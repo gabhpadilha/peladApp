@@ -1,0 +1,5 @@
+{
+  "skillOverrides": {
+    "frontend-design": "user-invocable-only"
+  }
+}
