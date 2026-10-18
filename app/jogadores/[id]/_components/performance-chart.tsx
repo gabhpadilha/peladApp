@@ -29,6 +29,12 @@ export function PerformanceChart({ performances, bestScore }: PerformanceChartPr
         Desempenho por rodada
       </SectionTitle>
 
+      {performances.length === 0 ? (
+        <p className="text-sm text-muted-foreground">
+          O gráfico aparece quando a primeira rodada for fechada.
+        </p>
+      ) : (
+      <>
       <div className="relative ml-6 h-48">
         {GRID_LINES.map((line) => (
           <div
@@ -100,6 +106,8 @@ export function PerformanceChart({ performances, bestScore }: PerformanceChartPr
           </li>
         ))}
       </ol>
+      </>
+      )}
     </section>
   );
 }

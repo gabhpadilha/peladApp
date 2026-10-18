@@ -1,15 +1,17 @@
+import { z } from "zod";
+import { getLeague } from "@/lib/league";
 import {
   getMatchPerformances,
-  getPendingEvaluations,
   rankPlayers,
   type MatchPerformance,
   type PendingEvaluation,
 } from "@/lib/players";
-import { getMockLeague } from "@/lib/mocks/league";
 import type { Player } from "@/types/player";
 
 export type AthleteProfile = {
   player: Player;
+  /** Jogador logado, para o cabeçalho. */
+  currentPlayer: Player | undefined;
   isMvp: boolean;
   isOwnProfile: boolean;
   delta: number | null;
@@ -22,13 +24,15 @@ export type AthleteProfile = {
   pending: PendingEvaluation[];
 };
 
-/** Perfil público de um atleta; `null` se o id não existir. */
-export async function getAthleteProfile(playerId: string): Promise<AthleteProfile | null> {
-  const league = getMockLeague();
-  const player = league.players.find((candidate) => candidate.id === playerId);
+/** Perfil de um atleta da pelada ativa; `null` se o id não for de alguém dela. */
+export async function getAthleteProfile(memberId: string): Promise<AthleteProfile | null> {
+  if (!z.uuid().safeParse(memberId).success) return null;
+
+  const league = await getLeague(`/jogadores/${memberId}`);
+  const player = league.players.find((candidate) => candidate.id === memberId);
   if (!player) return null;
 
-  const isOwnProfile = player.id === league.currentUserId;
+  const isOwnProfile = player.id === league.currentMemberId;
   const roleRanking = rankPlayers(league.players, player.role);
   const performances = getMatchPerformances(player.id, league.matches, league.evaluations);
   const scores = performances.flatMap((performance) =>
@@ -37,6 +41,7 @@ export async function getAthleteProfile(playerId: string): Promise<AthleteProfil
 
   return {
     player,
+    currentPlayer: league.players.find((candidate) => candidate.id === league.currentMemberId),
     isMvp: league.mvpId === player.id,
     isOwnProfile,
     delta: league.getDelta(player),
@@ -51,18 +56,6 @@ export async function getAthleteProfile(playerId: string): Promise<AthleteProfil
     ),
     bestScore: scores.length > 0 ? Math.max(...scores) : null,
     performances,
-    pending: isOwnProfile
-      ? getPendingEvaluations(player.id, league.matches, league.evaluations)
-      : [],
+    pending: isOwnProfile ? league.pending : [],
   };
-}
-
-/** Jogador logado, para o cabeçalho. */
-export async function getCurrentPlayer(): Promise<Player> {
-  const league = getMockLeague();
-  const player = league.players.find((candidate) => candidate.id === league.currentUserId);
-  if (!player) {
-    throw new Error("Jogador logado não encontrado");
-  }
-  return player;
 }

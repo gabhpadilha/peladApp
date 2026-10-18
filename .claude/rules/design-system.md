@@ -43,9 +43,16 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
 
 ## 🏠 Telas
 
-- **Home (`/`):** saudação, aviso de avaliação pendente, minha carta (OVR, variação, ranking, jogos, avaliações), próxima pelada, última rodada (Craque da Rodada + top 3 e progresso da rodada em avaliação) e ranking (linha e goleiros).
+- **Home (`/`):** nome da pelada + "Fala, <apelido>", aviso de avaliação pendente, minha carta (OVR, variação, ranking, jogos, avaliações; dica quando ainda não tem OVR), rodada em avaliação (envios/presentes), última rodada fechada (Craque da Rodada + top 3) ou o vazio "Nenhuma rodada ainda", e ranking (linha e goleiros).
+- **Navbar:** logo (home), "Pelada", chip apelido + OVR (perfil) e "Sair" (só ícone no celular).
+- **Trocar senha (`/trocar-senha`):** obrigatória no 1º acesso de quem foi cadastrado pelo organizador.
+- **Cadastrar jogador (em `/pelada`):** nome, apelido, posição e e-mail → mostra e-mail + senha provisória uma única vez e "Copiar mensagem para o WhatsApp".
 - **Atleta (`/jogadores/[id]`):** carta + resumo, aviso de pendência (só no próprio perfil), desempenho por rodada (barras, cor única, tooltip por CSS), atributos (barras) e histórico em tabela.
-- Superfícies: `rounded-xl border bg-card p-4`; títulos de seção em `font-display` caixa alta.
+- **Entrar (`/entrar`):** e-mail e senha; avisa que o cadastro é pelo link do organizador.
+- **Convite = cadastro (`/convite/[code]`):** nome da pelada + nome, apelido, posição (cards de rádio com dica), e-mail e senha → "Criar conta e entrar". Quem já tem conta vê só apelido/posição.
+- **Criar pelada (`/bem-vindo`):** só o organizador, uma vez: nome da pelada, seus dados e senha.
+- **Pelada (`/pelada`):** "Link de cadastro" com copiar/compartilhar; "Nova rodada": data, checklist de confirmados (com OVR e "Marcar todos"), número de times (padrão: confirmados ÷ 5), "Sortear times"/"Sortear de novo", cards dos times com média de OVR, aviso "rodízio no gol" e seletor para trocar jogador de time. Sem placar. Rodadas com "Fechar rodada" (confirmação). Elenco com OVR e "Tornar organizador".
+- Superfícies: `rounded-xl border bg-card p-4`; títulos de seção em `font-display` caixa alta. Campos e botões principais com `h-11 text-base` (toque e sem zoom no iOS).
 
 ## 📸 Foto do jogador
 
@@ -71,5 +78,6 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
 
 ## 🎲 Draft
 
-- Formato típico: times de **4 na linha + 1 goleiro**, com reservas revezando.
-- Goleiros são distribuídos primeiro, **um por time**; depois a linha é equilibrada pelo OVR. Time sem goleiro fica marcado como "rodízio no gol".
+- Formato típico: times de **4 na linha + 1 goleiro**, revezando: quem faz 2 gols fica, o outro sai e entra o próximo time. O app não registra placar.
+- Goleiros são distribuídos primeiro, **um por time**; depois a linha é equilibrada pelo OVR (sempre no time com menos jogadores e, no empate, menor soma). Sem nota → média do grupo. Time sem goleiro fica marcado como "rodízio no gol".
+- O organizador sempre pode ajustar o sorteio antes de criar a rodada.

@@ -10,13 +10,31 @@ O PeladApp é uma aplicação web full-stack para gamificar o futebol de salão 
 
 Design mobile-first é inegociável: a interação principal (dar notas no vestiário) acontece no celular.
 
-**Estado atual:** home (`/`) e página do atleta (`/jogadores/[id]`) prontas, com dados **mock**: `lib/mocks/` gera elenco, 8 rodadas e avaliações individuais com semente fixa, e `lib/mocks/league.ts` é a fonte que os `_data-access/` leem (troque por Supabase lá). O jogador "logado" é `MOCK_CURRENT_USER_ID`. OVR e atributos são sempre calculados das avaliações (`lib/ovr.ts`, `lib/players.ts`). Ainda não há Supabase, login nem tela de notas (o botão "Avaliar" está desabilitado). Atualize esta linha quando isso mudar.
+**Estado atual:** tudo lê o Supabase (não há mais mocks). Home (`/`) e atleta (`/jogadores/[memberId]`) leem de `lib/league.ts`; OVR e atributos são sempre calculados das avaliações (`lib/ovr.ts`, `lib/players.ts`). Contas: o **organizador cadastra cada jogador** em `/pelada` (conta criada com senha provisória via chave secreta; troca obrigatória em `/trocar-senha` no 1º acesso) ou o jogador se cadastra pelo link de convite (`/convite/[code]`). Login por e-mail e senha (`/entrar`), "Sair" na navbar. `/bem-vindo` cria a pelada (só o 1º organizador). `/pelada`: cadastrar jogador, link de cadastro, nova rodada (data + confirmados do WhatsApp + **sorteio dos times pelo OVR**), fechar rodada, elenco com promoção a organizador, trocar senha. Sem placar: os times revezam. Todas as rotas, menos `/entrar`, `/auth/*` e `/convite/*`, exigem login (`proxy.ts`). Faltam: tela de notas (botão "Avaliar" desabilitado) e publicar (Vercel). Atualize esta linha quando isso mudar.
+
+**Foco do produto:** é um "fantasy" da pelada: nota, carta, OVR e sorteio. Confirmação de presença e placar ficam no WhatsApp; não construa gestão de pelada além do necessário.
 
 **Design system:** todas as decisões visuais e de UX (tema, paleta, raridade, anatomia da carta, atributos de linha/goleiro, foto, tela de notas, Draft) estão em `.claude/rules/design-system.md` (carregado automaticamente). Leia antes de criar UI.
 
 ## 🛠️ Tech Stack
 - **Instalado:** Next.js 16.4 (App Router, Turbopack), React 19.3, TypeScript 5 (`strict`), Tailwind CSS 4, ESLint 9 (flat config), shadcn/ui (base Radix, preset `nova`, ícones Lucide; config em `components.json`), React Hook Form + Zod 4 + `@hookform/resolvers`.
-- **Planejado** (confira o `package.json` antes de importar): Framer Motion (animação das cartas), Supabase via `@supabase/ssr` (PostgreSQL, Auth, Storage), Jest + React Testing Library.
+- **Supabase** (`@supabase/ssr` + `@supabase/supabase-js`, CLI `supabase` como devDependency): projeto remoto "gabhpadilha's Project" (ref `kmpdmbowtkzxmsanddio`, região us-east-1), já linkado. A conta também tem o projeto `vitrine-guaratuba`, que **não** é deste app: nunca rode comandos nele.
+- **Planejado** (confira o `package.json` antes de importar): Framer Motion (animação das cartas), Jest + React Testing Library.
+
+## 🗄️ Supabase
+- **Clients:** `lib/supabase/server.ts` (Server Components/Actions/Route Handlers, um por requisição), `lib/supabase/client.ts` (browser), `lib/supabase/proxy.ts` (renova a sessão; chamado pelo `proxy.ts` da raiz) e `lib/supabase/admin.ts` (chave secreta `SUPABASE_SECRET_KEY`, **ignora RLS**: só em Server Actions depois de checar que quem chama é organizador; hoje só `createPlayer`).
+- **Senha provisória:** `createPlayer` cria a conta com `user_metadata.must_change_password = true`; `requireUserId` redireciona para `/trocar-senha` até a pessoa salvar a própria senha (`app/_actions/set-password.ts` tira a marca e renova o token).
+- **Schema:** fonte da verdade em `supabase/migrations/*.sql`; nunca altere o banco pelo dashboard sem criar migration. Grupos (várias peladas) → `group_members` (apelido/posição/foto **por grupo**, papel `organizer`/`player`) → `matches` → `match_attendance` → `evaluations`.
+- **Regras garantidas no banco:** só presentes avaliam/são avaliados (FK para `match_attendance`), sem autoavaliação, notas 1–10, só atributos de linha **ou** de goleiro, envio só com rodada `open`, papel só muda via função.
+- **Sessão (`lib/session.ts`):** `requireUserId(next)`, `requireActiveMembership(next)` (sem pelada → `/bem-vindo`) e `setActiveGroup` (só em Server Actions). O grupo ativo fica no cookie `peladapp_active_group`; sem ele, vale a pelada mais antiga.
+- **Auth:** e-mail e senha, **"Confirm email" desligado** no Supabase (Authentication > Sign In / Providers > Email); sem isso o `signUp` não devolve sessão e o cadastro pelo convite para no meio. Não há envio de e-mail no fluxo (o SMTP padrão só entrega para a equipe, 2/hora). `/auth/confirm` fica para recuperação de senha no futuro.
+- **`createClient()` chama `await connection()`:** com Partial Prefetching o Next pré-renderiza com cookies, e o `getClaims()` lê `Date.now()` ("blocking-prerender-current-time"). Não remova.
+- **Rodadas:** criar sempre por `create_match(grupo, data, membros[], times[])` (rodada + presença + time de cada um, atômico, `security invoker`, mínimo 2). Sorteio em `lib/draft.ts` (goleiros um por time, linha pelo OVR equilibrando soma e tamanho). Fechar = `update matches set status = 'closed'` pelo organizador. Placar existe no schema, mas não é usado.
+- **Organizadores:** `set_member_role` (só organizador chama; nunca deixa a pelada sem organizador).
+- **Avaliações são anônimas:** cada um só lê as notas que deu. Médias vêm de `get_group_scores(grupo)` (só rodadas fechadas, sem avaliador) e envios de `get_match_submissions(grupo)`. Entrar/criar grupo só por `join_group`/`create_group`/`get_invite`.
+- **Advisors** (`npx supabase db advisors --linked`): os avisos `*_security_definer_function_executable` das funções `security definer` (`create_group`, `join_group`, `get_invite` (também `anon`, para a tela de cadastro), `get_group_scores`, `get_match_submissions`, `is_group_member`, `is_group_organizer`, `set_member_role`) são **intencionais** (cada uma confere o membro por dentro). Ative "leaked password protection" se o plano permitir. Qualquer outro aviso novo precisa ser tratado. Função de trigger nova: revogue `execute` de `public, anon, authenticated`.
+- **Consultar o banco remoto:** `npx supabase db query --linked "<sql>"` (prefira contagens; não despeje dados pessoais).
+- **Validar migration sem Docker:** o schema foi testado com PGlite simulando `auth.users`/`auth.uid()`; repita esse teste ao mudar RLS.
 - **shadcn:** adicionar componentes com `npx shadcn@latest add <nome>` (vão para `components/ui/`). O `cn` vem do pacote `cn` (reexportado em `lib/utils.ts`), não de clsx/tailwind-merge. Tokens de tema ficam em `app/globals.css`.
 - **Instalar Zod/RHF:** use `npm install zod@^4 ...`; sem fixar o Zod o npm dá ERESOLVE por causa do peer opcional do `@hookform/resolvers`.
 
@@ -30,6 +48,9 @@ Desenvolvimento no VS Code + WSL (Ubuntu), com Node 20 via nvm. Se o Claude roda
 - `npm run type-check`: `tsc --noEmit`
 - `npx next typegen`: gera em `.next/` os helpers globais de rota (`PageProps`, `LayoutProps`, `RouteContext`), usados sem import (ex: `app/layout.tsx`). Num clone limpo ou após apagar `.next`, rode antes do `type-check` (ou suba o `dev`); senão o `tsc` falha com `Cannot find name 'LayoutProps'`.
 - Ainda não há test runner nem script `test`.
+- `npx supabase migration new <nome>` → editar o SQL → `npx supabase db push --dry-run` → `npx supabase db push`.
+- `npm run db:types`: regenera `types/database.ts` (tipos do banco, usados nos clients) depois de toda migration. Não edite esse arquivo à mão.
+- O CLI precisa de `npx supabase login` feito no WSL; o token fica no keyring da sessão.
 
 ## 🏗️ Architecture
 - **Rotas:** App Router em `app/`, agrupadas por `(grupo)/` (ex: `(auth)`, `(dashboard)`). Cada rota segue `page.tsx` (Server Component) + `_components/` + `_actions/` + `_data-access/`, conforme `.claude/rules/rules-global.md` (carregado automaticamente).
@@ -58,7 +79,7 @@ Desenvolvimento no VS Code + WSL (Ubuntu), com Node 20 via nvm. Se o Claude roda
 ## 🔐 Environment Variables
 - `NEXT_PUBLIC_*` apenas para chaves públicas do Supabase no client.
 - Segredos (Supabase Service Role Key) apenas no servidor: Server Actions, Route Handlers e `_data-access/`.
-- Copiar `.env.example` para `.env.local` ao configurar o ambiente. O `.env.example` ainda não existe e o `.gitignore` ignora `.env*`; ao criá-lo, adicione `!.env.example` ao `.gitignore`.
+- Copiar `.env.example` para `.env.local` ao configurar o ambiente (o `.gitignore` ignora `.env*`, exceto `.env.example`).
 
 ## 🔄 Workflow
 - ALWAYS run `npm run type-check && npm run lint` após uma série de mudanças.
