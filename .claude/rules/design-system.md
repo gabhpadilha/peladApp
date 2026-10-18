@@ -62,7 +62,10 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
 4. Storage guarda o **recorte (WebP com transparência)** e a **original** (para reprocessar no futuro).
 - Na carta: recorte → `object-contain` alinhado embaixo; original → `object-cover` com máscara em gradiente; sem foto → **iniciais** grandes na cor da faixa.
 
-## 📱 Tela de notas (vestiário, mobile)
+## 📱 Tela de notas (vestiário, mobile) — `/avaliar/[matchId]`
+
+Implementada em `app/avaliar/[matchId]/` (sem navbar). Aberta pelo botão "Avaliar" do aviso de pendência. Ordem: time a time, depois apelido. "—" + polegar cinza no meio (6) até o primeiro toque; tocar no polegar parado já conta como nota. Rodapé: anterior / Pular / Próximo (último vira "Revisar"). Revisão lista média (1 casa) ou "Pulado", toque para editar; "Enviar notas (N)" exige ao menos 1. Depois: "Notas enviadas!" e volta ao início. Estados sem formulário: rodada fechada, não jogou, já enviou.
+
 
 - **Um jogador por vez**, sem autoavaliação. Progresso fixo no topo ("3/8"), botão "Próximo" fixo no rodapé (zona do polegar), opção de **pular** jogador, **revisão final** e **envio em lote** numa única Server Action.
 - **Nota de 1 a 10 (inteiros)** por atributo, via **slider**:

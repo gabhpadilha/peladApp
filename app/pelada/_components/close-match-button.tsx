@@ -24,7 +24,7 @@ export function CloseMatchButton({ matchId, round }: CloseMatchButtonProps) {
 
   if (!isConfirming) {
     return (
-      <div className="flex flex-col items-end gap-1">
+      <div className="flex shrink-0 flex-col items-end gap-1">
         <Button size="sm" variant="outline" onClick={() => setIsConfirming(true)}>
           Fechar rodada
         </Button>
@@ -34,11 +34,15 @@ export function CloseMatchButton({ matchId, round }: CloseMatchButtonProps) {
   }
 
   return (
-    <div className="flex flex-col items-end gap-1.5">
-      <p className="text-xs text-muted-foreground">
+    <div
+      role="alertdialog"
+      aria-label={`Fechar a rodada ${round}`}
+      className="flex basis-full flex-col gap-2 rounded-lg border bg-muted/40 p-3 sm:flex-row sm:items-center sm:justify-between"
+    >
+      <p className="text-sm text-muted-foreground">
         Fechar a rodada {round}? As notas passam a contar no OVR e ninguém mais envia.
       </p>
-      <div className="flex gap-2">
+      <div className="flex shrink-0 justify-end gap-2">
         <Button size="sm" variant="ghost" onClick={() => setIsConfirming(false)} disabled={isPending}>
           Cancelar
         </Button>
