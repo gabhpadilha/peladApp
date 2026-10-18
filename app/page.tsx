@@ -41,11 +41,11 @@ async function HomeContent() {
           <div className="flex flex-col gap-6">
             <MyCardSummary
               player={data.currentPlayer}
-              isMvp={data.isCurrentPlayerMvp}
               delta={data.currentDelta}
               rank={data.currentRank}
               gamesPlayed={data.gamesPlayed}
               evaluationsReceived={data.evaluationsReceived}
+              awardCount={data.myAwardCount}
             />
             {data.openRound && (
               <OpenRoundCard
@@ -61,7 +61,7 @@ async function HomeContent() {
               <LatestRoundCard
                 match={data.latestRound.match}
                 topPerformers={data.latestRound.topPerformers}
-                mvpId={data.latestRound.mvpId}
+                awards={data.latestRound.awards}
               />
             )}
 

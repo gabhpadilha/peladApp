@@ -7,9 +7,6 @@ import {
   type PlayerProfile,
 } from "@/types/player";
 
-/** Mínimo de avaliações numa rodada para concorrer a Craque da Rodada. */
-const MVP_MIN_EVALUATIONS = 3;
-
 export type MatchPerformance = {
   match: Match;
   wasPresent: boolean;
@@ -90,24 +87,6 @@ export function getMatchPerformances(
       evaluationCount: received.length,
     };
   });
-}
-
-/** Mais bem avaliado da rodada (com um mínimo de avaliações). */
-export function getRoundMvpId(match: Match, evaluations: readonly Evaluation[]): string | null {
-  let best: { playerId: string; score: number } | null = null;
-
-  for (const playerId of match.presentPlayerIds) {
-    const received = evaluations.filter(
-      (evaluation) => evaluation.matchId === match.id && evaluation.playerId === playerId,
-    );
-    if (received.length < MVP_MIN_EVALUATIONS) continue;
-    const score = averageEvaluations(received);
-    if (score !== null && (best === null || score > best.score)) {
-      best = { playerId, score };
-    }
-  }
-
-  return best?.playerId ?? null;
 }
 
 /** Rodadas abertas em que o jogador esteve presente e ainda não enviou notas. */

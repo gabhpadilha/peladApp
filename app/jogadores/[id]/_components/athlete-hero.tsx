@@ -10,7 +10,7 @@ type AthleteHeroProps = {
 
 export function AthleteHero({ profile }: AthleteHeroProps) {
   const { player } = profile;
-  const tier = getCardTier(player.ovr ?? 0, profile.isMvp);
+  const tier = getCardTier(player.ovr ?? 0);
   const rankLabel = player.role === "goalkeeper" ? "entre goleiros" : "na linha";
 
   const stats = [
@@ -37,7 +37,7 @@ export function AthleteHero({ profile }: AthleteHeroProps) {
         {player.ovr ?? ""}
       </span>
 
-      <PlayerCard player={player} isMvp={profile.isMvp} size="lg" className="md:shrink-0" />
+      <PlayerCard player={player} size="lg" className="md:shrink-0" />
 
       <div className="relative flex w-full flex-col gap-6">
         <div className="text-center md:text-left">

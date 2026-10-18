@@ -1,8 +1,16 @@
+import { FrownIcon, GoalIcon, TrophyIcon, type LucideIcon } from "lucide-react";
 import { SectionTitle } from "@/components/section-title";
+import { AWARD_LABELS, type AwardKind } from "@/types/award";
 import { formatWeekdayDate } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
 import type { MatchSummary } from "../_data-access/get-group-overview";
 import { CloseMatchButton } from "./close-match-button";
+
+const AWARD_ICONS: Record<AwardKind, LucideIcon> = {
+  craque: TrophyIcon,
+  gol: GoalIcon,
+  bola_murcha: FrownIcon,
+};
 
 type MatchesListProps = {
   matches: MatchSummary[];
@@ -47,6 +55,20 @@ export function MatchesList({ matches, isOrganizer }: MatchesListProps) {
                     {match.presentCount} jogadores em {match.teamCount} times · {match.submittedCount}{" "}
                     enviaram notas
                   </p>
+                  {match.winners.length > 0 && (
+                    <ul aria-label="Cartas especiais da rodada" className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                      {match.winners.map((winner) => {
+                        const Icon = AWARD_ICONS[winner.kind];
+                        return (
+                          <li key={`${winner.kind}-${winner.nickname}`} className="inline-flex items-center gap-1">
+                            <Icon aria-hidden className="size-3.5 text-primary" />
+                            <span className="text-muted-foreground">{AWARD_LABELS[winner.kind].title}:</span>
+                            <span className="font-medium">{winner.nickname}</span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  )}
                 </div>
                 {isOrganizer && isOpen && <CloseMatchButton matchId={match.id} round={match.round} />}
               </li>

@@ -1,9 +1,11 @@
 import Image from "next/image";
 import { cva, type VariantProps } from "class-variance-authority";
-import { StarIcon } from "lucide-react";
+import { FrownIcon, GhostIcon, GoalIcon, TrophyIcon, type LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CARD_TIER_LABELS, getCardTier, type CardTier } from "@/lib/card-tier";
+import type { CardThemeKey } from "@/lib/card-themes";
 import { getInitials } from "@/lib/get-initials";
+import { AWARD_LABELS, type AwardKind } from "@/types/award";
 import {
   ATTRIBUTE_LABELS,
   GOALKEEPER_ATTRIBUTES,
@@ -30,15 +32,69 @@ export function PlayerCardDefs() {
   );
 }
 
+/** Visual da carta: faixa da carta base ou prêmio (com tema sazonal). */
+type AwardDesign = AwardKind | `${AwardKind}-halloween`;
+type CardDesign = CardTier | AwardDesign;
+
+/** Classes literais (o Tailwind precisa enxergá-las inteiras). */
+const DESIGNS: Record<CardDesign, { frame: string; face: string }> = {
+  bronze: {
+    frame: "bg-rarity-bronze-frame",
+    face: "from-rarity-bronze-from to-rarity-bronze-to text-rarity-bronze-foreground",
+  },
+  silver: {
+    frame: "bg-rarity-silver-frame",
+    face: "from-rarity-silver-from to-rarity-silver-to text-rarity-silver-foreground",
+  },
+  gold: {
+    frame: "bg-rarity-gold-frame",
+    face: "from-rarity-gold-from to-rarity-gold-to text-rarity-gold-foreground",
+  },
+  rare: {
+    frame: "bg-rarity-rare-frame",
+    face: "from-rarity-rare-from to-rarity-rare-to text-rarity-rare-foreground",
+  },
+  craque: {
+    frame: "bg-award-craque-frame",
+    face: "from-award-craque-from to-award-craque-to text-award-craque-foreground",
+  },
+  gol: {
+    frame: "bg-award-gol-frame",
+    face: "from-award-gol-from to-award-gol-to text-award-gol-foreground",
+  },
+  bola_murcha: {
+    frame: "bg-award-bola-murcha-frame",
+    face: "from-award-bola-murcha-from to-award-bola-murcha-to text-award-bola-murcha-foreground",
+  },
+  "craque-halloween": {
+    frame: "bg-award-craque-halloween-frame",
+    face: "from-award-craque-halloween-from to-award-craque-halloween-to text-award-craque-halloween-foreground",
+  },
+  "gol-halloween": {
+    frame: "bg-award-gol-halloween-frame",
+    face: "from-award-gol-halloween-from to-award-gol-halloween-to text-award-gol-halloween-foreground",
+  },
+  "bola_murcha-halloween": {
+    frame: "bg-award-bola-murcha-halloween-frame",
+    face: "from-award-bola-murcha-halloween-from to-award-bola-murcha-halloween-to text-award-bola-murcha-halloween-foreground",
+  },
+};
+
+const AWARD_ICONS: Record<AwardKind, LucideIcon> = {
+  craque: TrophyIcon,
+  gol: GoalIcon,
+  bola_murcha: FrownIcon,
+};
+
+/** Rótulo curto no rodapé da carta especial. */
+const AWARD_FOOTER: Record<AwardKind, string> = {
+  craque: "Craque",
+  gol: "Gol da semana",
+  bola_murcha: "Bola murcha",
+};
+
 const cardVariants = cva(cn("relative aspect-[5/7.4] shrink-0 select-none", SHAPE_CLIP), {
   variants: {
-    tier: {
-      bronze: "bg-rarity-bronze-frame",
-      silver: "bg-rarity-silver-frame",
-      gold: "bg-rarity-gold-frame",
-      special: "bg-rarity-special-frame",
-      mvp: "bg-rarity-mvp-frame",
-    } satisfies Record<CardTier, string>,
     size: {
       sm: "w-28",
       md: "w-40",
@@ -50,14 +106,6 @@ const cardVariants = cva(cn("relative aspect-[5/7.4] shrink-0 select-none", SHAP
     size: "md",
   },
 });
-
-const FACE_BY_TIER: Record<CardTier, string> = {
-  bronze: "from-rarity-bronze-from to-rarity-bronze-to text-rarity-bronze-foreground",
-  silver: "from-rarity-silver-from to-rarity-silver-to text-rarity-silver-foreground",
-  gold: "from-rarity-gold-from to-rarity-gold-to text-rarity-gold-foreground",
-  special: "from-rarity-special-from to-rarity-special-to text-rarity-special-foreground",
-  mvp: "from-rarity-mvp-from to-rarity-mvp-to text-rarity-mvp-foreground",
-};
 
 type CardSize = NonNullable<VariantProps<typeof cardVariants>["size"]>;
 
@@ -71,33 +119,50 @@ const PHOTO_SIZES: Record<CardSize, string> = {
 
 const EMPTY_VALUE = "–";
 
+export type PlayerCardAward = {
+  kind: AwardKind;
+  theme: CardThemeKey;
+  round: number;
+};
+
 type PlayerCardProps = {
   player: Player;
   size?: CardSize;
-  /** Craque da Rodada: sobrepõe a faixa calculada pelo OVR. */
-  isMvp?: boolean;
+  /** Carta especial: visual do prêmio e do tema; os números vêm de `player` (já congelados). */
+  award?: PlayerCardAward;
   className?: string;
 };
 
+function getDesign(player: Player, award: PlayerCardAward | undefined): CardDesign {
+  if (!award) return getCardTier(player.ovr ?? 0);
+  return award.theme === "default" ? award.kind : `${award.kind}-${award.theme}`;
+}
+
 /**
- * Carta do jogador. Escala pela largura (`size`): todo o conteúdo interno
- * usa unidades `cqw`, então não ajuste fontes por breakpoint.
+ * Carta do jogador. Sem `award`, é a carta base (faixa pelo OVR); com `award`,
+ * é a carta especial colecionável. Escala pela largura (`size`): todo o conteúdo
+ * interno usa unidades `cqw`, então não ajuste fontes por breakpoint.
  */
-export function PlayerCard({ player, size = "md", isMvp = false, className }: PlayerCardProps) {
-  const tier = getCardTier(player.ovr ?? 0, isMvp);
+export function PlayerCard({ player, size = "md", award, className }: PlayerCardProps) {
+  const design = getDesign(player, award);
+  const tier = getCardTier(player.ovr ?? 0);
   const attributeKeys: readonly PlayerAttribute[] =
     player.role === "goalkeeper" ? GOALKEEPER_ATTRIBUTES : OUTFIELD_ATTRIBUTES;
   const attributeValues: Partial<Record<PlayerAttribute, number | null>> = player.attributes;
+  const AwardIcon = award ? AWARD_ICONS[award.kind] : null;
+  const label = award
+    ? `${AWARD_LABELS[award.kind].title}, rodada ${award.round}`
+    : `carta ${CARD_TIER_LABELS[tier]}`;
 
   return (
     <article
-      aria-label={`${player.nickname}, ${player.position}, OVR ${player.ovr ?? "sem avaliação"}, carta ${CARD_TIER_LABELS[tier]}`}
-      className={cn(cardVariants({ tier, size }), className)}
+      aria-label={`${player.nickname}, ${player.position}, OVR ${player.ovr ?? "sem avaliação"}, ${label}`}
+      className={cn(cardVariants({ size }), DESIGNS[design].frame, className)}
     >
       <div
         className={cn(
           "@container absolute inset-[1.8%] overflow-hidden bg-linear-to-br",
-          FACE_BY_TIER[tier],
+          DESIGNS[design].face,
           SHAPE_CLIP,
         )}
       >
@@ -107,17 +172,26 @@ export function PlayerCard({ player, size = "md", isMvp = false, className }: Pl
         />
         <div
           aria-hidden
-          className="absolute inset-0 bg-[linear-gradient(115deg,transparent_28%,rgb(255_255_255/0.22)_42%,transparent_56%)]"
+          className={cn(
+            "absolute inset-0 bg-[linear-gradient(115deg,transparent_28%,rgb(255_255_255/0.22)_42%,transparent_56%)]",
+            // Ouro raro: brilho mais largo e intenso.
+            design === "rare" &&
+              "bg-[linear-gradient(115deg,transparent_18%,rgb(255_255_255/0.45)_38%,transparent_50%,rgb(255_255_255/0.2)_62%,transparent_72%)]",
+          )}
         />
+        {award?.theme === "halloween" && (
+          <GhostIcon
+            aria-hidden
+            className="absolute top-[18%] right-[-6%] size-[62cqw] rotate-12 opacity-[0.12]"
+          />
+        )}
 
         <div className="absolute top-[13%] left-[10%] z-10 flex flex-col items-center font-display leading-none">
           <span className="text-[25cqw] font-extrabold tabular-nums">
             {player.ovr ?? EMPTY_VALUE}
           </span>
           <span className="text-[9cqw] font-bold">{player.position}</span>
-          {tier === "mvp" && (
-            <StarIcon aria-hidden className="mt-[3cqw] size-[8cqw] fill-current" />
-          )}
+          {AwardIcon && <AwardIcon aria-hidden className="mt-[3cqw] size-[9cqw]" />}
         </div>
 
         <div className="absolute top-[6%] right-[5%] left-[27%] h-[53%]">
@@ -144,8 +218,13 @@ export function PlayerCard({ player, size = "md", isMvp = false, className }: Pl
           </dl>
         </div>
 
-        <span className="absolute inset-x-0 top-[84%] text-center font-display text-[4.8cqw] font-semibold tracking-[0.3em] uppercase opacity-60">
-          {CARD_TIER_LABELS[tier]}
+        <span
+          className={cn(
+            "absolute inset-x-0 top-[84%] text-center font-display text-[4.8cqw] font-semibold uppercase opacity-60",
+            award ? "tracking-[0.15em]" : "tracking-[0.3em]",
+          )}
+        >
+          {award ? `${AWARD_FOOTER[award.kind]} · R${award.round}` : CARD_TIER_LABELS[tier]}
         </span>
       </div>
     </article>

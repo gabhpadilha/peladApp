@@ -6,6 +6,7 @@ import { AppHeader } from "@/components/app-header";
 import { GroupGate } from "@/components/group-gate";
 import { PendingEvaluationsBanner } from "@/components/pending-evaluations-banner";
 import { AthleteHero } from "./_components/athlete-hero";
+import { AwardCollection } from "./_components/award-collection";
 import { AttributeBars } from "./_components/attribute-bars";
 import { MatchHistory } from "./_components/match-history";
 import { PerformanceChart } from "./_components/performance-chart";
@@ -44,6 +45,11 @@ async function AthleteContent({ params }: { params: PageProps<"/jogadores/[id]">
           <PerformanceChart performances={profile.performances} bestScore={profile.bestScore} />
           <AttributeBars player={profile.player} />
         </div>
+        <AwardCollection
+          awards={profile.awards}
+          nickname={profile.player.nickname}
+          isOwnProfile={profile.isOwnProfile}
+        />
         <MatchHistory performances={profile.performances} />
       </main>
     </>

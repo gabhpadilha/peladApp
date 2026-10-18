@@ -18,11 +18,14 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
 
 ## 🃏 Carta do jogador (`components/player-card.tsx`)
 
-- **Faixas de raridade pelo OVR (0–99)**, definidas em `lib/card-tier.ts`:
-  - Bronze `< 65` · Prata `65–74` · Ouro `75–84` · Especial `85+`
-  - **Craque da Rodada** (`mvp`): carta temporária do melhor avaliado da semana, sobrepõe a faixa.
+- **Dois tipos de carta:**
+  - **Carta base** (desempenho contínuo): uma por jogador, OVR e atributos mudam a cada rodada fechada.
+  - **Cartas especiais** (colecionáveis): ganhas por voto na rodada; foto congelada que nunca muda. Ver seção abaixo.
+- **Faixas da carta base pelo OVR (0–99)**, em `lib/card-tier.ts`:
+  - Bronze `< 65` · Prata `65–74` · Ouro `75–84` · **Ouro Raro** `85+` (ouro mais intenso e brilho mais forte).
   - Os limites serão calibrados com dados reais; mude só as constantes.
-- **Tokens:** `--rarity-<faixa>-frame` (moldura), `--rarity-<faixa>-from`/`-to` (gradiente da face) e `--rarity-<faixa>-foreground` (texto), expostos como `bg-rarity-gold-frame`, `text-rarity-gold-foreground` etc. Especial = carta preta com detalhes dourados.
+  - Preto e dourado é **exclusivo do Craque da Rodada** (como o TOTW da EA); a carta base nunca usa.
+- **Tokens:** `--rarity-<faixa>-frame` (moldura), `--rarity-<faixa>-from`/`-to` (gradiente da face) e `--rarity-<faixa>-foreground` (texto), expostos como `bg-rarity-gold-frame` etc. Prêmios: `--award-<prêmio>[-<tema>]-*` (`craque`, `gol`, `bola-murcha`).
 - **Formato:** escudo estilo FUT (cantos de cima recortados, ponta embaixo), via `<clipPath>` em `PlayerCardDefs`, renderizado uma vez em `app/layout.tsx`. Face com brilho diagonal e textura de linhas finas.
 - **Conteúdo (fiel às referências FUT):** OVR + posição no canto superior esquerdo, foto à direita, **apelido** como escrito (máx. ~12 caracteres; nome completo só no perfil), **6 atributos numa linha só, sigla em cima e valor embaixo**, nome da faixa discreto no rodapé. **Sem** escudo/bandeira; jogos e histórico ficam no perfil.
 - **A carta escala pela largura** (`@container` + unidades `cqw`). Os tamanhos saem da prop `size`; nunca ajuste fonte interna por breakpoint.
@@ -31,6 +34,15 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
   - Mesma moldura, mesmas faixas, mesmo layout; só mudam as siglas e a posição.
 - Goleiro é **papel do jogador** (fixo): cada pessoa tem uma única carta.
 - Em listas e no cabeçalho, o OVR aparece como `OvrBadge` (cor da faixa); variação da rodada como `OvrDelta` (ícone + número, nunca só cor).
+
+## 🏆 Cartas especiais (colecionáveis)
+
+- **Prêmios:** Craque da Rodada (`craque`), Gol da Semana (`gol`) e Bola Murcha (`bola_murcha`), em `types/award.ts`.
+- **Como se ganha:** os presentes votam na tela de notas, num passo por prêmio depois dos jogadores (opcional; "Ninguém" é o padrão; ninguém vota em si). Ao **fechar a rodada** (`close_match`), quem tiver mais votos ganha; **empate: todos os empatados ganham**. Um jogador pode ganhar mais de um prêmio na rodada.
+- **O que a carta mostra:** foto congelada do jogador no dia (OVR e atributos de todas as rodadas fechadas até ali). **Craque e Gol: +1 em cada atributo e no OVR** (como o Team of the Week da EA FC, teto 99). **Bola Murcha: sem bônus.**
+- **Visual (`PlayerCard` com `award`):** ícone do prêmio sob a posição e "PRÊMIO · R<rodada>" no rodapé. Clássico: Craque preto e dourado, Gol azul elétrico, Bola Murcha couro velho.
+- **Temas sazonais (`lib/card-themes.ts`):** pelo calendário da data do jogo (outubro = Halloween: Craque abóbora, Gol roxo e verde-gosma, Bola Murcha fantasma, com fantasma de marca d'água). O tema fica gravado na carta. Tema novo: período em `CARD_THEMES` + tokens `--award-*-<tema>-*` + classes em `DESIGNS` no `player-card.tsx`.
+- **Onde aparecem:** home (cartas da última rodada fechada), "Pelada" (ganhadores por rodada), perfil do atleta (seção **Coleção**, `#colecao`, visível para todos da pelada) e link "Coleção" no menu.
 
 ## 🧮 OVR (`lib/ovr.ts`)
 
