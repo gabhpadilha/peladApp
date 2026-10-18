@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { z } from "zod";
 import { MUST_CHANGE_PASSWORD_FLAG, requireUserId } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
@@ -10,13 +9,19 @@ export type SetPasswordResult =
   | { success: true }
   | { success: false; message: string; errors?: FieldErrors<SetPasswordInput> };
 
-/**
- * Define ou troca a senha de quem está logado e tira a marca de senha
- * provisória. Com `redirectTo`, redireciona depois de salvar.
- */
+type SetPasswordOptions = {
+  /**
+   * Encerra a sessão depois de salvar. Usado na troca obrigatória do 1º acesso:
+   * o token antigo ainda carrega a marca de senha provisória, e entrar de novo
+   * com a senha nova emite um token limpo (evita voltar para /trocar-senha).
+   */
+  signOutAfter?: boolean;
+};
+
+/** Define ou troca a senha de quem está logado e tira a marca de senha provisória. */
 export async function setPassword(
   input: SetPasswordInput,
-  redirectTo?: string,
+  { signOutAfter = false }: SetPasswordOptions = {},
 ): Promise<SetPasswordResult> {
   await requireUserId("/", { allowTempPassword: true });
 
@@ -48,9 +53,12 @@ export async function setPassword(
     };
   }
 
-  // Renova o token para a marca de senha provisória sair das claims já agora.
-  await supabase.auth.refreshSession();
+  if (signOutAfter) {
+    await supabase.auth.signOut({ scope: "local" });
+  } else {
+    // Renova o token para a marca de senha provisória sair das claims.
+    await supabase.auth.refreshSession();
+  }
 
-  if (redirectTo) redirect(redirectTo);
   return { success: true };
 }
