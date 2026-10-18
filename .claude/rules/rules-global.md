@@ -40,8 +40,8 @@ Use a consistent folder structure for data access and actions within each page m
 
 ## 2. Global or Shared Components
 
-- If the component will be reused in multiple pages or modules, place it in the global `/src/components` directory.
-  - Only add components to `/src/components` when you're sure they will be reused broadly.
+- If the component will be reused in multiple pages or modules, place it in the global `/components` directory (project root; there is no `src/`).
+  - Only add components to `/components` when you're sure they will be reused broadly.
   - If in doubt, always ask first before placing it globally.
 
 ## 3. Server vs. Client Component

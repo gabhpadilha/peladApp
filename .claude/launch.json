@@ -1,0 +1,20 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "dev",
+      "runtimeExecutable": "wsl.exe",
+      "runtimeArgs": [
+        "-d",
+        "ubuntu-26.04",
+        "--cd",
+        "/home/gabriellinux/projetoFut/peladApp",
+        "--",
+        "bash",
+        "-ic",
+        "npm run dev"
+      ],
+      "port": 3000
+    }
+  ]
+}

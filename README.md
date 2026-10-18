@@ -66,7 +66,7 @@ Regras principais:
 - Server Components por padrão; `"use client"` só com estado, eventos ou APIs do navegador.
 - Sem acesso a banco ou lógica de negócio dentro de componentes.
 - Formulários: shadcn/ui + React Hook Form + Zod.
-- Componentes usados em várias páginas ficam em `src/components`.
+- Componentes usados em várias páginas ficam em `components/` (na raiz; o projeto não usa `src/`).
 
 ## Próximos passos
 
