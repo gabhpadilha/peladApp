@@ -5,19 +5,17 @@ const BADGE_BY_TIER: Record<CardTier, string> = {
   bronze: "bg-rarity-bronze-frame text-rarity-bronze-foreground",
   silver: "bg-rarity-silver-frame text-rarity-silver-foreground",
   gold: "bg-rarity-gold-frame text-rarity-gold-foreground",
-  special: "bg-rarity-special-to text-rarity-special-foreground ring-1 ring-rarity-special-frame",
-  mvp: "bg-rarity-mvp-to text-rarity-mvp-foreground ring-1 ring-rarity-mvp-frame",
+  rare: "bg-linear-to-br from-rarity-rare-from to-rarity-rare-to text-rarity-rare-foreground ring-1 ring-rarity-rare-frame",
 };
 
 type OvrBadgeProps = {
   ovr: number | null;
-  isMvp?: boolean;
   className?: string;
 };
 
-/** OVR compacto na cor da faixa da carta, para listas e cabeçalho. */
-export function OvrBadge({ ovr, isMvp = false, className }: OvrBadgeProps) {
-  const tier = getCardTier(ovr ?? 0, isMvp);
+/** OVR compacto na cor da faixa da carta base, para listas e cabeçalho. */
+export function OvrBadge({ ovr, className }: OvrBadgeProps) {
+  const tier = getCardTier(ovr ?? 0);
 
   return (
     <span

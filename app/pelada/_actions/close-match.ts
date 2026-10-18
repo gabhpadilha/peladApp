@@ -2,12 +2,18 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { getThemeForDate } from "@/lib/card-themes";
 import { requireActiveMembership } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 
-export type CloseMatchResult = { success: true } | { success: false; message: string };
+export type CloseMatchResult =
+  | { success: true; awardCount: number }
+  | { success: false; message: string };
 
-/** Fecha a rodada: as notas dela passam a contar no OVR e não aceita mais envios. */
+/**
+ * Fecha a rodada: as notas passam a contar no OVR, ninguém mais envia, e os
+ * mais votados ganham as cartas especiais (com o tema sazonal da data do jogo).
+ */
 export async function closeMatch(matchId: string): Promise<CloseMatchResult> {
   const membership = await requireActiveMembership("/pelada");
   if (membership.role !== "organizer") {
@@ -20,19 +26,25 @@ export async function closeMatch(matchId: string): Promise<CloseMatchResult> {
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const { data: match } = await supabase
     .from("matches")
-    .update({ status: "closed", closed_at: new Date().toISOString() })
+    .select("played_on, status")
     .eq("id", parsedMatchId.data)
     .eq("group_id", membership.groupId)
-    .eq("status", "open")
-    .select("id");
+    .maybeSingle();
+  if (!match || match.status !== "open") {
+    return { success: false, message: "Essa rodada não está aberta." };
+  }
 
-  if (error || !data || data.length === 0) {
+  // Fecha e distribui as cartas na mesma transação (função no banco).
+  const { data: awardCount, error } = await supabase.rpc("close_match", {
+    target_match: parsedMatchId.data,
+    theme_key: getThemeForDate(match.played_on),
+  });
+  if (error) {
     return { success: false, message: "Não foi possível fechar a rodada." };
   }
 
-  revalidatePath("/pelada");
-  revalidatePath("/");
-  return { success: true };
+  revalidatePath("/", "layout");
+  return { success: true, awardCount: awardCount ?? 0 };
 }

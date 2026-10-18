@@ -1,6 +1,7 @@
 import { getLeague } from "@/lib/league";
 import { averageEvaluations } from "@/lib/ovr";
 import { getMatchPerformances, rankPlayers, type PendingEvaluation } from "@/lib/players";
+import type { Award } from "@/types/award";
 import type { Match } from "@/types/match";
 import type { Player } from "@/types/player";
 
@@ -14,13 +15,14 @@ export type RoundPerformer = { player: Player; score: number };
 export type HomeData = {
   groupName: string;
   currentPlayer: Player;
-  isCurrentPlayerMvp: boolean;
   currentDelta: number | null;
   currentRank: { position: number; total: number };
   gamesPlayed: number;
   evaluationsReceived: number;
+  /** Cartas especiais do jogador logado (coleção). */
+  myAwardCount: number;
   pending: PendingEvaluation[];
-  latestRound: { match: Match; topPerformers: RoundPerformer[]; mvpId: string | null } | null;
+  latestRound: { match: Match; topPerformers: RoundPerformer[]; awards: Award[] } | null;
   openRound: { match: Match; submitted: number; expected: number } | null;
   outfieldRanking: RankedPlayer[];
   goalkeeperRanking: RankedPlayer[];
@@ -62,7 +64,6 @@ export async function getHomeData(): Promise<HomeData> {
   return {
     groupName: league.membership.groupName,
     currentPlayer,
-    isCurrentPlayerMvp: league.mvpId === currentPlayer.id,
     currentDelta: league.getDelta(currentPlayer),
     currentRank: {
       position: roleRanking.findIndex((player) => player.id === currentPlayer.id) + 1,
@@ -73,8 +74,15 @@ export async function getHomeData(): Promise<HomeData> {
       (total, performance) => total + performance.evaluationCount,
       0,
     ),
+    myAwardCount: league.awards.filter((award) => award.memberId === currentPlayer.id).length,
     pending: league.pending,
-    latestRound: latestMatch ? { match: latestMatch, topPerformers, mvpId: league.mvpId } : null,
+    latestRound: latestMatch
+      ? {
+          match: latestMatch,
+          topPerformers,
+          awards: league.awards.filter((award) => award.matchId === latestMatch.id),
+        }
+      : null,
     openRound: openMatch
       ? {
           match: openMatch,

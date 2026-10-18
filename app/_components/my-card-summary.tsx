@@ -1,25 +1,26 @@
 import Link from "next/link";
-import { ArrowRightIcon } from "lucide-react";
+import { ArrowRightIcon, GalleryVerticalEndIcon } from "lucide-react";
 import { OvrDelta } from "@/components/ovr-delta";
 import { PlayerCard } from "@/components/player-card";
 import { POSITION_LABELS, type Player } from "@/types/player";
 
 type MyCardSummaryProps = {
   player: Player;
-  isMvp: boolean;
   delta: number | null;
   rank: { position: number; total: number };
   gamesPlayed: number;
   evaluationsReceived: number;
+  /** Quantas cartas especiais o jogador tem na coleção. */
+  awardCount: number;
 };
 
 export function MyCardSummary({
   player,
-  isMvp,
   delta,
   rank,
   gamesPlayed,
   evaluationsReceived,
+  awardCount,
 }: MyCardSummaryProps) {
   const rankLabel = player.role === "goalkeeper" ? "entre goleiros" : "na linha";
 
@@ -28,7 +29,7 @@ export function MyCardSummary({
       aria-labelledby="my-card-title"
       className="flex items-center gap-5 rounded-xl border bg-card p-4"
     >
-      <PlayerCard player={player} isMvp={isMvp} size="md" />
+      <PlayerCard player={player} size="md" />
 
       <div className="flex min-w-0 flex-1 flex-col gap-4">
         <div>
@@ -74,13 +75,22 @@ export function MyCardSummary({
           </p>
         )}
 
-        <Link
-          href={`/jogadores/${player.id}`}
-          className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
-        >
-          Ver meu desempenho
-          <ArrowRightIcon aria-hidden className="size-4" />
-        </Link>
+        <div className="flex flex-col gap-1.5">
+          <Link
+            href={`/jogadores/${player.id}`}
+            className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
+          >
+            Ver meu desempenho
+            <ArrowRightIcon aria-hidden className="size-4" />
+          </Link>
+          <Link
+            href={`/jogadores/${player.id}#colecao`}
+            className="inline-flex items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground hover:underline"
+          >
+            <GalleryVerticalEndIcon aria-hidden className="size-4" />
+            Minha coleção ({awardCount} {awardCount === 1 ? "carta" : "cartas"})
+          </Link>
+        </div>
       </div>
     </section>
   );

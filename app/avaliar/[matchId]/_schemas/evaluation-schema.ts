@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { SCORE_MAX, SCORE_MIN } from "@/lib/ovr";
+import { AWARD_KINDS, type AwardKind } from "@/types/award";
 import { GOALKEEPER_ATTRIBUTES, OUTFIELD_ATTRIBUTES } from "@/types/player";
 
 const scoreSchema = z.int().min(SCORE_MIN).max(SCORE_MAX);
@@ -24,8 +25,17 @@ export const playerEvaluationSchema = z.discriminatedUnion("role", [
   z.object({ playerId: z.uuid(), role: z.literal("goalkeeper"), scores: goalkeeperScoresSchema }),
 ]);
 
+/** Um voto (opcional) por prêmio: id do jogador indicado. */
+export const roundVotesSchema = z.object(
+  Object.fromEntries(AWARD_KINDS.map((kind) => [kind, z.uuid().optional()])) as Record<
+    AwardKind,
+    z.ZodOptional<z.ZodUUID>
+  >,
+);
+
 export const submitEvaluationsSchema = z.object({
   matchId: z.uuid(),
+  votes: roundVotesSchema,
   evaluations: z
     .array(playerEvaluationSchema)
     .min(1, "Avalie pelo menos um jogador.")
@@ -36,4 +46,5 @@ export const submitEvaluationsSchema = z.object({
 });
 
 export type PlayerEvaluationInput = z.infer<typeof playerEvaluationSchema>;
+export type RoundVotesInput = z.infer<typeof roundVotesSchema>;
 export type SubmitEvaluationsInput = z.infer<typeof submitEvaluationsSchema>;

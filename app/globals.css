@@ -15,8 +15,7 @@
   --color-rarity-bronze-frame: var(--rarity-bronze-frame);
   --color-rarity-silver-frame: var(--rarity-silver-frame);
   --color-rarity-gold-frame: var(--rarity-gold-frame);
-  --color-rarity-special-frame: var(--rarity-special-frame);
-  --color-rarity-mvp-frame: var(--rarity-mvp-frame);
+  --color-rarity-rare-frame: var(--rarity-rare-frame);
   --color-rarity-bronze-from: var(--rarity-bronze-from);
   --color-rarity-bronze-to: var(--rarity-bronze-to);
   --color-rarity-bronze-foreground: var(--rarity-bronze-foreground);
@@ -26,12 +25,33 @@
   --color-rarity-gold-from: var(--rarity-gold-from);
   --color-rarity-gold-to: var(--rarity-gold-to);
   --color-rarity-gold-foreground: var(--rarity-gold-foreground);
-  --color-rarity-special-from: var(--rarity-special-from);
-  --color-rarity-special-to: var(--rarity-special-to);
-  --color-rarity-special-foreground: var(--rarity-special-foreground);
-  --color-rarity-mvp-from: var(--rarity-mvp-from);
-  --color-rarity-mvp-to: var(--rarity-mvp-to);
-  --color-rarity-mvp-foreground: var(--rarity-mvp-foreground);
+  --color-rarity-rare-from: var(--rarity-rare-from);
+  --color-rarity-rare-to: var(--rarity-rare-to);
+  --color-rarity-rare-foreground: var(--rarity-rare-foreground);
+  --color-award-craque-frame: var(--award-craque-frame);
+  --color-award-craque-from: var(--award-craque-from);
+  --color-award-craque-to: var(--award-craque-to);
+  --color-award-craque-foreground: var(--award-craque-foreground);
+  --color-award-gol-frame: var(--award-gol-frame);
+  --color-award-gol-from: var(--award-gol-from);
+  --color-award-gol-to: var(--award-gol-to);
+  --color-award-gol-foreground: var(--award-gol-foreground);
+  --color-award-bola-murcha-frame: var(--award-bola-murcha-frame);
+  --color-award-bola-murcha-from: var(--award-bola-murcha-from);
+  --color-award-bola-murcha-to: var(--award-bola-murcha-to);
+  --color-award-bola-murcha-foreground: var(--award-bola-murcha-foreground);
+  --color-award-craque-halloween-frame: var(--award-craque-halloween-frame);
+  --color-award-craque-halloween-from: var(--award-craque-halloween-from);
+  --color-award-craque-halloween-to: var(--award-craque-halloween-to);
+  --color-award-craque-halloween-foreground: var(--award-craque-halloween-foreground);
+  --color-award-gol-halloween-frame: var(--award-gol-halloween-frame);
+  --color-award-gol-halloween-from: var(--award-gol-halloween-from);
+  --color-award-gol-halloween-to: var(--award-gol-halloween-to);
+  --color-award-gol-halloween-foreground: var(--award-gol-halloween-foreground);
+  --color-award-bola-murcha-halloween-frame: var(--award-bola-murcha-halloween-frame);
+  --color-award-bola-murcha-halloween-from: var(--award-bola-murcha-halloween-from);
+  --color-award-bola-murcha-halloween-to: var(--award-bola-murcha-halloween-to);
+  --color-award-bola-murcha-halloween-foreground: var(--award-bola-murcha-halloween-foreground);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -122,15 +142,45 @@
   --rarity-gold-from: oklch(0.88 0.15 92);
   --rarity-gold-to: oklch(0.7 0.14 78);
   --rarity-gold-foreground: oklch(0.24 0.05 70);
-  /* Especial: carta preta com detalhes dourados (referência "TOTW") */
-  --rarity-special-frame: oklch(0.8 0.12 85);
-  --rarity-special-from: oklch(0.27 0.01 80);
-  --rarity-special-to: oklch(0.13 0.005 80);
-  --rarity-special-foreground: oklch(0.86 0.12 88);
-  --rarity-mvp-frame: oklch(0.89 0.2 128);
-  --rarity-mvp-from: oklch(0.36 0.1 145);
-  --rarity-mvp-to: oklch(0.14 0.03 160);
-  --rarity-mvp-foreground: oklch(0.93 0.17 128);
+  /* Ouro raro (85+): ouro mais intenso e brilhante que o ouro comum */
+  --rarity-rare-frame: oklch(0.97 0.13 98);
+  --rarity-rare-from: oklch(0.93 0.18 96);
+  --rarity-rare-to: oklch(0.7 0.17 72);
+  --rarity-rare-foreground: oklch(0.22 0.06 65);
+
+  /*
+   * Cartas especiais (prêmios da rodada). Mesma estrutura: frame = moldura,
+   * from/to = face, foreground = texto. Tema sazonal = sufixo (ex.: -halloween).
+   */
+  /* Craque da Rodada: preta e dourada, como o Team of the Week */
+  --award-craque-frame: oklch(0.82 0.13 85);
+  --award-craque-from: oklch(0.27 0.01 80);
+  --award-craque-to: oklch(0.12 0.005 80);
+  --award-craque-foreground: oklch(0.87 0.13 88);
+  /* Gol da Semana: azul elétrico */
+  --award-gol-frame: oklch(0.86 0.13 210);
+  --award-gol-from: oklch(0.45 0.15 255);
+  --award-gol-to: oklch(0.18 0.08 265);
+  --award-gol-foreground: oklch(0.95 0.06 205);
+  /* Bola Murcha: couro velho, sem brilho */
+  --award-bola-murcha-frame: oklch(0.6 0.04 60);
+  --award-bola-murcha-from: oklch(0.52 0.04 65);
+  --award-bola-murcha-to: oklch(0.3 0.03 55);
+  --award-bola-murcha-foreground: oklch(0.92 0.02 80);
+
+  /* Halloween: abóbora, gosma e fantasma */
+  --award-craque-halloween-frame: oklch(0.76 0.17 55);
+  --award-craque-halloween-from: oklch(0.26 0.05 45);
+  --award-craque-halloween-to: oklch(0.11 0.02 40);
+  --award-craque-halloween-foreground: oklch(0.82 0.16 60);
+  --award-gol-halloween-frame: oklch(0.86 0.2 135);
+  --award-gol-halloween-from: oklch(0.36 0.15 300);
+  --award-gol-halloween-to: oklch(0.15 0.07 300);
+  --award-gol-halloween-foreground: oklch(0.9 0.19 135);
+  --award-bola-murcha-halloween-frame: oklch(0.82 0.02 280);
+  --award-bola-murcha-halloween-from: oklch(0.36 0.03 280);
+  --award-bola-murcha-halloween-to: oklch(0.14 0.02 280);
+  --award-bola-murcha-halloween-foreground: oklch(0.93 0.02 280);
 }
 
 @layer base {

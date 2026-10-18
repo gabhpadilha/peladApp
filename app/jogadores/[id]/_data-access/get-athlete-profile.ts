@@ -6,14 +6,16 @@ import {
   type MatchPerformance,
   type PendingEvaluation,
 } from "@/lib/players";
+import type { Award } from "@/types/award";
 import type { Player } from "@/types/player";
 
 export type AthleteProfile = {
   player: Player;
   /** Jogador logado, para o cabeçalho. */
   currentPlayer: Player | undefined;
-  isMvp: boolean;
   isOwnProfile: boolean;
+  /** Coleção de cartas especiais do atleta (mais recentes primeiro). */
+  awards: Award[];
   delta: number | null;
   rank: { position: number; total: number };
   gamesPlayed: number;
@@ -42,8 +44,8 @@ export async function getAthleteProfile(memberId: string): Promise<AthleteProfil
   return {
     player,
     currentPlayer: league.players.find((candidate) => candidate.id === league.currentMemberId),
-    isMvp: league.mvpId === player.id,
     isOwnProfile,
+    awards: league.awards.filter((award) => award.memberId === player.id),
     delta: league.getDelta(player),
     rank: {
       position: roleRanking.findIndex((candidate) => candidate.id === player.id) + 1,

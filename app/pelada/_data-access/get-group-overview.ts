@@ -1,6 +1,7 @@
 import { getGroupEvaluations, getOvrByMember } from "@/lib/group-scores";
 import { requireActiveMembership, type ActiveMembership, type PlayerPositionCode } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
+import { AWARD_KINDS, type AwardKind } from "@/types/award";
 import type { Database } from "@/types/database";
 
 const SITE_TIME_ZONE = "America/Sao_Paulo";
@@ -22,6 +23,8 @@ export type MatchSummary = {
   presentCount: number;
   teamCount: number;
   submittedCount: number;
+  /** Ganhadores das cartas especiais (só em rodadas fechadas). */
+  winners: { kind: AwardKind; nickname: string }[];
 };
 
 export type GroupOverview = {
@@ -44,7 +47,7 @@ export async function getGroupOverview(): Promise<GroupOverview> {
   const isOrganizer = membership.role === "organizer";
   const supabase = await createClient();
 
-  const [claimsResult, membersResult, matchesResult, submissionsResult, evaluations] = await Promise.all([
+  const [claimsResult, membersResult, matchesResult, submissionsResult, evaluations, awardsResult] = await Promise.all([
     supabase.auth.getClaims(),
     supabase
       .from("group_members")
@@ -58,11 +61,16 @@ export async function getGroupOverview(): Promise<GroupOverview> {
       .order("round", { ascending: false }),
     supabase.rpc("get_match_submissions", { target_group: membership.groupId }),
     getGroupEvaluations(membership.groupId),
+    supabase.from("awards").select("match_id, member_id, kind").eq("group_id", membership.groupId),
   ]);
 
   if (membersResult.error) throw membersResult.error;
   if (matchesResult.error) throw matchesResult.error;
   if (submissionsResult.error) throw submissionsResult.error;
+  if (awardsResult.error) throw awardsResult.error;
+
+  const nicknameByMember = new Map(membersResult.data.map((member) => [member.id, member.nickname]));
+  const kindOrder: readonly AwardKind[] = AWARD_KINDS;
 
   const submittedByMatch = new Map(
     submissionsResult.data.map((row) => [row.match_id, Number(row.submitted)]),
@@ -86,6 +94,10 @@ export async function getGroupOverview(): Promise<GroupOverview> {
       presentCount: match.match_attendance.length,
       teamCount: new Set(match.match_attendance.map((attendance) => attendance.team)).size,
       submittedCount: submittedByMatch.get(match.id) ?? 0,
+      winners: awardsResult.data
+        .filter((award) => award.match_id === match.id)
+        .toSorted((a, b) => kindOrder.indexOf(a.kind) - kindOrder.indexOf(b.kind))
+        .map((award) => ({ kind: award.kind, nickname: nicknameByMember.get(award.member_id) ?? "?" })),
     })),
     // Seguro aqui: a sessão já foi lida, então a rota é dinâmica.
     today: new Intl.DateTimeFormat("en-CA", { timeZone: SITE_TIME_ZONE }).format(new Date()),

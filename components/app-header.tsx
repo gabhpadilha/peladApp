@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogOutIcon, UsersIcon } from "lucide-react";
+import { GalleryVerticalEndIcon, LogOutIcon, UsersIcon } from "lucide-react";
 import { signOut } from "@/app/_actions/sign-out";
 import { OvrBadge } from "@/components/ovr-badge";
 import type { Player } from "@/types/player";
@@ -18,19 +18,25 @@ export function AppHeader({ currentPlayer }: AppHeaderProps) {
         <Link href="/" className="font-display text-2xl font-extrabold tracking-wide uppercase">
           Pelad<span className="text-primary">App</span>
         </Link>
-        <nav aria-label="Principal" className="flex items-center gap-1">
-          <Link href="/pelada" className={NAV_LINK}>
+        <nav aria-label="Principal" className="flex items-center gap-0.5 sm:gap-1">
+          <Link href="/pelada" className={NAV_LINK} aria-label="Pelada">
             <UsersIcon aria-hidden className="size-4" />
-            Pelada
+            <span className="hidden sm:inline">Pelada</span>
           </Link>
           {currentPlayer && (
-            <Link
-              href={`/jogadores/${currentPlayer.id}`}
-              className="flex items-center gap-2 rounded-lg py-1 pr-1 pl-2.5 text-sm font-medium transition-colors hover:bg-muted"
-            >
-              <span className="hidden sm:inline">{currentPlayer.nickname}</span>
-              <OvrBadge ovr={currentPlayer.ovr} />
-            </Link>
+            <>
+              <Link href={`/jogadores/${currentPlayer.id}#colecao`} className={NAV_LINK} aria-label="Minha coleção">
+                <GalleryVerticalEndIcon aria-hidden className="size-4" />
+                <span className="hidden sm:inline">Coleção</span>
+              </Link>
+              <Link
+                href={`/jogadores/${currentPlayer.id}`}
+                className="flex items-center gap-2 rounded-lg py-1 pr-1 pl-2.5 text-sm font-medium transition-colors hover:bg-muted"
+              >
+                <span className="hidden sm:inline">{currentPlayer.nickname}</span>
+                <OvrBadge ovr={currentPlayer.ovr} />
+              </Link>
+            </>
           )}
           <form action={signOut}>
             <button type="submit" className={NAV_LINK} aria-label="Sair da conta">

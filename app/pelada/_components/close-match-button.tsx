@@ -40,7 +40,8 @@ export function CloseMatchButton({ matchId, round }: CloseMatchButtonProps) {
       className="flex basis-full flex-col gap-2 rounded-lg border bg-muted/40 p-3 sm:flex-row sm:items-center sm:justify-between"
     >
       <p className="text-sm text-muted-foreground">
-        Fechar a rodada {round}? As notas passam a contar no OVR e ninguém mais envia.
+        Fechar a rodada {round}? As notas passam a contar no OVR, ninguém mais envia e os mais votados
+        ganham as cartas especiais.
       </p>
       <div className="flex shrink-0 justify-end gap-2">
         <Button size="sm" variant="ghost" onClick={() => setIsConfirming(false)} disabled={isPending}>
