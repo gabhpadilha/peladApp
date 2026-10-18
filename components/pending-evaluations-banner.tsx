@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ClipboardListIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatWeekdayDate } from "@/lib/format-date";
@@ -30,9 +31,8 @@ export function PendingEvaluationsBanner({ pending }: PendingEvaluationsBannerPr
           {next.playersToRate} jogadores para avaliar
         </p>
       </div>
-      {/* A tela de notas ainda não existe: liga aqui quando a rota for criada. */}
-      <Button size="lg" disabled title="Tela de notas em construção">
-        Avaliar
+      <Button asChild size="lg">
+        <Link href={`/avaliar/${next.match.id}`}>Avaliar</Link>
       </Button>
     </section>
   );

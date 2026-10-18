@@ -24,13 +24,14 @@ export function MatchesList({ matches, isOrganizer }: MatchesListProps) {
           {matches.map((match) => {
             const isOpen = match.status === "open";
             return (
-              <li key={match.id} className="flex items-start gap-3 border-t py-3 first:border-t-0">
-                <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+              // flex-wrap: a confirmação de fechar desce para uma linha própria em vez de espremer o texto.
+              <li key={match.id} className="flex flex-wrap items-start gap-x-3 gap-y-2 border-t py-3 first:border-t-0">
+                <div className="flex min-w-48 flex-1 flex-col gap-0.5">
                   <p className="flex items-center gap-2">
-                    <span className="font-display text-lg font-bold">Rodada {match.round}</span>
+                    <span className="font-display text-lg font-bold whitespace-nowrap">Rodada {match.round}</span>
                     <span
                       className={cn(
-                        "rounded-md px-1.5 py-0.5 text-xs font-medium",
+                        "shrink-0 rounded-md px-1.5 py-0.5 text-xs font-medium whitespace-nowrap",
                         isOpen ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground",
                       )}
                     >
