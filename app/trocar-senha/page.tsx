@@ -18,7 +18,8 @@ export default function ChangePasswordPage() {
           </p>
           <h1 className="text-lg font-medium">Escolha sua senha</h1>
           <p className="text-sm text-muted-foreground">
-            Você entrou com a senha provisória. Agora crie a sua; é ela que você vai usar daqui pra frente.
+            Você entrou com a senha provisória. Crie a sua: depois de salvar, você volta para o login e
+            entra com ela.
           </p>
         </div>
         <div className="rounded-xl border bg-card p-6">
@@ -34,5 +35,5 @@ export default function ChangePasswordPage() {
 
 async function ChangePasswordForm() {
   const { email } = await getPasswordChangeData();
-  return <PasswordForm email={email} redirectTo="/" submitLabel="Salvar e entrar" />;
+  return <PasswordForm email={email} afterSave="login" submitLabel="Salvar senha" />;
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { CheckCircle2Icon } from "lucide-react";
@@ -10,15 +11,23 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/c
 import { Input } from "@/components/ui/input";
 import { setPasswordSchema, type SetPasswordInput } from "@/types/member-schema";
 
+/** Tempo para ler o aviso de sucesso antes de ir para o login. */
+const LOGIN_REDIRECT_DELAY_MS = 1800;
+const LOGIN_PATH_AFTER_PASSWORD = "/entrar?senha=criada";
+
 type PasswordFormProps = {
   email: string;
-  /** Depois de salvar, vai para cá (ex.: "/" na troca obrigatória). */
-  redirectTo?: string;
+  /**
+   * `stay`: continua logado na mesma tela (trocar senha na página da pelada).
+   * `login`: encerra a sessão e leva para a tela de login (troca obrigatória do 1º acesso).
+   */
+  afterSave?: "stay" | "login";
   submitLabel?: string;
 };
 
 /** Definir ou trocar a senha da conta logada. */
-export function PasswordForm({ email, redirectTo, submitLabel = "Salvar senha" }: PasswordFormProps) {
+export function PasswordForm({ email, afterSave = "stay", submitLabel = "Salvar senha" }: PasswordFormProps) {
+  const router = useRouter();
   const [isSaved, setIsSaved] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -26,12 +35,19 @@ export function PasswordForm({ email, redirectTo, submitLabel = "Salvar senha" }
     resolver: zodResolver(setPasswordSchema),
     defaultValues: { password: "", confirmation: "" },
   });
+  const isLeaving = isSaved && afterSave === "login";
+
+  useEffect(() => {
+    if (!isLeaving) return;
+    const timeout = setTimeout(() => router.replace(LOGIN_PATH_AFTER_PASSWORD), LOGIN_REDIRECT_DELAY_MS);
+    return () => clearTimeout(timeout);
+  }, [isLeaving, router]);
 
   function handleSubmit(data: SetPasswordInput) {
     setFormError(null);
     setIsSaved(false);
     startTransition(async () => {
-      const result = await setPassword(data, redirectTo);
+      const result = await setPassword(data, { signOutAfter: afterSave === "login" });
       if (result.success) {
         setIsSaved(true);
         form.reset();
@@ -50,8 +66,10 @@ export function PasswordForm({ email, redirectTo, submitLabel = "Salvar senha" }
       <FieldGroup>
         {isSaved && (
           <p role="status" className="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-sm">
-            <CheckCircle2Icon aria-hidden className="size-4 text-primary" />
-            Senha salva. Use ela na tela de login.
+            <CheckCircle2Icon aria-hidden className="size-4 shrink-0 text-primary" />
+            {afterSave === "login"
+              ? "Senha criada com sucesso! Levando você para o login…"
+              : "Senha salva. Use ela na tela de login."}
           </p>
         )}
         {/* Ajuda o gerenciador de senhas do navegador a salvar com o e-mail certo. */}
@@ -67,6 +85,7 @@ export function PasswordForm({ email, redirectTo, submitLabel = "Salvar senha" }
                 id="new-password"
                 type="password"
                 autoComplete="new-password"
+                disabled={isLeaving}
                 aria-invalid={fieldState.invalid}
                 className="h-11 text-base"
               />
@@ -86,6 +105,7 @@ export function PasswordForm({ email, redirectTo, submitLabel = "Salvar senha" }
                 id="new-password-confirmation"
                 type="password"
                 autoComplete="new-password"
+                disabled={isLeaving}
                 aria-invalid={fieldState.invalid}
                 className="h-11 text-base"
               />
@@ -94,7 +114,7 @@ export function PasswordForm({ email, redirectTo, submitLabel = "Salvar senha" }
           )}
         />
         {formError && <FieldError>{formError}</FieldError>}
-        <Button type="submit" size="lg" disabled={isPending} className="h-11 w-full text-base">
+        <Button type="submit" size="lg" disabled={isPending || isLeaving} className="h-11 w-full text-base">
           {isPending ? "Salvando…" : submitLabel}
         </Button>
       </FieldGroup>
