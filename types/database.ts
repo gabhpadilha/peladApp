@@ -162,16 +162,19 @@ export type Database = {
           group_id: string
           match_id: string
           member_id: string
+          team: number | null
         }
         Insert: {
           group_id: string
           match_id: string
           member_id: string
+          team?: number | null
         }
         Update: {
           group_id?: string
           match_id?: string
           member_id?: string
+          team?: number | null
         }
         Relationships: [
           {
@@ -268,6 +271,15 @@ export type Database = {
         }
         Returns: string
       }
+      create_match: {
+        Args: {
+          match_date: string
+          present_member_ids: string[]
+          target_group: string
+          team_numbers: number[]
+        }
+        Returns: string
+      }
       get_group_scores: {
         Args: { target_group: string }
         Returns: {
@@ -311,6 +323,13 @@ export type Database = {
           member_position: Database["public"]["Enums"]["player_position"]
         }
         Returns: string
+      }
+      set_member_role: {
+        Args: {
+          new_role: Database["public"]["Enums"]["member_role"]
+          target_member: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

@@ -1,8 +1,9 @@
 import { z } from "zod";
+import { emailSchema } from "@/types/member-schema";
 
 export const signInSchema = z.object({
-  // Normaliza antes de validar: espaço sobrando ou maiúscula não devem barrar o login.
-  email: z.string().trim().toLowerCase().pipe(z.email("Digite um e-mail válido.")),
+  email: emailSchema,
+  password: z.string().min(1, "Digite sua senha."),
 });
 
 export type SignInInput = z.infer<typeof signInSchema>;

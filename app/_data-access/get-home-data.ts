@@ -1,13 +1,7 @@
+import { getLeague } from "@/lib/league";
 import { averageEvaluations } from "@/lib/ovr";
-import {
-  getMatchPerformances,
-  getPendingEvaluations,
-  getSubmissionProgress,
-  rankPlayers,
-  type PendingEvaluation,
-} from "@/lib/players";
-import { getMockLeague } from "@/lib/mocks/league";
-import type { Match, UpcomingMatch } from "@/types/match";
+import { getMatchPerformances, rankPlayers, type PendingEvaluation } from "@/lib/players";
+import type { Match } from "@/types/match";
 import type { Player } from "@/types/player";
 
 const OUTFIELD_RANKING_SIZE = 5;
@@ -18,6 +12,7 @@ export type RankedPlayer = { player: Player; position: number; delta: number | n
 export type RoundPerformer = { player: Player; score: number };
 
 export type HomeData = {
+  groupName: string;
   currentPlayer: Player;
   isCurrentPlayerMvp: boolean;
   currentDelta: number | null;
@@ -25,7 +20,6 @@ export type HomeData = {
   gamesPlayed: number;
   evaluationsReceived: number;
   pending: PendingEvaluation[];
-  upcomingMatch: UpcomingMatch;
   latestRound: { match: Match; topPerformers: RoundPerformer[]; mvpId: string | null } | null;
   openRound: { match: Match; submitted: number; expected: number } | null;
   outfieldRanking: RankedPlayer[];
@@ -33,10 +27,10 @@ export type HomeData = {
 };
 
 export async function getHomeData(): Promise<HomeData> {
-  const league = getMockLeague();
-  const currentPlayer = league.players.find((player) => player.id === league.currentUserId);
+  const league = await getLeague("/");
+  const currentPlayer = league.players.find((player) => player.id === league.currentMemberId);
   if (!currentPlayer) {
-    throw new Error("Jogador logado não encontrado");
+    throw new Error("Jogador logado não encontrado na pelada");
   }
 
   const roleRanking = rankPlayers(league.players, currentPlayer.role);
@@ -63,9 +57,10 @@ export async function getHomeData(): Promise<HomeData> {
         .slice(0, TOP_PERFORMERS_SIZE)
     : [];
 
-  const openMatch = league.matches.find((match) => match.status === "open");
+  const openMatch = league.matches.findLast((match) => match.status === "open");
 
   return {
+    groupName: league.membership.groupName,
     currentPlayer,
     isCurrentPlayerMvp: league.mvpId === currentPlayer.id,
     currentDelta: league.getDelta(currentPlayer),
@@ -78,11 +73,14 @@ export async function getHomeData(): Promise<HomeData> {
       (total, performance) => total + performance.evaluationCount,
       0,
     ),
-    pending: getPendingEvaluations(currentPlayer.id, league.matches, league.evaluations),
-    upcomingMatch: league.upcomingMatch,
+    pending: league.pending,
     latestRound: latestMatch ? { match: latestMatch, topPerformers, mvpId: league.mvpId } : null,
     openRound: openMatch
-      ? { match: openMatch, ...getSubmissionProgress(openMatch, league.evaluations) }
+      ? {
+          match: openMatch,
+          submitted: league.submittedByMatch.get(openMatch.id) ?? 0,
+          expected: openMatch.presentPlayerIds.length,
+        }
       : null,
     outfieldRanking: rankPlayers(league.players, "outfield")
       .slice(0, OUTFIELD_RANKING_SIZE)

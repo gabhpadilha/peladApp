@@ -1,22 +1,38 @@
+import { Suspense } from "react";
+import Link from "next/link";
+import { ArrowRightIcon } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
+import { GroupGate } from "@/components/group-gate";
 import { PendingEvaluationsBanner } from "@/components/pending-evaluations-banner";
 import { SectionTitle } from "@/components/section-title";
 import { LatestRoundCard } from "./_components/latest-round-card";
 import { MyCardSummary } from "./_components/my-card-summary";
+import { OpenRoundCard } from "./_components/open-round-card";
 import { RankingList } from "./_components/ranking-list";
-import { UpcomingMatchCard } from "./_components/upcoming-match-card";
 import { getHomeData } from "./_data-access/get-home-data";
 
-export default async function Home() {
+export default function Home() {
+  return (
+    // Exige login e pelada (lê cookies): o conteúdo faz streaming.
+    <Suspense fallback={<HomeSkeleton />}>
+      <GroupGate nextPath="/">
+        <HomeContent />
+      </GroupGate>
+    </Suspense>
+  );
+}
+
+async function HomeContent() {
   const data = await getHomeData();
+  const hasRounds = data.latestRound !== null || data.openRound !== null;
 
   return (
     <>
       <AppHeader currentPlayer={data.currentPlayer} />
       <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6">
         <div>
-          <p className="text-sm text-muted-foreground">Bem-vindo de volta,</p>
-          <h1 className="font-display text-3xl font-bold">{data.currentPlayer.nickname}</h1>
+          <p className="text-sm text-muted-foreground">{data.groupName}</p>
+          <h1 className="font-display text-3xl font-bold">Fala, {data.currentPlayer.nickname}</h1>
         </div>
 
         <PendingEvaluationsBanner pending={data.pending} />
@@ -31,7 +47,13 @@ export default async function Home() {
               gamesPlayed={data.gamesPlayed}
               evaluationsReceived={data.evaluationsReceived}
             />
-            <UpcomingMatchCard match={data.upcomingMatch} />
+            {data.openRound && (
+              <OpenRoundCard
+                match={data.openRound.match}
+                submitted={data.openRound.submitted}
+                expected={data.openRound.expected}
+              />
+            )}
           </div>
 
           <div className="flex flex-col gap-6">
@@ -40,28 +62,54 @@ export default async function Home() {
                 match={data.latestRound.match}
                 topPerformers={data.latestRound.topPerformers}
                 mvpId={data.latestRound.mvpId}
-                openRound={data.openRound}
               />
+            )}
+
+            {!hasRounds && (
+              <section className="flex flex-col gap-2 rounded-xl border border-dashed bg-card/50 p-4">
+                <h2 className="font-display text-lg font-bold tracking-wide uppercase">Nenhuma rodada ainda</h2>
+                <p className="text-sm text-muted-foreground">
+                  Depois do primeiro jogo, o organizador cria a rodada e cada um avalia quem jogou. As cartas e o
+                  ranking aparecem quando a rodada fecha.
+                </p>
+                <Link
+                  href="/pelada"
+                  className="inline-flex w-fit items-center gap-1 text-sm font-medium text-primary hover:underline"
+                >
+                  Ir para a pelada
+                  <ArrowRightIcon aria-hidden className="size-4" />
+                </Link>
+              </section>
             )}
 
             <section aria-labelledby="ranking-title" className="flex flex-col gap-3 rounded-xl border bg-card p-4">
               <SectionTitle id="ranking-title" aside="por OVR">
                 Ranking
               </SectionTitle>
-              <RankingList
-                title="Linha"
-                players={data.outfieldRanking}
-                currentPlayerId={data.currentPlayer.id}
-              />
-              <RankingList
-                title="Goleiros"
-                players={data.goalkeeperRanking}
-                currentPlayerId={data.currentPlayer.id}
-              />
+              <RankingList title="Linha" players={data.outfieldRanking} currentPlayerId={data.currentPlayer.id} />
+              {data.goalkeeperRanking.length > 0 && (
+                <RankingList
+                  title="Goleiros"
+                  players={data.goalkeeperRanking}
+                  currentPlayerId={data.currentPlayer.id}
+                />
+              )}
             </section>
           </div>
         </div>
       </main>
     </>
+  );
+}
+
+function HomeSkeleton() {
+  return (
+    <main aria-busy className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-20">
+      <div className="h-20 animate-pulse rounded-xl bg-card" />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <div className="h-72 animate-pulse rounded-xl bg-card" />
+        <div className="h-72 animate-pulse rounded-xl bg-card" />
+      </div>
+    </main>
   );
 }

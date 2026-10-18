@@ -1,6 +1,7 @@
 import "server-only";
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import type { Database } from "@/types/database";
 import { getSupabaseEnv } from "./env";
 
@@ -9,6 +10,9 @@ import { getSupabaseEnv } from "./env";
  * Crie um por requisição; nunca guarde em variável de módulo.
  */
 export async function createClient() {
+  // Dados de sessão são sempre da requisição: sem isso, o prefetch com cookies
+  // (Partial Prefetching) pré-renderiza e o Supabase lê Date.now() ao validar o token.
+  await connection();
   const cookieStore = await cookies();
   const { url, publishableKey } = getSupabaseEnv();
 

@@ -13,45 +13,43 @@ export function MatchHistory({ performances }: MatchHistoryProps) {
   return (
     <section aria-labelledby="history-title" className="flex flex-col gap-3 rounded-xl border bg-card p-4">
       <SectionTitle id="history-title">Histórico</SectionTitle>
-      <table className="w-full text-sm">
-        <thead>
-          <tr className="text-left text-xs text-muted-foreground uppercase">
-            <th scope="col" className="py-2 font-medium">Rodada</th>
-            <th scope="col" className="py-2 font-medium">Placar</th>
-            <th scope="col" className="py-2 text-right font-medium">Avaliações</th>
-            <th scope="col" className="py-2 text-right font-medium">Nota</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((performance) => (
-            <tr key={performance.match.id} className="border-t">
-              <th scope="row" className="py-2.5 text-left font-medium">
-                R{performance.match.round}{" "}
-                <span className="font-normal text-muted-foreground">
-                  · {formatShortDate(performance.match.date)}
-                </span>
-              </th>
-              <td className="py-2.5 text-muted-foreground tabular-nums">
-                {performance.match.score.teamA} × {performance.match.score.teamB}
-              </td>
-              <td className="py-2.5 text-right text-muted-foreground tabular-nums">
-                {performance.wasPresent ? performance.evaluationCount : "–"}
-              </td>
-              <td className="py-2.5 text-right">
-                {performance.score === null ? (
-                  <span className="text-muted-foreground">
-                    {performance.wasPresent ? "Sem notas" : "Ausente"}
-                  </span>
-                ) : (
-                  <span className="font-display text-lg font-bold tabular-nums">
-                    {performance.score}
-                  </span>
-                )}
-              </td>
+      {rows.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Nenhuma rodada fechada ainda.</p>
+      ) : (
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="text-left text-xs text-muted-foreground uppercase">
+              <th scope="col" className="py-2 font-medium">Rodada</th>
+              <th scope="col" className="py-2 text-right font-medium">Avaliações</th>
+              <th scope="col" className="py-2 text-right font-medium">Nota</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((performance) => (
+              <tr key={performance.match.id} className="border-t">
+                <th scope="row" className="py-2.5 text-left font-medium">
+                  R{performance.match.round}{" "}
+                  <span className="font-normal text-muted-foreground">
+                    · {formatShortDate(performance.match.date)}
+                  </span>
+                </th>
+                <td className="py-2.5 text-right text-muted-foreground tabular-nums">
+                  {performance.wasPresent ? performance.evaluationCount : "–"}
+                </td>
+                <td className="py-2.5 text-right">
+                  {performance.score === null ? (
+                    <span className="text-muted-foreground">
+                      {performance.wasPresent ? "Sem notas" : "Ausente"}
+                    </span>
+                  ) : (
+                    <span className="font-display text-lg font-bold tabular-nums">{performance.score}</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
     </section>
   );
 }

@@ -68,6 +68,12 @@ export function MyCardSummary({
           </div>
         </dl>
 
+        {player.ovr === null && (
+          <p className="text-xs text-muted-foreground">
+            Sua carta ganha números quando a primeira rodada em que você jogou for fechada.
+          </p>
+        )}
+
         <Link
           href={`/jogadores/${player.id}`}
           className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"

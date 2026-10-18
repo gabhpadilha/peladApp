@@ -15,16 +15,16 @@ export default function SignInPage({ searchParams }: PageProps<"/entrar">) {
             Pelad<span className="text-primary">App</span>
           </p>
           <h1 className="text-lg font-medium">Entrar</h1>
-          <p className="text-sm text-muted-foreground">
-            Sem senha: enviamos um link de acesso para o seu e-mail.
-          </p>
         </div>
-        <div className="rounded-xl border bg-card p-6">
+        <div className="flex flex-col gap-4 rounded-xl border bg-card p-6">
           {/* `searchParams` é dado de requisição: só o formulário espera por ele. */}
           <Suspense fallback={<SignInForm />}>
             <SignInFormWithNext searchParams={searchParams} />
           </Suspense>
         </div>
+        <p className="text-center text-sm text-muted-foreground">
+          Ainda não tem conta? O cadastro é pelo link que o organizador manda no grupo da pelada.
+        </p>
       </div>
     </main>
   );

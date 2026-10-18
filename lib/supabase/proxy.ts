@@ -2,14 +2,23 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getSupabaseEnv, hasSupabaseEnv } from "./env";
 
+/** Rotas abertas sem login (o convite é onde a conta é criada). Todo o resto exige sessão. */
+const PUBLIC_PATH_PREFIXES = ["/entrar", "/auth", "/convite"];
+
+function isPublicPath(pathname: string): boolean {
+  return PUBLIC_PATH_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
+
 /**
- * Renova o token de acesso a cada requisição e devolve os cookies atualizados
- * para os Server Components e para o navegador.
+ * Renova o token de acesso a cada requisição, devolve os cookies atualizados
+ * e manda quem não está logado para /entrar (voltando à página pedida).
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
-  // Sem .env.local o app ainda roda com os mocks; não há sessão para renovar.
+  // Sem .env.local não há sessão para renovar (as páginas mostram o erro de configuração).
   if (!hasSupabaseEnv()) return response;
 
   const { url, publishableKey } = getSupabaseEnv();
@@ -35,7 +44,21 @@ export async function updateSession(request: NextRequest) {
 
   // Não coloque código entre createServerClient e getClaims(): é aqui que a
   // sessão é renovada; sem isso o usuário é deslogado aleatoriamente.
-  await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getClaims();
+
+  const { pathname, search } = request.nextUrl;
+  if (!data?.claims && !isPublicPath(pathname)) {
+    const signInUrl = request.nextUrl.clone();
+    signInUrl.pathname = "/entrar";
+    signInUrl.search = "";
+    signInUrl.searchParams.set("next", `${pathname}${search}`);
+    const redirectResponse = NextResponse.redirect(signInUrl);
+    // Leva junto os cookies que a renovação possa ter gravado.
+    for (const cookie of response.cookies.getAll()) {
+      redirectResponse.cookies.set(cookie);
+    }
+    return redirectResponse;
+  }
 
   // Devolva este `response` como está, para os cookies não saírem de sincronia.
   return response;

@@ -12,10 +12,10 @@ export default function AuthErrorPage() {
       <div className="flex max-w-sm flex-col items-center gap-4 text-center">
         <h1 className="font-display text-3xl font-bold">Link inválido ou expirado</h1>
         <p className="text-sm text-muted-foreground">
-          Os links de acesso valem por pouco tempo e só podem ser usados uma vez. Peça um novo.
+          Links de acesso por e-mail só funcionam uma vez. Entre com seu e-mail e senha.
         </p>
         <Button asChild size="lg">
-          <Link href="/entrar">Pedir novo link</Link>
+          <Link href="/entrar">Ir para o login</Link>
         </Button>
       </div>
     </main>
