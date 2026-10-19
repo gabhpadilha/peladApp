@@ -200,7 +200,8 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
         </div>
 
         {/* z-0: a foto fica sempre atrás do OVR/posição (z-10). */}
-        <div className="absolute top-[6%] right-[5%] left-[27%] z-0 h-[53%]">
+        {/* Área da foto: proporção 0,87 (a mesma do enquadramento em lib/photo-cutout.ts). */}
+        <div className="absolute top-[4%] right-[3%] left-[22%] z-0 h-[58%]">
           <PlayerCardPhoto player={player} size={size} tintClass={DESIGNS[design].frame} />
         </div>
 

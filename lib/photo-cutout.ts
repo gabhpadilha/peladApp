@@ -1,8 +1,8 @@
 /**
- * Prepara a foto da carta no próprio aparelho (só no navegador):
+ * Prepara a foto da carta (só no navegador):
  * 1. lê a foto respeitando a orientação do celular;
- * 2. acha a pessoa com o MediaPipe (modelo multiclasse de selfie, Apache 2.0);
- * 3. enquadra rosto e busto na proporção da área de foto da carta;
+ * 2. acha a pessoa: máscara do servidor (MODNet) ou, sem rede, do MediaPipe no aparelho;
+ * 3. enquadra pela cabeça (rosto e busto) na proporção da área de foto da carta;
  * 4. gera o recorte sem fundo (PNG com alfa) e a original (JPEG).
  * O servidor converte as duas em WebP de 640px.
  */
@@ -23,8 +23,10 @@ const CARD_PHOTO_RATIO = 0.87;
 const MAX_SIDE = 1280;
 const OUTPUT_WIDTH = 640;
 /** Curva da máscara: abaixo vira transparente, acima opaco (borda mais justa). */
-const MASK_LOW = 0.35;
-const MASK_HIGH = 0.7;
+const MASK_LOW = 0.45;
+const MASK_HIGH = 0.8;
+/** Quanto a máscara encolhe antes da curva, em fração do lado maior da foto (~3px em 1280). */
+const EDGE_ERODE = 0.0022;
 /** Faixa do topo do recorte que é apagada (resíduo do segmentador na borda). */
 const TOP_EDGE_CLEAR = 0.015;
 /** Pessoa precisa ocupar pelo menos isso da foto para o recorte fazer sentido. */
@@ -140,35 +142,123 @@ function personAlpha(segmenter: ImageSegmenter, source: HTMLCanvasElement): Floa
 
 type Box = { x: number; y: number; width: number; height: number };
 
-/** Enquadramento rosto + busto: largura da pessoa, topo um pouco acima da cabeça. */
+/** Pixel conta como pessoa acima disso (para medir a silhueta). */
+const PERSON_THRESHOLD = 0.5;
+/** A linha só conta como topo da cabeça com pelo menos isso de largura (ignora fios soltos). */
+const MIN_TOP_RUN = 0.02;
+/**
+ * A largura da cabeça é medida do topo até essa profundidade (× a largura já
+ * medida): numa cabeça (elipse ~1,3 de altura por largura) isso para logo
+ * depois do ponto mais largo, na altura de olhos e orelhas, antes de gola,
+ * capuz ou ombros alargarem a silhueta.
+ */
+const HEAD_SCAN = 0.7;
+/** Altura da cabeça (topo do cabelo ao queixo) ≈ 1,3 × a largura dela. */
+const HEAD_PROPORTION = 1.3;
+/** Altura do quadro em "cabeças" (topo da cabeça ao queixo): ~2,1 dá o busto de carta FUT. */
+const FRAME_HEADS = 2.1;
+/** Folga acima da cabeça, em fração da altura do quadro (o degradê do topo da carta come 4%). */
+const HEADROOM = 0.09;
+
+/** Largura e centro do trecho contínuo de pessoa que passa por `centerX` na linha `y` (0 = fora). */
+function runAt(alpha: Float32Array, width: number, y: number, centerX: number): { width: number; center: number } {
+  const row = y * width;
+  const start = Math.round(centerX);
+  if (start < 0 || start >= width || alpha[row + start] <= PERSON_THRESHOLD) return { width: 0, center: centerX };
+  let left = start;
+  let right = start;
+  while (left > 0 && alpha[row + left - 1] > PERSON_THRESHOLD) left--;
+  while (right < width - 1 && alpha[row + right + 1] > PERSON_THRESHOLD) right++;
+  return { width: right - left + 1, center: (left + right) / 2 };
+}
+
+/**
+ * Enquadramento pela cabeça: acha o topo, mede a largura da cabeça até a
+ * altura da boca, estima a altura dela e monta o quadro com ~2,3 cabeças de
+ * altura, centrado no rosto. Assim o rosto ocupa a carta (antes o quadro seguia a largura dos
+ * ombros e a cabeça ficava pequena).
+ */
 function bustBox(alpha: Float32Array, width: number, height: number): Box {
-  let minX = width;
-  let maxX = -1;
-  let minY = height;
   let count = 0;
+  let top = -1;
+  let topCenter = 0;
   for (let y = 0; y < height; y++) {
+    let rowCount = 0;
+    let rowSum = 0;
     for (let x = 0; x < width; x++) {
-      if (alpha[y * width + x] > 0.5) {
-        count++;
-        if (x < minX) minX = x;
-        if (x > maxX) maxX = x;
-        if (y < minY) minY = y;
+      if (alpha[y * width + x] > PERSON_THRESHOLD) {
+        rowCount++;
+        rowSum += x;
       }
     }
+    count += rowCount;
+    if (top < 0 && rowCount >= width * MIN_TOP_RUN) {
+      top = y;
+      topCenter = rowSum / rowCount;
+    }
   }
-  if (count < width * height * MIN_PERSON_SHARE) throw new NoPersonFoundError();
+  if (top < 0 || count < width * height * MIN_PERSON_SHARE) throw new NoPersonFoundError();
 
-  const personWidth = maxX - minX + 1;
-  let boxWidth = Math.min(width, Math.round(personWidth * 1.08));
-  let boxHeight = Math.round(boxWidth / CARD_PHOTO_RATIO);
+  // Desce pela cabeça seguindo o trecho que passa pelo centro dela, só até a
+  // parte mais larga: abaixo disso gola, capuz e ombros alargam a silhueta.
+  let centerX = topCenter;
+  let headWidth = 0;
+  let centerSum = 0;
+  let headRows = 0;
+  for (let y = top; y < height; y++) {
+    if (headWidth > 0 && y - top > headWidth * HEAD_SCAN) break;
+    const run = runAt(alpha, width, y, centerX);
+    if (run.width === 0) continue;
+    headWidth = Math.max(headWidth, run.width);
+    centerX = run.center;
+    centerSum += run.center;
+    headRows++;
+  }
+  const headCenter = headRows > 0 ? centerSum / headRows : topCenter;
+  const headHeight = headWidth * HEAD_PROPORTION;
+  let boxHeight = Math.round(headHeight * FRAME_HEADS);
+  let boxWidth = Math.round(boxHeight * CARD_PHOTO_RATIO);
+  if (boxWidth > width) {
+    boxWidth = width;
+    boxHeight = Math.round(boxWidth / CARD_PHOTO_RATIO);
+  }
   if (boxHeight > height) {
     boxHeight = height;
-    boxWidth = Math.min(width, Math.round(boxHeight * CARD_PHOTO_RATIO));
+    boxWidth = Math.round(boxHeight * CARD_PHOTO_RATIO);
   }
-  const centerX = (minX + maxX) / 2;
-  const x = Math.round(Math.min(width - boxWidth, Math.max(0, centerX - boxWidth / 2)));
-  const y = Math.round(Math.min(height - boxHeight, Math.max(0, minY - boxHeight * 0.06)));
+  const x = Math.round(Math.min(width - boxWidth, Math.max(0, headCenter - boxWidth / 2)));
+  const y = Math.round(Math.min(height - boxHeight, Math.max(0, top - boxHeight * HEADROOM)));
   return { x, y, width: boxWidth, height: boxHeight };
+}
+
+/**
+ * Encolhe a máscara alguns pixels (mínimo numa janela, separável): a borda
+ * da silhueta costuma levar um fio do fundo (parede clara vira contorno branco).
+ */
+function erode(alpha: Float32Array, width: number, height: number, radius: number): Float32Array {
+  if (radius < 1) return alpha;
+  const horizontal = new Float32Array(alpha.length);
+  for (let y = 0; y < height; y++) {
+    const row = y * width;
+    for (let x = 0; x < width; x++) {
+      let min = 1;
+      const from = Math.max(0, x - radius);
+      const to = Math.min(width - 1, x + radius);
+      for (let k = from; k <= to; k++) min = Math.min(min, alpha[row + k]);
+      horizontal[row + x] = min;
+    }
+  }
+  const result = new Float32Array(alpha.length);
+  for (let x = 0; x < width; x++) {
+    for (let y = 0; y < height; y++) {
+      let min = 1;
+      const from = Math.max(0, y - radius);
+      const to = Math.min(height - 1, y + radius);
+      for (let k = from; k <= to; k++) min = Math.min(min, horizontal[k * width + x]);
+      result[y * width + x] = min;
+    }
+  }
+  return result;
 }
 
 /** Máscara (alfa com curva) como imagem do tamanho da foto, para compor com destination-in. */
@@ -187,8 +277,10 @@ function maskCanvas(alpha: Float32Array, width: number, height: number): HTMLCan
   return canvas;
 }
 
-/** Quanto esperar o segmentador do aparelho (download de ~16MB + WASM) antes de pedir ao servidor. */
-const SEGMENTER_TIMEOUT_MS = 20_000;
+/** Quanto esperar o recorte do servidor (cold start incluído) antes de tentar no aparelho. */
+const REMOTE_TIMEOUT_MS = 20_000;
+/** Quanto esperar o segmentador do aparelho (download de ~16MB + WASM) antes de seguir só com a original. */
+const SEGMENTER_TIMEOUT_MS = 30_000;
 
 function withTimeout<T>(promise: Promise<T>, milliseconds: number): Promise<T> {
   return new Promise((resolve, reject) => {
@@ -233,27 +325,33 @@ async function maskToAlpha(mask: Blob, width: number, height: number): Promise<F
   }
 }
 
-/** Alfa da pessoa: primeiro no aparelho (MediaPipe); se não der, pelo servidor. `null` = nenhum dos dois. */
+/**
+ * Alfa da pessoa: primeiro pelo servidor (MODNet, máscara de 512px com borda
+ * fina: separa o vão entre orelha e gola, onde o MediaPipe de 256px deixava a
+ * parede aparecer); se a rede falhar, no aparelho (MediaPipe, que só é
+ * baixado nesse caso). `null` = nenhum dos dois.
+ */
 async function findPersonAlpha(photo: HTMLCanvasElement, remoteMask: RemoteMask | undefined): Promise<Float32Array | null> {
+  if (remoteMask) {
+    try {
+      const mask = await withTimeout(remoteMask(await toBlob(photo, "image/jpeg", 0.9)), REMOTE_TIMEOUT_MS);
+      return await maskToAlpha(mask, photo.width, photo.height);
+    } catch (error) {
+      console.warn("Recorte no servidor indisponível; tentando no aparelho.", error);
+    }
+  }
   try {
     return personAlpha(await withTimeout(getSegmenter(), SEGMENTER_TIMEOUT_MS), photo);
   } catch (error) {
-    console.warn("Segmentação no aparelho indisponível; tentando no servidor.", error);
-  }
-  if (!remoteMask) return null;
-  try {
-    const mask = await remoteMask(await toBlob(photo, "image/jpeg", 0.9));
-    return await maskToAlpha(mask, photo.width, photo.height);
-  } catch (error) {
-    console.warn("Recorte no servidor indisponível; usando só a foto original.", error);
+    console.warn("Segmentação no aparelho indisponível; usando só a foto original.", error);
     return null;
   }
 }
 
 /**
  * Faz o recorte e a original enquadrados para a carta. Lança `NoPersonFoundError` sem pessoa.
- * A máscara vem do aparelho ou, se ele não rodar o MediaPipe, de `remoteMask`; o
- * enquadramento e a curva são os mesmos nos dois casos. Sem máscara nenhuma,
+ * A máscara vem de `remoteMask` (servidor) ou, se ele falhar, do MediaPipe no
+ * aparelho; o enquadramento e a curva são os mesmos nos dois casos. Sem máscara nenhuma,
  * devolve só a original (`hasCutout: false`).
  */
 export async function prepareCardPhoto(file: File, remoteMask?: RemoteMask): Promise<CardPhotoDraft> {
@@ -261,7 +359,8 @@ export async function prepareCardPhoto(file: File, remoteMask?: RemoteMask): Pro
 
   const alpha = await findPersonAlpha(photo, remoteMask);
   const box = alpha ? bustBox(alpha, photo.width, photo.height) : fallbackBox(photo.width, photo.height);
-  const mask = alpha ? maskCanvas(alpha, photo.width, photo.height) : null;
+  const erodeRadius = Math.round(Math.max(photo.width, photo.height) * EDGE_ERODE);
+  const mask = alpha ? maskCanvas(erode(alpha, photo.width, photo.height, erodeRadius), photo.width, photo.height) : null;
 
   let draft: CardPhotoDraft | null = null;
   for (const targetWidth of OUTPUT_WIDTHS) {
