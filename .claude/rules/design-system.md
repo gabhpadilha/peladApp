@@ -42,7 +42,7 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
 - **O que a carta mostra:** foto congelada do jogador no dia (OVR e atributos de todas as rodadas fechadas até ali). **Craque e Gol: +1 em cada atributo e no OVR** (como o Team of the Week da EA FC, teto 99). **Bola Murcha: sem bônus.**
 - **Visual (`PlayerCard` com `award`):** ícone do prêmio sob a posição e "PRÊMIO · R<rodada>" no rodapé. Clássico: Craque preto e dourado, Gol azul elétrico, Bola Murcha couro velho.
 - **Temas sazonais (`lib/card-themes.ts`):** pelo calendário da data do jogo (outubro = Halloween: Craque abóbora, Gol roxo e verde-gosma, Bola Murcha fantasma, com fantasma de marca d'água). O tema fica gravado na carta. Tema novo: período em `CARD_THEMES` + tokens `--award-*-<tema>-*` + classes em `DESIGNS` no `player-card.tsx`.
-- **Onde aparecem:** home (cartas da última rodada fechada), "Pelada" (ganhadores por rodada), perfil do atleta (seção **Coleção**, `#colecao`, visível para todos da pelada) e link "Coleção" no menu.
+- **Onde aparecem:** home (cartas da última rodada fechada), "Pelada" (ganhadores por rodada), perfil do atleta (seção **Coleção**, `#colecao`, visível para todos da pelada; o chip do jogador na navbar leva ao próprio perfil).
 
 ## 🧮 OVR (`lib/ovr.ts`)
 
@@ -55,8 +55,8 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
 
 ## 🏠 Telas
 
-- **Home (`/`):** nome da pelada + "Fala, <apelido>", aviso de avaliação pendente, minha carta (OVR, variação, ranking, jogos, avaliações; dica quando ainda não tem OVR), rodada em avaliação (envios/presentes), última rodada fechada (Craque da Rodada + top 3) ou o vazio "Nenhuma rodada ainda", e ranking (linha e goleiros).
-- **Navbar:** logo (home), "Pelada", chip apelido + OVR (perfil) e "Sair" (só ícone no celular).
+- **Home (`/`):** nome da pelada + "Fala, <apelido>", aviso de avaliação pendente, minha carta (OVR, variação, ranking, jogos, avaliações; dica quando ainda não tem OVR), rodada em avaliação (envios/presentes), última rodada fechada (Craque da Rodada + top 3) ou o vazio "Nenhuma rodada ainda", e ranking (linha e goleiros): resumo com top 5 da linha e top 2 do gol, e o botão "Ver ranking completo (+N)" / "Mostrar menos" expande a lista com todos os atletas no mesmo card (`ExpandableRanking`).
+- **Navbar:** logo (home), "Pelada", chip apelido + OVR (perfil, onde fica a coleção) e "Sair" (só ícone no celular). Sem link "Coleção" separado: levava ao mesmo perfil.
 - **Trocar senha (`/trocar-senha`):** obrigatória no 1º acesso de quem foi cadastrado pelo organizador.
 - **Cadastrar jogador (em `/pelada`):** nome, apelido, posição e **usuário** (sugerido do apelido enquanto o organizador não editar; mostrado em fonte mono) → mostra usuário + senha provisória uma única vez e "Copiar mensagem para o WhatsApp" (`AccessCard`). Sem e-mail.
 - **Atleta (`/jogadores/[id]`):** carta + resumo, aviso de pendência (só no próprio perfil), desempenho por rodada (barras, cor única, tooltip por CSS), atributos (barras) e histórico em tabela.

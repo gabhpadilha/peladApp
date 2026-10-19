@@ -8,7 +8,7 @@ import { SectionTitle } from "@/components/section-title";
 import { LatestRoundCard } from "./_components/latest-round-card";
 import { MyCardSummary } from "./_components/my-card-summary";
 import { OpenRoundCard } from "./_components/open-round-card";
-import { RankingList } from "./_components/ranking-list";
+import { ExpandableRanking } from "./_components/expandable-ranking";
 import { getHomeData } from "./_data-access/get-home-data";
 
 export default function Home() {
@@ -86,14 +86,11 @@ async function HomeContent() {
               <SectionTitle id="ranking-title" aside="por OVR">
                 Ranking
               </SectionTitle>
-              <RankingList title="Linha" players={data.outfieldRanking} currentPlayerId={data.currentPlayer.id} />
-              {data.goalkeeperRanking.length > 0 && (
-                <RankingList
-                  title="Goleiros"
-                  players={data.goalkeeperRanking}
-                  currentPlayerId={data.currentPlayer.id}
-                />
-              )}
+              <ExpandableRanking
+                outfield={data.outfieldRanking}
+                goalkeepers={data.goalkeeperRanking}
+                currentPlayerId={data.currentPlayer.id}
+              />
             </section>
           </div>
         </div>

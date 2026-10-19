@@ -5,8 +5,6 @@ import type { Award } from "@/types/award";
 import type { Match } from "@/types/match";
 import type { Player } from "@/types/player";
 
-const OUTFIELD_RANKING_SIZE = 5;
-const GOALKEEPER_RANKING_SIZE = 2;
 const TOP_PERFORMERS_SIZE = 3;
 
 export type RankedPlayer = { player: Player; position: number; delta: number | null };
@@ -90,11 +88,8 @@ export async function getHomeData(): Promise<HomeData> {
           expected: openMatch.presentPlayerIds.length,
         }
       : null,
-    outfieldRanking: rankPlayers(league.players, "outfield")
-      .slice(0, OUTFIELD_RANKING_SIZE)
-      .map(toRanked),
-    goalkeeperRanking: rankPlayers(league.players, "goalkeeper")
-      .slice(0, GOALKEEPER_RANKING_SIZE)
-      .map(toRanked),
+    // Completos: a home mostra o resumo e expande para o ranking inteiro.
+    outfieldRanking: rankPlayers(league.players, "outfield").map(toRanked),
+    goalkeeperRanking: rankPlayers(league.players, "goalkeeper").map(toRanked),
   };
 }
