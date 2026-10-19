@@ -8,6 +8,7 @@ import { NoPersonFoundError, prepareCardPhoto } from "@/lib/photo-cutout";
 import { cn } from "@/lib/utils";
 import type { Player, PlayerPhoto } from "@/types/player";
 import { removePlayerPhoto } from "../_actions/remove-player-photo";
+import { segmentPhoto } from "../_actions/segment-photo";
 import { uploadPlayerPhoto } from "../_actions/upload-player-photo";
 import type { GroupMemberSummary } from "../_data-access/get-roster";
 
@@ -20,6 +21,7 @@ type PlayerPhotoUploaderProps = {
 type Draft = {
   cutout: Blob;
   original: Blob;
+  hasCutout: boolean;
   cutoutUrl: string;
   originalUrl: string;
 };
@@ -32,6 +34,16 @@ function previewPlayer(member: PlayerPhotoUploaderProps["member"], photo: Player
   return member.position === "GOL"
     ? { ...base, role: "goalkeeper", position: "GOL", attributes: { ref: null, ela: null, pos: null, sai: null, rep: null, pes: null } }
     : { ...base, role: "outfield", position: member.position, attributes: { vel: null, chu: null, pas: null, dri: null, def: null, fis: null } };
+}
+
+/** Reserva do recorte: o servidor devolve a máscara quando o aparelho não roda o MediaPipe. */
+async function maskFromServer(photo: Blob): Promise<Blob> {
+  const formData = new FormData();
+  formData.set("photo", new File([photo], "photo.jpg", { type: photo.type || "image/jpeg" }));
+  const result = await segmentPhoto(formData);
+  if (!result.success) throw new Error(result.message);
+  const bytes = Uint8Array.from(atob(result.maskBase64), (char) => char.charCodeAt(0));
+  return new Blob([bytes], { type: "image/png" });
 }
 
 /**
@@ -61,14 +73,18 @@ export function PlayerPhotoUploader({ member, isSelf }: PlayerPhotoUploaderProps
     setMessage(null);
     setIsProcessing(true);
     try {
-      const prepared = await prepareCardPhoto(file);
+      const prepared = await prepareCardPhoto(file, maskFromServer);
       setDraft({
         ...prepared,
         cutoutUrl: URL.createObjectURL(prepared.cutout),
         originalUrl: URL.createObjectURL(prepared.original),
       });
-      setChoice("cutout");
+      setChoice(prepared.hasCutout ? "cutout" : "original");
+      if (!prepared.hasCutout) {
+        setMessage({ kind: "error", text: "Não deu para tirar o fundo agora (sem conexão com o servidor?). Você pode usar a foto original ou tentar de novo." });
+      }
     } catch (error) {
+      console.error("Falha ao preparar a foto", error);
       setMessage({
         kind: "error",
         text:
@@ -90,13 +106,19 @@ export function PlayerPhotoUploader({ member, isSelf }: PlayerPhotoUploaderProps
     formData.set("cutout", new File([draft.cutout], "cutout.png", { type: draft.cutout.type }));
     formData.set("original", new File([draft.original], "original.jpg", { type: draft.original.type }));
     startTransition(async () => {
-      const result = await uploadPlayerPhoto(formData);
-      if (!result.success) {
-        setMessage({ kind: "error", text: result.message });
-        return;
+      try {
+        const result = await uploadPlayerPhoto(formData);
+        if (!result.success) {
+          setMessage({ kind: "error", text: result.message });
+          return;
+        }
+        setDraft(null);
+        setMessage({ kind: "saved", text: "Foto salva! Ela já aparece na carta." });
+      } catch (error) {
+        // Rede caiu, envio grande demais ou erro do servidor: sem isso nada aparecia na tela.
+        console.error("Falha ao enviar a foto", error);
+        setMessage({ kind: "error", text: "Não foi possível enviar a foto. Confira a conexão e tente de novo." });
       }
-      setDraft(null);
-      setMessage({ kind: "saved", text: "Foto salva! Ela já aparece na carta." });
     });
   }
 
@@ -110,7 +132,7 @@ export function PlayerPhotoUploader({ member, isSelf }: PlayerPhotoUploaderProps
 
   const options: { kind: Choice; label: string; url: string }[] = draft
     ? [
-        { kind: "cutout", label: "Recorte", url: draft.cutoutUrl },
+        ...(draft.hasCutout ? [{ kind: "cutout" as const, label: "Recorte", url: draft.cutoutUrl }] : []),
         { kind: "original", label: "Original", url: draft.originalUrl },
       ]
     : [];

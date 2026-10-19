@@ -8,6 +8,24 @@ const nextConfig: NextConfig = {
   experimental: {
     serverActions: { bodySizeLimit: "4mb" },
   },
+  // Recorte de reserva no servidor (lib/person-matte.ts): binário nativo, fica fora do bundle.
+  serverExternalPackages: ["onnxruntime-node"],
+  // O modelo é lido do disco em tempo de execução e o binding nativo carrega a
+  // libonnxruntime.so ao lado dele: o rastreio não enxerga nenhum dos dois sozinho.
+  outputFileTracingIncludes: {
+    "/elenco": [
+      "./models/modnet-portrait-q.onnx",
+      "./node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime.so.1",
+    ],
+  },
+  // A Vercel roda em Linux x64: corta os binários das outras plataformas (~250MB).
+  outputFileTracingExcludes: {
+    "/*": [
+      "./node_modules/onnxruntime-node/bin/napi-v6/darwin/**/*",
+      "./node_modules/onnxruntime-node/bin/napi-v6/win32/**/*",
+      "./node_modules/onnxruntime-node/bin/napi-v6/linux/arm64/**/*",
+    ],
+  },
   // Fotos das cartas no Supabase Storage (bucket público player-photos).
   images: {
     remotePatterns: [

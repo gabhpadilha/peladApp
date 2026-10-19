@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "type-check": "tsc --noEmit",
+    "postinstall": "node scripts/copy-mediapipe-wasm.mjs",
     "db:types": "supabase gen types typescript --linked --schema public > types/database.ts"
   },
   "dependencies": {
@@ -19,6 +20,7 @@
     "cn": "^0.4.0",
     "lucide-react": "^1.59.0",
     "next": "16.4.0",
+    "onnxruntime-node": "1.30.0",
     "radix-ui": "^1.8.1",
     "react": "19.3.0",
     "react-dom": "19.3.0",

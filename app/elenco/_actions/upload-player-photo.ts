@@ -52,6 +52,10 @@ export async function uploadPlayerPhoto(formData: FormData): Promise<UploadPlaye
   const cutout = formData.get("cutout");
   const original = formData.get("original");
   if (!isImageFile(cutout) || !isImageFile(original)) {
+    console.error("uploadPlayerPhoto: arquivo recusado", {
+      cutout: cutout instanceof File ? { type: cutout.type, size: cutout.size } : typeof cutout,
+      original: original instanceof File ? { type: original.type, size: original.size } : typeof original,
+    });
     return { success: false, message: "Envie uma imagem PNG, JPEG ou WebP de até 3MB." };
   }
   if (!hasAdminEnv()) {
@@ -78,7 +82,8 @@ export async function uploadPlayerPhoto(formData: FormData): Promise<UploadPlaye
   let originalWebp: Buffer;
   try {
     [cutoutWebp, originalWebp] = await Promise.all([toCardWebp(cutout), toCardWebp(original)]);
-  } catch {
+  } catch (error) {
+    console.error("uploadPlayerPhoto: sharp falhou", error);
     return { success: false, message: "Não foi possível ler essa imagem. Tente outra foto." };
   }
 
@@ -91,6 +96,7 @@ export async function uploadPlayerPhoto(formData: FormData): Promise<UploadPlaye
     storage.upload(paths.original, originalWebp, { contentType: "image/webp", cacheControl: CACHE_ONE_YEAR }),
   ]);
   if (uploads.some((upload) => upload.error)) {
+    console.error("uploadPlayerPhoto: Storage recusou", uploads.map((upload) => upload.error?.message));
     await storage.remove([paths.cutout, paths.original]);
     return { success: false, message: "Não foi possível enviar a foto. Tente de novo." };
   }

@@ -8,11 +8,14 @@
  */
 import type { ImageSegmenter } from "@mediapipe/tasks-vision";
 
-/** Mesma versão do package.json: o WASM precisa bater com a biblioteca. */
-const TASKS_VISION_VERSION = "1.1.1";
-const WASM_URL = `https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@${TASKS_VISION_VERSION}/wasm`;
-const MODEL_URL =
-  "https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_multiclass_256x256/float32/latest/selfie_multiclass_256x256.tflite";
+/**
+ * Servidos pelo próprio app (sem depender de CDN que a rede pode bloquear):
+ * o WASM é copiado do `@mediapipe/tasks-vision` instalado no postinstall
+ * (`scripts/copy-mediapipe-wasm.mjs`, sempre na versão da biblioteca) e o
+ * modelo fica versionado em `public/mediapipe/`.
+ */
+const WASM_URL = "/mediapipe/wasm";
+const MODEL_URL = "/mediapipe/selfie_multiclass_256x256.tflite";
 
 /** Área de foto da carta: largura ÷ altura. */
 const CARD_PHOTO_RATIO = 0.87;
@@ -30,7 +33,12 @@ const MIN_PERSON_SHARE = 0.03;
 export type CardPhotoDraft = {
   cutout: Blob;
   original: Blob;
+  /** `false` = nem o aparelho nem o servidor tiraram o fundo; `cutout` é só uma cópia da original. */
+  hasCutout: boolean;
 };
+
+/** Recorte de reserva: recebe a foto (JPEG já reduzido) e devolve a máscara da pessoa (PNG cinza, mesmo tamanho). */
+export type RemoteMask = (photo: Blob) => Promise<Blob>;
 
 export class NoPersonFoundError extends Error {
   constructor() {
@@ -77,14 +85,38 @@ function toBlob(canvas: HTMLCanvasElement, type: string, quality?: number): Prom
   });
 }
 
+/** Decodifica a foto já na orientação certa. Navegadores mais velhos (iOS) recusam as opções do `createImageBitmap`: cai para `<img>`, que aplica o EXIF sozinho. */
+async function decodeImage(file: File): Promise<{ source: CanvasImageSource; width: number; height: number; release: () => void }> {
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+    return { source: bitmap, width: bitmap.width, height: bitmap.height, release: () => bitmap.close() };
+  } catch {
+    // tenta o caminho antigo abaixo
+  }
+  const url = URL.createObjectURL(file);
+  try {
+    const image = new Image();
+    image.decoding = "async";
+    image.src = url;
+    await image.decode();
+    return { source: image, width: image.naturalWidth, height: image.naturalHeight, release: () => URL.revokeObjectURL(url) };
+  } catch (error) {
+    URL.revokeObjectURL(url);
+    throw error;
+  }
+}
+
 /** Desenha a foto (já na orientação certa) com o lado maior em `MAX_SIDE`. */
 async function loadScaled(file: File): Promise<HTMLCanvasElement> {
-  const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
-  const scale = Math.min(1, MAX_SIDE / Math.max(bitmap.width, bitmap.height));
-  const canvas = createCanvas(Math.round(bitmap.width * scale), Math.round(bitmap.height * scale));
-  get2d(canvas).drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  bitmap.close();
-  return canvas;
+  const decoded = await decodeImage(file);
+  try {
+    const scale = Math.min(1, MAX_SIDE / Math.max(decoded.width, decoded.height));
+    const canvas = createCanvas(Math.round(decoded.width * scale), Math.round(decoded.height * scale));
+    get2d(canvas).drawImage(decoded.source, 0, 0, canvas.width, canvas.height);
+    return canvas;
+  } finally {
+    decoded.release();
+  }
 }
 
 /** Probabilidade de cada pixel ser pessoa (1 − fundo), já no tamanho da foto. */
@@ -155,30 +187,109 @@ function maskCanvas(alpha: Float32Array, width: number, height: number): HTMLCan
   return canvas;
 }
 
-/** Faz o recorte e a original enquadrados para a carta. Lança `NoPersonFoundError` sem pessoa. */
-export async function prepareCardPhoto(file: File): Promise<CardPhotoDraft> {
-  const [segmenter, photo] = await Promise.all([getSegmenter(), loadScaled(file)]);
-  const alpha = personAlpha(segmenter, photo);
-  const box = bustBox(alpha, photo.width, photo.height);
-  const mask = maskCanvas(alpha, photo.width, photo.height);
+/** Quanto esperar o segmentador do aparelho (download de ~16MB + WASM) antes de pedir ao servidor. */
+const SEGMENTER_TIMEOUT_MS = 20_000;
 
-  const outputWidth = Math.min(OUTPUT_WIDTH, box.width);
-  const outputHeight = Math.round(outputWidth / CARD_PHOTO_RATIO);
+function withTimeout<T>(promise: Promise<T>, milliseconds: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error("Tempo esgotado ao carregar o segmentador.")), milliseconds);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (error: unknown) => {
+        clearTimeout(timer);
+        reject(error);
+      },
+    );
+  });
+}
 
-  const original = createCanvas(outputWidth, outputHeight);
-  get2d(original).drawImage(photo, box.x, box.y, box.width, box.height, 0, 0, outputWidth, outputHeight);
+/** Enquadramento sem segmentação (aparelho que não roda o modelo): centro, do topo, na proporção da carta. */
+function fallbackBox(width: number, height: number): Box {
+  const boxWidth = Math.min(width, Math.round(height * CARD_PHOTO_RATIO));
+  const boxHeight = Math.round(boxWidth / CARD_PHOTO_RATIO);
+  return { x: Math.round((width - boxWidth) / 2), y: 0, width: boxWidth, height: Math.min(height, boxHeight) };
+}
 
-  const cutout = createCanvas(outputWidth, outputHeight);
-  const context = get2d(cutout);
-  context.drawImage(photo, box.x, box.y, box.width, box.height, 0, 0, outputWidth, outputHeight);
-  // Mantém só onde a máscara é opaca (a suavização do drawImage amacia a borda).
-  context.globalCompositeOperation = "destination-in";
-  context.drawImage(mask, box.x, box.y, box.width, box.height, 0, 0, outputWidth, outputHeight);
-  // O segmentador deixa uma faixa semitransparente na borda de cima (vira uma
-  // linha sobre a cabeça na carta): limpa as primeiras linhas.
-  context.globalCompositeOperation = "source-over";
-  context.clearRect(0, 0, outputWidth, Math.ceil(outputHeight * TOP_EDGE_CLEAR));
+/** Tenta de novo em larguras menores até o envio caber (o servidor aceita 3MB por arquivo e ~4MB no total). */
+const OUTPUT_WIDTHS = [OUTPUT_WIDTH, 480, 360];
+const MAX_TOTAL_BYTES = 3.5 * 1024 * 1024;
 
-  const [cutoutBlob, originalBlob] = await Promise.all([toBlob(cutout, "image/png"), toBlob(original, "image/jpeg", 0.9)]);
-  return { cutout: cutoutBlob, original: originalBlob };
+/** Lê a máscara PNG do servidor como alfa (0–1) no tamanho da foto. */
+async function maskToAlpha(mask: Blob, width: number, height: number): Promise<Float32Array> {
+  const decoded = await decodeImage(new File([mask], "mask.png", { type: mask.type || "image/png" }));
+  try {
+    const canvas = createCanvas(width, height);
+    const context = get2d(canvas);
+    context.drawImage(decoded.source, 0, 0, width, height);
+    const { data } = context.getImageData(0, 0, width, height);
+    const alpha = new Float32Array(width * height);
+    for (let i = 0; i < alpha.length; i++) alpha[i] = data[i * 4] / 255;
+    return alpha;
+  } finally {
+    decoded.release();
+  }
+}
+
+/** Alfa da pessoa: primeiro no aparelho (MediaPipe); se não der, pelo servidor. `null` = nenhum dos dois. */
+async function findPersonAlpha(photo: HTMLCanvasElement, remoteMask: RemoteMask | undefined): Promise<Float32Array | null> {
+  try {
+    return personAlpha(await withTimeout(getSegmenter(), SEGMENTER_TIMEOUT_MS), photo);
+  } catch (error) {
+    console.warn("Segmentação no aparelho indisponível; tentando no servidor.", error);
+  }
+  if (!remoteMask) return null;
+  try {
+    const mask = await remoteMask(await toBlob(photo, "image/jpeg", 0.9));
+    return await maskToAlpha(mask, photo.width, photo.height);
+  } catch (error) {
+    console.warn("Recorte no servidor indisponível; usando só a foto original.", error);
+    return null;
+  }
+}
+
+/**
+ * Faz o recorte e a original enquadrados para a carta. Lança `NoPersonFoundError` sem pessoa.
+ * A máscara vem do aparelho ou, se ele não rodar o MediaPipe, de `remoteMask`; o
+ * enquadramento e a curva são os mesmos nos dois casos. Sem máscara nenhuma,
+ * devolve só a original (`hasCutout: false`).
+ */
+export async function prepareCardPhoto(file: File, remoteMask?: RemoteMask): Promise<CardPhotoDraft> {
+  const photo = await loadScaled(file);
+
+  const alpha = await findPersonAlpha(photo, remoteMask);
+  const box = alpha ? bustBox(alpha, photo.width, photo.height) : fallbackBox(photo.width, photo.height);
+  const mask = alpha ? maskCanvas(alpha, photo.width, photo.height) : null;
+
+  let draft: CardPhotoDraft | null = null;
+  for (const targetWidth of OUTPUT_WIDTHS) {
+    const outputWidth = Math.min(targetWidth, box.width);
+    const outputHeight = Math.round(outputWidth / CARD_PHOTO_RATIO);
+
+    const original = createCanvas(outputWidth, outputHeight);
+    get2d(original).drawImage(photo, box.x, box.y, box.width, box.height, 0, 0, outputWidth, outputHeight);
+    const originalBlob = await toBlob(original, "image/jpeg", 0.9);
+
+    let cutoutBlob = originalBlob;
+    if (mask) {
+      const cutout = createCanvas(outputWidth, outputHeight);
+      const context = get2d(cutout);
+      context.drawImage(photo, box.x, box.y, box.width, box.height, 0, 0, outputWidth, outputHeight);
+      // Mantém só onde a máscara é opaca (a suavização do drawImage amacia a borda).
+      context.globalCompositeOperation = "destination-in";
+      context.drawImage(mask, box.x, box.y, box.width, box.height, 0, 0, outputWidth, outputHeight);
+      // O segmentador deixa uma faixa semitransparente na borda de cima (vira uma
+      // linha sobre a cabeça na carta): limpa as primeiras linhas.
+      context.globalCompositeOperation = "source-over";
+      context.clearRect(0, 0, outputWidth, Math.ceil(outputHeight * TOP_EDGE_CLEAR));
+      cutoutBlob = await toBlob(cutout, "image/png");
+    }
+
+    draft = { cutout: cutoutBlob, original: originalBlob, hasCutout: mask !== null };
+    if (cutoutBlob.size + originalBlob.size <= MAX_TOTAL_BYTES) break;
+  }
+  if (!draft) throw new Error("Falha ao gerar a imagem.");
+  return draft;
 }

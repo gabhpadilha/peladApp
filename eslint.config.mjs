@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
     // Scripts de skills de agentes (não são código do app).
     ".agents/**",
     ".claude/**",
+    // WASM do MediaPipe copiado do node_modules (código gerado de terceiros).
+    "public/mediapipe/**",
   ]),
 ]);
 
