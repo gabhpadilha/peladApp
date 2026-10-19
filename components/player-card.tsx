@@ -248,8 +248,11 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
  */
 const PHOTO_FADES: Record<NonNullable<Player["photo"]>["kind"], readonly string[]> = {
   cutout: [
-    "linear-gradient(to bottom, transparent 0%, black 4%, black 52%, transparent 94%)",
-    "linear-gradient(to right, transparent 0%, black 16%, black 84%, transparent 100%)",
+    "linear-gradient(to bottom, transparent 0%, black 4%)",
+    // Vinheta oval em volta do rosto (enquadrado no centro, topo ~9% e queixo
+    // ~57%): ombros e peito somem juntos em todas as direções, então um detalhe
+    // claro no ombro (ex.: listra de camisa) não fica solto como um risco.
+    "radial-gradient(ellipse 62% 66% at 50% 30%, black 58%, transparent 100%)",
   ],
   original: [
     "linear-gradient(to bottom, black 55%, transparent)",
