@@ -32,8 +32,6 @@ export type Roster = {
   members: GroupMemberSummary[];
   /** Desativados; vazio para quem não é o dono. */
   inactiveMembers: InactiveMemberSummary[];
-  /** Nome completo de quem está logado, para o card "Seu perfil". */
-  myFullName: string;
   /** Usuário (ou e-mail, nas contas antigas) da conta logada, para o card de senha. */
   login: string;
   /** Tela de login, para a mensagem de acesso dos jogadores cadastrados. */
@@ -68,7 +66,6 @@ export async function getRoster(): Promise<Roster> {
   const profileByUser = new Map(profiles.map((profile) => [profile.id, profile]));
   const ovrByMember = getOvrByMember(evaluations);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
-  const me = membersResult.data.find((member) => member.id === membership.memberId);
 
   return {
     membership,
@@ -92,7 +89,6 @@ export async function getRoster(): Promise<Roster> {
           .filter((member) => member.deactivated_at !== null)
           .map((member) => ({ id: member.id, nickname: member.nickname, position: member.position }))
       : [],
-    myFullName: (me && profileByUser.get(me.user_id)?.full_name) ?? membership.nickname,
     login: (() => {
       const email = claimsResult.data?.claims.email ?? "";
       return emailToUsername(email) ?? email;

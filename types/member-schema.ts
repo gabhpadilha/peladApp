@@ -71,8 +71,22 @@ export const editPlayerSchema = memberProfileSchema.extend({
 
 export type EditPlayerInput = z.infer<typeof editPlayerSchema>;
 
-/** Qualquer jogador editando o próprio cadastro: só nome e apelido. */
-export const ownProfileSchema = memberProfileSchema.pick({ fullName: true, nickname: true });
+/**
+ * Qualquer jogador editando o próprio cadastro: só nome e apelido. Os campos
+ * vêm em branco; vazio = manter o atual, mas pelo menos um precisa vir.
+ */
+export const ownProfileSchema = z
+  .object({
+    fullName: z.string().trim().max(80, "Use no máximo 80 caracteres.").refine(
+      (value) => value === "" || value.length >= 2,
+      "Use pelo menos 2 letras.",
+    ),
+    nickname: z.string().trim().max(12, "Use no máximo 12 caracteres (cabe na carta)."),
+  })
+  .refine((input) => input.fullName !== "" || input.nickname !== "", {
+    message: "Preencha o nome ou o apelido que quer trocar.",
+    path: ["fullName"],
+  });
 
 export type OwnProfileInput = z.infer<typeof ownProfileSchema>;
 

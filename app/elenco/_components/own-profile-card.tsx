@@ -9,18 +9,18 @@ import { Input } from "@/components/ui/input";
 import { ownProfileSchema, type OwnProfileInput } from "@/types/member-schema";
 import { updateOwnProfile } from "../_actions/update-own-profile";
 
-type OwnProfileCardProps = {
-  fullName: string;
-  nickname: string;
-};
+const EMPTY_FORM: OwnProfileInput = { fullName: "", nickname: "" };
 
-/** Todo jogador edita o próprio nome e apelido (o resto do cadastro é com o dono). */
-export function OwnProfileCard({ fullName, nickname }: OwnProfileCardProps) {
+/**
+ * Todo jogador edita o próprio nome e apelido (o resto do cadastro é com o
+ * dono). Campos em branco, como os de senha: preenche só o que quer trocar.
+ */
+export function OwnProfileCard() {
   const [status, setStatus] = useState<{ kind: "saved" | "error"; message: string } | null>(null);
   const [isPending, startTransition] = useTransition();
   const form = useForm<OwnProfileInput>({
     resolver: zodResolver(ownProfileSchema),
-    defaultValues: { fullName, nickname },
+    defaultValues: EMPTY_FORM,
   });
 
   function handleSubmit(data: OwnProfileInput) {
@@ -28,7 +28,7 @@ export function OwnProfileCard({ fullName, nickname }: OwnProfileCardProps) {
     startTransition(async () => {
       const result = await updateOwnProfile(data);
       if (result.success) {
-        form.reset(data);
+        form.reset(EMPTY_FORM);
         setStatus({ kind: "saved", message: "Salvo!" });
         return;
       }
@@ -46,7 +46,10 @@ export function OwnProfileCard({ fullName, nickname }: OwnProfileCardProps) {
         <h2 id="own-profile-title" className="font-display text-lg font-bold tracking-wide uppercase">
           Seu perfil
         </h2>
-        <p className="text-sm text-muted-foreground">Posição e usuário de login, só com o dono da pelada.</p>
+        <p className="text-sm text-muted-foreground">
+          Preencha só o que quer trocar; o que ficar em branco continua igual. Posição e usuário de login, só com o
+          dono da pelada.
+        </p>
       </div>
       <form onSubmit={form.handleSubmit(handleSubmit)} noValidate>
         <FieldGroup>
@@ -55,7 +58,7 @@ export function OwnProfileCard({ fullName, nickname }: OwnProfileCardProps) {
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="own-profile-full-name">Seu nome</FieldLabel>
+                <FieldLabel htmlFor="own-profile-full-name">Novo nome</FieldLabel>
                 <Input
                   {...field}
                   id="own-profile-full-name"
@@ -72,7 +75,7 @@ export function OwnProfileCard({ fullName, nickname }: OwnProfileCardProps) {
             control={form.control}
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor="own-profile-nickname">Apelido</FieldLabel>
+                <FieldLabel htmlFor="own-profile-nickname">Novo apelido</FieldLabel>
                 <Input
                   {...field}
                   id="own-profile-nickname"
@@ -81,7 +84,7 @@ export function OwnProfileCard({ fullName, nickname }: OwnProfileCardProps) {
                   aria-invalid={fieldState.invalid}
                   className="h-11 text-base"
                 />
-                <FieldDescription>É o nome que aparece na sua carta.</FieldDescription>
+                <FieldDescription>É o nome que aparece na sua carta (até 12 letras).</FieldDescription>
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>
             )}

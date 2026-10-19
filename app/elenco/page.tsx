@@ -53,8 +53,9 @@ async function RosterContent() {
             loginUrl={roster.loginUrl}
           />
         </div>
-        <div className="flex flex-col gap-6">
-          <OwnProfileCard fullName={roster.myFullName} nickname={roster.membership.nickname} />
+        {/* key: trocou de conta na mesma aba, os formulários recomeçam do zero. */}
+        <div key={roster.membership.memberId} className="flex flex-col gap-6">
+          <OwnProfileCard />
           <PasswordCard login={roster.login} />
         </div>
       </div>

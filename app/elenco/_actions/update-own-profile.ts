@@ -11,7 +11,7 @@ export type UpdateOwnProfileResult =
   | { success: false; message: string; errors?: FieldErrors<OwnProfileInput> };
 
 /**
- * O próprio jogador troca nome e apelido. Roda com a sessão dele (RLS): o
+ * O próprio jogador troca nome e/ou apelido (campo vazio = manter). Roda com a sessão dele (RLS): o
  * banco só deixa mexer na própria linha, e posição/usuário ficam com o dono.
  */
 export async function updateOwnProfile(input: OwnProfileInput): Promise<UpdateOwnProfileResult> {
@@ -27,11 +27,14 @@ export async function updateOwnProfile(input: OwnProfileInput): Promise<UpdateOw
     };
   }
 
+  // Campo vazio = manter o atual.
   const { fullName, nickname } = validation.data;
   const supabase = await createClient();
   const [profileUpdate, memberUpdate] = await Promise.all([
-    supabase.from("profiles").update({ full_name: fullName }).eq("id", userId),
-    supabase.from("group_members").update({ nickname }).eq("id", membership.memberId),
+    fullName ? supabase.from("profiles").update({ full_name: fullName }).eq("id", userId) : { error: null },
+    nickname
+      ? supabase.from("group_members").update({ nickname }).eq("id", membership.memberId)
+      : { error: null },
   ]);
   if (profileUpdate.error || memberUpdate.error) {
     return { success: false, message: "Não foi possível salvar. Tente de novo." };
