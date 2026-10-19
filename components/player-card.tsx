@@ -285,7 +285,7 @@ function maskStyle(layers: readonly string[], firstLayer?: { size: string; posit
 }
 
 /**
- * Filtro de cor suave: a cor da moldura da carta, em `soft-light`, só sobre a
+ * Filtro de cor suave: a cor da moldura da carta, a 16%, só sobre a
  * pessoa (a própria foto é a máscara). Deixa a foto homogênea com a carta.
  * O Storage responde com CORS aberto, o que o `mask-image` exige.
  */
@@ -299,7 +299,9 @@ function PhotoTint({ photo, tintClass }: { photo: NonNullable<Player["photo"]>; 
   return (
     <span
       aria-hidden
-      className={cn("pointer-events-none absolute inset-0 opacity-55 mix-blend-soft-light", tintClass)}
+      // Mistura normal e bem transparente: com `mix-blend-soft-light` o Safari
+      // (WebKit) pintava o retângulo da área inteira, com faixas nas laterais.
+      className={cn("pointer-events-none absolute inset-0 opacity-[0.16]", tintClass)}
       // A máscara depende da URL da foto: estilo inline.
       style={style}
     />
