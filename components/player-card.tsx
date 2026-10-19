@@ -200,8 +200,9 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
         </div>
 
         {/* z-0: a foto fica sempre atrás do OVR/posição (z-10). */}
-        {/* Área da foto: proporção 0,87 (a mesma do enquadramento em lib/photo-cutout.ts). */}
-        <div className="absolute top-[4%] right-[3%] left-[22%] z-0 h-[58%]">
+        {/* Área da foto (estilo EA FC): centralizada, passa um pouco das laterais da face */}
+        {/* (as bordas ficam fora do corte) e vai até o apelido. Proporção ~1,18, a mesma de lib/photo-cutout.ts. */}
+        <div className="absolute top-[2%] -right-[4%] -left-[4%] z-0 h-[62%]">
           <PlayerCardPhoto player={player} size={size} tintClass={DESIGNS[design].frame} />
         </div>
 
@@ -242,26 +243,21 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
 
 /**
  * Degradês que fazem a foto sumir na carta (os mesmos na foto e no filtro de cor).
- * Recorte: topo limpo (apaga a linha que o segmentador deixa na borda), vinheta
- * oval em volta do rosto e laterais zeradas. Regra: as quatro bordas da área
- * terminam transparentes (borda com opacidade vira fio no Safari do iPhone).
- * Original: some embaixo e no lado do OVR.
+ * O busto aparece inteiro, de lado a lado, e some só embaixo, atrás do apelido
+ * (como nas cartas do EA FC); a original some também do lado do OVR. Regra: as quatro bordas da área terminam
+ * transparentes (borda com opacidade vira fio no Safari do iPhone); as laterais
+ * ainda ficam fora do corte da face.
  */
 const PHOTO_FADES: Record<NonNullable<Player["photo"]>["kind"], readonly string[]> = {
   cutout: [
-    "linear-gradient(to bottom, transparent 0%, black 4%)",
-    // Vinheta oval em volta do rosto (enquadrado no centro, topo ~9% e queixo
-    // ~57%): ombros e peito somem juntos em todas as direções, então um detalhe
-    // claro no ombro (ex.: listra de camisa) não fica solto como um risco.
-    "radial-gradient(ellipse 62% 66% at 50% 30%, black 58%, transparent 100%)",
-    // A vinheta sozinha não chega a zero nas laterais na altura do rosto, e o
-    // Safari do iPhone desenha a borda da camada como um fio vertical: as
-    // bordas da área precisam terminar sempre transparentes.
-    "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
+    // Topo limpo: apaga a linha que o segmentador deixa na borda; embaixo, some atrás do apelido.
+    "linear-gradient(to bottom, transparent 0%, black 3%, black 70%, transparent 100%)",
+    "linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)",
   ],
   original: [
-    "linear-gradient(to bottom, black 55%, transparent)",
-    "linear-gradient(to right, transparent, black 30%)",
+    "linear-gradient(to bottom, transparent 0%, black 4%, black 62%, transparent 100%)",
+    // Com fundo, o lado do OVR some mais (senão o número se perde na foto).
+    "linear-gradient(to right, transparent 4%, black 40%, black 92%, transparent 100%)",
   ],
 };
 
