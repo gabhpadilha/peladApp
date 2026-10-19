@@ -310,8 +310,10 @@ function PlayerCardPhoto({ player, size }: { player: Player; size: CardSize }) {
         sizes={PHOTO_SIZES[size]}
         // Prévia do upload (blob:) ainda não está no Storage: sem otimizador.
         unoptimized={player.photo.url.startsWith("blob:")}
-        // Recorte apoiado embaixo; original cobrindo a área a partir do topo.
-        className={player.photo.kind === "cutout" ? "object-contain object-bottom" : "object-cover object-top"}
+        // Sempre cobrindo a largura toda da área (recorte novo já vem na proporção
+        // dela): imagem mais estreita deixava a própria borda visível no iPhone,
+        // como uma faixa vertical, mesmo com o fundo 100% transparente.
+        className="object-cover object-top"
         // Degradês explícitos (os utilitários mask-b-* do Tailwind escondiam a foto inteira).
         style={maskStyle(PHOTO_FADES[player.photo.kind])}
       />
