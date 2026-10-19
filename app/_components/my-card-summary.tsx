@@ -102,7 +102,7 @@ export function MyCardSummary({
           Desempenho
         </Link>
         <Link
-          href={`/jogadores/${player.id}#colecao`}
+          href={`/jogadores/${player.id}/colecao`}
           className={cn(buttonVariants({ variant: "outline", size: "lg" }), "h-11 text-sm")}
           aria-label={`Minha coleção: ${awardCount} ${awardCount === 1 ? "carta" : "cartas"}`}
         >

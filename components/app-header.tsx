@@ -28,7 +28,7 @@ export function AppHeader({ currentPlayer }: AppHeaderProps) {
             <span className="hidden sm:inline">Elenco</span>
           </Link>
           {currentPlayer && (
-            // Perfil com carta, desempenho e coleção (#colecao).
+            // Perfil: Estatísticas, com aba para a Coleção (/colecao).
             <Link
               href={`/jogadores/${currentPlayer.id}`}
               aria-label={`Meu perfil: ${currentPlayer.nickname}`}

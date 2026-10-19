@@ -6,12 +6,15 @@ import { AppHeader } from "@/components/app-header";
 import { GroupGate } from "@/components/group-gate";
 import { PendingEvaluationsBanner } from "@/components/pending-evaluations-banner";
 import { AthleteHero } from "./_components/athlete-hero";
-import { AwardCollection } from "./_components/award-collection";
+import { AthleteHighlights } from "./_components/athlete-highlights";
+import { AthleteTabs } from "./_components/athlete-tabs";
 import { AttributeBars } from "./_components/attribute-bars";
 import { MatchHistory } from "./_components/match-history";
 import { PerformanceChart } from "./_components/performance-chart";
+import { TierProgress } from "./_components/tier-progress";
 import { getAthleteProfile } from "./_data-access/get-athlete-profile";
 
+/** Estatísticas da carta vigente; a coleção de cartas especiais fica em /colecao. */
 export default function AthletePage({ params }: PageProps<"/jogadores/[id]">) {
   return (
     // `params` e a sessão são dados de requisição: a página faz streaming.
@@ -39,17 +42,19 @@ async function AthleteContent({ params }: { params: PageProps<"/jogadores/[id]">
           <ArrowLeftIcon aria-hidden className="size-4" />
           Início
         </Link>
+        <AthleteTabs memberId={profile.player.id} awardCount={profile.awards.length} active="stats" />
         <AthleteHero profile={profile} />
         <PendingEvaluationsBanner pending={profile.pending} />
+        {profile.player.ovr !== null && <TierProgress ovr={profile.player.ovr} />}
+        <AthleteHighlights
+          player={profile.player}
+          performances={profile.performances}
+          gamesPlayed={profile.gamesPlayed}
+        />
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
           <PerformanceChart performances={profile.performances} bestScore={profile.bestScore} />
-          <AttributeBars player={profile.player} />
+          <AttributeBars player={profile.player} groupAverages={profile.groupAverages} />
         </div>
-        <AwardCollection
-          awards={profile.awards}
-          nickname={profile.player.nickname}
-          isOwnProfile={profile.isOwnProfile}
-        />
         <MatchHistory performances={profile.performances} />
       </main>
     </>
@@ -61,6 +66,7 @@ function AthleteSkeleton() {
     <>
       <AppHeader />
       <main aria-busy className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6">
+        <div className="h-13 animate-pulse rounded-xl bg-card" />
         <div className="h-80 animate-pulse rounded-xl bg-card" />
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
           <div className="h-64 animate-pulse rounded-xl bg-card" />

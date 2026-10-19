@@ -32,7 +32,7 @@ export function LatestRoundCard({ match, topPerformers, awards }: LatestRoundCar
           {awards.map((award) => (
             <li key={award.id} className="mx-auto flex w-full max-w-40 min-w-0 flex-col items-center gap-1.5 text-center">
               <Link
-                href={`/jogadores/${award.memberId}#colecao`}
+                href={`/jogadores/${award.memberId}/colecao`}
                 aria-label={`${AWARD_LABELS[award.kind].title}: ${award.card.nickname}`}
                 className="w-full"
               >

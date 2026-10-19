@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { getGroupAttributeAverages } from "@/lib/athlete-insights";
+import { getCurrentCardEvent, type CardThemeKey } from "@/lib/card-themes";
 import { getLeague } from "@/lib/league";
 import {
   getMatchPerformances,
@@ -7,7 +9,10 @@ import {
   type PendingEvaluation,
 } from "@/lib/players";
 import type { Award } from "@/types/award";
-import type { Player } from "@/types/player";
+import type { Player, PlayerAttribute } from "@/types/player";
+
+/** "Hoje" no fuso da pelada, `AAAA-MM-DD` (o servidor roda em UTC). */
+const todayFormatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" });
 
 export type AthleteProfile = {
   player: Player;
@@ -26,6 +31,10 @@ export type AthleteProfile = {
   performances: MatchPerformance[];
   /** Só preenchido no perfil do próprio jogador logado. */
   pending: PendingEvaluation[];
+  /** Média da pelada em cada atributo, só da mesma função (linha ou gol). */
+  groupAverages: Partial<Record<PlayerAttribute, number>>;
+  /** Tema das cartas especiais deste mês (prévia na coleção vazia). */
+  currentTheme: CardThemeKey;
 };
 
 /** Perfil de um atleta da pelada ativa; `null` se o id não for de alguém dela. */
@@ -64,5 +73,7 @@ export async function getAthleteProfile(memberId: string): Promise<AthleteProfil
     bestScore: scores.length > 0 ? Math.max(...scores) : null,
     performances,
     pending: isOwnProfile ? league.pending : [],
+    groupAverages: getGroupAttributeAverages(league.activePlayers, player.role),
+    currentTheme: getCurrentCardEvent(todayFormatter.format(new Date())).theme,
   };
 }
