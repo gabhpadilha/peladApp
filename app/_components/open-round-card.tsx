@@ -1,4 +1,8 @@
+import Link from "next/link";
+import { LayoutGridIcon } from "lucide-react";
+import { buttonVariants } from "@/components/ui/button";
 import { formatShortDate } from "@/lib/format-date";
+import { cn } from "@/lib/utils";
 import type { Match } from "@/types/match";
 
 type OpenRoundCardProps = {
@@ -27,6 +31,13 @@ export function OpenRoundCard({ match, submitted, expected }: OpenRoundCardProps
         aria-label="Notas enviadas"
         className="h-1.5 w-full overflow-hidden rounded-full [&::-moz-progress-bar]:bg-primary [&::-webkit-progress-bar]:bg-muted [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-primary"
       />
+      <Link
+        href={`/rodadas/${match.id}`}
+        className={cn(buttonVariants({ variant: "secondary", size: "lg" }), "h-11 text-sm")}
+      >
+        <LayoutGridIcon aria-hidden />
+        Abrir a mesa tática
+      </Link>
     </section>
   );
 }

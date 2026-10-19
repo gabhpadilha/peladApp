@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/server";
 import { newMatchSchema, type NewMatchInput } from "../_schemas/new-match-schema";
 
 export type CreateMatchResult =
-  | { success: true; round: number }
+  | { success: true; round: number; matchId: string }
   | { success: false; message: string };
 
 /** Organizador cria a rodada com os confirmados já divididos em Branco e Preto, titulares e reservas (atômico no banco). */
@@ -44,5 +44,5 @@ export async function createMatch(input: NewMatchInput): Promise<CreateMatchResu
 
   const { data: match } = await supabase.from("matches").select("round").eq("id", matchId).single();
   revalidatePath("/rodadas");
-  return { success: true, round: match?.round ?? 0 };
+  return { success: true, round: match?.round ?? 0, matchId };
 }

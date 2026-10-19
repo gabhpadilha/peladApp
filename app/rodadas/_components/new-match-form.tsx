@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { ArmchairIcon, CheckCircle2Icon, ShuffleIcon } from "lucide-react";
@@ -55,6 +56,7 @@ export function NewMatchForm({ members, today }: NewMatchFormProps) {
   const [createdRound, setCreatedRound] = useState<number | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
   const form = useForm<NewMatchInput>({
     resolver: zodResolver(newMatchSchema),
     defaultValues: { playedOn: today, players: [] },
@@ -111,6 +113,8 @@ export function NewMatchForm({ members, today }: NewMatchFormProps) {
       setCreatedRound(result.round);
       setConfirmedIds([]);
       form.reset({ playedOn: today, players: [] });
+      // Abre a mesa tática da rodada recém-criada: Branco x Preto em campo.
+      router.push(`/rodadas/${result.matchId}`);
     });
   }
 

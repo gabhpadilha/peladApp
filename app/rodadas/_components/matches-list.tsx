@@ -1,4 +1,6 @@
-import { FrownIcon, GoalIcon, TrophyIcon, type LucideIcon } from "lucide-react";
+import Link from "next/link";
+import { FrownIcon, GoalIcon, LayoutGridIcon, TrophyIcon, type LucideIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { SectionTitle } from "@/components/section-title";
 import { AWARD_LABELS, type AwardKind } from "@/types/award";
 import { formatWeekdayDate } from "@/lib/format-date";
@@ -72,6 +74,12 @@ export function MatchesList({ matches, isOrganizer }: MatchesListProps) {
                     </ul>
                   )}
                 </div>
+                <Button asChild size="sm" variant={isOpen ? "default" : "secondary"} className="shrink-0">
+                  <Link href={`/rodadas/${match.id}`} aria-label={`Abrir a mesa tática da rodada ${match.round}`}>
+                    <LayoutGridIcon aria-hidden />
+                    Mesa tática
+                  </Link>
+                </Button>
                 {isOrganizer && isOpen && <CloseMatchButton matchId={match.id} round={match.round} />}
                 {isOrganizer && <DeleteMatchButton matchId={match.id} round={match.round} isClosed={!isOpen} />}
               </li>

@@ -32,7 +32,7 @@ export function PendingEvaluationsBanner({ pending }: PendingEvaluationsBannerPr
         </p>
       </div>
       <Button asChild size="lg">
-        <Link href={`/avaliar/${next.match.id}`}>Avaliar</Link>
+        <Link href={`/rodadas/${next.match.id}`}>Avaliar</Link>
       </Button>
     </section>
   );
