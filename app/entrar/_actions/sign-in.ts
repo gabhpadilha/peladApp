@@ -40,6 +40,10 @@ export async function signIn(input: SignInInput, next?: string): Promise<SignInR
   const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
+    // Jogador desativado pelo organizador: a conta fica bloqueada no Auth.
+    if (error.code === "user_banned") {
+      return { success: false, message: "Sua conta foi desativada. Fale com o organizador da pelada." };
+    }
     return {
       success: false,
       message:

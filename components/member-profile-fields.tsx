@@ -26,12 +26,15 @@ type MemberProfileFieldsProps<Values extends FieldValues & MemberProfileInput> =
   control: Control<Values>;
   /** Prefixo dos ids, para não repetir ids com dois formulários na mesma tela. */
   idPrefix: string;
+  /** Rótulo do nome; "Nome" quando o organizador edita outra pessoa. */
+  nameLabel?: string;
 };
 
 /** Nome, apelido e posição: o que todo jogador informa ao entrar numa pelada. */
 export function MemberProfileFields<Values extends FieldValues & MemberProfileInput>({
   control,
   idPrefix,
+  nameLabel = "Seu nome",
 }: MemberProfileFieldsProps<Values>) {
   return (
     <>
@@ -40,7 +43,7 @@ export function MemberProfileFields<Values extends FieldValues & MemberProfileIn
         control={control}
         render={({ field, fieldState }) => (
           <Field data-invalid={fieldState.invalid}>
-            <FieldLabel htmlFor={`${idPrefix}-full-name`}>Seu nome</FieldLabel>
+            <FieldLabel htmlFor={`${idPrefix}-full-name`}>{nameLabel}</FieldLabel>
             <Input
               {...field}
               id={`${idPrefix}-full-name`}

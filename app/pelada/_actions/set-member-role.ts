@@ -12,14 +12,17 @@ const inputSchema = z.object({
 
 export type SetMemberRoleResult = { success: true } | { success: false; message: string };
 
-/** Promove a organizador ou volta a jogador. O banco impede ficar sem organizador. */
+/** Promove a organizador ou volta a jogador. Só o dono da pelada; ele nunca se rebaixa. */
 export async function setMemberRole(
   memberId: string,
   role: "organizer" | "player",
 ): Promise<SetMemberRoleResult> {
   const membership = await requireActiveMembership("/pelada");
-  if (membership.role !== "organizer") {
-    return { success: false, message: "Só organizadores mudam papéis." };
+  if (!membership.isOwner) {
+    return { success: false, message: "Só o dono da pelada muda quem é organizador." };
+  }
+  if (memberId === membership.memberId) {
+    return { success: false, message: "O dono da pelada é sempre organizador." };
   }
 
   const validation = inputSchema.safeParse({ memberId, role });
@@ -33,12 +36,7 @@ export async function setMemberRole(
     new_role: validation.data.role,
   });
   if (error) {
-    return {
-      success: false,
-      message: error.message.includes("at least one organizer")
-        ? "A pelada precisa de pelo menos um organizador."
-        : "Não foi possível mudar o papel.",
-    };
+    return { success: false, message: "Não foi possível mudar o papel." };
   }
 
   revalidatePath("/pelada");

@@ -18,8 +18,8 @@ export type ResetMemberPasswordResult =
  */
 export async function resetMemberPassword(memberId: string): Promise<ResetMemberPasswordResult> {
   const membership = await requireActiveMembership("/pelada");
-  if (membership.role !== "organizer") {
-    return { success: false, message: "Só o organizador redefine senhas." };
+  if (!membership.isOwner) {
+    return { success: false, message: "Só o dono da pelada redefine senhas." };
   }
   if (!z.uuid().safeParse(memberId).success) {
     return { success: false, message: "Jogador inválido." };
@@ -38,6 +38,9 @@ export async function resetMemberPassword(memberId: string): Promise<ResetMember
     .maybeSingle();
   if (!member) {
     return { success: false, message: "Jogador não encontrado nessa pelada." };
+  }
+  if (member.user_id === membership.ownerUserId) {
+    return { success: false, message: "Sua própria senha se troca em \"Sua senha\"." };
   }
 
   const admin = createAdminClient();

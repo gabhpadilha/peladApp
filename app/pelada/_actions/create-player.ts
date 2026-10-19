@@ -25,8 +25,8 @@ const USERNAME_TAKEN = "Esse usuário já existe. Escolha outro.";
  */
 export async function createPlayer(input: CreatePlayerInput): Promise<CreatePlayerResult> {
   const membership = await requireActiveMembership("/pelada");
-  if (membership.role !== "organizer") {
-    return { success: false, message: "Só o organizador cadastra jogadores." };
+  if (!membership.isOwner) {
+    return { success: false, message: "Só o dono da pelada cadastra jogadores." };
   }
 
   const validation = createPlayerSchema.safeParse(input);

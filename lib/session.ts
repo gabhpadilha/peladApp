@@ -19,6 +19,10 @@ export type ActiveMembership = {
   role: MemberRole;
   nickname: string;
   position: PlayerPositionCode;
+  /** Conta de quem criou a pelada: só ela muda papéis, e ninguém mais mexe nela. */
+  ownerUserId: string;
+  /** O usuário logado é o dono da pelada. */
+  isOwner: boolean;
 };
 
 /**
@@ -62,20 +66,29 @@ export async function requireUserId(
   return user.id;
 }
 
+/** Tela de quem foi desativado pelo organizador em todas as peladas. */
+export const DEACTIVATED_PATH = "/conta-desativada";
+
 /**
  * Grupo em que o usuário está agora: o do cookie, se ele ainda for membro,
- * senão o mais antigo. `null` se não participa de nenhum.
+ * senão o mais antigo. `null` se não participa de nenhum. Quem só tem
+ * participações desativadas vai para `/conta-desativada`.
  */
 export async function getActiveMembership(userId: string): Promise<ActiveMembership | null> {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const { data: allRows, error } = await supabase
     .from("group_members")
-    .select("id, group_id, role, nickname, position, groups(name, invite_code)")
+    .select("id, group_id, role, nickname, position, deactivated_at, groups(name, invite_code, created_by)")
     .eq("user_id", userId)
     .order("joined_at");
 
   if (error) throw error;
-  if (!data || data.length === 0) return null;
+  if (!allRows || allRows.length === 0) return null;
+
+  const data = allRows.filter((member) => member.deactivated_at === null);
+  if (data.length === 0) {
+    redirect(DEACTIVATED_PATH);
+  }
 
   const activeGroupId = (await cookies()).get(ACTIVE_GROUP_COOKIE)?.value;
   const row = data.find((member) => member.group_id === activeGroupId) ?? data[0];
@@ -88,6 +101,8 @@ export async function getActiveMembership(userId: string): Promise<ActiveMembers
     role: row.role,
     nickname: row.nickname,
     position: row.position,
+    ownerUserId: row.groups.created_by,
+    isOwner: row.groups.created_by === userId,
   };
 }
 

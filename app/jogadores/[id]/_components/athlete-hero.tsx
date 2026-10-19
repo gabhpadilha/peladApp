@@ -19,7 +19,9 @@ export function AthleteHero({ profile }: AthleteHeroProps) {
       value: player.ovr ?? "–",
       detail: <OvrDelta delta={profile.delta} className="text-xs" />,
     },
-    { label: "Ranking", value: `${profile.rank.position}º`, detail: rankLabel },
+    profile.isActive
+      ? { label: "Ranking", value: `${profile.rank.position}º`, detail: rankLabel }
+      : { label: "Ranking", value: "–", detail: "fora da pelada" },
     { label: "Jogos", value: profile.gamesPlayed, detail: null },
     { label: "Avaliações", value: profile.evaluationsReceived, detail: "recebidas" },
   ];
@@ -43,6 +45,7 @@ export function AthleteHero({ profile }: AthleteHeroProps) {
         <div className="text-center md:text-left">
           <p className="text-sm text-muted-foreground">
             {POSITION_LABELS[player.position]} · Carta {CARD_TIER_LABELS[tier]}
+            {!profile.isActive && " · Desativado"}
           </p>
           <h1 id="athlete-name" className="font-display text-5xl font-extrabold">
             {player.nickname}

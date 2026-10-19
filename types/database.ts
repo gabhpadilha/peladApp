@@ -155,6 +155,7 @@ export type Database = {
       }
       group_members: {
         Row: {
+          deactivated_at: string | null
           group_id: string
           id: string
           joined_at: string
@@ -166,6 +167,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          deactivated_at?: string | null
           group_id: string
           id?: string
           joined_at?: string
@@ -177,6 +179,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          deactivated_at?: string | null
           group_id?: string
           id?: string
           joined_at?: string
@@ -434,6 +437,7 @@ export type Database = {
       }
       is_group_member: { Args: { target_group: string }; Returns: boolean }
       is_group_organizer: { Args: { target_group: string }; Returns: boolean }
+      is_group_owner: { Args: { target_group: string }; Returns: boolean }
       join_group: {
         Args: {
           code: string
@@ -441,6 +445,10 @@ export type Database = {
           member_position: Database["public"]["Enums"]["player_position"]
         }
         Returns: string
+      }
+      set_member_active: {
+        Args: { active: boolean; target_member: string }
+        Returns: undefined
       }
       set_member_role: {
         Args: {

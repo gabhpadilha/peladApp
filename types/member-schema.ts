@@ -61,6 +61,21 @@ export const createPlayerSchema = memberProfileSchema.extend({
 
 export type CreatePlayerInput = z.infer<typeof createPlayerSchema>;
 
+/**
+ * Organizador editando um jogador. `username` vazio = conta antiga com e-mail
+ * (não tem usuário para trocar).
+ */
+export const editPlayerSchema = memberProfileSchema.extend({
+  username: usernameSchema.or(z.literal("")),
+});
+
+export type EditPlayerInput = z.infer<typeof editPlayerSchema>;
+
+/** Qualquer jogador editando o próprio cadastro: só nome e apelido. */
+export const ownProfileSchema = memberProfileSchema.pick({ fullName: true, nickname: true });
+
+export type OwnProfileInput = z.infer<typeof ownProfileSchema>;
+
 /** Definir ou trocar a própria senha. */
 export const setPasswordSchema = z
   .object({

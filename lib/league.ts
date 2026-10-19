@@ -48,7 +48,7 @@ export async function getLeague(nextPath = "/") {
     await Promise.all([
       supabase
         .from("group_members")
-        .select("id, user_id, nickname, position")
+        .select("id, user_id, nickname, position, deactivated_at")
         .eq("group_id", membership.groupId),
       supabase
         .from("matches")
@@ -158,6 +158,11 @@ export async function getLeague(nextPath = "/") {
 
   const latestClosedMatch = getLatestClosedMatch(matches);
   const players = buildPlayers(playerProfiles, matches, evaluations);
+  // Desativados ficam em `players` (histórico, cartas, perfil), mas fora do ranking.
+  const inactiveIds = new Set(
+    membersResult.data.filter((member) => member.deactivated_at !== null).map((member) => member.id),
+  );
+  const activePlayers = players.filter((player) => !inactiveIds.has(player.id));
   const previousPlayers = latestClosedMatch
     ? buildPlayers(playerProfiles, matches, evaluations, { upToRound: latestClosedMatch.round - 1 })
     : [];
@@ -172,7 +177,11 @@ export async function getLeague(nextPath = "/") {
   return {
     membership,
     currentMemberId: membership.memberId,
+    /** Todos, inclusive desativados (histórico). */
     players,
+    /** Só quem está na pelada hoje: rankings. */
+    activePlayers,
+    isActive: (memberId: string) => !inactiveIds.has(memberId),
     matches,
     evaluations,
     awards,

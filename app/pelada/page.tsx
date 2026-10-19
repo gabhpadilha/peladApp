@@ -5,6 +5,7 @@ import { CreatePlayerForm } from "./_components/create-player-form";
 import { MatchesList } from "./_components/matches-list";
 import { MembersList } from "./_components/members-list";
 import { NewMatchForm } from "./_components/new-match-form";
+import { OwnProfileCard } from "./_components/own-profile-card";
 import { PasswordCard } from "./_components/password-card";
 import { getGroupOverview } from "./_data-access/get-group-overview";
 
@@ -40,16 +41,18 @@ async function GroupContent() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="flex flex-col gap-6">
-          {overview.isOrganizer && <CreatePlayerForm loginUrl={overview.loginUrl} />}
+          {overview.membership.isOwner && <CreatePlayerForm loginUrl={overview.loginUrl} />}
           {overview.isOrganizer && <NewMatchForm members={overview.members} today={overview.today} />}
+          <OwnProfileCard fullName={overview.myFullName} nickname={overview.membership.nickname} />
           <PasswordCard login={overview.login} />
         </div>
         <div className="flex flex-col gap-6">
           <MatchesList matches={overview.matches} isOrganizer={overview.isOrganizer} />
           <MembersList
             members={overview.members}
+            inactiveMembers={overview.inactiveMembers}
             currentMemberId={overview.membership.memberId}
-            canManage={overview.isOrganizer}
+            canManage={overview.membership.isOwner}
             loginUrl={overview.loginUrl}
           />
         </div>

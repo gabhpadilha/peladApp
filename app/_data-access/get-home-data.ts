@@ -39,7 +39,7 @@ export async function getHomeData(): Promise<HomeData> {
     throw new Error("Jogador logado não encontrado na pelada");
   }
 
-  const roleRanking = rankPlayers(league.players, currentPlayer.role);
+  const roleRanking = rankPlayers(league.activePlayers, currentPlayer.role);
   const performances = getMatchPerformances(currentPlayer.id, league.matches, league.evaluations);
 
   const toRanked = (player: Player, index: number): RankedPlayer => ({
@@ -95,8 +95,8 @@ export async function getHomeData(): Promise<HomeData> {
         }
       : null,
     // Completos: a home mostra o resumo e expande para o ranking inteiro.
-    outfieldRanking: rankPlayers(league.players, "outfield").map(toRanked),
-    goalkeeperRanking: rankPlayers(league.players, "goalkeeper").map(toRanked),
+    outfieldRanking: rankPlayers(league.activePlayers, "outfield").map(toRanked),
+    goalkeeperRanking: rankPlayers(league.activePlayers, "goalkeeper").map(toRanked),
     cardEvent: getCurrentCardEvent(todayFormatter.format(new Date())),
   };
 }
