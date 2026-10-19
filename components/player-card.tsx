@@ -198,7 +198,8 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
           {AwardIcon && <AwardIcon aria-hidden className="mt-[3cqw] size-[9cqw]" />}
         </div>
 
-        <div className="absolute top-[6%] right-[5%] left-[27%] h-[53%]">
+        {/* z-0: a foto fica sempre atrás do OVR/posição (z-10). */}
+        <div className="absolute top-[6%] right-[5%] left-[27%] z-0 h-[53%]">
           <PlayerCardPhoto player={player} size={size} />
         </div>
 
@@ -260,7 +261,9 @@ function PlayerCardPhoto({ player, size }: { player: Player; size: CardSize }) {
       className={cn(
         player.photo.kind === "cutout"
           ? "object-contain object-bottom"
-          : "rounded-t-[6cqw] object-cover mask-b-from-60% mask-b-to-100%",
+          : // Foto comum: some em degradê embaixo e na esquerda (lado do OVR), como nas cartas FUT.
+            // Máscara explícita: os utilitários mask-b-* do Tailwind intersectavam camadas e escondiam a foto inteira.
+            "object-cover object-top [mask-composite:intersect] [mask-image:linear-gradient(to_bottom,black_55%,transparent),linear-gradient(to_right,transparent,black_30%)] [-webkit-mask-composite:source-in]",
       )}
     />
   );

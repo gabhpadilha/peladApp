@@ -43,7 +43,7 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
 - **Visual (`PlayerCard` com `award`):** ícone do prêmio sob a posição e "PRÊMIO · R<rodada>" no rodapé. Clássico: Craque preto e dourado, Gol azul elétrico, Bola Murcha couro velho.
 - **Temas sazonais (`lib/card-themes.ts`):** pelo calendário da data do jogo (outubro = Halloween: Craque abóbora, Gol roxo e verde-gosma, Bola Murcha fantasma, com fantasma de marca d'água). O tema fica gravado na carta. Tema novo: período em `CARD_THEMES` + tokens `--award-*-<tema>-*` + classes em `DESIGNS` no `player-card.tsx` + textos em `EVENT_COPY` (`app/_components/card-event-showcase.tsx`).
 - **Prévia:** `PlayerCard` com `award` sem `round` é prévia (rodapé sem "R<rodada>"); o bônus vem de `withAwardBonus` (`lib/award-bonus.ts`).
-- **Onde aparecem:** home (cartas da última rodada fechada), "Rodadas" (ganhadores por rodada), perfil do atleta (seção **Coleção**, `#colecao`, visível para todos da pelada; o chip do jogador na navbar leva ao próprio perfil).
+- **Onde aparecem:** home (cartas da última rodada fechada), "Rodadas" (ganhadores por rodada), página **Coleção** do atleta (`/jogadores/[id]/colecao`, visível para todos da pelada; aba ao lado de Estatísticas).
 
 ## 🧮 OVR (`lib/ovr.ts`)
 
@@ -57,10 +57,12 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
 ## 🏠 Telas
 
 - **Home (`/`):** nome da pelada + "Fala, <apelido>", aviso de avaliação pendente, **evento do mês** (`CardEventShowcase`, largura total: nome do tema, "Até <fim> · faltam N dias", texto do evento, prévia das 3 cartas especiais com a carta do próprio jogador no tema, com o +1 aplicado, e "Como ganhar" em 3 passos; fora de tema sazonal mostra as cartas clássicas como "Cartas especiais"), minha carta (`MyCardSummary`, mobile-first: carta pequena + apelido, "Posição · Carta <faixa>" e OVR grande com variação; Ranking/Jogos/Notas em 3 blocos com número e complemento em linhas próprias, sem corte; dica com ícone quando ainda não tem OVR, e ranking "–"; "Desempenho" e "Coleção N" como dois botões lado a lado), rodada em avaliação (envios/presentes), última rodada fechada (Craque da Rodada + top 3) ou o vazio "Nenhuma rodada ainda", e ranking (linha e goleiros): resumo com top 5 da linha e top 2 do gol, e o botão "Ver ranking completo (+N)" / "Mostrar menos" expande a lista com todos os atletas no mesmo card (`ExpandableRanking`).
-- **Navbar:** logo (home), "Rodadas" (ícone de sorteio), "Elenco", chip apelido + OVR (perfil, onde fica a coleção) e "Sair" (só ícone no celular). Sem link "Coleção" separado: levava ao mesmo perfil.
+- **Navbar:** logo (home), "Rodadas" (ícone de sorteio), "Elenco", chip apelido + OVR (perfil; a coleção é a aba ao lado) e "Sair" (só ícone no celular). Sem link "Coleção" separado: levava ao mesmo perfil.
 - **Senha:** sem troca obrigatória. O jogador entra com a senha gerada e, se quiser, troca em Elenco → "Sua senha" (`/trocar-senha` redireciona para `/elenco`).
 - **Cadastrar jogador (em `/elenco`):** nome, apelido, posição e **usuário** (sugerido do apelido enquanto o organizador não editar; mostrado em fonte mono) → mostra usuário + senha gerada uma única vez e "Copiar mensagem para o WhatsApp" (`AccessCard`). Sem e-mail.
-- **Atleta (`/jogadores/[id]`):** carta + resumo, aviso de pendência (só no próprio perfil), desempenho por rodada (barras, cor única, tooltip por CSS), atributos (barras) e histórico em tabela.
+- **Atleta: duas páginas com abas** (`AthleteTabs`, segmentado de largura total: "Estatísticas" | "Coleção N"), porque a coleção cresce com o tempo.
+  - **Estatísticas (`/jogadores/[id]`, carta vigente):** carta + resumo, aviso de pendência (só no próprio perfil), **"Próxima faixa"** (barra na cor da faixa atual, "faltam N de OVR"; "Faixa máxima" no Ouro Raro; some sem OVR), **4 destaques** (melhor rodada, ponto forte, a melhorar, presença %), desempenho por rodada (barras, cor única, tooltip por CSS), atributos (barra lima + **traço da média da pelada** da mesma função, diferença em texto `+N`/`-N` em `success`/`destructive`) e histórico em tabela.
+  - **Coleção (`/jogadores/[id]/colecao`):** cabeçalho (total + 3 blocos por prêmio, ícone em cima e nome sem cortar), **"Última conquista"** (carta grande, data, votos, OVR, tema), galeria com **filtro por prêmio** (chips `aria-pressed`) **agrupada por evento e ano** ("Halloween 2026"). Vazia: prévia das 3 cartas do tema do mês **apagadas com cadeado** e "Ver as rodadas".
 - **Entrar (`/entrar`):** campo "Usuário" (aceita também e-mail das contas antigas) e senha; avisa "Peça acesso ao organizador da pelada".
 - **Criar pelada (`/bem-vindo`):** só o organizador, uma vez: nome da pelada, seus dados e senha.
 - **Rodadas (`/rodadas`, atração principal):** cabeçalho com nome da pelada, título "Rodadas", texto do fluxo e "N rodada(s) em avaliação". Organizador: "Nova rodada" em destaque (coluna larga, `3fr`) ao lado da lista; jogador: só a lista. "Nova rodada": data, checklist de confirmados (com OVR e "Marcar todos"), número de times (padrão: confirmados ÷ 5), "Sortear times"/"Sortear de novo", cards dos times com média de OVR, aviso "rodízio no gol" e seletor para trocar jogador de time. Sem placar. Rodadas com "Fechar rodada" (confirmação).
@@ -74,7 +76,8 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
 2. **MediaPipe Selfie Segmentation** remove o fundo **no próprio aparelho** (grátis, Apache 2.0; confirmar o model card antes de instalar). Não usar `@imgly/background-removal` (AGPL).
 3. Prévia já dentro da carta: **"Usar recorte"** ou **"Usar foto original"**.
 4. Storage guarda o **recorte (WebP com transparência)** e a **original** (para reprocessar no futuro).
-- Na carta: recorte → `object-contain` alinhado embaixo; original → `object-cover` com máscara em gradiente; sem foto → **iniciais** grandes na cor da faixa.
+- Na carta: recorte → `object-contain` alinhado embaixo; original → `object-cover object-top` com **degradê embaixo e na esquerda** (máscara explícita `mask-image` com duas camadas e `mask-composite: intersect`; não use os utilitários `mask-b-*` do Tailwind, que escondiam a foto inteira); sem foto → **iniciais** grandes na cor da faixa. A foto fica em `z-0`, sempre atrás do OVR/posição (`z-10`).
+- **Hoje (sem upload no app):** a foto é recortada fora (rosto/busto, proporção ~0,87, WebP ~640px) e enviada pelo CLI ao bucket público `player-photos` como `<memberId>-vN.webp` (troque o `N` ao substituir, para não pegar cache); `photo_kind = 'original'`.
 
 ## 📱 Tela de notas (vestiário, mobile) — `/avaliar/[matchId]`
 

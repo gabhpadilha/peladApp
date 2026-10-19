@@ -1,6 +1,7 @@
 import "server-only";
 import { parseCardTheme } from "@/lib/card-themes";
 import { getGroupEvaluations } from "@/lib/group-scores";
+import { toPlayerPhoto } from "@/lib/player-photo";
 import {
   buildPlayers,
   getLatestClosedMatch,
@@ -48,7 +49,7 @@ export async function getLeague(nextPath = "/") {
     await Promise.all([
       supabase
         .from("group_members")
-        .select("id, user_id, nickname, position, deactivated_at")
+        .select("id, user_id, nickname, position, deactivated_at, photo_path, photo_kind")
         .eq("group_id", membership.groupId),
       supabase
         .from("matches")
@@ -86,7 +87,7 @@ export async function getLeague(nextPath = "/") {
       id: member.id,
       nickname: member.nickname,
       fullName: fullNameByUser.get(member.user_id) ?? member.nickname,
-      photo: null,
+      photo: toPlayerPhoto(member.photo_path, member.photo_kind),
     };
     return member.position === "GOL"
       ? { ...base, role: "goalkeeper", position: "GOL" }
