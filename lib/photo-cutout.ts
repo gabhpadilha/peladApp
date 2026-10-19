@@ -2,7 +2,7 @@
  * Prepara a foto da carta (só no navegador):
  * 1. lê a foto respeitando a orientação do celular;
  * 2. acha a pessoa: máscara do servidor (BiRefNet no Hugging Face, remove.bg ou MODNet) ou, sem rede, do MediaPipe no aparelho;
- * 3. enquadra pela cabeça (rosto grande e busto de lado a lado) para a área de foto da carta;
+ * 3. enquadra pela cabeça no padrão das cartas do EA FC (do peito para cima, OVR livre) para a área de foto da carta;
  * 4. gera o recorte sem fundo (PNG com alfa) e a original (JPEG).
  * O servidor converte as duas em WebP de 640px.
  */
@@ -23,8 +23,9 @@ const MODEL_URL = "/mediapipe/selfie_multiclass_256x256.tflite";
  * estreito que isso (foto em pé); a carta centraliza e apoia embaixo.
  */
 const CARD_PHOTO_RATIO = 1.18;
-/** Laterais do recorte que somem aos poucos (fração da largura): ombro cortado pela borda da foto não vira um risco reto. */
-const SIDE_FEATHER = 0.07;
+/** Laterais e pé da foto que somem aos poucos (fração da largura/altura da foto): ombro ou peito cortados pela borda não viram um risco reto. */
+const SIDE_FEATHER = 0.06;
+const BOTTOM_FEATHER = 0.06;
 /** Lado maior antes de segmentar; saída já em 640px (tamanho final), o PNG com alfa fica < 1,5MB. */
 const MAX_SIDE = 1280;
 const OUTPUT_WIDTH = 640;
@@ -161,17 +162,21 @@ const MIN_TOP_RUN = 0.02;
 const HEAD_SCAN = 0.7;
 /** Altura da cabeça (topo do cabelo ao queixo) ≈ 1,3 × a largura dela. */
 const HEAD_PROPORTION = 1.3;
-/**
- * Altura do quadro em "cabeças" estimadas (topo da cabeça ao queixo). A
- * estimativa sai ~25% maior que a cabeça real (orelhas e cabelo alargam a
- * medida), então 1,55 dá a cabeça real em ~1/3 da altura da carta: rosto
- * grande e busto até o peito, como nas cartas do EA FC.
+/*
+ * Padrão das cartas do EA FC (medido nas referências do dono do app, 2026-10-19),
+ * em fração da área de foto (top 2%, altura 62%, laterais -4% da carta):
+ * cabeça com ~1/4 da altura da carta, topo dela a ~15% da carta, rosto um
+ * pouco à direita do centro (o OVR fica livre, à esquerda) e corte na linha
+ * do peito, atrás do apelido.
  */
-const FRAME_HEADS = 1.55;
-/** Folga acima da cabeça, em fração da altura do quadro. */
-const HEADROOM = 0.08;
+/** Altura do quadro em cabeças estimadas (a estimativa fica perto da cabeça real: ~27% da carta). */
+const FRAME_HEADS = 2.35;
+/** Folga acima da cabeça, em fração da altura do quadro: topo da cabeça a ~14% da carta. */
+const HEADROOM = 0.19;
+/** Centro do rosto, em fração da largura do quadro: ~54% da carta, à direita do OVR. */
+const FACE_X = 0.54;
 
-/** Largura e centro do trecho contínuo de pessoa que passa por `centerX` na linha `y` (0 = fora). */
+/** Trecho contínuo de pessoa que passa por `centerX` na linha `y` (largura 0 = fora). */
 function runAt(alpha: Float32Array, width: number, y: number, centerX: number): { width: number; center: number } {
   const row = y * width;
   const start = Math.round(centerX);
@@ -184,10 +189,11 @@ function runAt(alpha: Float32Array, width: number, y: number, centerX: number): 
 }
 
 /**
- * Enquadramento pela cabeça: acha o topo, mede a largura da cabeça até os
- * olhos/orelhas, estima a altura dela e monta o quadro com ~2,2 cabeças de
- * altura e a largura da área da carta, centrado no rosto. Assim o rosto tem
- * sempre o mesmo tamanho na carta e o busto vai de lado a lado.
+ * Enquadramento pela cabeça (estilo EA FC): acha o topo, mede a largura da
+ * cabeça até olhos/orelhas, estima a altura dela e monta o quadro na proporção
+ * da área da carta, com a cabeça sempre no mesmo tamanho e lugar. O quadro pode
+ * passar da foto (pouco espaço acima da cabeça, ombro cortado pela borda): o
+ * que fica fora sai transparente e a borda da foto some aos poucos.
  */
 function bustBox(alpha: Float32Array, width: number, height: number): Box {
   let count = 0;
@@ -226,13 +232,11 @@ function bustBox(alpha: Float32Array, width: number, height: number): Box {
     headRows++;
   }
   const headCenter = headRows > 0 ? centerSum / headRows : topCenter;
-  const headHeight = headWidth * HEAD_PROPORTION;
-  // A altura (em cabeças) manda: é ela que fixa o tamanho do rosto na carta.
-  // Foto em pé mais estreita que o quadro: o quadro fica mais estreito, não menor.
-  const boxHeight = Math.min(height, Math.round(headHeight * FRAME_HEADS));
-  const boxWidth = Math.min(width, Math.round(boxHeight * CARD_PHOTO_RATIO));
-  const x = Math.round(Math.min(width - boxWidth, Math.max(0, headCenter - boxWidth / 2)));
-  const y = Math.round(Math.min(height - boxHeight, Math.max(0, top - boxHeight * HEADROOM)));
+  const boxHeight = Math.round(headWidth * HEAD_PROPORTION * FRAME_HEADS);
+  const boxWidth = Math.round(boxHeight * CARD_PHOTO_RATIO);
+  // Posição fixa da cabeça no quadro, mesmo que ele passe das bordas da foto.
+  const x = Math.round(headCenter - boxWidth * FACE_X);
+  const y = Math.round(top - boxHeight * HEADROOM);
   return { x, y, width: boxWidth, height: boxHeight };
 }
 
@@ -266,13 +270,22 @@ function erode(alpha: Float32Array, width: number, height: number, radius: numbe
   return result;
 }
 
-/** Máscara (alfa com curva) como imagem do tamanho da foto, para compor com destination-in. */
+/**
+ * Máscara (alfa com curva) como imagem do tamanho da foto, para compor com
+ * destination-in. As laterais e o pé da foto somem aos poucos: ombro ou peito
+ * cortados pela borda da foto não viram um risco reto na carta.
+ */
 function maskCanvas(alpha: Float32Array, width: number, height: number): HTMLCanvasElement {
   const canvas = createCanvas(width, height);
   const context = get2d(canvas);
   const image = context.createImageData(width, height);
+  const sideFeather = Math.max(1, width * SIDE_FEATHER);
+  const bottomFeather = Math.max(1, height * BOTTOM_FEATHER);
   for (let i = 0; i < alpha.length; i++) {
-    const t = Math.min(1, Math.max(0, (alpha[i] - MASK_LOW) / (MASK_HIGH - MASK_LOW)));
+    const x = i % width;
+    const y = (i - x) / width;
+    const edge = Math.min(1, x / sideFeather, (width - 1 - x) / sideFeather, (height - 1 - y) / bottomFeather);
+    const t = edge * Math.min(1, Math.max(0, (alpha[i] - MASK_LOW) / (MASK_HIGH - MASK_LOW)));
     image.data[i * 4] = 255;
     image.data[i * 4 + 1] = 255;
     image.data[i * 4 + 2] = 255;
@@ -310,20 +323,26 @@ function fallbackBox(width: number, height: number): Box {
   return { x: Math.round((width - boxWidth) / 2), y: 0, width: boxWidth, height: boxHeight };
 }
 
-/** Apaga aos poucos as laterais do recorte (destination-out com degradê). */
-function featherSides(context: CanvasRenderingContext2D, width: number, height: number) {
-  const feather = Math.max(1, Math.round(width * SIDE_FEATHER));
-  context.globalCompositeOperation = "destination-out";
-  const left = context.createLinearGradient(0, 0, feather, 0);
-  left.addColorStop(0, "rgb(0 0 0 / 1)");
-  left.addColorStop(1, "rgb(0 0 0 / 0)");
-  context.fillStyle = left;
-  context.fillRect(0, 0, feather, height);
-  const right = context.createLinearGradient(width - feather, 0, width, 0);
-  right.addColorStop(0, "rgb(0 0 0 / 0)");
-  right.addColorStop(1, "rgb(0 0 0 / 1)");
-  context.fillStyle = right;
-  context.fillRect(width - feather, 0, feather, height);
+/**
+ * Desenha o trecho `box` da imagem ocupando o canvas todo. O quadro pode passar
+ * da foto: desenha a imagem inteira deslocada e o que fica fora sai transparente.
+ */
+function drawBox(context: CanvasRenderingContext2D, image: HTMLCanvasElement, box: Box, outputWidth: number, outputHeight: number) {
+  const scaleX = outputWidth / box.width;
+  const scaleY = outputHeight / box.height;
+  context.drawImage(image, -box.x * scaleX, -box.y * scaleY, image.width * scaleX, image.height * scaleY);
+}
+
+/** Parte do quadro que está dentro da foto (a original não tem transparência). */
+function clampBox(box: Box, width: number, height: number): Box {
+  const x = Math.max(0, box.x);
+  const y = Math.max(0, box.y);
+  return {
+    x,
+    y,
+    width: Math.max(1, Math.min(width, box.x + box.width) - x),
+    height: Math.max(1, Math.min(height, box.y + box.height) - y),
+  };
 }
 
 /** Tenta de novo em larguras menores até o envio caber (o servidor aceita 3MB por arquivo e ~4MB no total). */
@@ -382,28 +401,31 @@ export async function prepareCardPhoto(file: File, remoteMask?: RemoteMask): Pro
   const erodeRadius = Math.round(Math.max(photo.width, photo.height) * EDGE_ERODE);
   const mask = alpha ? maskCanvas(erode(alpha, photo.width, photo.height, erodeRadius), photo.width, photo.height) : null;
 
+  const originalBox = clampBox(box, photo.width, photo.height);
+
   let draft: CardPhotoDraft | null = null;
   for (const targetWidth of OUTPUT_WIDTHS) {
     const outputWidth = Math.min(targetWidth, box.width);
     const outputHeight = Math.round((outputWidth * box.height) / box.width);
 
-    const original = createCanvas(outputWidth, outputHeight);
-    get2d(original).drawImage(photo, box.x, box.y, box.width, box.height, 0, 0, outputWidth, outputHeight);
+    const originalWidth = Math.max(1, Math.round((outputWidth * originalBox.width) / box.width));
+    const originalHeight = Math.max(1, Math.round((originalWidth * originalBox.height) / originalBox.width));
+    const original = createCanvas(originalWidth, originalHeight);
+    drawBox(get2d(original), photo, originalBox, originalWidth, originalHeight);
     const originalBlob = await toBlob(original, "image/jpeg", 0.9);
 
     let cutoutBlob = originalBlob;
     if (mask) {
       const cutout = createCanvas(outputWidth, outputHeight);
       const context = get2d(cutout);
-      context.drawImage(photo, box.x, box.y, box.width, box.height, 0, 0, outputWidth, outputHeight);
+      drawBox(context, photo, box, outputWidth, outputHeight);
       // Mantém só onde a máscara é opaca (a suavização do drawImage amacia a borda).
       context.globalCompositeOperation = "destination-in";
-      context.drawImage(mask, box.x, box.y, box.width, box.height, 0, 0, outputWidth, outputHeight);
+      drawBox(context, mask, box, outputWidth, outputHeight);
       // O segmentador deixa uma faixa semitransparente na borda de cima (vira uma
       // linha sobre a cabeça na carta): limpa as primeiras linhas.
       context.globalCompositeOperation = "source-over";
       context.clearRect(0, 0, outputWidth, Math.ceil(outputHeight * TOP_EDGE_CLEAR));
-      featherSides(context, outputWidth, outputHeight);
       cutoutBlob = await toBlob(cutout, "image/png");
     }
 
