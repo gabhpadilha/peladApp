@@ -18,7 +18,7 @@ export function OwnPhotoCard({ member }: OwnPhotoCardProps) {
           Sua foto
         </h2>
         <p className="text-sm text-muted-foreground">
-          O fundo sai sozinho e a foto ganha o tom da sua carta.
+          O fundo sai sozinho e a foto entra na sua carta.
         </p>
       </div>
       <PlayerPhotoUploader member={member} isSelf />

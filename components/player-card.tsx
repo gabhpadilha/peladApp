@@ -204,7 +204,7 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
         {/* Área da foto (estilo EA FC): centralizada, passa um pouco das laterais da face */}
         {/* (as bordas ficam fora do corte) e vai até o apelido. Proporção ~1,18, a mesma de lib/photo-cutout.ts. */}
         <div className="absolute top-[2%] -right-[4%] -left-[4%] z-0 h-[62%]">
-          <PlayerCardPhoto player={player} size={size} tintClass={DESIGNS[design].frame} />
+          <PlayerCardPhoto player={player} size={size} />
         </div>
 
         <div className="absolute inset-x-[7%] top-[60%] flex flex-col items-center gap-[3cqw] font-display leading-none">
@@ -243,7 +243,7 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
 }
 
 /**
- * Degradês que fazem a foto sumir na carta (os mesmos na foto e no filtro de cor).
+ * Degradês que fazem a foto sumir na carta.
  * Recorte enquadrado pelos ombros (`lib/photo-cutout.ts`): eles vão de borda a
  * borda da carta e só somem rente ao corte da face; o peito some embaixo, atrás
  * do apelido. A original (só fotos antigas) some também do lado do OVR. Regra: as quatro bordas da área terminam
@@ -266,17 +266,14 @@ const PHOTO_FADES: Record<NonNullable<Player["photo"]>["kind"], readonly string[
 };
 
 /** Monta a máscara: camadas intersectadas, cada uma cobrindo a área da foto. */
-function maskStyle(layers: readonly string[], firstLayer?: { size: string; position: string }): CSSProperties {
+function maskStyle(layers: readonly string[]): CSSProperties {
   const image = layers.join(", ");
-  const sizes = layers.map((_, index) => (index === 0 && firstLayer ? firstLayer.size : "100% 100%")).join(", ");
-  const positions = layers.map((_, index) => (index === 0 && firstLayer ? firstLayer.position : "center")).join(", ");
+  const sizes = layers.map(() => "100% 100%").join(", ");
   return {
     maskImage: image,
     WebkitMaskImage: image,
     maskSize: sizes,
     WebkitMaskSize: sizes,
-    maskPosition: positions,
-    WebkitMaskPosition: positions,
     maskRepeat: "no-repeat",
     WebkitMaskRepeat: "no-repeat",
     maskComposite: "intersect",
@@ -284,31 +281,13 @@ function maskStyle(layers: readonly string[], firstLayer?: { size: string; posit
   };
 }
 
-/**
- * Filtro de cor suave: a cor da moldura da carta, a 16%, só sobre a
- * pessoa (a própria foto é a máscara). Deixa a foto homogênea com a carta.
- * O Storage responde com CORS aberto, o que o `mask-image` exige.
+/*
+ * Sem filtro de cor na foto: a camada na cor da moldura, mascarada pela
+ * própria foto (`mask-image: url(...)`), aparecia no iPhone como um retângulo
+ * com faixas nas laterais (o Safari não aplicava a máscara da foto). Não volte
+ * a usar máscara com a URL da foto nem `mix-blend-mode` sobre ela.
  */
-function PhotoTint({ photo, tintClass }: { photo: NonNullable<Player["photo"]>; tintClass: string }) {
-  const isCutout = photo.kind === "cutout";
-  const style = maskStyle([`url("${photo.url}")`, ...PHOTO_FADES[photo.kind]], {
-    size: isCutout ? "contain" : "cover",
-    position: isCutout ? "bottom" : "top",
-  });
-
-  return (
-    <span
-      aria-hidden
-      // Mistura normal e bem transparente: com `mix-blend-soft-light` o Safari
-      // (WebKit) pintava o retângulo da área inteira, com faixas nas laterais.
-      className={cn("pointer-events-none absolute inset-0 opacity-[0.16]", tintClass)}
-      // A máscara depende da URL da foto: estilo inline.
-      style={style}
-    />
-  );
-}
-
-function PlayerCardPhoto({ player, size, tintClass }: { player: Player; size: CardSize; tintClass: string }) {
+function PlayerCardPhoto({ player, size }: { player: Player; size: CardSize }) {
   if (!player.photo) {
     return (
       <div className="flex size-full items-end justify-center">
@@ -336,7 +315,6 @@ function PlayerCardPhoto({ player, size, tintClass }: { player: Player; size: Ca
         // Degradês explícitos (os utilitários mask-b-* do Tailwind escondiam a foto inteira).
         style={maskStyle(PHOTO_FADES[player.photo.kind])}
       />
-      <PhotoTint photo={player.photo} tintClass={tintClass} />
     </>
   );
 }
