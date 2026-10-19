@@ -36,11 +36,14 @@ export async function segmentPhoto(formData: FormData): Promise<SegmentPhotoResu
 
   for (const provider of PROVIDERS) {
     if (!provider.isEnabled()) continue;
+    const startedAt = Date.now();
     try {
       const mask = await provider.run(image, photo.type);
+      // Mostra nos logs da Vercel quem recortou (ex.: se o Space caiu para a reserva).
+      console.info(`segmentPhoto: máscara via ${provider.name} em ${Date.now() - startedAt}ms`);
       return { success: true, maskBase64: mask.toString("base64") };
     } catch (error) {
-      console.error(`segmentPhoto: ${provider.name} falhou`, error);
+      console.error(`segmentPhoto: ${provider.name} falhou em ${Date.now() - startedAt}ms`, error);
     }
   }
   return { success: false, message: "Não foi possível tirar o fundo da foto." };
