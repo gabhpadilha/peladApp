@@ -22,6 +22,8 @@ const OUTPUT_WIDTH = 640;
 /** Curva da máscara: abaixo vira transparente, acima opaco (borda mais justa). */
 const MASK_LOW = 0.35;
 const MASK_HIGH = 0.7;
+/** Faixa do topo do recorte que é apagada (resíduo do segmentador na borda). */
+const TOP_EDGE_CLEAR = 0.015;
 /** Pessoa precisa ocupar pelo menos isso da foto para o recorte fazer sentido. */
 const MIN_PERSON_SHARE = 0.03;
 
@@ -172,6 +174,10 @@ export async function prepareCardPhoto(file: File): Promise<CardPhotoDraft> {
   // Mantém só onde a máscara é opaca (a suavização do drawImage amacia a borda).
   context.globalCompositeOperation = "destination-in";
   context.drawImage(mask, box.x, box.y, box.width, box.height, 0, 0, outputWidth, outputHeight);
+  // O segmentador deixa uma faixa semitransparente na borda de cima (vira uma
+  // linha sobre a cabeça na carta): limpa as primeiras linhas.
+  context.globalCompositeOperation = "source-over";
+  context.clearRect(0, 0, outputWidth, Math.ceil(outputHeight * TOP_EDGE_CLEAR));
 
   const [cutoutBlob, originalBlob] = await Promise.all([toBlob(cutout, "image/png"), toBlob(original, "image/jpeg", 0.9)]);
   return { cutout: cutoutBlob, original: originalBlob };
