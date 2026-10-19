@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { MUST_CHANGE_PASSWORD_FLAG, requireActiveMembership } from "@/lib/session";
+import { requireActiveMembership } from "@/lib/session";
 import { createAdminClient, hasAdminEnv } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { generateTempPassword } from "@/lib/temp-password";
@@ -12,9 +12,8 @@ export type ResetMemberPasswordResult =
   | { success: false; message: string };
 
 /**
- * Organizador gera uma nova senha provisória para um jogador da pelada
- * (sem e-mail, não existe "esqueci a senha"). No próximo acesso, a troca é
- * obrigatória.
+ * Dono gera uma senha nova para um jogador que esqueceu a dele (sem e-mail,
+ * não existe "esqueci a senha"). O jogador troca depois, se quiser.
  */
 export async function resetMemberPassword(memberId: string): Promise<ResetMemberPasswordResult> {
   const membership = await requireActiveMembership("/elenco");
@@ -50,11 +49,7 @@ export async function resetMemberPassword(memberId: string): Promise<ResetMember
   }
 
   const tempPassword = generateTempPassword();
-  const { error } = await admin.auth.admin.updateUserById(member.user_id, {
-    password: tempPassword,
-    // Mantém o que já existe nos metadados e só liga a troca obrigatória.
-    user_metadata: { ...target.user.user_metadata, [MUST_CHANGE_PASSWORD_FLAG]: true },
-  });
+  const { error } = await admin.auth.admin.updateUserById(member.user_id, { password: tempPassword });
   if (error) {
     return { success: false, message: "Não foi possível redefinir a senha. Tente de novo." };
   }

@@ -12,7 +12,7 @@ export function buildAccessMessage({ nickname, login, tempPassword, loginUrl }: 
     `Fala, ${nickname}! Seu acesso ao PeladApp:`,
     loginUrl,
     `${login.includes("@") ? "E-mail" : "Usuário"}: ${login}`,
-    `Senha provisória: ${tempPassword}`,
-    "No primeiro acesso você escolhe sua senha.",
+    `Senha: ${tempPassword}`,
+    "Se quiser trocar a senha, vá em Elenco → Sua senha.",
   ].join("\n");
 }

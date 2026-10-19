@@ -14,7 +14,7 @@ type ResetPasswordButtonProps = {
 
 type Stage = "idle" | "confirming" | "done";
 
-/** Organizador gera nova senha provisória para quem esqueceu a dele. */
+/** Dono gera uma senha nova para quem esqueceu a dele. */
 export function ResetPasswordButton({ memberId, nickname, loginUrl }: ResetPasswordButtonProps) {
   const [stage, setStage] = useState<Stage>("idle");
   const [result, setResult] = useState<Extract<ResetMemberPasswordResult, { success: true }> | null>(null);
@@ -61,7 +61,7 @@ export function ResetPasswordButton({ memberId, nickname, loginUrl }: ResetPassw
         className="flex basis-full flex-col gap-2 rounded-lg border bg-muted/40 p-3 sm:flex-row sm:items-center sm:justify-between"
       >
         <p className="text-sm text-muted-foreground">
-          Gerar uma senha provisória nova para {nickname}? A senha atual deixa de funcionar.
+          Gerar uma senha nova para {nickname}? A senha atual deixa de funcionar.
         </p>
         <div className="flex shrink-0 justify-end gap-2">
           <Button size="sm" variant="ghost" onClick={() => setStage("idle")} disabled={isPending}>

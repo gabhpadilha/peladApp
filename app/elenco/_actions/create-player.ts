@@ -20,7 +20,7 @@ const USERNAME_TAKEN = "Esse usuário já existe. Escolha outro.";
 
 /**
  * Organizador cadastra um jogador por usuário (sem e-mail): cria a conta já
- * confirmada com senha provisória (troca obrigatória no 1º acesso) e coloca
+ * confirmada com uma senha gerada (o jogador troca se quiser, em "Sua senha") e coloca
  * na pelada. O Auth recebe o e-mail técnico do usuário (lib/username.ts).
  */
 export async function createPlayer(input: CreatePlayerInput): Promise<CreatePlayerResult> {
@@ -57,7 +57,6 @@ export async function createPlayer(input: CreatePlayerInput): Promise<CreatePlay
     email: usernameToEmail(username),
     password: tempPassword,
     email_confirm: true,
-    user_metadata: { must_change_password: true },
   });
   if (createError || !created.user) {
     if (createError?.code === "email_exists") {

@@ -18,7 +18,7 @@ type AccessCardProps = {
   children?: ReactNode;
 };
 
-/** Acesso do jogador (usuário + senha provisória) com cópia da mensagem para o WhatsApp. */
+/** Acesso do jogador (usuário + senha gerada) com cópia da mensagem para o WhatsApp. */
 export function AccessCard({ title, nickname, login, tempPassword, loginUrl, children }: AccessCardProps) {
   const [isCopied, setIsCopied] = useState(false);
 
@@ -34,10 +34,10 @@ export function AccessCard({ title, nickname, login, tempPassword, loginUrl, chi
       <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
         <dt className="text-muted-foreground">{login.includes("@") ? "E-mail" : "Usuário"}</dt>
         <dd className="truncate font-mono font-medium select-all">{login}</dd>
-        <dt className="text-muted-foreground">Senha provisória</dt>
+        <dt className="text-muted-foreground">Senha</dt>
         <dd className="font-mono font-medium select-all">{tempPassword}</dd>
       </dl>
-      <p className="text-xs text-muted-foreground">Anote ou mande agora: a senha provisória não aparece de novo.</p>
+      <p className="text-xs text-muted-foreground">Anote ou mande agora: a senha não aparece de novo. Se ele quiser, troca depois em “Sua senha”.</p>
       <div className="flex flex-col gap-2 sm:flex-row">
         <Button size="lg" onClick={handleCopy} className="flex-1">
           {isCopied ? <CheckIcon aria-hidden /> : <CopyIcon aria-hidden />}

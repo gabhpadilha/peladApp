@@ -54,7 +54,7 @@ export const createGroupSchema = memberProfileSchema.extend({
 
 export type CreateGroupInput = z.infer<typeof createGroupSchema>;
 
-/** Organizador cadastrando um jogador por usuário (a senha provisória é gerada no servidor). */
+/** Organizador cadastrando um jogador por usuário (a senha é gerada no servidor). */
 export const createPlayerSchema = memberProfileSchema.extend({
   username: usernameSchema,
 });

@@ -24,7 +24,7 @@ const EMPTY_FORM: CreatePlayerInput = { fullName: "", nickname: "", username: ""
 
 /**
  * Organizador cadastra o jogador por usuário (sem e-mail) e repassa o acesso
- * com senha provisória. O usuário é sugerido a partir do apelido.
+ * com a senha gerada. O usuário é sugerido a partir do apelido.
  */
 export function CreatePlayerForm({ loginUrl }: CreatePlayerFormProps) {
   const [created, setCreated] = useState<CreatedPlayer | null>(null);
@@ -67,7 +67,7 @@ export function CreatePlayerForm({ loginUrl }: CreatePlayerFormProps) {
           Cadastrar jogador
         </h2>
         <p className="text-sm text-muted-foreground">
-          Sem e-mail: o jogador entra com usuário e uma senha provisória, e escolhe a dele no primeiro acesso.
+          Sem e-mail: o jogador entra com usuário e a senha gerada aqui. Se quiser, troca depois em “Sua senha”.
         </p>
       </div>
 

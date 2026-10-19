@@ -120,14 +120,16 @@ export function NewMatchForm({ members, today }: NewMatchFormProps) {
             name="playedOn"
             control={form.control}
             render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
+              <Field data-invalid={fieldState.invalid} className="min-w-0">
                 <FieldLabel htmlFor="new-match-date">Data do jogo</FieldLabel>
                 <Input
                   {...field}
                   id="new-match-date"
                   type="date"
                   aria-invalid={fieldState.invalid}
-                  className="h-11 text-base"
+                  // iOS: o date nativo tem largura mínima própria e vaza do card; sem a aparência
+                  // nativa e com min-w-0 ele respeita o w-full (texto à esquerda como os outros campos).
+                  className="h-11 w-full min-w-0 appearance-none text-base [&::-webkit-date-and-time-value]:text-left"
                 />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
               </Field>

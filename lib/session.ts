@@ -25,45 +25,23 @@ export type ActiveMembership = {
   isOwner: boolean;
 };
 
-/**
- * Marca em `user_metadata` de quem foi cadastrado pelo organizador com senha
- * provisória. Sai quando a pessoa define a própria senha.
- */
-export const MUST_CHANGE_PASSWORD_FLAG = "must_change_password";
-export const CHANGE_PASSWORD_PATH = "/trocar-senha";
-
-type SessionUser = { id: string; mustChangePassword: boolean };
-
-async function getSessionUser(): Promise<SessionUser | null> {
-  const supabase = await createClient();
-  const { data } = await supabase.auth.getClaims();
-  if (!data?.claims.sub) return null;
-
-  const metadata: Record<string, unknown> = data.claims.user_metadata ?? {};
-  return { id: data.claims.sub, mustChangePassword: metadata[MUST_CHANGE_PASSWORD_FLAG] === true };
-}
-
 /** Id do usuário logado (validado pelo JWT), ou `null`. */
 export async function getUserId(): Promise<string | null> {
-  return (await getSessionUser())?.id ?? null;
+  const supabase = await createClient();
+  const { data } = await supabase.auth.getClaims();
+  return data?.claims.sub ?? null;
 }
 
 /**
- * Exige login; sem sessão, manda para /entrar voltando a `nextPath`.
- * Com senha provisória, manda para a troca obrigatória (exceto na própria troca).
+ * Exige login; sem sessão, manda para /entrar voltando a `nextPath`. A senha
+ * gerada pelo dono vale até a pessoa querer trocar (Elenco → "Sua senha").
  */
-export async function requireUserId(
-  nextPath = "/",
-  { allowTempPassword = false }: { allowTempPassword?: boolean } = {},
-): Promise<string> {
-  const user = await getSessionUser();
-  if (!user) {
+export async function requireUserId(nextPath = "/"): Promise<string> {
+  const userId = await getUserId();
+  if (!userId) {
     redirect(`/entrar?next=${encodeURIComponent(nextPath)}`);
   }
-  if (user.mustChangePassword && !allowTempPassword) {
-    redirect(CHANGE_PASSWORD_PATH);
-  }
-  return user.id;
+  return userId;
 }
 
 /** Tela de quem foi desativado pelo organizador em todas as peladas. */

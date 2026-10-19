@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { CheckCircle2Icon } from "lucide-react";
 import { SignInForm } from "./_components/sign-in-form";
 
 export const metadata: Metadata = {
@@ -24,7 +23,7 @@ export default function SignInPage({ searchParams }: PageProps<"/entrar">) {
           </Suspense>
         </div>
         <p className="text-center text-sm text-muted-foreground">
-          Ainda não tem conta? Peça acesso ao organizador da pelada.
+          Ainda não tem conta ou esqueceu a senha? Fale com o organizador da pelada.
         </p>
       </div>
     </main>
@@ -36,17 +35,6 @@ async function SignInContent({
 }: {
   searchParams: PageProps<"/entrar">["searchParams"];
 }) {
-  const { next, senha } = await searchParams;
-
-  return (
-    <>
-      {senha === "criada" && (
-        <p role="status" className="flex items-center gap-2 rounded-lg bg-primary/10 px-3 py-2 text-sm">
-          <CheckCircle2Icon aria-hidden className="size-4 shrink-0 text-primary" />
-          Senha criada! Entre com seu e-mail e a nova senha.
-        </p>
-      )}
-      <SignInForm next={typeof next === "string" ? next : undefined} />
-    </>
-  );
+  const { next } = await searchParams;
+  return <SignInForm next={typeof next === "string" ? next : undefined} />;
 }

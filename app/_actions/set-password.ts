@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { MUST_CHANGE_PASSWORD_FLAG, requireUserId } from "@/lib/session";
+import { requireUserId } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 import { setPasswordSchema, type FieldErrors, type SetPasswordInput } from "@/types/member-schema";
 
@@ -9,21 +9,9 @@ export type SetPasswordResult =
   | { success: true }
   | { success: false; message: string; errors?: FieldErrors<SetPasswordInput> };
 
-type SetPasswordOptions = {
-  /**
-   * Encerra a sessão depois de salvar. Usado na troca obrigatória do 1º acesso:
-   * o token antigo ainda carrega a marca de senha provisória, e entrar de novo
-   * com a senha nova emite um token limpo (evita voltar para /trocar-senha).
-   */
-  signOutAfter?: boolean;
-};
-
-/** Define ou troca a senha de quem está logado e tira a marca de senha provisória. */
-export async function setPassword(
-  input: SetPasswordInput,
-  { signOutAfter = false }: SetPasswordOptions = {},
-): Promise<SetPasswordResult> {
-  await requireUserId("/", { allowTempPassword: true });
+/** Troca a senha de quem está logado (opcional: a senha gerada pelo dono também vale). */
+export async function setPassword(input: SetPasswordInput): Promise<SetPasswordResult> {
+  await requireUserId("/elenco");
 
   const validation = setPasswordSchema.safeParse(input);
   if (!validation.success) {
@@ -35,10 +23,7 @@ export async function setPassword(
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.updateUser({
-    password: validation.data.password,
-    data: { [MUST_CHANGE_PASSWORD_FLAG]: false },
-  });
+  const { error } = await supabase.auth.updateUser({ password: validation.data.password });
 
   if (error?.code === "same_password") {
     return { success: false, message: "Escolha uma senha diferente da atual." };
@@ -51,13 +36,6 @@ export async function setPassword(
           ? "Senha fraca. Use uma senha mais longa."
           : "Não foi possível salvar a senha. Tente de novo.",
     };
-  }
-
-  if (signOutAfter) {
-    await supabase.auth.signOut({ scope: "local" });
-  } else {
-    // Renova o token para a marca de senha provisória sair das claims.
-    await supabase.auth.refreshSession();
   }
 
   return { success: true };
