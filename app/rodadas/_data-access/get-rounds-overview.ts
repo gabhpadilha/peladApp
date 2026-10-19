@@ -21,9 +21,9 @@ export type MatchSummary = {
   playedOn: string;
   status: Database["public"]["Enums"]["match_status"];
   presentCount: number;
-  teamCount: number;
-  /** Presentes no banco de reserva (sem time). */
-  benchCount: number;
+  /** Titulares e reservas (os reservas também jogam o rodízio e avaliam). */
+  starterCount: number;
+  reserveCount: number;
   submittedCount: number;
   /** Ganhadores das cartas especiais (só em rodadas fechadas). */
   winners: { kind: AwardKind; nickname: string }[];
@@ -52,7 +52,7 @@ export async function getRoundsOverview(): Promise<RoundsOverview> {
       .order("nickname"),
     supabase
       .from("matches")
-      .select("id, round, played_on, status, match_attendance(team)")
+      .select("id, round, played_on, status, match_attendance(reserve)")
       .eq("group_id", membership.groupId)
       .order("round", { ascending: false }),
     supabase.rpc("get_match_submissions", { target_group: membership.groupId }),
@@ -90,10 +90,8 @@ export async function getRoundsOverview(): Promise<RoundsOverview> {
       playedOn: match.played_on,
       status: match.status,
       presentCount: match.match_attendance.length,
-      // Banco = presença sem time; não conta como time.
-      teamCount: new Set(match.match_attendance.flatMap((attendance) => (attendance.team === null ? [] : [attendance.team])))
-        .size,
-      benchCount: match.match_attendance.filter((attendance) => attendance.team === null).length,
+      starterCount: match.match_attendance.filter((attendance) => !attendance.reserve).length,
+      reserveCount: match.match_attendance.filter((attendance) => attendance.reserve).length,
       submittedCount: submittedByMatch.get(match.id) ?? 0,
       winners: awardsResult.data
         .filter((award) => award.match_id === match.id)

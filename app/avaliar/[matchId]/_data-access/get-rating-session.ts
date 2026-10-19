@@ -5,8 +5,10 @@ import type { Player } from "@/types/player";
 
 export type RatingTarget = {
   player: Player;
-  /** Time em que jogou na rodada (1, 2, 3…), se registrado. */
+  /** Time da rodada: 1 = Branco, 2 = Preto. */
   team: number | null;
+  /** Começou no banco do time. */
+  isReserve: boolean;
 };
 
 type RoundInfo = { id: string; round: number; date: string };
@@ -42,20 +44,25 @@ export async function getRatingSession(matchId: string): Promise<RatingSession> 
   const supabase = await createClient();
   const { data: attendance, error } = await supabase
     .from("match_attendance")
-    .select("member_id, team")
+    .select("member_id, team, reserve")
     .eq("match_id", matchId);
   if (error) throw error;
-  const teamByMember = new Map(attendance.map((row) => [row.member_id, row.team]));
+  const slotByMember = new Map(attendance.map((row) => [row.member_id, row]));
 
   const targets = league.players
     .filter(
       (player) => player.id !== league.currentMemberId && match.presentPlayerIds.includes(player.id),
     )
-    .map((player) => ({ player, team: teamByMember.get(player.id) ?? null }))
-    // Time a time, para avaliar na ordem em que a pessoa lembra do jogo.
+    .map((player) => ({
+      player,
+      team: slotByMember.get(player.id)?.team ?? null,
+      isReserve: slotByMember.get(player.id)?.reserve ?? false,
+    }))
+    // Time a time (titulares antes dos reservas), na ordem em que a pessoa lembra do jogo.
     .toSorted(
       (a, b) =>
         (a.team ?? Number.MAX_SAFE_INTEGER) - (b.team ?? Number.MAX_SAFE_INTEGER) ||
+        Number(a.isReserve) - Number(b.isReserve) ||
         a.player.nickname.localeCompare(b.player.nickname, "pt-BR"),
     );
 

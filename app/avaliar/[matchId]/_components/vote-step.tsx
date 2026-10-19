@@ -3,6 +3,7 @@
 import { FrownIcon, GoalIcon, TrophyIcon, type LucideIcon } from "lucide-react";
 import { Field, FieldLabel, FieldTitle } from "@/components/ui/field";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { teamRoleLabel } from "@/lib/teams";
 import { AWARD_LABELS, type AwardKind } from "@/types/award";
 import { POSITION_LABELS } from "@/types/player";
 import type { RatingTarget } from "../_data-access/get-rating-session";
@@ -50,13 +51,13 @@ export function VoteStep({ kind, targets, selected, onSelect }: VoteStepProps) {
         onValueChange={(value) => onSelect(value === NO_VOTE ? undefined : value)}
         className="gap-2"
       >
-        {targets.map(({ player, team }) => (
+        {targets.map(({ player, team, isReserve }) => (
           <FieldLabel key={player.id} htmlFor={`${groupId}-${player.id}`}>
             <Field orientation="horizontal">
               <div className="flex flex-1 flex-col gap-0.5">
                 <FieldTitle>{player.nickname}</FieldTitle>
                 <span className="text-xs text-muted-foreground">
-                  {team !== null ? `Time ${team} · ` : "Banco · "}
+                  {team !== null && `${teamRoleLabel(team, isReserve)} · `}
                   {POSITION_LABELS[player.position]}
                 </span>
               </div>

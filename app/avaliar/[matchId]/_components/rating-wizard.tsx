@@ -7,6 +7,7 @@ import { CheckCircle2Icon, ChevronLeftIcon, PencilIcon, XIcon } from "lucide-rea
 import { PlayerCard } from "@/components/player-card";
 import { Button } from "@/components/ui/button";
 import { formatWeekdayDate } from "@/lib/format-date";
+import { teamRoleLabel } from "@/lib/teams";
 import { cn } from "@/lib/utils";
 import { AWARD_KINDS, AWARD_LABELS, type AwardKind } from "@/types/award";
 import {
@@ -208,7 +209,7 @@ export function RatingWizard({ match, targets }: RatingWizardProps) {
               <PlayerCard player={step.target.player} size="sm" />
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground uppercase">
-                  {step.target.team !== null ? `Time ${step.target.team} · ` : "Banco · "}
+                  {step.target.team !== null && `${teamRoleLabel(step.target.team, step.target.isReserve)} · `}
                   {POSITION_LABELS[step.target.player.position]}
                 </p>
                 <h1 className="truncate font-display text-3xl font-bold">{step.target.player.nickname}</h1>
@@ -347,7 +348,7 @@ function ReviewList({ targets, drafts, votes, nameById, ratedCount, firstVoteInd
       <div className="flex flex-col gap-1">
         <h2 className="text-xs font-medium text-muted-foreground uppercase">Suas notas</h2>
         <ul className="flex flex-col">
-          {targets.map(({ player, team }, targetIndex) => {
+          {targets.map(({ player, team, isReserve }, targetIndex) => {
             const draft = drafts[player.id];
             const isRated = draft !== undefined && !draft.skipped && isComplete(player, draft);
             return (
@@ -360,7 +361,7 @@ function ReviewList({ targets, drafts, votes, nameById, ratedCount, firstVoteInd
                   <span className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate font-medium">{player.nickname}</span>
                     <span className="text-xs text-muted-foreground">
-                      {team !== null ? `Time ${team} · ` : "Banco · "}
+                      {team !== null && `${teamRoleLabel(team, isReserve)} · `}
                       {POSITION_LABELS[player.position]}
                     </span>
                   </span>

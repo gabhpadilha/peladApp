@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { BENCH_TEAM, MATCH_TEAMS } from "@/lib/draft";
+import { MATCH_TEAMS } from "@/lib/draft";
 
-const MIN_ON_COURT = 2;
+const MIN_STARTERS = 2;
 
 export const newMatchSchema = z.object({
   playedOn: z.iso.date("Escolha a data do jogo."),
@@ -9,13 +9,15 @@ export const newMatchSchema = z.object({
     .array(
       z.object({
         memberId: z.uuid(),
-        /** 1 ou 2 = time em quadra; 0 = banco de reserva. */
-        team: z.int().min(BENCH_TEAM).max(MATCH_TEAMS),
+        /** 1 = Branco, 2 = Preto. */
+        team: z.int().min(1).max(MATCH_TEAMS),
+        /** Reserva do time (começa no banco). */
+        reserve: z.boolean(),
       }),
     )
     .refine(
-      (players) => players.filter((player) => player.team !== BENCH_TEAM).length >= MIN_ON_COURT,
-      `Marque pelo menos ${MIN_ON_COURT} confirmados e sorteie os times.`,
+      (players) => players.filter((player) => !player.reserve).length >= MIN_STARTERS,
+      `Marque pelo menos ${MIN_STARTERS} confirmados e sorteie os times.`,
     ),
 });
 

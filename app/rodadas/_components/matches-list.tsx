@@ -53,8 +53,9 @@ export function MatchesList({ matches, isOrganizer }: MatchesListProps) {
                     </span>
                   </p>
                   <p className="text-xs text-muted-foreground tabular-nums">
-                    {match.presentCount} jogadores em {match.teamCount} times
-                    {match.benchCount > 0 && ` + ${match.benchCount} no banco`} · {match.submittedCount} enviaram notas
+                    Branco x Preto · {match.starterCount} titulares
+                    {match.reserveCount > 0 && ` + ${match.reserveCount} reservas`} · {match.submittedCount} enviaram
+                    notas
                   </p>
                   {match.winners.length > 0 && (
                     <ul aria-label="Cartas especiais da rodada" className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs">

@@ -229,19 +229,22 @@ export type Database = {
           group_id: string
           match_id: string
           member_id: string
-          team: number | null
+          reserve: boolean
+          team: number
         }
         Insert: {
           group_id: string
           match_id: string
           member_id: string
-          team?: number | null
+          reserve?: boolean
+          team: number
         }
         Update: {
           group_id?: string
           match_id?: string
           member_id?: string
-          team?: number | null
+          reserve?: boolean
+          team?: number
         }
         Relationships: [
           {
@@ -396,6 +399,7 @@ export type Database = {
         Args: {
           match_date: string
           present_member_ids: string[]
+          reserve_flags: boolean[]
           target_group: string
           team_numbers: number[]
         }

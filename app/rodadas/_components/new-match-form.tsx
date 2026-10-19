@@ -17,7 +17,8 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { BENCH_TEAM, draftMatch, MATCH_TEAMS, PLAYERS_PER_TEAM } from "@/lib/draft";
+import { draftMatch, MATCH_TEAMS, PLAYERS_PER_TEAM } from "@/lib/draft";
+import { teamName } from "@/lib/teams";
 import { cn } from "@/lib/utils";
 import { POSITION_LABELS } from "@/types/player";
 import { createMatch } from "../_actions/create-match";
@@ -29,15 +30,26 @@ type NewMatchFormProps = {
   today: string;
 };
 
-/** Times em quadra (1, 2) e o banco de reserva (0), na ordem em que aparecem. */
+/** Branco (1) e Preto (2), na ordem em que aparecem. */
 const TEAM_NUMBERS = Array.from({ length: MATCH_TEAMS }, (_, index) => index + 1);
-const GROUPS = [...TEAM_NUMBERS, BENCH_TEAM];
 
-function groupLabel(team: number): string {
-  return team === BENCH_TEAM ? "Banco" : `Time ${team}`;
+/** Vagas do seletor de cada jogador: titular ou reserva de cada time ("1:s", "1:r", "2:s", "2:r"). */
+const SLOTS = TEAM_NUMBERS.flatMap((team) => [
+  { value: `${team}:s`, team, reserve: false, label: teamName(team) },
+  { value: `${team}:r`, team, reserve: true, label: `${teamName(team)} · reserva` },
+]);
+
+/** Bolinha da cor do time (branco com aro / preto com aro). */
+function TeamSwatch({ team }: { team: number }) {
+  return (
+    <span
+      aria-hidden
+      className={cn("inline-block size-3 rounded-full border", team === 1 ? "bg-white" : "bg-black border-white/40")}
+    />
+  );
 }
 
-/** Data + confirmados do WhatsApp + sorteio: 2 times de 5 equilibrados pelo OVR e o banco. */
+/** Data + confirmados do WhatsApp + sorteio: Branco e Preto, titulares e reservas equilibrados pelo OVR. */
 export function NewMatchForm({ members, today }: NewMatchFormProps) {
   const [confirmedIds, setConfirmedIds] = useState<string[]>([]);
   const [createdRound, setCreatedRound] = useState<number | null>(null);
@@ -65,21 +77,26 @@ export function NewMatchForm({ members, today }: NewMatchFormProps) {
         ? [{ id, role: member.position === "GOL" ? ("goalkeeper" as const) : ("outfield" as const), ovr: member.ovr }]
         : [];
     });
-    const { teams, benchIds } = draftMatch(confirmed);
+    const { teams } = draftMatch(confirmed);
     form.setValue(
       "players",
-      [
-        ...teams.flatMap((team) => team.playerIds.map((memberId) => ({ memberId, team: team.number }))),
-        ...benchIds.map((memberId) => ({ memberId, team: BENCH_TEAM })),
-      ],
+      teams.flatMap((team) => [
+        ...team.playerIds.map((memberId) => ({ memberId, team: team.number, reserve: false })),
+        ...team.reserveIds.map((memberId) => ({ memberId, team: team.number, reserve: true })),
+      ]),
       { shouldValidate: true },
     );
   }
 
-  function handleMovePlayer(memberId: string, team: number) {
+  function handleMovePlayer(memberId: string, slotValue: string) {
+    const slot = SLOTS.find((candidate) => candidate.value === slotValue);
+    if (!slot) return;
     form.setValue(
       "players",
-      players.map((player) => (player.memberId === memberId ? { ...player, team } : player)),
+      players.map((player) =>
+        player.memberId === memberId ? { ...player, team: slot.team, reserve: slot.reserve } : player,
+      ),
+      { shouldValidate: true },
     );
   }
 
@@ -104,7 +121,7 @@ export function NewMatchForm({ members, today }: NewMatchFormProps) {
           Nova rodada
         </h2>
         <p className="text-sm text-muted-foreground">
-          Marque quem confirmou no WhatsApp e sorteie os times pelo OVR.
+          Marque quem confirmou no WhatsApp e sorteie o time Branco e o time Preto pelo OVR.
         </p>
       </div>
 
@@ -185,9 +202,9 @@ export function NewMatchForm({ members, today }: NewMatchFormProps) {
             <FieldSet>
               <FieldLegend variant="label">Times</FieldLegend>
               <FieldDescription>
-                {MATCH_TEAMS} times de {PLAYERS_PER_TEAM} (1 goleiro + {PLAYERS_PER_TEAM - 1} na linha), equilibrados
-                pelo OVR. Com mais de {MATCH_TEAMS * PLAYERS_PER_TEAM} confirmados, o sorteio decide quem começa e o
-                resto vai para o banco.
+                Time Branco e time Preto com {PLAYERS_PER_TEAM} titulares (1 goleiro + {PLAYERS_PER_TEAM - 1} na
+                linha), equilibrados pelo OVR. Com mais de {MATCH_TEAMS * PLAYERS_PER_TEAM} confirmados, o sorteio
+                decide quem começa e divide o resto igualmente em reservas dos dois times.
               </FieldDescription>
               <Button type="button" variant="secondary" size="lg" className="h-11 w-full text-base" onClick={handleDraft}>
                 <ShuffleIcon aria-hidden />
@@ -196,12 +213,12 @@ export function NewMatchForm({ members, today }: NewMatchFormProps) {
 
               {hasTeams && (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {GROUPS.map((teamNumber) => {
-                    const isBench = teamNumber === BENCH_TEAM;
+                  {TEAM_NUMBERS.map((teamNumber) => {
                     const teamPlayers = players.filter((player) => player.team === teamNumber);
-                    // Banco vazio não aparece (até 10 confirmados todo mundo joga).
-                    if (isBench && teamPlayers.length === 0) return null;
-                    const knownOvrs = teamPlayers.flatMap((player) => {
+                    const starters = teamPlayers.filter((player) => !player.reserve);
+                    const reserves = teamPlayers.filter((player) => player.reserve);
+                    // Média só dos titulares (quem começa em quadra).
+                    const knownOvrs = starters.flatMap((player) => {
                       const ovr = memberById.get(player.memberId)?.ovr;
                       return ovr == null ? [] : [ovr];
                     });
@@ -209,69 +226,63 @@ export function NewMatchForm({ members, today }: NewMatchFormProps) {
                       knownOvrs.length > 0
                         ? Math.round(knownOvrs.reduce((sum, ovr) => sum + ovr, 0) / knownOvrs.length)
                         : null;
-                    const hasGoalkeeper = teamPlayers.some(
+                    const hasGoalkeeper = starters.some(
                       (player) => memberById.get(player.memberId)?.position === "GOL",
                     );
 
+                    function renderPlayer(player: (typeof players)[number]) {
+                      const member = memberById.get(player.memberId);
+                      if (!member) return null;
+                      const slotValue = `${player.team}:${player.reserve ? "r" : "s"}`;
+                      return (
+                        <li key={player.memberId} className="flex items-center gap-2 text-sm">
+                          <span className="min-w-0 flex-1 truncate">
+                            {member.nickname}
+                            {member.position === "GOL" && <span className="text-xs text-muted-foreground"> · GOL</span>}
+                          </span>
+                          <label className="sr-only" htmlFor={`team-of-${member.id}`}>
+                            Onde fica {member.nickname}
+                          </label>
+                          <select
+                            id={`team-of-${member.id}`}
+                            value={slotValue}
+                            onChange={(event) => handleMovePlayer(member.id, event.target.value)}
+                            className="h-8 rounded-md border bg-background px-1.5 text-xs"
+                          >
+                            {SLOTS.map((slot) => (
+                              <option key={slot.value} value={slot.value}>
+                                {slot.label}
+                              </option>
+                            ))}
+                          </select>
+                        </li>
+                      );
+                    }
+
                     return (
-                      <div
-                        key={teamNumber}
-                        className={cn(
-                          "flex flex-col gap-2 rounded-lg p-3",
-                          // Banco: largura total e borda tracejada, para ler como "fora da quadra".
-                          isBench ? "border border-dashed bg-transparent sm:col-span-2" : "bg-muted/40",
-                        )}
-                      >
+                      <div key={teamNumber} className="flex flex-col gap-2 rounded-lg bg-muted/40 p-3">
                         <div className="flex items-baseline justify-between">
-                          <h3 className="flex items-center gap-1.5 font-display text-base font-bold uppercase">
-                            {isBench && <ArmchairIcon aria-hidden className="size-4 text-muted-foreground" />}
-                            {isBench ? "Banco de reserva" : `Time ${teamNumber}`}
+                          <h3 className="flex items-center gap-2 font-display text-base font-bold uppercase">
+                            <TeamSwatch team={teamNumber} />
+                            Time {teamName(teamNumber)}
                           </h3>
                           <span className="text-xs text-muted-foreground tabular-nums">
-                            {isBench
-                              ? `${teamPlayers.length} ${teamPlayers.length === 1 ? "jogador" : "jogadores"}`
-                              : `${teamPlayers.length} · média ${averageOvr ?? "–"}`}
+                            {starters.length} · média {averageOvr ?? "–"}
                           </span>
                         </div>
-                        {!isBench && !hasGoalkeeper && teamPlayers.length > 0 && (
+                        {!hasGoalkeeper && starters.length > 0 && (
                           <p className="text-xs text-muted-foreground">Sem goleiro: rodízio no gol.</p>
                         )}
-                        {isBench && (
-                          <p className="text-xs text-muted-foreground">
-                            Ficaram de fora no sorteio. Também estão na rodada: avaliam e são avaliados.
-                          </p>
+                        <ul className="flex flex-col gap-1">{starters.map(renderPlayer)}</ul>
+                        {reserves.length > 0 && (
+                          <div className="flex flex-col gap-1 border-t border-dashed pt-2">
+                            <p className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground uppercase">
+                              <ArmchairIcon aria-hidden className="size-3.5" />
+                              Reservas · {reserves.length}
+                            </p>
+                            <ul className="flex flex-col gap-1">{reserves.map(renderPlayer)}</ul>
+                          </div>
                         )}
-                        <ul className="flex flex-col gap-1">
-                          {teamPlayers.map((player) => {
-                            const member = memberById.get(player.memberId);
-                            if (!member) return null;
-                            return (
-                              <li key={player.memberId} className="flex items-center gap-2 text-sm">
-                                <span className="min-w-0 flex-1 truncate">
-                                  {member.nickname}
-                                  {member.position === "GOL" && (
-                                    <span className="text-xs text-muted-foreground"> · GOL</span>
-                                  )}
-                                </span>
-                                <label className="sr-only" htmlFor={`team-of-${member.id}`}>
-                                  Onde fica {member.nickname}
-                                </label>
-                                <select
-                                  id={`team-of-${member.id}`}
-                                  value={player.team}
-                                  onChange={(event) => handleMovePlayer(member.id, Number(event.target.value))}
-                                  className="h-8 rounded-md border bg-background px-1.5 text-xs"
-                                >
-                                  {GROUPS.map((number) => (
-                                    <option key={number} value={number}>
-                                      {groupLabel(number)}
-                                    </option>
-                                  ))}
-                                </select>
-                              </li>
-                            );
-                          })}
-                        </ul>
                       </div>
                     );
                   })}

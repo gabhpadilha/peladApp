@@ -11,7 +11,7 @@ export type CreateMatchResult =
   | { success: true; round: number }
   | { success: false; message: string };
 
-/** Organizador cria a rodada com os confirmados já divididos em times (atômico no banco). */
+/** Organizador cria a rodada com os confirmados já divididos em Branco e Preto, titulares e reservas (atômico no banco). */
 export async function createMatch(input: NewMatchInput): Promise<CreateMatchResult> {
   const membership = await requireActiveMembership("/rodadas");
   if (membership.role !== "organizer") {
@@ -31,6 +31,7 @@ export async function createMatch(input: NewMatchInput): Promise<CreateMatchResu
     match_date: playedOn,
     present_member_ids: players.map((player) => player.memberId),
     team_numbers: players.map((player) => player.team),
+    reserve_flags: players.map((player) => player.reserve),
   });
   if (error || !matchId) {
     return {
