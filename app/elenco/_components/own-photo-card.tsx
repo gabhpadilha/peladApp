@@ -8,7 +8,11 @@ type OwnPhotoCardProps = {
 /** Cada jogador troca a própria foto da carta (recortada no aparelho). */
 export function OwnPhotoCard({ member }: OwnPhotoCardProps) {
   return (
-    <section aria-labelledby="own-photo-title" className="flex flex-col gap-4 rounded-xl border bg-card p-4">
+    <section
+      id="sua-foto"
+      aria-labelledby="own-photo-title"
+      className="flex scroll-mt-20 flex-col gap-4 rounded-xl border bg-card p-4"
+    >
       <div>
         <h2 id="own-photo-title" className="font-display text-lg font-bold tracking-wide uppercase">
           Sua foto

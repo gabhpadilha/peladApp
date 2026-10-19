@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChartColumnIcon, GalleryVerticalEndIcon, InfoIcon } from "lucide-react";
+import { CameraIcon, ChartColumnIcon, GalleryVerticalEndIcon, InfoIcon } from "lucide-react";
 import { OvrDelta } from "@/components/ovr-delta";
 import { PlayerCard } from "@/components/player-card";
 import { buttonVariants } from "@/components/ui/button";
@@ -91,6 +91,17 @@ export function MyCardSummary({
           <InfoIcon aria-hidden className="mt-px size-3.5 shrink-0" />
           Sua carta ganha números quando fechar a primeira rodada em que você jogou.
         </p>
+      )}
+
+      {/* Sem foto: atalho direto para o upload (fica no Elenco, longe no celular). */}
+      {!player.photo && (
+        <Link
+          href="/elenco#sua-foto"
+          className={cn(buttonVariants({ variant: "default", size: "lg" }), "h-11 text-sm")}
+        >
+          <CameraIcon aria-hidden />
+          Adicionar sua foto na carta
+        </Link>
       )}
 
       <div className="grid grid-cols-2 gap-2">

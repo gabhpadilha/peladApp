@@ -44,8 +44,21 @@ async function RosterContent() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="flex flex-col gap-6">
+      {/*
+        Celular: "Sua foto" primeiro (antes do cadastro longo do dono), depois elenco, perfil e senha.
+        Desktop: elenco à esquerda ocupando as duas linhas; foto e perfil/senha à direita.
+        key: trocou de conta na mesma aba, os formulários recomeçam do zero.
+      */}
+      <div
+        key={roster.membership.memberId}
+        className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-start"
+      >
+        {me && (
+          <div className="lg:col-start-2 lg:row-start-1">
+            <OwnPhotoCard member={me} />
+          </div>
+        )}
+        <div className="flex flex-col gap-6 lg:col-start-1 lg:row-span-2 lg:row-start-1">
           {isOwner && <CreatePlayerForm loginUrl={roster.loginUrl} />}
           <MembersList
             members={roster.members}
@@ -55,9 +68,7 @@ async function RosterContent() {
             loginUrl={roster.loginUrl}
           />
         </div>
-        {/* key: trocou de conta na mesma aba, os formulários recomeçam do zero. */}
-        <div key={roster.membership.memberId} className="flex flex-col gap-6">
-          {me && <OwnPhotoCard member={me} />}
+        <div className="flex flex-col gap-6 lg:col-start-2 lg:row-start-2">
           <OwnProfileCard />
           <PasswordCard login={roster.login} />
         </div>
