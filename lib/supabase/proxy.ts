@@ -2,8 +2,8 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { getSupabaseEnv, hasSupabaseEnv } from "./env";
 
-/** Rotas abertas sem login (o convite é onde a conta é criada). Todo o resto exige sessão. */
-const PUBLIC_PATH_PREFIXES = ["/entrar", "/auth", "/convite"];
+/** Rotas abertas sem login. Todo o resto exige sessão (contas são criadas pelo organizador). */
+const PUBLIC_PATH_PREFIXES = ["/entrar", "/auth"];
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATH_PREFIXES.some(

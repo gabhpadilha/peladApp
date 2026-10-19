@@ -58,12 +58,11 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
 - **Home (`/`):** nome da pelada + "Fala, <apelido>", aviso de avaliação pendente, minha carta (OVR, variação, ranking, jogos, avaliações; dica quando ainda não tem OVR), rodada em avaliação (envios/presentes), última rodada fechada (Craque da Rodada + top 3) ou o vazio "Nenhuma rodada ainda", e ranking (linha e goleiros).
 - **Navbar:** logo (home), "Pelada", chip apelido + OVR (perfil) e "Sair" (só ícone no celular).
 - **Trocar senha (`/trocar-senha`):** obrigatória no 1º acesso de quem foi cadastrado pelo organizador.
-- **Cadastrar jogador (em `/pelada`):** nome, apelido, posição e e-mail → mostra e-mail + senha provisória uma única vez e "Copiar mensagem para o WhatsApp".
+- **Cadastrar jogador (em `/pelada`):** nome, apelido, posição e **usuário** (sugerido do apelido enquanto o organizador não editar; mostrado em fonte mono) → mostra usuário + senha provisória uma única vez e "Copiar mensagem para o WhatsApp" (`AccessCard`). Sem e-mail.
 - **Atleta (`/jogadores/[id]`):** carta + resumo, aviso de pendência (só no próprio perfil), desempenho por rodada (barras, cor única, tooltip por CSS), atributos (barras) e histórico em tabela.
-- **Entrar (`/entrar`):** e-mail e senha; avisa que o cadastro é pelo link do organizador.
-- **Convite = cadastro (`/convite/[code]`):** nome da pelada + nome, apelido, posição (cards de rádio com dica), e-mail e senha → "Criar conta e entrar". Quem já tem conta vê só apelido/posição.
+- **Entrar (`/entrar`):** campo "Usuário" (aceita também e-mail das contas antigas) e senha; avisa "Peça acesso ao organizador da pelada".
 - **Criar pelada (`/bem-vindo`):** só o organizador, uma vez: nome da pelada, seus dados e senha.
-- **Pelada (`/pelada`):** "Link de cadastro" com copiar/compartilhar; "Nova rodada": data, checklist de confirmados (com OVR e "Marcar todos"), número de times (padrão: confirmados ÷ 5), "Sortear times"/"Sortear de novo", cards dos times com média de OVR, aviso "rodízio no gol" e seletor para trocar jogador de time. Sem placar. Rodadas com "Fechar rodada" (confirmação). Elenco com OVR e "Tornar organizador".
+- **Pelada (`/pelada`):** "Cadastrar jogador" (organizador); "Nova rodada": data, checklist de confirmados (com OVR e "Marcar todos"), número de times (padrão: confirmados ÷ 5), "Sortear times"/"Sortear de novo", cards dos times com média de OVR, aviso "rodízio no gol" e seletor para trocar jogador de time. Sem placar. Rodadas com "Fechar rodada" (confirmação). Elenco com OVR e, para o organizador, `@usuário`, "Tornar organizador" e "Redefinir senha" (confirmação → novo `AccessCard`). "Sua senha" para trocar a própria.
 - Superfícies: `rounded-xl border bg-card p-4`; títulos de seção em `font-display` caixa alta. Campos e botões principais com `h-11 text-base` (toque e sem zoom no iOS).
 
 ## 📸 Foto do jogador

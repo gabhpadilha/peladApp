@@ -5,6 +5,7 @@ import { z } from "zod";
 import { requireActiveMembership } from "@/lib/session";
 import { createAdminClient, hasAdminEnv } from "@/lib/supabase/admin";
 import { generateTempPassword } from "@/lib/temp-password";
+import { usernameToEmail } from "@/lib/username";
 import {
   createPlayerSchema,
   type CreatePlayerInput,
@@ -12,12 +13,15 @@ import {
 } from "@/types/member-schema";
 
 export type CreatePlayerResult =
-  | { success: true; email: string; nickname: string; tempPassword: string }
+  | { success: true; username: string; nickname: string; tempPassword: string }
   | { success: false; message: string; errors?: FieldErrors<CreatePlayerInput> };
 
+const USERNAME_TAKEN = "Esse usuário já existe. Escolha outro.";
+
 /**
- * Organizador cadastra um jogador: cria a conta já confirmada com senha
- * provisória (troca obrigatória no 1º acesso) e coloca na pelada.
+ * Organizador cadastra um jogador por usuário (sem e-mail): cria a conta já
+ * confirmada com senha provisória (troca obrigatória no 1º acesso) e coloca
+ * na pelada. O Auth recebe o e-mail técnico do usuário (lib/username.ts).
  */
 export async function createPlayer(input: CreatePlayerInput): Promise<CreatePlayerResult> {
   const membership = await requireActiveMembership("/pelada");
@@ -40,30 +44,40 @@ export async function createPlayer(input: CreatePlayerInput): Promise<CreatePlay
     };
   }
 
-  const { email, fullName, nickname, position } = validation.data;
-  const tempPassword = generateTempPassword();
+  const { username, fullName, nickname, position } = validation.data;
   const admin = createAdminClient();
 
+  const { data: taken } = await admin.from("profiles").select("id").eq("username", username).maybeSingle();
+  if (taken) {
+    return { success: false, message: USERNAME_TAKEN, errors: { username: [USERNAME_TAKEN] } };
+  }
+
+  const tempPassword = generateTempPassword();
   const { data: created, error: createError } = await admin.auth.admin.createUser({
-    email,
+    email: usernameToEmail(username),
     password: tempPassword,
     email_confirm: true,
     user_metadata: { must_change_password: true },
   });
   if (createError || !created.user) {
+    if (createError?.code === "email_exists") {
+      return { success: false, message: USERNAME_TAKEN, errors: { username: [USERNAME_TAKEN] } };
+    }
     return {
       success: false,
       message:
-        createError?.code === "email_exists"
-          ? "Esse e-mail já tem conta. Mande o link de cadastro para ele entrar na pelada."
+        createError?.code === "email_address_invalid"
+          ? "O Supabase recusou o login técnico desse usuário. Avise quem cuida do app."
           : "Não foi possível criar a conta.",
-      errors: createError?.code === "email_exists" ? { email: ["E-mail já cadastrado."] } : undefined,
     };
   }
 
   const userId = created.user.id;
   // O perfil já foi criado pelo trigger on_auth_user_created.
-  const profileUpdate = await admin.from("profiles").update({ full_name: fullName }).eq("id", userId);
+  const profileUpdate = await admin
+    .from("profiles")
+    .update({ full_name: fullName, username })
+    .eq("id", userId);
   const memberInsert = await admin
     .from("group_members")
     .insert({ group_id: membership.groupId, user_id: userId, nickname, position });
@@ -74,7 +88,6 @@ export async function createPlayer(input: CreatePlayerInput): Promise<CreatePlay
     return { success: false, message: "Não foi possível colocar o jogador na pelada. Tente de novo." };
   }
 
-  revalidatePath("/pelada");
-  revalidatePath("/");
-  return { success: true, email, nickname, tempPassword };
+  revalidatePath("/", "layout");
+  return { success: true, username, nickname, tempPassword };
 }

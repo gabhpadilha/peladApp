@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getSafeRedirectPath } from "@/lib/safe-redirect";
 import { hasSupabaseEnv } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
+import { usernameToEmail } from "@/lib/username";
 import type { FieldErrors } from "@/types/member-schema";
 import { signInSchema, type SignInInput } from "../_schemas/sign-in-schema";
 
@@ -14,7 +15,10 @@ export type SignInResult = {
   errors?: FieldErrors<SignInInput>;
 };
 
-/** Login com e-mail e senha; em caso de sucesso redireciona para `next`. */
+/**
+ * Login com usuário (ou e-mail, nas contas antigas) e senha; em caso de
+ * sucesso redireciona para `next`. Usuário vira o e-mail técnico do Auth.
+ */
 export async function signIn(input: SignInInput, next?: string): Promise<SignInResult> {
   const validation = signInSchema.safeParse(input);
   if (!validation.success) {
@@ -29,8 +33,11 @@ export async function signIn(input: SignInInput, next?: string): Promise<SignInR
     return { success: false, message: "Supabase ainda não configurado (.env.local)." };
   }
 
+  const { login, password } = validation.data;
+  const email = login.includes("@") ? login : usernameToEmail(login);
+
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword(validation.data);
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     return {
@@ -38,7 +45,7 @@ export async function signIn(input: SignInInput, next?: string): Promise<SignInR
       message:
         error.status === 429
           ? "Muitas tentativas. Espere um minuto e tente de novo."
-          : "E-mail ou senha incorretos.",
+          : "Usuário ou senha incorretos.",
     };
   }
 

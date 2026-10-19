@@ -1,6 +1,7 @@
 import { getGroupEvaluations, getOvrByMember } from "@/lib/group-scores";
 import { requireActiveMembership, type ActiveMembership, type PlayerPositionCode } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
+import { emailToUsername } from "@/lib/username";
 import { AWARD_KINDS, type AwardKind } from "@/types/award";
 import type { Database } from "@/types/database";
 
@@ -13,6 +14,8 @@ export type GroupMemberSummary = {
   role: Database["public"]["Enums"]["member_role"];
   /** OVR atual (rodadas fechadas); `null` se ainda não foi avaliado. */
   ovr: number | null;
+  /** Usuário de login; `null` em contas antigas, que entram por e-mail. */
+  username: string | null;
 };
 
 export type MatchSummary = {
@@ -30,14 +33,12 @@ export type MatchSummary = {
 export type GroupOverview = {
   membership: ActiveMembership;
   isOrganizer: boolean;
-  /** Só para o organizador. */
-  inviteUrl: string | null;
   members: GroupMemberSummary[];
   matches: MatchSummary[];
   /** Hoje no fuso da pelada (`AAAA-MM-DD`), padrão da nova rodada. */
   today: string;
-  /** E-mail da conta logada, mostrado no card de senha. */
-  email: string;
+  /** Usuário (ou e-mail, nas contas antigas) da conta logada, para o card de senha. */
+  login: string;
   /** Tela de login, para a mensagem de acesso dos jogadores cadastrados. */
   loginUrl: string;
 };
@@ -51,7 +52,7 @@ export async function getGroupOverview(): Promise<GroupOverview> {
     supabase.auth.getClaims(),
     supabase
       .from("group_members")
-      .select("id, nickname, position, role")
+      .select("id, user_id, nickname, position, role")
       .eq("group_id", membership.groupId)
       .order("nickname"),
     supabase
@@ -70,6 +71,17 @@ export async function getGroupOverview(): Promise<GroupOverview> {
   if (awardsResult.error) throw awardsResult.error;
 
   const nicknameByMember = new Map(membersResult.data.map((member) => [member.id, member.nickname]));
+
+  // Usuário de login de cada um (só o organizador vê, para saber o que mandar).
+  const { data: profiles, error: profilesError } = await supabase
+    .from("profiles")
+    .select("id, username")
+    .in(
+      "id",
+      membersResult.data.map((member) => member.user_id),
+    );
+  if (profilesError) throw profilesError;
+  const usernameByUser = new Map(profiles.map((profile) => [profile.id, profile.username]));
   const kindOrder: readonly AwardKind[] = AWARD_KINDS;
 
   const submittedByMatch = new Map(
@@ -81,10 +93,13 @@ export async function getGroupOverview(): Promise<GroupOverview> {
   return {
     membership,
     isOrganizer,
-    inviteUrl: isOrganizer ? `${siteUrl}/convite/${membership.inviteCode}` : null,
     members: membersResult.data.map((member) => ({
-      ...member,
+      id: member.id,
+      nickname: member.nickname,
+      position: member.position,
+      role: member.role,
       ovr: ovrByMember.get(member.id) ?? null,
+      username: isOrganizer ? (usernameByUser.get(member.user_id) ?? null) : null,
     })),
     matches: matchesResult.data.map((match) => ({
       id: match.id,
@@ -101,7 +116,10 @@ export async function getGroupOverview(): Promise<GroupOverview> {
     })),
     // Seguro aqui: a sessão já foi lida, então a rota é dinâmica.
     today: new Intl.DateTimeFormat("en-CA", { timeZone: SITE_TIME_ZONE }).format(new Date()),
-    email: claimsResult.data?.claims.email ?? "",
+    login: (() => {
+      const email = claimsResult.data?.claims.email ?? "";
+      return emailToUsername(email) ?? email;
+    })(),
     loginUrl: `${siteUrl}/entrar`,
   };
 }

@@ -19,7 +19,7 @@ export function SignInForm({ next }: SignInFormProps) {
   const [isPending, startTransition] = useTransition();
   const form = useForm<SignInInput>({
     resolver: zodResolver(signInSchema),
-    defaultValues: { email: "", password: "" },
+    defaultValues: { login: "", password: "" },
   });
 
   function handleSubmit(data: SignInInput) {
@@ -35,18 +35,20 @@ export function SignInForm({ next }: SignInFormProps) {
     <form onSubmit={form.handleSubmit(handleSubmit)} noValidate>
       <FieldGroup>
         <Controller
-          name="email"
+          name="login"
           control={form.control}
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <FieldLabel htmlFor="sign-in-email">E-mail</FieldLabel>
+              <FieldLabel htmlFor="sign-in-login">Usuário</FieldLabel>
               <Input
                 {...field}
-                id="sign-in-email"
-                type="email"
-                inputMode="email"
-                autoComplete="email"
-                placeholder="voce@email.com"
+                id="sign-in-login"
+                type="text"
+                autoComplete="username"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                placeholder="seu.usuario (ou e-mail)"
                 aria-invalid={fieldState.invalid}
                 className="h-11 text-base"
               />

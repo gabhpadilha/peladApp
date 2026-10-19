@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { USERNAME_PATTERN, USERNAME_RULE } from "@/lib/username";
 
 export const PLAYER_POSITION_CODES = ["FIX", "ALA", "PIV", "GOL"] as const;
 
@@ -34,7 +35,12 @@ export const memberProfileSchema = z.object({
 
 export type MemberProfileInput = z.infer<typeof memberProfileSchema>;
 
-const inviteCodeSchema = z.string().regex(/^[0-9a-f]{16}$/, "Convite inválido.");
+/** Login sem e-mail (ver lib/username.ts). */
+export const usernameSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(USERNAME_PATTERN, USERNAME_RULE);
 
 /** Organizador criando a pelada (a conta já existe; define a senha aqui). */
 export const createGroupSchema = memberProfileSchema.extend({
@@ -48,25 +54,9 @@ export const createGroupSchema = memberProfileSchema.extend({
 
 export type CreateGroupInput = z.infer<typeof createGroupSchema>;
 
-/** Quem já tem conta entrando pelo convite. */
-export const joinGroupSchema = memberProfileSchema.extend({
-  inviteCode: inviteCodeSchema,
-});
-
-export type JoinGroupInput = z.infer<typeof joinGroupSchema>;
-
-/** Cadastro único pelo link de convite: cria a conta e já entra na pelada. */
-export const signUpSchema = memberProfileSchema.extend({
-  inviteCode: inviteCodeSchema,
-  email: emailSchema,
-  password: passwordSchema,
-});
-
-export type SignUpInput = z.infer<typeof signUpSchema>;
-
-/** Organizador cadastrando um jogador (a senha provisória é gerada no servidor). */
+/** Organizador cadastrando um jogador por usuário (a senha provisória é gerada no servidor). */
 export const createPlayerSchema = memberProfileSchema.extend({
-  email: emailSchema,
+  username: usernameSchema,
 });
 
 export type CreatePlayerInput = z.infer<typeof createPlayerSchema>;
