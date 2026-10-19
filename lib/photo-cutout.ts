@@ -1,7 +1,7 @@
 /**
  * Prepara a foto da carta (só no navegador):
  * 1. lê a foto respeitando a orientação do celular;
- * 2. acha a pessoa: máscara do servidor (remove.bg gratuito ou MODNet) ou, sem rede, do MediaPipe no aparelho;
+ * 2. acha a pessoa: máscara do servidor (BiRefNet no Hugging Face, remove.bg ou MODNet) ou, sem rede, do MediaPipe no aparelho;
  * 3. enquadra pela cabeça (rosto grande e busto de lado a lado) para a área de foto da carta;
  * 4. gera o recorte sem fundo (PNG com alfa) e a original (JPEG).
  * O servidor converte as duas em WebP de 640px.
@@ -282,8 +282,8 @@ function maskCanvas(alpha: Float32Array, width: number, height: number): HTMLCan
   return canvas;
 }
 
-/** Quanto esperar o recorte do servidor (remove.bg até 15s + MODNet de reserva, cold start incluído) antes de tentar no aparelho. */
-const REMOTE_TIMEOUT_MS = 35_000;
+/** Quanto esperar o recorte do servidor (Space até 20s + remove.bg até 15s + MODNet de reserva, cold start incluído) antes de tentar no aparelho. */
+const REMOTE_TIMEOUT_MS = 45_000;
 /** Quanto esperar o segmentador do aparelho (download de ~16MB + WASM) antes de seguir só com a original. */
 const SEGMENTER_TIMEOUT_MS = 30_000;
 
@@ -347,8 +347,8 @@ async function maskToAlpha(mask: Blob, width: number, height: number): Promise<F
 }
 
 /**
- * Alfa da pessoa: primeiro pelo servidor (remove.bg ou, sem ele,
- * MODNet); se a rede falhar, no aparelho (MediaPipe, que só é baixado nesse
+ * Alfa da pessoa: primeiro pelo servidor (BiRefNet no Hugging Face, remove.bg
+ * ou MODNet, nessa ordem); se a rede falhar, no aparelho (MediaPipe, que só é baixado nesse
  * caso e enche vãos entre orelha e gola). `null` = nenhum dos dois.
  */
 async function findPersonAlpha(photo: HTMLCanvasElement, remoteMask: RemoteMask | undefined): Promise<Float32Array | null> {
