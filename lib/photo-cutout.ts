@@ -2,7 +2,7 @@
  * Prepara a foto da carta (só no navegador):
  * 1. lê a foto respeitando a orientação do celular;
  * 2. acha a pessoa: máscara do servidor (BiRefNet no Hugging Face, remove.bg ou MODNet) ou, sem rede, do MediaPipe no aparelho;
- * 3. enquadra pela cabeça no padrão das cartas do EA FC (do peito para cima, OVR livre) para a área de foto da carta;
+ * 3. enquadra no padrão das cartas do EA FC (ombros na largura toda da carta, do peito para cima) para a área de foto da carta;
  * 4. gera o recorte sem fundo (PNG com alfa) e a original (JPEG).
  * O servidor converte as duas em WebP de 640px.
  */
@@ -163,18 +163,23 @@ const HEAD_SCAN = 0.7;
 /** Altura da cabeça (topo do cabelo ao queixo) ≈ 1,3 × a largura dela. */
 const HEAD_PROPORTION = 1.3;
 /*
- * Padrão das cartas do EA FC (medido nas referências do dono do app, 2026-10-19),
- * em fração da área de foto (top 2%, altura 62%, laterais -4% da carta):
- * cabeça com ~1/4 da altura da carta, topo dela a ~15% da carta, rosto um
- * pouco à direita do centro (o OVR fica livre, à esquerda) e corte na linha
- * do peito, atrás do apelido.
+ * Modelo "C" escolhido pelo dono do app (2026-10-19, entre 4 variantes com
+ * fotos reais): ombros ocupando a largura toda da carta, topo da cabeça a
+ * ~11% da carta e rosto a ~52% da largura. Em fração da área de foto (top 2%,
+ * altura 62%, laterais -4% da carta, `player-card.tsx`):
  */
-/** Altura do quadro em cabeças estimadas (a estimativa fica perto da cabeça real: ~27% da carta). */
-const FRAME_HEADS = 2.35;
-/** Folga acima da cabeça, em fração da altura do quadro: topo da cabeça a ~14% da carta. */
-const HEADROOM = 0.19;
-/** Centro do rosto, em fração da largura do quadro: ~54% da carta, à direita do OVR. */
-const FACE_X = 0.54;
+/** Largura do quadro ÷ largura dos ombros: área de 108% da carta ÷ ombros em 100% dela. */
+const FRAME_PER_SHOULDERS = 1.08;
+/** Folga acima da cabeça, em fração da altura do quadro: (11% − 2%) ÷ 62%. */
+const HEADROOM = 0.145;
+/** Centro do rosto, em fração da largura do quadro: (52% + 4%) ÷ 108%. */
+const FACE_X = 0.519;
+/** Faixa dos ombros, em alturas de cabeça estimadas abaixo do topo (do queixo ao fim dos ombros). */
+const SHOULDER_SCAN_FROM = 0.9;
+const SHOULDER_SCAN_TO = 1.8;
+/** Limites dos ombros em larguras de cabeça: foto que corta os ombros ou braço aberto não estragam o quadro. */
+const MIN_SHOULDER_HEADS = 2.4;
+const MAX_SHOULDER_HEADS = 3.4;
 
 /** Trecho contínuo de pessoa que passa por `centerX` na linha `y` (largura 0 = fora). */
 function runAt(alpha: Float32Array, width: number, y: number, centerX: number): { width: number; center: number } {
@@ -189,11 +194,25 @@ function runAt(alpha: Float32Array, width: number, y: number, centerX: number): 
 }
 
 /**
- * Enquadramento pela cabeça (estilo EA FC): acha o topo, mede a largura da
- * cabeça até olhos/orelhas, estima a altura dela e monta o quadro na proporção
- * da área da carta, com a cabeça sempre no mesmo tamanho e lugar. O quadro pode
- * passar da foto (pouco espaço acima da cabeça, ombro cortado pela borda): o
- * que fica fora sai transparente e a borda da foto some aos poucos.
+ * Largura dos ombros: o trecho mais largo que passa pelo centro do rosto entre
+ * o queixo e o fim dos ombros, limitado em cabeças (foto que corta os ombros
+ * mede menos: vale o mínimo; braço aberto mede demais: vale o máximo).
+ */
+function measureShoulders(alpha: Float32Array, width: number, height: number, top: number, headWidth: number, headCenter: number): number {
+  const headHeight = headWidth * HEAD_PROPORTION;
+  const from = Math.min(height - 1, Math.round(top + headHeight * SHOULDER_SCAN_FROM));
+  const to = Math.min(height - 1, Math.round(top + headHeight * SHOULDER_SCAN_TO));
+  let shoulders = 0;
+  for (let y = from; y <= to; y++) shoulders = Math.max(shoulders, runAt(alpha, width, y, headCenter).width);
+  return Math.min(headWidth * MAX_SHOULDER_HEADS, Math.max(headWidth * MIN_SHOULDER_HEADS, shoulders));
+}
+
+/**
+ * Enquadramento no padrão das cartas do EA FC: acha a cabeça, mede os ombros e
+ * monta o quadro para eles ocuparem a largura toda da carta, com a cabeça
+ * sempre no mesmo lugar. O quadro pode passar da foto (pouco espaço acima da
+ * cabeça, ombro cortado pela borda): o que fica fora sai transparente e a
+ * borda da foto some aos poucos.
  */
 function bustBox(alpha: Float32Array, width: number, height: number): Box {
   let count = 0;
@@ -232,8 +251,10 @@ function bustBox(alpha: Float32Array, width: number, height: number): Box {
     headRows++;
   }
   const headCenter = headRows > 0 ? centerSum / headRows : topCenter;
-  const boxHeight = Math.round(headWidth * HEAD_PROPORTION * FRAME_HEADS);
-  const boxWidth = Math.round(boxHeight * CARD_PHOTO_RATIO);
+  // Os ombros fixam o tamanho da pessoa na carta.
+  const shoulders = measureShoulders(alpha, width, height, top, headWidth, headCenter);
+  const boxWidth = Math.round(shoulders * FRAME_PER_SHOULDERS);
+  const boxHeight = Math.round(boxWidth / CARD_PHOTO_RATIO);
   // Posição fixa da cabeça no quadro, mesmo que ele passe das bordas da foto.
   const x = Math.round(headCenter - boxWidth * FACE_X);
   const y = Math.round(top - boxHeight * HEADROOM);

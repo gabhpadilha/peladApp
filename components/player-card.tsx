@@ -192,7 +192,8 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
         )}
 
         <div className="absolute top-[13%] left-[10%] z-10 flex flex-col items-center font-display leading-none">
-          <span className="text-[25cqw] font-extrabold tabular-nums">
+          {/* 21cqw: ~85% do tamanho anterior (pedido do dono do app). */}
+          <span className="text-[21cqw] font-extrabold tabular-nums">
             {player.ovr ?? EMPTY_VALUE}
           </span>
           <span className="text-[9cqw] font-bold">{player.position}</span>
