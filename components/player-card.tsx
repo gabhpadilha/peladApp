@@ -243,16 +243,19 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
 
 /**
  * Degradês que fazem a foto sumir na carta (os mesmos na foto e no filtro de cor).
- * O busto aparece inteiro, de lado a lado, e some só embaixo, atrás do apelido
- * (como nas cartas do EA FC); a original some também do lado do OVR. Regra: as quatro bordas da área terminam
+ * Rosto grande e centralizado (como nas cartas do EA FC); o peito some embaixo,
+ * atrás do apelido, e os ombros somem nas laterais, para a borda do recorte não
+ * chamar atenção. A original (só fotos antigas) some também do lado do OVR. Regra: as quatro bordas da área terminam
  * transparentes (borda com opacidade vira fio no Safari do iPhone); as laterais
  * ainda ficam fora do corte da face.
  */
 const PHOTO_FADES: Record<NonNullable<Player["photo"]>["kind"], readonly string[]> = {
   cutout: [
-    // Topo limpo: apaga a linha que o segmentador deixa na borda; embaixo, some atrás do apelido.
-    "linear-gradient(to bottom, transparent 0%, black 3%, black 70%, transparent 100%)",
-    "linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)",
+    // Topo limpo: apaga a linha que o segmentador deixa na borda; embaixo, o
+    // peito some aos poucos atrás do apelido.
+    "linear-gradient(to bottom, transparent 0%, black 3%, black 52%, transparent 94%)",
+    // Laterais: os ombros somem aos poucos, sem a borda do recorte em destaque.
+    "linear-gradient(to right, transparent 4%, black 30%, black 70%, transparent 96%)",
   ],
   original: [
     "linear-gradient(to bottom, transparent 0%, black 4%, black 62%, transparent 100%)",

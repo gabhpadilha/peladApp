@@ -161,8 +161,8 @@ const MIN_TOP_RUN = 0.02;
 const HEAD_SCAN = 0.7;
 /** Altura da cabeça (topo do cabelo ao queixo) ≈ 1,3 × a largura dela. */
 const HEAD_PROPORTION = 1.3;
-/** Altura do quadro em "cabeças" (topo da cabeça ao queixo): ~2,2 dá rosto grande e busto até o peito, como nas cartas do EA FC. */
-const FRAME_HEADS = 2.2;
+/** Altura do quadro em "cabeças" (topo da cabeça ao queixo): ~1,85 dá rosto grande e busto até o peito, como nas cartas do EA FC. */
+const FRAME_HEADS = 1.85;
 /** Folga acima da cabeça, em fração da altura do quadro. */
 const HEADROOM = 0.08;
 

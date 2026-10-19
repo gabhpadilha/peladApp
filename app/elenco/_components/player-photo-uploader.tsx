@@ -1,11 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState, useTransition } from "react";
-import { CameraIcon, CheckIcon, LoaderCircleIcon, Trash2Icon } from "lucide-react";
+import { CameraIcon, LoaderCircleIcon, Trash2Icon } from "lucide-react";
 import { PlayerCard } from "@/components/player-card";
 import { Button } from "@/components/ui/button";
 import { NoPersonFoundError, prepareCardPhoto } from "@/lib/photo-cutout";
-import { cn } from "@/lib/utils";
 import type { Player, PlayerPhoto } from "@/types/player";
 import { removePlayerPhoto } from "../_actions/remove-player-photo";
 import { segmentPhoto } from "../_actions/segment-photo";
@@ -21,12 +20,8 @@ type PlayerPhotoUploaderProps = {
 type Draft = {
   cutout: Blob;
   original: Blob;
-  hasCutout: boolean;
   cutoutUrl: string;
-  originalUrl: string;
 };
-
-type Choice = PlayerPhoto["kind"];
 
 /** Carta só para a prévia: números de verdade não importam aqui. */
 function previewPlayer(member: PlayerPhotoUploaderProps["member"], photo: PlayerPhoto | null): Player {
@@ -47,13 +42,13 @@ async function maskFromServer(photo: Blob): Promise<Blob> {
 }
 
 /**
- * Foto da carta: escolhe a foto, recorta o fundo no próprio aparelho (MediaPipe)
- * e mostra a prévia já na carta, com "Recorte" ou "Original".
+ * Foto da carta: escolhe a foto, tira o fundo (servidor ou, sem rede, o
+ * aparelho) e mostra a prévia já na carta. A carta só usa a foto sem fundo
+ * (decisão do dono do app): se nenhum recorte funcionar, pede outra tentativa.
  */
 export function PlayerPhotoUploader({ member, isSelf }: PlayerPhotoUploaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
-  const [choice, setChoice] = useState<Choice>("cutout");
   const [isProcessing, setIsProcessing] = useState(false);
   const [message, setMessage] = useState<{ kind: "error" | "saved"; text: string } | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -61,10 +56,7 @@ export function PlayerPhotoUploader({ member, isSelf }: PlayerPhotoUploaderProps
   // Libera as URLs temporárias da prévia.
   useEffect(() => {
     return () => {
-      if (draft) {
-        URL.revokeObjectURL(draft.cutoutUrl);
-        URL.revokeObjectURL(draft.originalUrl);
-      }
+      if (draft) URL.revokeObjectURL(draft.cutoutUrl);
     };
   }, [draft]);
 
@@ -74,15 +66,11 @@ export function PlayerPhotoUploader({ member, isSelf }: PlayerPhotoUploaderProps
     setIsProcessing(true);
     try {
       const prepared = await prepareCardPhoto(file, maskFromServer);
-      setDraft({
-        ...prepared,
-        cutoutUrl: URL.createObjectURL(prepared.cutout),
-        originalUrl: URL.createObjectURL(prepared.original),
-      });
-      setChoice(prepared.hasCutout ? "cutout" : "original");
       if (!prepared.hasCutout) {
-        setMessage({ kind: "error", text: "Não deu para tirar o fundo agora (sem conexão com o servidor?). Você pode usar a foto original ou tentar de novo." });
+        setMessage({ kind: "error", text: "Não deu para tirar o fundo agora. Confira a conexão e tente de novo." });
+        return;
       }
+      setDraft({ cutout: prepared.cutout, original: prepared.original, cutoutUrl: URL.createObjectURL(prepared.cutout) });
     } catch (error) {
       console.error("Falha ao preparar a foto", error);
       setMessage({
@@ -102,7 +90,7 @@ export function PlayerPhotoUploader({ member, isSelf }: PlayerPhotoUploaderProps
     if (!draft) return;
     const formData = new FormData();
     formData.set("memberId", member.id);
-    formData.set("kind", choice);
+    formData.set("kind", "cutout");
     formData.set("cutout", new File([draft.cutout], "cutout.png", { type: draft.cutout.type }));
     formData.set("original", new File([draft.original], "original.jpg", { type: draft.original.type }));
     startTransition(async () => {
@@ -130,13 +118,6 @@ export function PlayerPhotoUploader({ member, isSelf }: PlayerPhotoUploaderProps
     });
   }
 
-  const options: { kind: Choice; label: string; url: string }[] = draft
-    ? [
-        ...(draft.hasCutout ? [{ kind: "cutout" as const, label: "Recorte", url: draft.cutoutUrl }] : []),
-        { kind: "original", label: "Original", url: draft.originalUrl },
-      ]
-    : [];
-
   return (
     <div className="flex flex-col gap-4">
       <input
@@ -150,35 +131,9 @@ export function PlayerPhotoUploader({ member, isSelf }: PlayerPhotoUploaderProps
 
       {draft ? (
         <>
-          <p className="text-sm text-muted-foreground">Escolha como a foto entra na carta:</p>
-          <div role="radiogroup" aria-label="Versão da foto" className="grid grid-cols-2 gap-3">
-            {options.map((option) => {
-              const isChosen = option.kind === choice;
-              return (
-                <button
-                  key={option.kind}
-                  type="button"
-                  role="radio"
-                  aria-checked={isChosen}
-                  onClick={() => setChoice(option.kind)}
-                  className={cn(
-                    "flex flex-col items-center gap-2 rounded-xl border-2 p-2 transition-colors",
-                    isChosen ? "border-primary bg-primary/10" : "border-transparent bg-muted/40 hover:bg-muted",
-                  )}
-                >
-                  <div className="w-full max-w-36">
-                    <PlayerCard
-                      player={previewPlayer(member, { url: option.url, kind: option.kind })}
-                      size="fill"
-                    />
-                  </div>
-                  <span className="flex items-center gap-1 text-sm font-medium">
-                    {isChosen && <CheckIcon aria-hidden className="size-4 text-primary" />}
-                    {option.label}
-                  </span>
-                </button>
-              );
-            })}
+          <p className="text-sm text-muted-foreground">Assim a foto vai ficar na carta:</p>
+          <div className="mx-auto w-full max-w-48">
+            <PlayerCard player={previewPlayer(member, { url: draft.cutoutUrl, kind: "cutout" })} size="fill" />
           </div>
           <div className="flex gap-2">
             <Button
@@ -192,7 +147,7 @@ export function PlayerPhotoUploader({ member, isSelf }: PlayerPhotoUploaderProps
               Cancelar
             </Button>
             <Button type="button" size="lg" className="h-11 flex-1 text-base" onClick={handleSave} disabled={isPending}>
-              {isPending ? "Salvando…" : choice === "cutout" ? "Usar recorte" : "Usar original"}
+              {isPending ? "Salvando…" : "Usar foto"}
             </Button>
           </div>
         </>
@@ -232,7 +187,7 @@ export function PlayerPhotoUploader({ member, isSelf }: PlayerPhotoUploaderProps
             )}
             <p className="text-xs text-muted-foreground">
               {isProcessing
-                ? "O fundo é tirado aqui no aparelho. Na primeira vez demora um pouco mais."
+                ? "Tirando o fundo da foto. Pode levar alguns segundos."
                 : "Foto de frente, do rosto ao peito, com boa luz."}
             </p>
           </div>
