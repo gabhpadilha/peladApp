@@ -27,14 +27,22 @@ export function LatestRoundCard({ match, topPerformers, awards }: LatestRoundCar
       {awards.length === 0 ? (
         <p className="text-sm text-muted-foreground">Ninguém recebeu votos para os prêmios dessa rodada.</p>
       ) : (
-        <ul aria-label="Prêmios da rodada" className="-mx-1 flex snap-x gap-3 overflow-x-auto px-1 pb-1">
+        // Grade de 3 colunas (empates quebram linha): cabe no celular sem rolagem lateral.
+        <ul aria-label="Prêmios da rodada" className="grid grid-cols-3 gap-x-2 gap-y-4 sm:gap-x-4">
           {awards.map((award) => (
-            <li key={award.id} className="flex snap-start flex-col items-center gap-1.5">
-              <Link href={`/jogadores/${award.memberId}#colecao`} aria-label={`${AWARD_LABELS[award.kind].title}: ${award.card.nickname}`}>
-                <PlayerCard player={award.card} award={award} size="sm" />
+            <li key={award.id} className="mx-auto flex w-full max-w-40 min-w-0 flex-col items-center gap-1.5 text-center">
+              <Link
+                href={`/jogadores/${award.memberId}#colecao`}
+                aria-label={`${AWARD_LABELS[award.kind].title}: ${award.card.nickname}`}
+                className="w-full"
+              >
+                <PlayerCard player={award.card} award={award} size="fill" />
               </Link>
-              <span className="text-xs text-muted-foreground">
-                {AWARD_LABELS[award.kind].title} · {award.votes} {award.votes === 1 ? "voto" : "votos"}
+              <span className="flex flex-col text-xs leading-tight">
+                <span className="font-medium">{AWARD_LABELS[award.kind].title}</span>
+                <span className="text-muted-foreground">
+                  {award.votes} {award.votes === 1 ? "voto" : "votos"}
+                </span>
               </span>
             </li>
           ))}
