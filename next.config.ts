@@ -4,6 +4,10 @@ const nextConfig: NextConfig = {
   /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
+  // Upload da foto da carta (recorte PNG + original): o padrão de 1MB das Server Actions é pouco.
+  experimental: {
+    serverActions: { bodySizeLimit: "4mb" },
+  },
   // Fotos das cartas no Supabase Storage (bucket público player-photos).
   images: {
     remotePatterns: [

@@ -72,10 +72,12 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
 
 ## 📸 Foto do jogador
 
-1. Jogador escolhe a foto → crop (rosto/busto).
-2. **MediaPipe Selfie Segmentation** remove o fundo **no próprio aparelho** (grátis, Apache 2.0; confirmar o model card antes de instalar). Não usar `@imgly/background-removal` (AGPL).
-3. Prévia já dentro da carta: **"Usar recorte"** ou **"Usar foto original"**.
-4. Storage guarda o **recorte (WebP com transparência)** e a **original** (para reprocessar no futuro).
+**Implementado** (`PlayerPhotoUploader`, em `/elenco`: card "Sua foto" para cada um e "Gerenciar → Foto" para o dono):
+1. Jogador escolhe a foto ("Escolher foto"/"Trocar foto"; "Tirar foto" volta às iniciais).
+2. **MediaPipe** (`selfie_multiclass_256x256`, Apache 2.0) acha a pessoa **no próprio aparelho** (`lib/photo-cutout.ts`); o enquadramento rosto/busto é **automático** pela silhueta (largura da pessoa, topo logo acima da cabeça, proporção 0,87). Curva na máscara (0,35–0,70) para a borda ficar justa. Não usar `@imgly/background-removal` (AGPL).
+3. Prévia já dentro da carta, lado a lado: **"Recorte"** ou **"Original"** → "Usar recorte"/"Usar original".
+4. Storage guarda o **recorte (WebP com transparência)** e a **original**, em `<memberId>/<timestamp>-*.webp` (nome novo a cada envio = sem cache velho).
+- **Filtro de cor (`PhotoTint`):** camada na cor da moldura da carta (`DESIGNS[design].frame`), `mix-blend-soft-light` a 55%, mascarada pela própria foto (só a pessoa ganha o tom) e pelos mesmos degradês. Bem suave: aproxima a foto da carta sem mudar a pele. Exige CORS aberto no Storage (o Supabase responde `*`).
 - Na carta: recorte → `object-contain` alinhado embaixo, **sumindo em degradê na base** (`mask-image` até 72%), para o busto não terminar numa linha reta sobre o apelido; original → `object-cover object-top` com **degradê embaixo e na esquerda** (máscara explícita `mask-image` com duas camadas e `mask-composite: intersect`; não use os utilitários `mask-b-*` do Tailwind, que escondiam a foto inteira); sem foto → **iniciais** grandes na cor da faixa. A foto fica em `z-0`, sempre atrás do OVR/posição (`z-10`).
 - **Hoje (sem upload no app):** a foto é recortada fora (rosto/busto, proporção ~0,87, WebP ~640px) e enviada pelo CLI ao bucket público `player-photos` como `<memberId>-vN.webp` (troque o `N` ao substituir, para não pegar cache). Sem fundo: modelo **IS-Net** (`isnet-general-use`, Apache 2.0, entrada 1024) via `onnxruntime-node`, WebP com alfa e `photo_kind = 'cutout'`. Ao voltar a máscara quadrada para o tamanho da foto use `fit: "fill"` (o padrão `cover` estica a silhueta e deixa um halo de parede).
 

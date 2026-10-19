@@ -1,8 +1,10 @@
 import { getGroupEvaluations, getOvrByMember } from "@/lib/group-scores";
 import { requireActiveMembership, type ActiveMembership, type PlayerPositionCode } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
+import { toPlayerPhoto } from "@/lib/player-photo";
 import { emailToUsername } from "@/lib/username";
 import type { Database } from "@/types/database";
+import type { PlayerPhoto } from "@/types/player";
 
 export type GroupMemberSummary = {
   id: string;
@@ -17,6 +19,8 @@ export type GroupMemberSummary = {
   fullName: string;
   /** Criou a pelada: único que gerencia pessoas. */
   isOwner: boolean;
+  /** Foto atual da carta (prévia do upload); `null` sem foto. */
+  photo: PlayerPhoto | null;
 };
 
 /** Jogador desativado (saiu da pelada); só o dono vê, para reativar. */
@@ -48,7 +52,7 @@ export async function getRoster(): Promise<Roster> {
     supabase.auth.getClaims(),
     supabase
       .from("group_members")
-      .select("id, user_id, nickname, position, role, deactivated_at")
+      .select("id, user_id, nickname, position, role, deactivated_at, photo_path, photo_kind")
       .eq("group_id", membership.groupId)
       .order("nickname"),
     getGroupEvaluations(membership.groupId),
@@ -82,6 +86,7 @@ export async function getRoster(): Promise<Roster> {
           username: isOwner ? (profile?.username ?? null) : null,
           fullName: isOwner ? (profile?.full_name ?? member.nickname) : "",
           isOwner: member.user_id === membership.ownerUserId,
+          photo: toPlayerPhoto(member.photo_path, member.photo_kind),
         };
       }),
     inactiveMembers: isOwner

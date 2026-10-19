@@ -200,7 +200,7 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
 
         {/* z-0: a foto fica sempre atrás do OVR/posição (z-10). */}
         <div className="absolute top-[6%] right-[5%] left-[27%] z-0 h-[53%]">
-          <PlayerCardPhoto player={player} size={size} />
+          <PlayerCardPhoto player={player} size={size} tintClass={DESIGNS[design].frame} />
         </div>
 
         <div className="absolute inset-x-[7%] top-[60%] flex flex-col items-center gap-[3cqw] font-display leading-none">
@@ -238,7 +238,46 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
   );
 }
 
-function PlayerCardPhoto({ player, size }: { player: Player; size: CardSize }) {
+/** Degradês que fazem a foto sumir na carta (iguais na foto e no filtro de cor). */
+const PHOTO_FADES = {
+  cutout: "linear-gradient(to bottom, black 72%, transparent)",
+  original: "linear-gradient(to bottom, black 55%, transparent), linear-gradient(to right, transparent, black 30%)",
+} as const;
+
+/**
+ * Filtro de cor suave: a cor da moldura da carta, em `soft-light`, só sobre a
+ * pessoa (a própria foto é a máscara). Deixa a foto homogênea com a carta.
+ * O Storage responde com CORS aberto, o que o `mask-image` exige.
+ */
+function PhotoTint({ photo, tintClass }: { photo: NonNullable<Player["photo"]>; tintClass: string }) {
+  const isCutout = photo.kind === "cutout";
+  const photoLayer = `url("${photo.url}")`;
+  const maskImage = `${photoLayer}, ${PHOTO_FADES[photo.kind]}`;
+  const layers = isCutout ? 2 : 3;
+  const maskStyle = {
+    maskImage,
+    WebkitMaskImage: maskImage,
+    maskSize: [isCutout ? "contain" : "cover", ...Array(layers - 1).fill("100% 100%")].join(", "),
+    WebkitMaskSize: [isCutout ? "contain" : "cover", ...Array(layers - 1).fill("100% 100%")].join(", "),
+    maskPosition: [isCutout ? "bottom" : "top", ...Array(layers - 1).fill("center")].join(", "),
+    WebkitMaskPosition: [isCutout ? "bottom" : "top", ...Array(layers - 1).fill("center")].join(", "),
+    maskRepeat: "no-repeat",
+    WebkitMaskRepeat: "no-repeat",
+    maskComposite: "intersect",
+    WebkitMaskComposite: "source-in",
+  };
+
+  return (
+    <span
+      aria-hidden
+      className={cn("pointer-events-none absolute inset-0 opacity-55 mix-blend-soft-light", tintClass)}
+      // A máscara depende da URL da foto: único estilo inline aqui.
+      style={maskStyle}
+    />
+  );
+}
+
+function PlayerCardPhoto({ player, size, tintClass }: { player: Player; size: CardSize; tintClass: string }) {
   if (!player.photo) {
     return (
       <div className="flex size-full items-end justify-center">
@@ -253,19 +292,24 @@ function PlayerCardPhoto({ player, size }: { player: Player; size: CardSize }) {
   }
 
   return (
-    <Image
-      src={player.photo.url}
-      alt=""
-      fill
-      sizes={PHOTO_SIZES[size]}
-      className={cn(
-        player.photo.kind === "cutout"
-          ? // Recorte sem fundo: apoiado embaixo e sumindo em degradê na base (sem linha reta sobre o apelido).
-            "object-contain object-bottom [mask-image:linear-gradient(to_bottom,black_72%,transparent)]"
-          : // Foto comum: some em degradê embaixo e na esquerda (lado do OVR), como nas cartas FUT.
-            // Máscara explícita: os utilitários mask-b-* do Tailwind intersectavam camadas e escondiam a foto inteira.
-            "object-cover object-top [mask-composite:intersect] [mask-image:linear-gradient(to_bottom,black_55%,transparent),linear-gradient(to_right,transparent,black_30%)] [-webkit-mask-composite:source-in]",
-      )}
-    />
+    <>
+      <Image
+        src={player.photo.url}
+        alt=""
+        fill
+        sizes={PHOTO_SIZES[size]}
+        // Prévia do upload (blob:) ainda não está no Storage: sem otimizador.
+        unoptimized={player.photo.url.startsWith("blob:")}
+        className={cn(
+          player.photo.kind === "cutout"
+            ? // Recorte sem fundo: apoiado embaixo e sumindo em degradê na base (sem linha reta sobre o apelido).
+              "object-contain object-bottom [mask-image:linear-gradient(to_bottom,black_72%,transparent)]"
+            : // Foto comum: some em degradê embaixo e na esquerda (lado do OVR), como nas cartas FUT.
+              // Máscara explícita: os utilitários mask-b-* do Tailwind intersectavam camadas e escondiam a foto inteira.
+              "object-cover object-top [mask-composite:intersect] [mask-image:linear-gradient(to_bottom,black_55%,transparent),linear-gradient(to_right,transparent,black_30%)] [-webkit-mask-composite:source-in]",
+        )}
+      />
+      <PhotoTint photo={player.photo} tintClass={tintClass} />
+    </>
   );
 }

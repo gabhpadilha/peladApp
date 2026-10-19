@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { PencilIcon, Settings2Icon } from "lucide-react";
+import { CameraIcon, PencilIcon, Settings2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { GroupMemberSummary } from "../_data-access/get-roster";
 import { EditPlayerForm } from "./edit-player-form";
 import { MemberActiveButton } from "./member-active-button";
 import { MemberRoleButton } from "./member-role-button";
+import { PlayerPhotoUploader } from "./player-photo-uploader";
 import { ResetPasswordButton } from "./reset-password-button";
 
 type MemberManagePanelProps = {
@@ -23,12 +24,12 @@ type MemberManagePanelProps = {
  */
 export function MemberManagePanel({ member, isSelf, canChangeRole, loginUrl }: MemberManagePanelProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
+  const [mode, setMode] = useState<"actions" | "edit" | "photo">("actions");
   const panelId = `manage-${member.id}`;
 
   function handleClose() {
     setIsOpen(false);
-    setIsEditing(false);
+    setMode("actions");
   }
 
   return (
@@ -47,13 +48,24 @@ export function MemberManagePanel({ member, isSelf, canChangeRole, loginUrl }: M
 
       {isOpen && (
         <div id={panelId} className="flex basis-full flex-col gap-3 rounded-lg border bg-muted/30 p-3">
-          {isEditing ? (
-            <EditPlayerForm member={member} onDone={() => setIsEditing(false)} />
-          ) : (
+          {mode === "edit" && <EditPlayerForm member={member} onDone={() => setMode("actions")} />}
+          {mode === "photo" && (
+            <>
+              <PlayerPhotoUploader member={member} isSelf={isSelf} />
+              <Button size="sm" variant="ghost" className="self-end" onClick={() => setMode("actions")}>
+                Voltar
+              </Button>
+            </>
+          )}
+          {mode === "actions" && (
             <div className="flex flex-wrap items-start justify-end gap-1">
-              <Button size="xs" variant="ghost" onClick={() => setIsEditing(true)}>
+              <Button size="xs" variant="ghost" onClick={() => setMode("edit")}>
                 <PencilIcon aria-hidden />
                 Editar dados
+              </Button>
+              <Button size="xs" variant="ghost" onClick={() => setMode("photo")}>
+                <CameraIcon aria-hidden />
+                Foto
               </Button>
               {canChangeRole && (
                 <MemberRoleButton

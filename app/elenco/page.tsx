@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { AppHeader } from "@/components/app-header";
 import { CreatePlayerForm } from "./_components/create-player-form";
 import { MembersList } from "./_components/members-list";
+import { OwnPhotoCard } from "./_components/own-photo-card";
 import { OwnProfileCard } from "./_components/own-profile-card";
 import { PasswordCard } from "./_components/password-card";
 import { getRoster } from "./_data-access/get-roster";
@@ -29,6 +30,7 @@ export default function RosterPage() {
 async function RosterContent() {
   const roster = await getRoster();
   const { isOwner } = roster.membership;
+  const me = roster.members.find((member) => member.id === roster.membership.memberId);
 
   return (
     <>
@@ -55,6 +57,7 @@ async function RosterContent() {
         </div>
         {/* key: trocou de conta na mesma aba, os formulários recomeçam do zero. */}
         <div key={roster.membership.memberId} className="flex flex-col gap-6">
+          {me && <OwnPhotoCard member={me} />}
           <OwnProfileCard />
           <PasswordCard login={roster.login} />
         </div>
