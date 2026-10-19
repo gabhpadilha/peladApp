@@ -100,6 +100,8 @@ const cardVariants = cva(cn("relative aspect-[5/7.4] shrink-0 select-none", SHAP
       md: "w-40",
       lg: "w-56",
       xl: "w-72",
+      /** Ocupa a largura do pai (ex.: grade de 3 cartas que precisa caber no celular). */
+      fill: "w-full",
     },
   },
   defaultVariants: {
@@ -115,6 +117,7 @@ const PHOTO_SIZES: Record<CardSize, string> = {
   md: "160px",
   lg: "224px",
   xl: "288px",
+  fill: "(min-width: 1024px) 160px, 33vw",
 };
 
 const EMPTY_VALUE = "–";

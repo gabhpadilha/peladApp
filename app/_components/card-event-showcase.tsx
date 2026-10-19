@@ -84,16 +84,12 @@ export function CardEventShowcase({ event, player }: CardEventShowcaseProps) {
 
       <div className="flex flex-col gap-2">
         <h3 className="text-xs font-medium text-muted-foreground uppercase">Prévia com a sua carta</h3>
-        <ul aria-label="Cartas do evento" className="-mx-1 flex snap-x gap-3 overflow-x-auto px-1 pb-1 lg:justify-around">
+        {/* 3 colunas que sempre cabem na tela: sem rolagem lateral no celular. */}
+        <ul aria-label="Cartas do evento" className="grid grid-cols-3 gap-2 sm:gap-4">
           {AWARD_KINDS.map((kind) => (
-            <li key={kind} className="flex w-28 shrink-0 snap-start flex-col items-center gap-1.5 text-center lg:w-40">
-              <PlayerCard
-                player={withAwardBonus(player, kind)}
-                award={{ kind, theme: event.theme }}
-                size="sm"
-                className="lg:w-40"
-              />
-              <span className="text-sm leading-tight font-medium">{AWARD_LABELS[kind].title}</span>
+            <li key={kind} className="mx-auto flex w-full max-w-40 min-w-0 flex-col items-center gap-1.5 text-center">
+              <PlayerCard player={withAwardBonus(player, kind)} award={{ kind, theme: event.theme }} size="fill" />
+              <span className="text-xs leading-tight font-medium sm:text-sm">{AWARD_LABELS[kind].title}</span>
               <span className="flex flex-col text-xs text-muted-foreground">
                 <span>{copy.looks[kind]}</span>
                 <span className={cn(BOOSTED_AWARDS.includes(kind) && "font-medium text-success")}>

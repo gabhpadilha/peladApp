@@ -64,6 +64,7 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
 - **Entrar (`/entrar`):** campo "Usuário" (aceita também e-mail das contas antigas) e senha; avisa "Peça acesso ao organizador da pelada".
 - **Criar pelada (`/bem-vindo`):** só o organizador, uma vez: nome da pelada, seus dados e senha.
 - **Pelada (`/pelada`):** "Cadastrar jogador" (organizador); "Nova rodada": data, checklist de confirmados (com OVR e "Marcar todos"), número de times (padrão: confirmados ÷ 5), "Sortear times"/"Sortear de novo", cards dos times com média de OVR, aviso "rodízio no gol" e seletor para trocar jogador de time. Sem placar. Rodadas com "Fechar rodada" (confirmação). Elenco com OVR e, para o organizador, `@usuário`, "Tornar organizador" e "Redefinir senha" (confirmação → novo `AccessCard`). "Sua senha" para trocar a própria.
+- **Sem rolagem lateral da página no celular.** Grid de layout sempre com `grid-cols-1` (ou `minmax(0,…)` nas colunas): sem isso a coluna implícita cresce até a fileira de cartas com rolagem e empurra a página (534px num celular de 375). A prévia do evento usa grade de 3 colunas com `PlayerCard size="fill"`.
 - Superfícies: `rounded-xl border bg-card p-4`; títulos de seção em `font-display` caixa alta. Campos e botões principais com `h-11 text-base` (toque e sem zoom no iOS).
 
 ## 📸 Foto do jogador

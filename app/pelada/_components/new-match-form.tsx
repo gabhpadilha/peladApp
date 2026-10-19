@@ -212,7 +212,7 @@ export function NewMatchForm({ members, today }: NewMatchFormProps) {
               </div>
 
               {hasTeams && (
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {teamNumbers.map((teamNumber) => {
                     const teamPlayers = players.filter((player) => player.team === teamNumber);
                     const knownOvrs = teamPlayers.flatMap((player) => {

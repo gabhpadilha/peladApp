@@ -40,7 +40,7 @@ async function HomeContent() {
 
         <CardEventShowcase event={data.cardEvent} player={data.currentPlayer} />
 
-        <div className="grid gap-6 lg:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="flex flex-col gap-6">
             <MyCardSummary
               player={data.currentPlayer}
@@ -106,7 +106,7 @@ function HomeSkeleton() {
   return (
     <main aria-busy className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-20">
       <div className="h-20 animate-pulse rounded-xl bg-card" />
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="h-72 animate-pulse rounded-xl bg-card" />
         <div className="h-72 animate-pulse rounded-xl bg-card" />
       </div>

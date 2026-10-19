@@ -41,7 +41,7 @@ async function AthleteContent({ params }: { params: PageProps<"/jogadores/[id]">
         </Link>
         <AthleteHero profile={profile} />
         <PendingEvaluationsBanner pending={profile.pending} />
-        <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
           <PerformanceChart performances={profile.performances} bestScore={profile.bestScore} />
           <AttributeBars player={profile.player} />
         </div>
@@ -62,7 +62,7 @@ function AthleteSkeleton() {
       <AppHeader />
       <main aria-busy className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6">
         <div className="h-80 animate-pulse rounded-xl bg-card" />
-        <div className="grid gap-6 lg:grid-cols-[3fr_2fr]">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
           <div className="h-64 animate-pulse rounded-xl bg-card" />
           <div className="h-64 animate-pulse rounded-xl bg-card" />
         </div>

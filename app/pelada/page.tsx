@@ -38,7 +38,7 @@ async function GroupContent() {
         <h1 className="font-display text-4xl font-extrabold">{overview.membership.groupName}</h1>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <div className="flex flex-col gap-6">
           {overview.isOrganizer && <CreatePlayerForm loginUrl={overview.loginUrl} />}
           {overview.isOrganizer && <NewMatchForm members={overview.members} today={overview.today} />}
@@ -60,7 +60,7 @@ async function GroupContent() {
 
 function GroupSkeleton() {
   return (
-    <div aria-busy className="grid gap-6 lg:grid-cols-2">
+    <div aria-busy className="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <div className="h-96 animate-pulse rounded-xl bg-card" />
       <div className="h-96 animate-pulse rounded-xl bg-card" />
     </div>
