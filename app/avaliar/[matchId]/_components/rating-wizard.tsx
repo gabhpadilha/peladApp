@@ -208,7 +208,7 @@ export function RatingWizard({ match, targets }: RatingWizardProps) {
               <PlayerCard player={step.target.player} size="sm" />
               <div className="min-w-0">
                 <p className="text-xs text-muted-foreground uppercase">
-                  {step.target.team !== null ? `Time ${step.target.team} · ` : ""}
+                  {step.target.team !== null ? `Time ${step.target.team} · ` : "Banco · "}
                   {POSITION_LABELS[step.target.player.position]}
                 </p>
                 <h1 className="truncate font-display text-3xl font-bold">{step.target.player.nickname}</h1>
@@ -360,7 +360,7 @@ function ReviewList({ targets, drafts, votes, nameById, ratedCount, firstVoteInd
                   <span className="flex min-w-0 flex-1 flex-col">
                     <span className="truncate font-medium">{player.nickname}</span>
                     <span className="text-xs text-muted-foreground">
-                      {team !== null ? `Time ${team} · ` : ""}
+                      {team !== null ? `Time ${team} · ` : "Banco · "}
                       {POSITION_LABELS[player.position]}
                     </span>
                   </span>

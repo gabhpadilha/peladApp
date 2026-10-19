@@ -1,13 +1,22 @@
 /**
- * Sorteio equilibrado dos times pelo OVR.
- * Goleiros vão primeiro (um por time); a linha entra do maior para o menor
- * OVR, sempre no time com menos jogadores e, no empate, com menor soma.
+ * Sorteio da rodada (`draftMatch`): sempre 2 times de 5 (1 goleiro + 4 na
+ * linha). Quem joga é sorteado de verdade (justo para todos); quem sobra vai
+ * para o banco de reserva. Depois, os 2 times são equilibrados pelo OVR
+ * (`draftTeams`): goleiros primeiro (um por time) e a linha do maior para o
+ * menor OVR, sempre no time com menos jogadores e, no empate, menor soma.
  */
 
 /** Futsal: 4 na linha + 1 goleiro. */
 export const PLAYERS_PER_TEAM = 5;
-export const MIN_TEAMS = 2;
-export const MAX_TEAMS = 12;
+/** A rodada sempre tem 2 times em quadra; o resto vai para o banco. */
+export const MATCH_TEAMS = 2;
+const GOALKEEPERS_ON_COURT = MATCH_TEAMS;
+const PLAYERS_ON_COURT = MATCH_TEAMS * PLAYERS_PER_TEAM;
+/** Número de "time" do banco de reserva no formulário (no banco vira sem time). */
+export const BENCH_TEAM = 0;
+/** Limites de `draftTeams` (o banco aceita até 12 times por rodada). */
+const MIN_TEAMS = 2;
+const MAX_TEAMS = 12;
 /** OVR assumido para quem ainda não tem nota e não há média para usar. */
 const UNRATED_FALLBACK_OVR = 50;
 /** Variação aleatória (±metade) para cada novo sorteio sair diferente. */
@@ -27,12 +36,6 @@ export type DraftTeam = {
   totalOvr: number;
   hasGoalkeeper: boolean;
 };
-
-/** Quantos times fazem sentido para N confirmados (mínimo 2). */
-export function getDefaultTeamCount(playerCount: number): number {
-  const byTeamSize = Math.round(playerCount / PLAYERS_PER_TEAM);
-  return Math.min(MAX_TEAMS, Math.max(MIN_TEAMS, byTeamSize));
-}
 
 function average(values: number[]): number | null {
   return values.length === 0 ? null : values.reduce((sum, value) => sum + value, 0) / values.length;
@@ -88,4 +91,45 @@ export function draftTeams(
   }
 
   return teams;
+}
+
+/** Embaralha sem viés (Fisher–Yates). */
+function shuffle<T>(items: readonly T[], random: () => number): T[] {
+  const result = [...items];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+export type MatchDraft = {
+  /** Sempre 2 times. */
+  teams: DraftTeam[];
+  /** Quem ficou de fora no sorteio (banco de reserva). */
+  benchIds: string[];
+};
+
+/**
+ * 2 times de 5 + banco. Sorteia 2 goleiros (os outros vão para a disputa da
+ * linha) e completa as 10 vagas sorteando a linha; quem sobra fica no banco.
+ * Faltou goleiro: um jogador de linha completa o time ("rodízio no gol").
+ */
+export function draftMatch(players: readonly DraftPlayer[], random: () => number = Math.random): MatchDraft {
+  const goalkeepers = shuffle(
+    players.filter((player) => player.role === "goalkeeper"),
+    random,
+  );
+  const goalkeepersOnCourt = goalkeepers.slice(0, GOALKEEPERS_ON_COURT);
+  const linePool = shuffle(
+    [...players.filter((player) => player.role === "outfield"), ...goalkeepers.slice(GOALKEEPERS_ON_COURT)],
+    random,
+  );
+  const lineOnCourt = linePool.slice(0, PLAYERS_ON_COURT - goalkeepersOnCourt.length);
+  const bench = linePool.slice(lineOnCourt.length);
+
+  return {
+    teams: draftTeams([...goalkeepersOnCourt, ...lineOnCourt], MATCH_TEAMS, random),
+    benchIds: bench.map((player) => player.id),
+  };
 }

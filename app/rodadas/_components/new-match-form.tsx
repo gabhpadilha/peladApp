@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm, useWatch } from "react-hook-form";
-import { CheckCircle2Icon, MinusIcon, PlusIcon, ShuffleIcon } from "lucide-react";
+import { ArmchairIcon, CheckCircle2Icon, ShuffleIcon } from "lucide-react";
 import { OvrBadge } from "@/components/ovr-badge";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -17,7 +17,8 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { draftTeams, getDefaultTeamCount, MAX_TEAMS, MIN_TEAMS } from "@/lib/draft";
+import { BENCH_TEAM, draftMatch, MATCH_TEAMS, PLAYERS_PER_TEAM } from "@/lib/draft";
+import { cn } from "@/lib/utils";
 import { POSITION_LABELS } from "@/types/player";
 import { createMatch } from "../_actions/create-match";
 import type { DraftMember } from "../_data-access/get-rounds-overview";
@@ -28,10 +29,17 @@ type NewMatchFormProps = {
   today: string;
 };
 
-/** Data + confirmados do WhatsApp + sorteio dos times pelo OVR. */
+/** Times em quadra (1, 2) e o banco de reserva (0), na ordem em que aparecem. */
+const TEAM_NUMBERS = Array.from({ length: MATCH_TEAMS }, (_, index) => index + 1);
+const GROUPS = [...TEAM_NUMBERS, BENCH_TEAM];
+
+function groupLabel(team: number): string {
+  return team === BENCH_TEAM ? "Banco" : `Time ${team}`;
+}
+
+/** Data + confirmados do WhatsApp + sorteio: 2 times de 5 equilibrados pelo OVR e o banco. */
 export function NewMatchForm({ members, today }: NewMatchFormProps) {
   const [confirmedIds, setConfirmedIds] = useState<string[]>([]);
-  const [teamCount, setTeamCount] = useState(MIN_TEAMS);
   const [createdRound, setCreatedRound] = useState<number | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -45,31 +53,27 @@ export function NewMatchForm({ members, today }: NewMatchFormProps) {
 
   function handleConfirmedChange(nextIds: string[]) {
     setConfirmedIds(nextIds);
-    setTeamCount(getDefaultTeamCount(nextIds.length));
     // Mudou a lista: o sorteio antigo não vale mais.
     form.setValue("players", []);
     setCreatedRound(null);
   }
 
-  function handleDraft(count = teamCount) {
+  function handleDraft() {
     const confirmed = confirmedIds.flatMap((id) => {
       const member = memberById.get(id);
       return member
         ? [{ id, role: member.position === "GOL" ? ("goalkeeper" as const) : ("outfield" as const), ovr: member.ovr }]
         : [];
     });
-    const teams = draftTeams(confirmed, count);
+    const { teams, benchIds } = draftMatch(confirmed);
     form.setValue(
       "players",
-      teams.flatMap((team) => team.playerIds.map((memberId) => ({ memberId, team: team.number }))),
+      [
+        ...teams.flatMap((team) => team.playerIds.map((memberId) => ({ memberId, team: team.number }))),
+        ...benchIds.map((memberId) => ({ memberId, team: BENCH_TEAM })),
+      ],
       { shouldValidate: true },
     );
-  }
-
-  function handleTeamCountChange(nextCount: number) {
-    const clamped = Math.min(MAX_TEAMS, Math.max(MIN_TEAMS, nextCount));
-    setTeamCount(clamped);
-    if (hasTeams) handleDraft(clamped);
   }
 
   function handleMovePlayer(memberId: string, team: number) {
@@ -89,12 +93,9 @@ export function NewMatchForm({ members, today }: NewMatchFormProps) {
       }
       setCreatedRound(result.round);
       setConfirmedIds([]);
-      setTeamCount(MIN_TEAMS);
       form.reset({ playedOn: today, players: [] });
     });
   }
-
-  const teamNumbers = Array.from({ length: teamCount }, (_, index) => index + 1);
 
   return (
     <section aria-labelledby="new-match-title" className="flex flex-col gap-4 rounded-xl border bg-card p-4">
@@ -183,40 +184,23 @@ export function NewMatchForm({ members, today }: NewMatchFormProps) {
           {confirmedIds.length >= 2 && (
             <FieldSet>
               <FieldLegend variant="label">Times</FieldLegend>
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1 rounded-lg border p-1">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label="Menos um time"
-                    disabled={teamCount <= MIN_TEAMS}
-                    onClick={() => handleTeamCountChange(teamCount - 1)}
-                  >
-                    <MinusIcon />
-                  </Button>
-                  <span className="w-16 text-center text-sm tabular-nums">{teamCount} times</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon-sm"
-                    aria-label="Mais um time"
-                    disabled={teamCount >= Math.min(MAX_TEAMS, confirmedIds.length)}
-                    onClick={() => handleTeamCountChange(teamCount + 1)}
-                  >
-                    <PlusIcon />
-                  </Button>
-                </div>
-                <Button type="button" variant="secondary" size="lg" className="flex-1" onClick={() => handleDraft()}>
-                  <ShuffleIcon aria-hidden />
-                  {hasTeams ? "Sortear de novo" : "Sortear times"}
-                </Button>
-              </div>
+              <FieldDescription>
+                {MATCH_TEAMS} times de {PLAYERS_PER_TEAM} (1 goleiro + {PLAYERS_PER_TEAM - 1} na linha), equilibrados
+                pelo OVR. Com mais de {MATCH_TEAMS * PLAYERS_PER_TEAM} confirmados, o sorteio decide quem começa e o
+                resto vai para o banco.
+              </FieldDescription>
+              <Button type="button" variant="secondary" size="lg" className="h-11 w-full text-base" onClick={handleDraft}>
+                <ShuffleIcon aria-hidden />
+                {hasTeams ? "Sortear de novo" : "Sortear times"}
+              </Button>
 
               {hasTeams && (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                  {teamNumbers.map((teamNumber) => {
+                  {GROUPS.map((teamNumber) => {
+                    const isBench = teamNumber === BENCH_TEAM;
                     const teamPlayers = players.filter((player) => player.team === teamNumber);
+                    // Banco vazio não aparece (até 10 confirmados todo mundo joga).
+                    if (isBench && teamPlayers.length === 0) return null;
                     const knownOvrs = teamPlayers.flatMap((player) => {
                       const ovr = memberById.get(player.memberId)?.ovr;
                       return ovr == null ? [] : [ovr];
@@ -230,15 +214,32 @@ export function NewMatchForm({ members, today }: NewMatchFormProps) {
                     );
 
                     return (
-                      <div key={teamNumber} className="flex flex-col gap-2 rounded-lg bg-muted/40 p-3">
+                      <div
+                        key={teamNumber}
+                        className={cn(
+                          "flex flex-col gap-2 rounded-lg p-3",
+                          // Banco: largura total e borda tracejada, para ler como "fora da quadra".
+                          isBench ? "border border-dashed bg-transparent sm:col-span-2" : "bg-muted/40",
+                        )}
+                      >
                         <div className="flex items-baseline justify-between">
-                          <h3 className="font-display text-base font-bold uppercase">Time {teamNumber}</h3>
+                          <h3 className="flex items-center gap-1.5 font-display text-base font-bold uppercase">
+                            {isBench && <ArmchairIcon aria-hidden className="size-4 text-muted-foreground" />}
+                            {isBench ? "Banco de reserva" : `Time ${teamNumber}`}
+                          </h3>
                           <span className="text-xs text-muted-foreground tabular-nums">
-                            {teamPlayers.length} · média {averageOvr ?? "–"}
+                            {isBench
+                              ? `${teamPlayers.length} ${teamPlayers.length === 1 ? "jogador" : "jogadores"}`
+                              : `${teamPlayers.length} · média ${averageOvr ?? "–"}`}
                           </span>
                         </div>
-                        {!hasGoalkeeper && teamPlayers.length > 0 && (
+                        {!isBench && !hasGoalkeeper && teamPlayers.length > 0 && (
                           <p className="text-xs text-muted-foreground">Sem goleiro: rodízio no gol.</p>
+                        )}
+                        {isBench && (
+                          <p className="text-xs text-muted-foreground">
+                            Ficaram de fora no sorteio. Também estão na rodada: avaliam e são avaliados.
+                          </p>
                         )}
                         <ul className="flex flex-col gap-1">
                           {teamPlayers.map((player) => {
@@ -253,7 +254,7 @@ export function NewMatchForm({ members, today }: NewMatchFormProps) {
                                   )}
                                 </span>
                                 <label className="sr-only" htmlFor={`team-of-${member.id}`}>
-                                  Time de {member.nickname}
+                                  Onde fica {member.nickname}
                                 </label>
                                 <select
                                   id={`team-of-${member.id}`}
@@ -261,9 +262,9 @@ export function NewMatchForm({ members, today }: NewMatchFormProps) {
                                   onChange={(event) => handleMovePlayer(member.id, Number(event.target.value))}
                                   className="h-8 rounded-md border bg-background px-1.5 text-xs"
                                 >
-                                  {teamNumbers.map((number) => (
+                                  {GROUPS.map((number) => (
                                     <option key={number} value={number}>
-                                      Time {number}
+                                      {groupLabel(number)}
                                     </option>
                                   ))}
                                 </select>

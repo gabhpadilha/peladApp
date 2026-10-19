@@ -56,7 +56,7 @@ export function VoteStep({ kind, targets, selected, onSelect }: VoteStepProps) {
               <div className="flex flex-1 flex-col gap-0.5">
                 <FieldTitle>{player.nickname}</FieldTitle>
                 <span className="text-xs text-muted-foreground">
-                  {team !== null ? `Time ${team} · ` : ""}
+                  {team !== null ? `Time ${team} · ` : "Banco · "}
                   {POSITION_LABELS[player.position]}
                 </span>
               </div>
