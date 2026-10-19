@@ -122,7 +122,8 @@ const EMPTY_VALUE = "–";
 export type PlayerCardAward = {
   kind: AwardKind;
   theme: CardThemeKey;
-  round: number;
+  /** Sem rodada = prévia (ex.: apresentação do evento do mês). */
+  round?: number;
 };
 
 type PlayerCardProps = {
@@ -151,7 +152,7 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
   const attributeValues: Partial<Record<PlayerAttribute, number | null>> = player.attributes;
   const AwardIcon = award ? AWARD_ICONS[award.kind] : null;
   const label = award
-    ? `${AWARD_LABELS[award.kind].title}, rodada ${award.round}`
+    ? `${AWARD_LABELS[award.kind].title}, ${award.round === undefined ? "prévia" : `rodada ${award.round}`}`
     : `carta ${CARD_TIER_LABELS[tier]}`;
 
   return (
@@ -224,7 +225,9 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
             award ? "tracking-[0.15em]" : "tracking-[0.3em]",
           )}
         >
-          {award ? `${AWARD_FOOTER[award.kind]} · R${award.round}` : CARD_TIER_LABELS[tier]}
+          {award
+            ? `${AWARD_FOOTER[award.kind]}${award.round === undefined ? "" : ` · R${award.round}`}`
+            : CARD_TIER_LABELS[tier]}
         </span>
       </div>
     </article>

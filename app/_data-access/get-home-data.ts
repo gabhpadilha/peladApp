@@ -1,3 +1,4 @@
+import { getCurrentCardEvent, type CurrentCardEvent } from "@/lib/card-themes";
 import { getLeague } from "@/lib/league";
 import { averageEvaluations } from "@/lib/ovr";
 import { getMatchPerformances, rankPlayers, type PendingEvaluation } from "@/lib/players";
@@ -6,6 +7,9 @@ import type { Match } from "@/types/match";
 import type { Player } from "@/types/player";
 
 const TOP_PERFORMERS_SIZE = 3;
+
+/** "Hoje" no fuso da pelada, `AAAA-MM-DD` (o servidor roda em UTC). */
+const todayFormatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" });
 
 export type RankedPlayer = { player: Player; position: number; delta: number | null };
 export type RoundPerformer = { player: Player; score: number };
@@ -24,6 +28,8 @@ export type HomeData = {
   openRound: { match: Match; submitted: number; expected: number } | null;
   outfieldRanking: RankedPlayer[];
   goalkeeperRanking: RankedPlayer[];
+  /** Evento do mês das cartas especiais (tema sazonal ou clássico). */
+  cardEvent: CurrentCardEvent;
 };
 
 export async function getHomeData(): Promise<HomeData> {
@@ -91,5 +97,6 @@ export async function getHomeData(): Promise<HomeData> {
     // Completos: a home mostra o resumo e expande para o ranking inteiro.
     outfieldRanking: rankPlayers(league.players, "outfield").map(toRanked),
     goalkeeperRanking: rankPlayers(league.players, "goalkeeper").map(toRanked),
+    cardEvent: getCurrentCardEvent(todayFormatter.format(new Date())),
   };
 }
