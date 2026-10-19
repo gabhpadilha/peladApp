@@ -20,11 +20,11 @@ import { Input } from "@/components/ui/input";
 import { draftTeams, getDefaultTeamCount, MAX_TEAMS, MIN_TEAMS } from "@/lib/draft";
 import { POSITION_LABELS } from "@/types/player";
 import { createMatch } from "../_actions/create-match";
-import type { GroupMemberSummary } from "../_data-access/get-group-overview";
+import type { DraftMember } from "../_data-access/get-rounds-overview";
 import { newMatchSchema, type NewMatchInput } from "../_schemas/new-match-schema";
 
 type NewMatchFormProps = {
-  members: GroupMemberSummary[];
+  members: DraftMember[];
   today: string;
 };
 

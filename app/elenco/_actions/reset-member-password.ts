@@ -17,7 +17,7 @@ export type ResetMemberPasswordResult =
  * obrigatória.
  */
 export async function resetMemberPassword(memberId: string): Promise<ResetMemberPasswordResult> {
-  const membership = await requireActiveMembership("/pelada");
+  const membership = await requireActiveMembership("/elenco");
   if (!membership.isOwner) {
     return { success: false, message: "Só o dono da pelada redefine senhas." };
   }

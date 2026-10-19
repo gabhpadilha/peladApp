@@ -13,7 +13,7 @@ export type CreateMatchResult =
 
 /** Organizador cria a rodada com os confirmados já divididos em times (atômico no banco). */
 export async function createMatch(input: NewMatchInput): Promise<CreateMatchResult> {
-  const membership = await requireActiveMembership("/pelada");
+  const membership = await requireActiveMembership("/rodadas");
   if (membership.role !== "organizer") {
     return { success: false, message: "Só o organizador cria rodadas." };
   }
@@ -42,6 +42,6 @@ export async function createMatch(input: NewMatchInput): Promise<CreateMatchResu
   }
 
   const { data: match } = await supabase.from("matches").select("round").eq("id", matchId).single();
-  revalidatePath("/pelada");
+  revalidatePath("/rodadas");
   return { success: true, round: match?.round ?? 0 };
 }

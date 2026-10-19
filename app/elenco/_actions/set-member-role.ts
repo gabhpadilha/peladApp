@@ -17,7 +17,7 @@ export async function setMemberRole(
   memberId: string,
   role: "organizer" | "player",
 ): Promise<SetMemberRoleResult> {
-  const membership = await requireActiveMembership("/pelada");
+  const membership = await requireActiveMembership("/elenco");
   if (!membership.isOwner) {
     return { success: false, message: "Só o dono da pelada muda quem é organizador." };
   }
@@ -39,6 +39,6 @@ export async function setMemberRole(
     return { success: false, message: "Não foi possível mudar o papel." };
   }
 
-  revalidatePath("/pelada");
+  revalidatePath("/elenco");
   return { success: true };
 }

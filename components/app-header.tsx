@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogOutIcon, UsersIcon } from "lucide-react";
+import { LogOutIcon, ShuffleIcon, UsersIcon } from "lucide-react";
 import { signOut } from "@/app/_actions/sign-out";
 import { OvrBadge } from "@/components/ovr-badge";
 import type { Player } from "@/types/player";
@@ -19,9 +19,13 @@ export function AppHeader({ currentPlayer }: AppHeaderProps) {
           Pelad<span className="text-primary">App</span>
         </Link>
         <nav aria-label="Principal" className="flex items-center gap-0.5 sm:gap-1">
-          <Link href="/pelada" className={NAV_LINK} aria-label="Pelada">
+          <Link href="/rodadas" className={NAV_LINK} aria-label="Rodadas">
+            <ShuffleIcon aria-hidden className="size-4" />
+            <span className="hidden sm:inline">Rodadas</span>
+          </Link>
+          <Link href="/elenco" className={NAV_LINK} aria-label="Elenco">
             <UsersIcon aria-hidden className="size-4" />
-            <span className="hidden sm:inline">Pelada</span>
+            <span className="hidden sm:inline">Elenco</span>
           </Link>
           {currentPlayer && (
             // Perfil com carta, desempenho e coleção (#colecao).

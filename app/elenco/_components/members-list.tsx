@@ -1,7 +1,7 @@
 import { OvrBadge } from "@/components/ovr-badge";
 import { SectionTitle } from "@/components/section-title";
 import { POSITION_LABELS } from "@/types/player";
-import type { GroupMemberSummary, InactiveMemberSummary } from "../_data-access/get-group-overview";
+import type { GroupMemberSummary, InactiveMemberSummary } from "../_data-access/get-roster";
 import { MemberActiveButton } from "./member-active-button";
 import { MemberManagePanel } from "./member-manage-panel";
 

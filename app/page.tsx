@@ -76,10 +76,10 @@ async function HomeContent() {
                   ranking aparecem quando a rodada fecha.
                 </p>
                 <Link
-                  href="/pelada"
+                  href="/rodadas"
                   className="inline-flex w-fit items-center gap-1 text-sm font-medium text-primary hover:underline"
                 >
-                  Ir para a pelada
+                  Ir para as rodadas
                   <ArrowRightIcon aria-hidden className="size-4" />
                 </Link>
               </section>

@@ -1,0 +1,102 @@
+import { getGroupEvaluations, getOvrByMember } from "@/lib/group-scores";
+import { requireActiveMembership, type ActiveMembership, type PlayerPositionCode } from "@/lib/session";
+import { createClient } from "@/lib/supabase/server";
+import { emailToUsername } from "@/lib/username";
+import type { Database } from "@/types/database";
+
+export type GroupMemberSummary = {
+  id: string;
+  nickname: string;
+  position: PlayerPositionCode;
+  role: Database["public"]["Enums"]["member_role"];
+  /** OVR atual (rodadas fechadas); `null` se ainda não foi avaliado. */
+  ovr: number | null;
+  /** Usuário de login (só para o dono); `null` em contas antigas, que entram por e-mail. */
+  username: string | null;
+  /** Nome completo (só para o dono, que edita o jogador). */
+  fullName: string;
+  /** Criou a pelada: único que gerencia pessoas. */
+  isOwner: boolean;
+};
+
+/** Jogador desativado (saiu da pelada); só o dono vê, para reativar. */
+export type InactiveMemberSummary = {
+  id: string;
+  nickname: string;
+  position: PlayerPositionCode;
+};
+
+export type Roster = {
+  membership: ActiveMembership;
+  /** Elenco ativo. */
+  members: GroupMemberSummary[];
+  /** Desativados; vazio para quem não é o dono. */
+  inactiveMembers: InactiveMemberSummary[];
+  /** Nome completo de quem está logado, para o card "Seu perfil". */
+  myFullName: string;
+  /** Usuário (ou e-mail, nas contas antigas) da conta logada, para o card de senha. */
+  login: string;
+  /** Tela de login, para a mensagem de acesso dos jogadores cadastrados. */
+  loginUrl: string;
+};
+
+export async function getRoster(): Promise<Roster> {
+  const membership = await requireActiveMembership("/elenco");
+  // Gestão de pessoas (usuários, edição, desativados) é só do dono.
+  const isOwner = membership.isOwner;
+  const supabase = await createClient();
+
+  const [claimsResult, membersResult, evaluations] = await Promise.all([
+    supabase.auth.getClaims(),
+    supabase
+      .from("group_members")
+      .select("id, user_id, nickname, position, role, deactivated_at")
+      .eq("group_id", membership.groupId)
+      .order("nickname"),
+    getGroupEvaluations(membership.groupId),
+  ]);
+  if (membersResult.error) throw membersResult.error;
+
+  const { data: profiles, error: profilesError } = await supabase
+    .from("profiles")
+    .select("id, username, full_name")
+    .in(
+      "id",
+      membersResult.data.map((member) => member.user_id),
+    );
+  if (profilesError) throw profilesError;
+  const profileByUser = new Map(profiles.map((profile) => [profile.id, profile]));
+  const ovrByMember = getOvrByMember(evaluations);
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+  const me = membersResult.data.find((member) => member.id === membership.memberId);
+
+  return {
+    membership,
+    members: membersResult.data
+      .filter((member) => member.deactivated_at === null)
+      .map((member) => {
+        const profile = profileByUser.get(member.user_id);
+        return {
+          id: member.id,
+          nickname: member.nickname,
+          position: member.position,
+          role: member.role,
+          ovr: ovrByMember.get(member.id) ?? null,
+          username: isOwner ? (profile?.username ?? null) : null,
+          fullName: isOwner ? (profile?.full_name ?? member.nickname) : "",
+          isOwner: member.user_id === membership.ownerUserId,
+        };
+      }),
+    inactiveMembers: isOwner
+      ? membersResult.data
+          .filter((member) => member.deactivated_at !== null)
+          .map((member) => ({ id: member.id, nickname: member.nickname, position: member.position }))
+      : [],
+    myFullName: (me && profileByUser.get(me.user_id)?.full_name) ?? membership.nickname,
+    login: (() => {
+      const email = claimsResult.data?.claims.email ?? "";
+      return emailToUsername(email) ?? email;
+    })(),
+    loginUrl: `${siteUrl}/entrar`,
+  };
+}

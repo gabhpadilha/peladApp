@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { PencilIcon, Settings2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { GroupMemberSummary } from "../_data-access/get-group-overview";
+import type { GroupMemberSummary } from "../_data-access/get-roster";
 import { EditPlayerForm } from "./edit-player-form";
 import { MemberActiveButton } from "./member-active-button";
 import { MemberRoleButton } from "./member-role-button";

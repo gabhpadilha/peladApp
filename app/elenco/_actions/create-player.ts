@@ -24,7 +24,7 @@ const USERNAME_TAKEN = "Esse usuário já existe. Escolha outro.";
  * na pelada. O Auth recebe o e-mail técnico do usuário (lib/username.ts).
  */
 export async function createPlayer(input: CreatePlayerInput): Promise<CreatePlayerResult> {
-  const membership = await requireActiveMembership("/pelada");
+  const membership = await requireActiveMembership("/elenco");
   if (!membership.isOwner) {
     return { success: false, message: "Só o dono da pelada cadastra jogadores." };
   }

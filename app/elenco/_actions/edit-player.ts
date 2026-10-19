@@ -21,7 +21,7 @@ const ROLE_LOCKED =
  * Trocar o usuário troca o login (e-mail técnico do Auth); a senha continua.
  */
 export async function editPlayer(memberId: string, input: EditPlayerInput): Promise<EditPlayerResult> {
-  const membership = await requireActiveMembership("/pelada");
+  const membership = await requireActiveMembership("/elenco");
   if (!membership.isOwner) {
     return { success: false, message: "Só o dono da pelada edita o cadastro dos jogadores." };
   }

@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { USERNAME_RULE } from "@/lib/username";
 import { editPlayerSchema, type EditPlayerInput } from "@/types/member-schema";
 import { editPlayer } from "../_actions/edit-player";
-import type { GroupMemberSummary } from "../_data-access/get-group-overview";
+import type { GroupMemberSummary } from "../_data-access/get-roster";
 
 type EditPlayerFormProps = {
   member: GroupMemberSummary;

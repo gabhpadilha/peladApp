@@ -3,7 +3,7 @@ import { SectionTitle } from "@/components/section-title";
 import { AWARD_LABELS, type AwardKind } from "@/types/award";
 import { formatWeekdayDate } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
-import type { MatchSummary } from "../_data-access/get-group-overview";
+import type { MatchSummary } from "../_data-access/get-rounds-overview";
 import { CloseMatchButton } from "./close-match-button";
 
 const AWARD_ICONS: Record<AwardKind, LucideIcon> = {

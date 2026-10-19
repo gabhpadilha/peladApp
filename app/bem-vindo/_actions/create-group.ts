@@ -72,5 +72,6 @@ export async function createGroup(input: CreateGroupInput): Promise<CreateGroupR
   }
 
   await setActiveGroup(groupId);
-  redirect("/pelada");
+  // Pelada nova: o primeiro passo é cadastrar a galera.
+  redirect("/elenco");
 }

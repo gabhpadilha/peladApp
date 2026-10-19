@@ -15,7 +15,7 @@ export type CloseMatchResult =
  * mais votados ganham as cartas especiais (com o tema sazonal da data do jogo).
  */
 export async function closeMatch(matchId: string): Promise<CloseMatchResult> {
-  const membership = await requireActiveMembership("/pelada");
+  const membership = await requireActiveMembership("/rodadas");
   if (membership.role !== "organizer") {
     return { success: false, message: "Só o organizador fecha rodadas." };
   }

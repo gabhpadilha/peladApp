@@ -17,7 +17,7 @@ const BAN_FOREVER = "876000h";
  * funcionar, e desbloqueada ao reativar.
  */
 export async function setMemberActive(memberId: string, active: boolean): Promise<SetMemberActiveResult> {
-  const membership = await requireActiveMembership("/pelada");
+  const membership = await requireActiveMembership("/elenco");
   if (!membership.isOwner) {
     return { success: false, message: "Só o dono da pelada desativa jogadores." };
   }
