@@ -242,9 +242,10 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
 
 /**
  * Degradês que fazem a foto sumir na carta (os mesmos na foto e no filtro de cor).
- * Recorte: topo limpo (apaga a linha que o segmentador deixa na borda), do pescoço
- * para baixo some devagar até a base e as laterais somem (ombro cortado pela foto
- * original não vira uma borda reta). Original: some embaixo e no lado do OVR.
+ * Recorte: topo limpo (apaga a linha que o segmentador deixa na borda), vinheta
+ * oval em volta do rosto e laterais zeradas. Regra: as quatro bordas da área
+ * terminam transparentes (borda com opacidade vira fio no Safari do iPhone).
+ * Original: some embaixo e no lado do OVR.
  */
 const PHOTO_FADES: Record<NonNullable<Player["photo"]>["kind"], readonly string[]> = {
   cutout: [
@@ -253,6 +254,10 @@ const PHOTO_FADES: Record<NonNullable<Player["photo"]>["kind"], readonly string[
     // ~57%): ombros e peito somem juntos em todas as direções, então um detalhe
     // claro no ombro (ex.: listra de camisa) não fica solto como um risco.
     "radial-gradient(ellipse 62% 66% at 50% 30%, black 58%, transparent 100%)",
+    // A vinheta sozinha não chega a zero nas laterais na altura do rosto, e o
+    // Safari do iPhone desenha a borda da camada como um fio vertical: as
+    // bordas da área precisam terminar sempre transparentes.
+    "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
   ],
   original: [
     "linear-gradient(to bottom, black 55%, transparent)",
