@@ -5,6 +5,7 @@ import { formatWeekdayDate } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
 import type { MatchSummary } from "../_data-access/get-rounds-overview";
 import { CloseMatchButton } from "./close-match-button";
+import { DeleteMatchButton } from "./delete-match-button";
 
 const AWARD_ICONS: Record<AwardKind, LucideIcon> = {
   craque: TrophyIcon,
@@ -71,6 +72,7 @@ export function MatchesList({ matches, isOrganizer }: MatchesListProps) {
                   )}
                 </div>
                 {isOrganizer && isOpen && <CloseMatchButton matchId={match.id} round={match.round} />}
+                {isOrganizer && <DeleteMatchButton matchId={match.id} round={match.round} isClosed={!isOpen} />}
               </li>
             );
           })}
