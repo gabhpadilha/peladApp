@@ -1,10 +1,11 @@
 import { PasswordForm } from "@/components/password-form";
 
 type PasswordCardProps = {
-  email: string;
+  /** Usuário (ou e-mail, nas contas antigas) da conta logada. */
+  login: string;
 };
 
-export function PasswordCard({ email }: PasswordCardProps) {
+export function PasswordCard({ login }: PasswordCardProps) {
   return (
     <section aria-labelledby="password-title" className="flex flex-col gap-4 rounded-xl border bg-card p-4">
       <div>
@@ -12,10 +13,10 @@ export function PasswordCard({ email }: PasswordCardProps) {
           Sua senha
         </h2>
         <p className="text-sm text-muted-foreground">
-          Para entrar com <span className="text-foreground">{email}</span> em outro aparelho.
+          Para entrar com <span className="font-mono text-foreground">{login}</span> em outro aparelho.
         </p>
       </div>
-      <PasswordForm email={email} />
+      <PasswordForm email={login} />
     </section>
   );
 }

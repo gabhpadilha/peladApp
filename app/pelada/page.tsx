@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { AppHeader } from "@/components/app-header";
 import { CreatePlayerForm } from "./_components/create-player-form";
-import { InviteLinkCard } from "./_components/invite-link-card";
 import { MatchesList } from "./_components/matches-list";
 import { MembersList } from "./_components/members-list";
 import { NewMatchForm } from "./_components/new-match-form";
@@ -42,18 +41,16 @@ async function GroupContent() {
       <div className="grid gap-6 lg:grid-cols-2">
         <div className="flex flex-col gap-6">
           {overview.isOrganizer && <CreatePlayerForm loginUrl={overview.loginUrl} />}
-          {overview.inviteUrl && (
-            <InviteLinkCard inviteUrl={overview.inviteUrl} groupName={overview.membership.groupName} />
-          )}
           {overview.isOrganizer && <NewMatchForm members={overview.members} today={overview.today} />}
-          <PasswordCard email={overview.email} />
+          <PasswordCard login={overview.login} />
         </div>
         <div className="flex flex-col gap-6">
           <MatchesList matches={overview.matches} isOrganizer={overview.isOrganizer} />
           <MembersList
             members={overview.members}
             currentMemberId={overview.membership.memberId}
-            canManageRoles={overview.isOrganizer}
+            canManage={overview.isOrganizer}
+            loginUrl={overview.loginUrl}
           />
         </div>
       </div>

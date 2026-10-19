@@ -1,35 +1,46 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Controller, useForm } from "react-hook-form";
-import { CheckIcon, CopyIcon, UserPlusIcon } from "lucide-react";
+import { Controller, useForm, useWatch } from "react-hook-form";
+import { UserPlusIcon } from "lucide-react";
 import { MemberProfileFields } from "@/components/member-profile-fields";
 import { Button } from "@/components/ui/button";
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
+import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { suggestUsername, USERNAME_RULE } from "@/lib/username";
 import { createPlayerSchema, type CreatePlayerInput } from "@/types/member-schema";
 import { createPlayer } from "../_actions/create-player";
+import { AccessCard } from "./access-card";
 
-const COPIED_FEEDBACK_MS = 2000;
-
-type CreatedPlayer = { email: string; nickname: string; tempPassword: string };
+type CreatedPlayer = { username: string; nickname: string; tempPassword: string };
 
 type CreatePlayerFormProps = {
   /** Link da tela de login, para a mensagem do WhatsApp. */
   loginUrl: string;
 };
 
-/** Organizador cadastra o jogador e repassa o acesso com senha provisória. */
+const EMPTY_FORM: CreatePlayerInput = { fullName: "", nickname: "", username: "", position: "ALA" };
+
+/**
+ * Organizador cadastra o jogador por usuário (sem e-mail) e repassa o acesso
+ * com senha provisória. O usuário é sugerido a partir do apelido.
+ */
 export function CreatePlayerForm({ loginUrl }: CreatePlayerFormProps) {
   const [created, setCreated] = useState<CreatedPlayer | null>(null);
-  const [isCopied, setIsCopied] = useState(false);
+  const [isUsernameEdited, setIsUsernameEdited] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const form = useForm<CreatePlayerInput>({
     resolver: zodResolver(createPlayerSchema),
-    defaultValues: { fullName: "", nickname: "", email: "" },
+    defaultValues: { ...EMPTY_FORM, position: undefined },
   });
+  const nickname = useWatch({ control: form.control, name: "nickname" });
+
+  // Enquanto o organizador não mexer no usuário, ele acompanha o apelido.
+  useEffect(() => {
+    if (!isUsernameEdited) form.setValue("username", suggestUsername(nickname ?? ""));
+  }, [nickname, isUsernameEdited, form]);
 
   function handleSubmit(data: CreatePlayerInput) {
     setFormError(null);
@@ -37,7 +48,8 @@ export function CreatePlayerForm({ loginUrl }: CreatePlayerFormProps) {
       const result = await createPlayer(data);
       if (result.success) {
         setCreated(result);
-        form.reset({ fullName: "", nickname: "", email: "" });
+        setIsUsernameEdited(false);
+        form.reset({ ...EMPTY_FORM, position: undefined });
         return;
       }
       for (const [name, messages] of Object.entries(result.errors ?? {})) {
@@ -48,19 +60,6 @@ export function CreatePlayerForm({ loginUrl }: CreatePlayerFormProps) {
     });
   }
 
-  async function handleCopyMessage(player: CreatedPlayer) {
-    const message = [
-      `Fala, ${player.nickname}! Seu acesso ao PeladApp:`,
-      loginUrl,
-      `E-mail: ${player.email}`,
-      `Senha provisória: ${player.tempPassword}`,
-      "No primeiro acesso você escolhe sua senha.",
-    ].join("\n");
-    await navigator.clipboard.writeText(message);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), COPIED_FEEDBACK_MS);
-  }
-
   return (
     <section aria-labelledby="create-player-title" className="flex flex-col gap-4 rounded-xl border bg-card p-4">
       <div>
@@ -68,53 +67,50 @@ export function CreatePlayerForm({ loginUrl }: CreatePlayerFormProps) {
           Cadastrar jogador
         </h2>
         <p className="text-sm text-muted-foreground">
-          A conta é criada com uma senha provisória. No primeiro acesso, o jogador escolhe a dele.
+          Sem e-mail: o jogador entra com usuário e uma senha provisória, e escolhe a dele no primeiro acesso.
         </p>
       </div>
 
       {created ? (
-        <div role="status" className="flex flex-col gap-3 rounded-lg border border-primary/30 bg-primary/10 p-4">
-          <p className="font-medium">{created.nickname} cadastrado!</p>
-          <dl className="grid grid-cols-[auto_1fr] gap-x-3 gap-y-1 text-sm">
-            <dt className="text-muted-foreground">E-mail</dt>
-            <dd className="truncate">{created.email}</dd>
-            <dt className="text-muted-foreground">Senha provisória</dt>
-            <dd className="font-mono font-medium select-all">{created.tempPassword}</dd>
-          </dl>
-          <p className="text-xs text-muted-foreground">
-            Anote ou mande agora: a senha provisória não aparece de novo.
-          </p>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Button size="lg" onClick={() => handleCopyMessage(created)} className="flex-1">
-              {isCopied ? <CheckIcon aria-hidden /> : <CopyIcon aria-hidden />}
-              {isCopied ? "Mensagem copiada" : "Copiar mensagem para o WhatsApp"}
-            </Button>
-            <Button size="lg" variant="secondary" onClick={() => setCreated(null)}>
-              <UserPlusIcon aria-hidden />
-              Cadastrar outro
-            </Button>
-          </div>
-        </div>
+        <AccessCard
+          title={`${created.nickname} cadastrado!`}
+          nickname={created.nickname}
+          login={created.username}
+          tempPassword={created.tempPassword}
+          loginUrl={loginUrl}
+        >
+          <Button size="lg" variant="secondary" onClick={() => setCreated(null)}>
+            <UserPlusIcon aria-hidden />
+            Cadastrar outro
+          </Button>
+        </AccessCard>
       ) : (
         <form onSubmit={form.handleSubmit(handleSubmit)} noValidate>
           <FieldGroup>
             <MemberProfileFields control={form.control} idPrefix="create-player" />
             <Controller
-              name="email"
+              name="username"
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor="create-player-email">E-mail do jogador</FieldLabel>
+                  <FieldLabel htmlFor="create-player-username">Usuário para entrar no app</FieldLabel>
                   <Input
                     {...field}
-                    id="create-player-email"
-                    type="email"
-                    inputMode="email"
+                    onChange={(event) => {
+                      setIsUsernameEdited(true);
+                      field.onChange(event.target.value.toLowerCase());
+                    }}
+                    id="create-player-username"
                     autoComplete="off"
-                    placeholder="jogador@email.com"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                    spellCheck={false}
+                    maxLength={20}
+                    placeholder="magrao"
                     aria-invalid={fieldState.invalid}
-                    className="h-11 text-base"
+                    className="h-11 font-mono text-base"
                   />
+                  <FieldDescription>{USERNAME_RULE}</FieldDescription>
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}
