@@ -8,9 +8,11 @@ import {
   getOvrDelta,
   getPendingEvaluations,
 } from "@/lib/players";
+import { computeProgression, submissionKey, type Progression } from "@/lib/progression";
 import { requireActiveMembership } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 import { AWARD_KINDS, type Award } from "@/types/award";
+import { isCardSkinKey } from "@/types/card-skin";
 import type { Json } from "@/types/database";
 import type { Evaluation, Match } from "@/types/match";
 import {
@@ -45,11 +47,18 @@ export async function getLeague(nextPath = "/") {
   const membership = await requireActiveMembership(nextPath);
   const supabase = await createClient();
 
-  const [membersResult, matchesResult, evaluations, givenResult, submissionsResult, awardsResult] =
-    await Promise.all([
+  const [
+    membersResult,
+    matchesResult,
+    evaluations,
+    givenResult,
+    submissionsResult,
+    awardsResult,
+    memberSubmissionsResult,
+  ] = await Promise.all([
       supabase
         .from("group_members")
-        .select("id, user_id, nickname, position, deactivated_at, photo_path, photo_kind")
+        .select("id, user_id, nickname, position, deactivated_at, photo_path, photo_kind, card_skin")
         .eq("group_id", membership.groupId),
       supabase
         .from("matches")
@@ -64,6 +73,8 @@ export async function getLeague(nextPath = "/") {
         .from("awards")
         .select("id, match_id, member_id, kind, theme, votes, score, position, ovr, attributes")
         .eq("group_id", membership.groupId),
+      // Quem enviou notas em cada rodada fechada (para o XP e as PeladaCoins).
+      supabase.rpc("get_member_submissions", { target_group: membership.groupId }),
     ]);
 
   if (membersResult.error) throw membersResult.error;
@@ -71,6 +82,32 @@ export async function getLeague(nextPath = "/") {
   if (givenResult.error) throw givenResult.error;
   if (submissionsResult.error) throw submissionsResult.error;
   if (awardsResult.error) throw awardsResult.error;
+  if (memberSubmissionsResult.error) throw memberSubmissionsResult.error;
+
+  const matches: Match[] = matchesResult.data.map((match) => ({
+    id: match.id,
+    round: match.round,
+    date: match.played_on,
+    status: match.status,
+    presentPlayerIds: match.match_attendance.map((attendance) => attendance.member_id),
+  }));
+  const matchById = new Map(matches.map((match) => [match.id, match]));
+
+  // XP, nível e PeladaCoins de cada um, do histórico (rodadas fechadas).
+  const submissions = new Set(
+    memberSubmissionsResult.data.map((row) => submissionKey(row.match_id, row.member_id)),
+  );
+  const progressionAwards = awardsResult.data.map((award) => ({
+    kind: award.kind,
+    matchId: award.match_id,
+    memberId: award.member_id,
+  }));
+  const progressionById = new Map<string, Progression>(
+    membersResult.data.map((member) => [
+      member.id,
+      computeProgression({ playerId: member.id, matches, evaluations, awards: progressionAwards, submissions }),
+    ]),
+  );
 
   const { data: profiles, error: profilesError } = await supabase
     .from("profiles")
@@ -88,21 +125,14 @@ export async function getLeague(nextPath = "/") {
       nickname: member.nickname,
       fullName: fullNameByUser.get(member.user_id) ?? member.nickname,
       photo: toPlayerPhoto(member.photo_path, member.photo_kind),
+      cardSkin: isCardSkinKey(member.card_skin) ? member.card_skin : null,
+      level: progressionById.get(member.id)?.level ?? 0,
     };
     return member.position === "GOL"
       ? { ...base, role: "goalkeeper", position: "GOL" }
       : { ...base, role: "outfield", position: member.position };
   });
   const profileById = new Map(playerProfiles.map((profile) => [profile.id, profile]));
-
-  const matches: Match[] = matchesResult.data.map((match) => ({
-    id: match.id,
-    round: match.round,
-    date: match.played_on,
-    status: match.status,
-    presentPlayerIds: match.match_attendance.map((attendance) => attendance.member_id),
-  }));
-  const matchById = new Map(matches.map((match) => [match.id, match]));
 
   const givenEvaluations: Evaluation[] = givenResult.data.map((evaluation) => ({
     id: evaluation.id,
@@ -189,6 +219,9 @@ export async function getLeague(nextPath = "/") {
       submissionsResult.data.map((row) => [row.match_id, Number(row.submitted)]),
     ),
     getDelta,
+    /** XP, nível e PeladaCoins ganhas de cada membro. */
+    getProgression: (memberId: string): Progression =>
+      progressionById.get(memberId) ?? { level: 0, xpIntoLevel: 0, xpNeeded: 60, xp: 0, coinsEarned: 0 },
   };
 }
 

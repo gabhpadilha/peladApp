@@ -35,6 +35,14 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
 - Goleiro é **papel do jogador** (fixo): cada pessoa tem uma única carta.
 - Em listas e no cabeçalho, o OVR aparece como `OvrBadge` (cor da faixa); variação da rodada como `OvrDelta` (ícone + número, nunca só cor).
 
+## 💎 Cartas da Loja e nível (`PremiumPlayerCard`, `LevelSeal`)
+
+- **Selo de nível:** hexágono pequeno dentro da ponta de baixo da carta base (na cor da moldura; dourado nas cartas da Loja), longe dos selos da mesa tática. Some nas cartas especiais.
+- **Cartas premium (aprovadas pelo dono do app, "rascunho 4"):** estilo TOTY sóbrio: moldura e lâminas finas em **ouro champanhe** (`--card-gold`), face em vidro translúcido escuro com fio dourado, atributos em 2 colunas de 3 com divisória. Só a cor da face muda por carta (`@utility card-skin-<chave>`: Esmeralda, Safira, Ametista, Rubi, Turquesa, Ônix e **Ícone**, a branca, última). Nada de asas, cristais ou enfeites (o dono achou "exagerado" e "cartunesco").
+- **Carta comprada substitui a padrão em todo lugar** (ranking, mesa tática, perfil, elenco) quando o jogador a usa. Cartas especiais nunca mudam por ela. As faixas Bronze/Prata/Ouro seguem pelo OVR na carta padrão.
+- **Loja (`/loja`, na navbar com ícone de loja):** saldo de PeladaCoins (`CoinPill`), barra de nível com a próxima liberação, grade com a carta do próprio jogador em cada visual: "Em uso", "Usar" (já comprada), preço (abre a folha de compra: carta grande, saldo antes → depois, "Comprar e usar") ou bloqueada (apagada, cadeado, "Nível X · Y PC"). Embaixo, "Como ganhar PeladaCoins". Comprou, é para sempre; dá para voltar à Padrão.
+- **Perfil:** barra "Nível N" com XP até o próximo (`LevelProgressBar`), antes de "Próxima faixa".
+
 ## 🏆 Cartas especiais (colecionáveis)
 
 - **Prêmios (`types/award.ts`, aprovados pelo dono do app em 2026-10-20):** por voto, nesta ordem: Melhor Jogador (`craque`), Gol da Rodada (`gol`), Drible da Rodada, Melhor Atacante, Melhor Defensor, Melhor Goleiro, Fair Play (o gente boa), Fominha e Bola Murcha; sem voto: **Time da Semana** (as 4 maiores notas da linha e a maior do gol na rodada, com no mínimo 3 notas recebidas). Ícones em `components/award-icons.ts`.
@@ -58,7 +66,7 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
 ## 🏠 Telas
 
 - **Home (`/`):** nome da pelada + "Fala, <apelido>", aviso de avaliação pendente, **evento do mês** (`CardEventShowcase`, largura total: nome do tema, "Até <fim> · faltam N dias", texto do evento, aviso "Novidade", prévia das 9 cartas por voto com a carta do próprio jogador no tema (bônus aplicado), bloco do Time da Semana e "Como ganhar" em 4 passos; fora de tema sazonal mostra as cartas clássicas como "Cartas especiais"), minha carta (`MyCardSummary`, mobile-first: carta pequena + apelido, "Posição · Carta <faixa>" e OVR grande com variação; Ranking/Jogos/Notas em 3 blocos com número e complemento em linhas próprias, sem corte; dica com ícone quando ainda não tem OVR, e ranking "–"; "Desempenho" e "Coleção N" como dois botões lado a lado), rodada em avaliação (envios/presentes), "Confira os vencedores" (até abrir o pacote), última rodada fechada (cartas da rodada + top 3 + "Ver a revelação de novo") ou o vazio "Nenhuma rodada ainda", e ranking (linha e goleiros): cada linha tem a **miniatura da carta** (`PlayerCard size="fill"` em `w-14`, com a foto quando tem; proposta A aprovada pelo dono do app em 2026-10-19, a do pódio foi descartada) ao lado de posição, apelido, cargo, variação e OVR; resumo com top 5 da linha e top 2 do gol, e o botão "Ver ranking completo (+N)" / "Mostrar menos" expande a lista com todos os atletas no mesmo card (`ExpandableRanking`).
-- **Navbar:** logo (home), "Rodadas" (ícone de sorteio), "Elenco", chip apelido + OVR (perfil; a coleção é a aba ao lado) e "Sair" (só ícone no celular). Sem link "Coleção" separado: levava ao mesmo perfil.
+- **Navbar:** logo (home), "Rodadas" (ícone de sorteio), "Elenco", "Loja", chip apelido + OVR (perfil; a coleção é a aba ao lado) e "Sair" (só ícone no celular). Sem link "Coleção" separado: levava ao mesmo perfil.
 - **Senha:** sem troca obrigatória. O jogador entra com a senha gerada e, se quiser, troca em Elenco → "Sua senha" (`/trocar-senha` redireciona para `/elenco`).
 - **Cadastrar jogador (em `/elenco`):** nome, apelido, posição e **usuário** (sugerido do apelido enquanto o organizador não editar; mostrado em fonte mono) → mostra usuário + senha gerada uma única vez e "Copiar mensagem para o WhatsApp" (`AccessCard`). Sem e-mail.
 - **Atleta: duas páginas com abas** (`AthleteTabs`, segmentado de largura total: "Estatísticas" | "Coleção N"), porque a coleção cresce com o tempo.

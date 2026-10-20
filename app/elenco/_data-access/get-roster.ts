@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { toPlayerPhoto } from "@/lib/player-photo";
 import { emailToUsername } from "@/lib/username";
 import type { Database } from "@/types/database";
+import { isCardSkinKey, type CardSkinKey } from "@/types/card-skin";
 import type { PlayerPhoto } from "@/types/player";
 
 export type GroupMemberSummary = {
@@ -21,6 +22,8 @@ export type GroupMemberSummary = {
   isOwner: boolean;
   /** Foto atual da carta (prévia do upload); `null` sem foto. */
   photo: PlayerPhoto | null;
+  /** Carta da Loja em uso (a prévia do upload mostra a carta de verdade). */
+  cardSkin: CardSkinKey | null;
 };
 
 /** Jogador desativado (saiu da pelada); só o dono vê, para reativar. */
@@ -52,7 +55,7 @@ export async function getRoster(): Promise<Roster> {
     supabase.auth.getClaims(),
     supabase
       .from("group_members")
-      .select("id, user_id, nickname, position, role, deactivated_at, photo_path, photo_kind")
+      .select("id, user_id, nickname, position, role, deactivated_at, photo_path, photo_kind, card_skin")
       .eq("group_id", membership.groupId)
       .order("nickname"),
     getGroupEvaluations(membership.groupId),
@@ -87,6 +90,7 @@ export async function getRoster(): Promise<Roster> {
           fullName: isOwner ? (profile?.full_name ?? member.nickname) : "",
           isOwner: member.user_id === membership.ownerUserId,
           photo: toPlayerPhoto(member.photo_path, member.photo_kind),
+          cardSkin: isCardSkinKey(member.card_skin) ? member.card_skin : null,
         };
       }),
     inactiveMembers: isOwner

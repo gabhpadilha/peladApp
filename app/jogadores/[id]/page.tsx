@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeftIcon } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
 import { GroupGate } from "@/components/group-gate";
+import { LevelProgressBar } from "@/components/level-progress";
 import { PendingEvaluationsBanner } from "@/components/pending-evaluations-banner";
 import { AthleteHero } from "./_components/athlete-hero";
 import { AthleteHighlights } from "./_components/athlete-highlights";
@@ -45,6 +46,10 @@ async function AthleteContent({ params }: { params: PageProps<"/jogadores/[id]">
         <AthleteTabs memberId={profile.player.id} awardCount={profile.awards.length} active="stats" />
         <AthleteHero profile={profile} />
         <PendingEvaluationsBanner pending={profile.pending} />
+        <LevelProgressBar
+          progress={profile.levelProgress}
+          hint={profile.isOwnProfile ? "troque o visual da carta na Loja" : undefined}
+        />
         {profile.player.ovr !== null && <TierProgress ovr={profile.player.ovr} />}
         <AthleteHighlights
           player={profile.player}

@@ -309,6 +309,66 @@
   --award-time-da-semana-halloween-foreground: oklch(0.93 0.06 250);
 }
 
+/*
+ * Cartas da Loja (`types/card-skin.ts`), inspiradas na Team of the Year do EA FC.
+ * O desenho é um só (`PremiumPlayerCard` em components/player-card.tsx); cada
+ * classe troca só as cores da face: centro (mid), meio (deep), borda (end), a
+ * luz do vidro (light) e o texto. O ouro champanhe é o mesmo em todas.
+ */
+:root {
+  --card-gold: linear-gradient(155deg, #fbf1d2 0%, #d2af66 16%, #f4e4b4 30%, #94692d 48%, #ddbb76 64%, #735020 82%, #e8cf95 100%);
+}
+@utility card-skin-esmeralda {
+  --skin-mid: #0b5c3b;
+  --skin-deep: #01150d;
+  --skin-end: #000000;
+  --skin-light: #46e8a6;
+  --skin-text: #ead49e;
+}
+@utility card-skin-safira {
+  --skin-mid: #1532a0;
+  --skin-deep: #030a2c;
+  --skin-end: #000000;
+  --skin-light: #6c9bff;
+  --skin-text: #ead49e;
+}
+@utility card-skin-ametista {
+  --skin-mid: #4a168c;
+  --skin-deep: #0e0321;
+  --skin-end: #000000;
+  --skin-light: #b987ff;
+  --skin-text: #ead49e;
+}
+@utility card-skin-rubi {
+  --skin-mid: #7e0d1c;
+  --skin-deep: #1e0105;
+  --skin-end: #000000;
+  --skin-light: #ff6b82;
+  --skin-text: #ead49e;
+}
+@utility card-skin-turquesa {
+  --skin-mid: #075e68;
+  --skin-deep: #01161a;
+  --skin-end: #000000;
+  --skin-light: #4de9f5;
+  --skin-text: #ead49e;
+}
+@utility card-skin-onix {
+  --skin-mid: #1f2024;
+  --skin-deep: #030304;
+  --skin-end: #000000;
+  --skin-light: #b9bfc9;
+  --skin-text: #ead49e;
+}
+/* Ícone: a única clara (creme e dourado). */
+@utility card-skin-icone {
+  --skin-mid: #fffdf7;
+  --skin-deep: #f3e9d3;
+  --skin-end: #dccba2;
+  --skin-light: #ffffff;
+  --skin-text: #3a2a0e;
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

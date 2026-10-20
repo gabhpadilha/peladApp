@@ -1,3 +1,5 @@
+import type { CardSkinKey } from "@/types/card-skin";
+
 export const OUTFIELD_POSITIONS = ["FIX", "ALA", "PIV"] as const;
 export type OutfieldPosition = (typeof OUTFIELD_POSITIONS)[number];
 export type PlayerPosition = OutfieldPosition | "GOL";
@@ -45,6 +47,10 @@ type ProfileBase = {
   nickname: string;
   fullName: string;
   photo: PlayerPhoto | null;
+  /** Personalização comprada na Loja e em uso; sem ela, a carta padrão (faixa do OVR). */
+  cardSkin?: CardSkinKey | null;
+  /** Nível (XP), mostrado no selo da ponta da carta. */
+  level?: number | null;
 };
 
 /** Dados cadastrais, sem nada derivado das avaliações. */

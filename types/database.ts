@@ -114,6 +114,48 @@ export type Database = {
           },
         ]
       }
+      card_skin_purchases: {
+        Row: {
+          created_at: string
+          group_id: string
+          id: string
+          member_id: string
+          price: number
+          skin: string
+        }
+        Insert: {
+          created_at?: string
+          group_id: string
+          id?: string
+          member_id: string
+          price: number
+          skin: string
+        }
+        Update: {
+          created_at?: string
+          group_id?: string
+          id?: string
+          member_id?: string
+          price?: number
+          skin?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "card_skin_purchases_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "card_skin_purchases_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "group_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       evaluations: {
         Row: {
           chu: number | null
@@ -191,6 +233,7 @@ export type Database = {
       }
       group_members: {
         Row: {
+          card_skin: string | null
           deactivated_at: string | null
           group_id: string
           id: string
@@ -203,6 +246,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          card_skin?: string | null
           deactivated_at?: string | null
           group_id: string
           id?: string
@@ -215,6 +259,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          card_skin?: string | null
           deactivated_at?: string | null
           group_id?: string
           id?: string
@@ -473,6 +518,13 @@ export type Database = {
         Returns: {
           match_id: string
           submitted: number
+        }[]
+      }
+      get_member_submissions: {
+        Args: { target_group: string }
+        Returns: {
+          match_id: string
+          member_id: string
         }[]
       }
       is_group_member: { Args: { target_group: string }; Returns: boolean }

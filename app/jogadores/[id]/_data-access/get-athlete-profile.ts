@@ -8,6 +8,7 @@ import {
   type MatchPerformance,
   type PendingEvaluation,
 } from "@/lib/players";
+import type { LevelProgress } from "@/lib/progression";
 import type { Award } from "@/types/award";
 import type { Player, PlayerAttribute } from "@/types/player";
 
@@ -35,6 +36,8 @@ export type AthleteProfile = {
   groupAverages: Partial<Record<PlayerAttribute, number>>;
   /** Tema das cartas especiais deste mês (prévia na coleção vazia). */
   currentTheme: CardThemeKey;
+  /** Nível e XP do atleta (públicos para a pelada). */
+  levelProgress: LevelProgress;
 };
 
 /** Perfil de um atleta da pelada ativa; `null` se o id não for de alguém dela. */
@@ -75,5 +78,6 @@ export async function getAthleteProfile(memberId: string): Promise<AthleteProfil
     pending: isOwnProfile ? league.pending : [],
     groupAverages: getGroupAttributeAverages(league.activePlayers, player.role),
     currentTheme: getCurrentCardEvent(todayFormatter.format(new Date())).theme,
+    levelProgress: league.getProgression(player.id),
   };
 }

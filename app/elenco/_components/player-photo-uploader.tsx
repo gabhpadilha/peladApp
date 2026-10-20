@@ -12,7 +12,7 @@ import { uploadPlayerPhoto } from "../_actions/upload-player-photo";
 import type { GroupMemberSummary } from "../_data-access/get-roster";
 
 type PlayerPhotoUploaderProps = {
-  member: Pick<GroupMemberSummary, "id" | "nickname" | "position" | "ovr" | "photo">;
+  member: Pick<GroupMemberSummary, "id" | "nickname" | "position" | "ovr" | "photo" | "cardSkin">;
   /** É a foto de quem está logado (muda só o texto de acessibilidade). */
   isSelf: boolean;
 };
@@ -25,7 +25,7 @@ type Draft = {
 
 /** Carta só para a prévia: números de verdade não importam aqui. */
 function previewPlayer(member: PlayerPhotoUploaderProps["member"], photo: PlayerPhoto | null): Player {
-  const base = { id: member.id, nickname: member.nickname, fullName: member.nickname, photo, ovr: member.ovr };
+  const base = { id: member.id, nickname: member.nickname, fullName: member.nickname, photo, ovr: member.ovr, cardSkin: member.cardSkin };
   return member.position === "GOL"
     ? { ...base, role: "goalkeeper", position: "GOL", attributes: { ref: null, ela: null, pos: null, sai: null, rep: null, pes: null } }
     : { ...base, role: "outfield", position: member.position, attributes: { vel: null, chu: null, pas: null, dri: null, def: null, fis: null } };

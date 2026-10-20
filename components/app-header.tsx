@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LogOutIcon, ShuffleIcon, UsersIcon } from "lucide-react";
+import { LogOutIcon, ShuffleIcon, StoreIcon, UsersIcon } from "lucide-react";
 import { signOut } from "@/app/_actions/sign-out";
 import { OvrBadge } from "@/components/ovr-badge";
 import type { Player } from "@/types/player";
@@ -26,6 +26,10 @@ export function AppHeader({ currentPlayer }: AppHeaderProps) {
           <Link href="/elenco" className={NAV_LINK} aria-label="Elenco">
             <UsersIcon aria-hidden className="size-4" />
             <span className="hidden sm:inline">Elenco</span>
+          </Link>
+          <Link href="/loja" className={NAV_LINK} aria-label="Loja">
+            <StoreIcon aria-hidden className="size-4" />
+            <span className="hidden sm:inline">Loja</span>
           </Link>
           {currentPlayer && (
             // Perfil: Estatísticas, com aba para a Coleção (/colecao).
