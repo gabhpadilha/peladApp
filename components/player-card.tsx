@@ -462,13 +462,14 @@ function PremiumBlades({ skin }: { skin: CardSkinKey }) {
   );
 }
 
-/** Cabeça e pescoço de lobo uivando, focinho para cima e para a esquerda (para a lua), em ~21 x 40 unidades. */
-const HOWLING_WOLF =
-  "M3,2 L9,8 Q10,8.6 11.2,8.4 L13.6,2.6 L15.4,9.6 Q17,11 17.6,13.4 Q18.8,16.2 19.6,18.4 L21,18.8 L20.4,20.2 Q20.9,22 21.4,24 Q22.4,28 23,32 L11,32 Q11.4,28 11.8,25.4 L10.2,24.4 L11.4,22.8 Q11.2,20 10.4,18 Q9.4,15.4 8.2,14 Q6,11.6 4.4,9.8 L3.4,7.8 L7.4,9 L3.4,4.2 Q2.6,3.6 3,2 Z";
+/** Cabeça de lobo rosnando de perfil, virada para a esquerda (para a lua), em ~40 x 40 unidades. */
+const WEREWOLF_HEAD =
+  "M2,13 L6,11.4 L14,10 L17,8.4 L19,7.6 L25,0 L27.6,8.8 L28.6,9.6 L35,8.2 L31,12 L38,12.6 L33.4,16 L39,19 L34,21 L37.6,26.4 L32.4,26 L34.4,33 L29.6,29.6 L29.4,37.6 L26,32 L23.6,39 L22.4,32 L19,27 L15.6,24.6 L13,27.4 L12.6,24.2 L8,24.4 L5,23.6 L6,21.2 L7,22.6 L8,20.8 L9.2,22 L14,18 L9,16.6 L8.6,18.8 L7.6,17 L6.8,19.2 L6.2,16.4 L3,15.6 Z";
+const WEREWOLF_EYE = "M15.6,12.8 L20,11.6 L18.6,13.2 Z";
 
 /**
- * Detalhes do Lobisomem: lua cheia atrás da cabeça, lobo uivando no vão ao
- * lado dela e três arranhões rasgando o fio interno da lateral direita.
+ * Detalhes do Lobisomem: lua cheia atrás da cabeça, cabeça de lobo rosnando
+ * no vão ao lado dela e três arranhões rasgando o fio interno da lateral direita.
  */
 function WerewolfArt({ metal }: { metal: string }) {
   return (
@@ -497,29 +498,22 @@ function WerewolfArt({ metal }: { metal: string }) {
           <path d="M99,88 Q93,96 88.5,106" fill="none" stroke={`url(#${metal})`} strokeOpacity={0.85} strokeWidth={0.5} strokeLinecap="round" />
         </g>
       ))}
-      {/* Lobo uivando para a lua, no vão ao lado da cabeça (silhueta com fio de prata). */}
+      {/* Cabeça de lobo rosnando no vão ao lado da cabeça do jogador; some embaixo, atrás do ombro. */}
       <defs>
-        {/* O pescoço some aos poucos atrás do ombro (sem corte reto). */}
         <linearGradient id="werewolf-fill" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0%" stopColor="#03070d" stopOpacity={0.92} />
-          <stop offset="68%" stopColor="#03070d" stopOpacity={0.9} />
+          <stop offset="62%" stopColor="#03070d" stopOpacity={0.9} />
           <stop offset="100%" stopColor="#03070d" stopOpacity={0} />
         </linearGradient>
         <linearGradient id="werewolf-rim" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#f4f8ff" stopOpacity={1} />
-          <stop offset="55%" stopColor="#b4bfcc" stopOpacity={0.7} />
-          <stop offset="90%" stopColor="#b4bfcc" stopOpacity={0} />
+          <stop offset="0%" stopColor="#f4f8ff" stopOpacity={0.9} />
+          <stop offset="55%" stopColor="#b4bfcc" stopOpacity={0.6} />
+          <stop offset="92%" stopColor="#b4bfcc" stopOpacity={0} />
         </linearGradient>
       </defs>
-      <g transform="translate(67 4) scale(1.2)">
-        <path
-          d={HOWLING_WOLF}
-          fill="url(#werewolf-fill)"
-          stroke="url(#werewolf-rim)"
-          strokeWidth={0.28}
-          strokeLinejoin="round"
-        />
-        <path d="M10,10.4 Q11,9.8 12,10.2" fill="none" stroke={`url(#${metal})`} strokeWidth={0.4} strokeLinecap="round" />
+      <g transform="translate(67.5 9) scale(0.76)">
+        <path d={WEREWOLF_HEAD} fill="url(#werewolf-fill)" stroke="url(#werewolf-rim)" strokeWidth={0.45} strokeLinejoin="round" />
+        <path d={WEREWOLF_EYE} fill="#dceaff" />
       </g>
     </>
   );
