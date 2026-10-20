@@ -8,7 +8,7 @@ import {
   getOvrDelta,
   getPendingEvaluations,
 } from "@/lib/players";
-import { computeProgression, submissionKey, type Progression } from "@/lib/progression";
+import { computeProgression, submissionKey, WELCOME_BONUS_COINS, type Progression } from "@/lib/progression";
 import { requireActiveMembership } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 import { AWARD_KINDS, type Award } from "@/types/award";
@@ -221,7 +221,7 @@ export async function getLeague(nextPath = "/") {
     getDelta,
     /** XP, nível e PeladaCoins ganhas de cada membro. */
     getProgression: (memberId: string): Progression =>
-      progressionById.get(memberId) ?? { level: 0, xpIntoLevel: 0, xpNeeded: 60, xp: 0, coinsEarned: 0 },
+      progressionById.get(memberId) ?? { level: 0, xpIntoLevel: 0, xpNeeded: 60, xp: 0, coinsEarned: WELCOME_BONUS_COINS },
   };
 }
 

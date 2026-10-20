@@ -6,7 +6,8 @@
  * `app/globals.css`. O banco guarda só a chave (`group_members.card_skin`).
  */
 export const CARD_SKINS = [
-  { key: "esmeralda", name: "Esmeralda", level: 2, price: 150 },
+  // Liberada desde o começo: dá para comprar com o bônus de boas-vindas.
+  { key: "esmeralda", name: "Esmeralda", level: 0, price: 150 },
   { key: "safira", name: "Safira", level: 4, price: 250 },
   { key: "ametista", name: "Ametista", level: 6, price: 350 },
   { key: "rubi", name: "Rubi", level: 8, price: 450 },

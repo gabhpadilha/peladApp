@@ -244,6 +244,7 @@ export type Database = {
           position: Database["public"]["Enums"]["player_position"]
           role: Database["public"]["Enums"]["member_role"]
           user_id: string
+          welcome_bonus_seen_at: string | null
         }
         Insert: {
           card_skin?: string | null
@@ -257,6 +258,7 @@ export type Database = {
           position: Database["public"]["Enums"]["player_position"]
           role?: Database["public"]["Enums"]["member_role"]
           user_id: string
+          welcome_bonus_seen_at?: string | null
         }
         Update: {
           card_skin?: string | null
@@ -270,6 +272,7 @@ export type Database = {
           position?: Database["public"]["Enums"]["player_position"]
           role?: Database["public"]["Enums"]["member_role"]
           user_id?: string
+          welcome_bonus_seen_at?: string | null
         }
         Relationships: [
           {

@@ -23,9 +23,12 @@ const COINS_OVR_UP = 10;
 const COINS_BEST_PLAYER = 60;
 const COINS_OTHER_POSITIVE_AWARD = 30;
 const COINS_PER_LEVEL = 20;
+/** Bônus de primeiro login: todo jogador começa com ele (aviso na home). */
+export const WELCOME_BONUS_COINS = 150;
 
 /** As regras como aparecem para o jogador (Loja e perfil), tiradas das mesmas constantes. */
 export const COIN_RULES = [
+  { label: "Bônus de boas-vindas", value: `+${WELCOME_BONUS_COINS}` },
   { label: "Jogar uma rodada", value: `+${COINS_PLAYED}` },
   { label: "Enviar as suas notas", value: `+${COINS_SUBMITTED}` },
   { label: "Nota 7+ / 8+ / 9+", value: `+${COINS_SCORE_BONUS[70]} / +${COINS_SCORE_BONUS[80]} / +${COINS_SCORE_BONUS[90]}` },
@@ -135,5 +138,5 @@ export function computeProgression({ playerId, matches, evaluations, awards, sub
   }
 
   const progress = getLevelProgress(xp);
-  return { ...progress, xp, coinsEarned: coins + progress.level * COINS_PER_LEVEL };
+  return { ...progress, xp, coinsEarned: WELCOME_BONUS_COINS + coins + progress.level * COINS_PER_LEVEL };
 }

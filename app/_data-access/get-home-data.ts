@@ -34,7 +34,21 @@ export type HomeData = {
   /** Evento do mês das cartas especiais (tema sazonal ou clássico). */
   cardEvent: CurrentCardEvent;
   winnersAlert: WinnersAlert | null;
+  /** Aviso do bônus de boas-vindas, enquanto o jogador não o fechar. */
+  showWelcomeBonus: boolean;
 };
+
+/** O jogador ainda não viu o aviso do bônus de primeiro login. */
+async function hasUnseenWelcomeBonus(memberId: string): Promise<boolean> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("group_members")
+    .select("welcome_bonus_seen_at")
+    .eq("id", memberId)
+    .single();
+  if (error) throw error;
+  return data.welcome_bonus_seen_at === null;
+}
 
 /** Aviso da última rodada fechada, enquanto o jogador não abrir o pacote dela. */
 async function getWinnersAlert(memberId: string, match: Match | null, awards: Award[]): Promise<WinnersAlert | null> {
@@ -93,7 +107,10 @@ export async function getHomeData(): Promise<HomeData> {
     : [];
 
   const openMatch = league.matches.findLast((match) => match.status === "open");
-  const winnersAlert = await getWinnersAlert(league.currentMemberId, latestMatch, league.awards);
+  const [winnersAlert, showWelcomeBonus] = await Promise.all([
+    getWinnersAlert(league.currentMemberId, latestMatch, league.awards),
+    hasUnseenWelcomeBonus(league.currentMemberId),
+  ]);
 
   return {
     groupName: league.membership.groupName,
@@ -129,5 +146,6 @@ export async function getHomeData(): Promise<HomeData> {
     goalkeeperRanking: rankPlayers(league.activePlayers, "goalkeeper").map(toRanked),
     cardEvent: getCurrentCardEvent(todayFormatter.format(new Date())),
     winnersAlert,
+    showWelcomeBonus,
   };
 }

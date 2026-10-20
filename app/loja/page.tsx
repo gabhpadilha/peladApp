@@ -6,7 +6,7 @@ import { AppHeader } from "@/components/app-header";
 import { GroupGate } from "@/components/group-gate";
 import { LevelProgressBar } from "@/components/level-progress";
 import { COIN_RULES } from "@/lib/progression";
-import { CoinPill } from "./_components/coin-pill";
+import { CoinPill } from "@/components/coin-pill";
 import { ShopContent } from "./_components/shop-content";
 import { getShop } from "./_data-access/get-shop";
 

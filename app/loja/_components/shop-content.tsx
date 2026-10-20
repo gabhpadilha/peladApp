@@ -10,7 +10,7 @@ import type { Player } from "@/types/player";
 import { buyCardSkin, type ShopActionResult } from "../_actions/buy-card-skin";
 import { equipCardSkin } from "../_actions/equip-card-skin";
 import type { ShopItem } from "../_data-access/get-shop";
-import { formatCoins } from "./coin-pill";
+import { formatCoins } from "@/components/coin-pill";
 
 type ShopContentProps = {
   me: Player;

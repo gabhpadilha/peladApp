@@ -38,9 +38,10 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
 ## 💎 Cartas da Loja e nível (`PremiumPlayerCard`, `LevelSeal`)
 
 - **Selo de nível:** hexágono pequeno dentro da ponta de baixo da carta base (na cor da moldura; dourado nas cartas da Loja), longe dos selos da mesa tática. Some nas cartas especiais.
-- **Cartas premium (aprovadas pelo dono do app, "rascunho 4"):** estilo TOTY sóbrio: moldura e lâminas finas em **ouro champanhe** (`--card-gold`), face em vidro translúcido escuro com fio dourado, atributos em 2 colunas de 3 com divisória. Só a cor da face muda por carta (`@utility card-skin-<chave>`: Esmeralda, Safira, Ametista, Rubi, Turquesa, Ônix e **Ícone**, a branca, última). Nada de asas, cristais ou enfeites (o dono achou "exagerado" e "cartunesco").
+- **Cartas premium (aprovadas pelo dono do app, "rascunho 4"):** estilo TOTY sóbrio: moldura e lâminas finas em **ouro champanhe** (`--card-gold`), face em vidro translúcido escuro com fio dourado, atributos em 2 colunas de 3 com divisória. Só a cor da face muda por carta (`@utility card-skin-<chave>`: Esmeralda (liberada desde o nível 0), Safira, Ametista, Rubi, Turquesa, Ônix e **Ícone**, a branca, última). Nada de asas, cristais ou enfeites (o dono achou "exagerado" e "cartunesco").
 - **Carta comprada substitui a padrão em todo lugar** (ranking, mesa tática, perfil, elenco) quando o jogador a usa. Cartas especiais nunca mudam por ela. As faixas Bronze/Prata/Ouro seguem pelo OVR na carta padrão.
 - **Loja (`/loja`, na navbar com ícone de loja):** saldo de PeladaCoins (`CoinPill`), barra de nível com a próxima liberação, grade com a carta do próprio jogador em cada visual: "Em uso", "Usar" (já comprada), preço (abre a folha de compra: carta grande, saldo antes → depois, "Comprar e usar") ou bloqueada (apagada, cadeado, "Nível X · Y PC"). Embaixo, "Como ganhar PeladaCoins". Comprou, é para sempre; dá para voltar à Padrão.
+- **Bônus de primeiro login (home):** diálogo uma vez por jogador: moedas em círculo âmbar, "Bônus de primeiro login", "+150 PC" grande, a carta do próprio jogador na Esmeralda (liberada para todos) e "Ir para a Loja" / "Depois". Fechar de qualquer jeito marca como visto.
 - **Perfil:** barra "Nível N" com XP até o próximo (`LevelProgressBar`), antes de "Próxima faixa".
 
 ## 🏆 Cartas especiais (colecionáveis)

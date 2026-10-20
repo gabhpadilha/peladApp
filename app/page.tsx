@@ -10,6 +10,8 @@ import { LatestRoundCard } from "./_components/latest-round-card";
 import { MyCardSummary } from "./_components/my-card-summary";
 import { OpenRoundCard } from "./_components/open-round-card";
 import { WinnersBanner } from "./_components/winners-banner";
+import { WelcomeBonusDialog } from "./_components/welcome-bonus-dialog";
+import { WELCOME_BONUS_COINS } from "@/lib/progression";
 import { ExpandableRanking } from "./_components/expandable-ranking";
 import { getHomeData } from "./_data-access/get-home-data";
 
@@ -36,6 +38,8 @@ async function HomeContent() {
           <p className="text-sm text-muted-foreground">{data.groupName}</p>
           <h1 className="font-display text-3xl font-bold">Fala, {data.currentPlayer.nickname}</h1>
         </div>
+
+        {data.showWelcomeBonus && <WelcomeBonusDialog player={data.currentPlayer} coins={WELCOME_BONUS_COINS} />}
 
         <PendingEvaluationsBanner pending={data.pending} />
 
