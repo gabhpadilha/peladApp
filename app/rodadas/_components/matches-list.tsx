@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { FrownIcon, GoalIcon, LayoutGridIcon, TrophyIcon, type LucideIcon } from "lucide-react";
+import { LayoutGridIcon, PackageOpenIcon } from "lucide-react";
+import { AWARD_ICONS } from "@/components/award-icons";
 import { Button } from "@/components/ui/button";
 import { SectionTitle } from "@/components/section-title";
 import { AWARD_LABELS, type AwardKind } from "@/types/award";
@@ -9,11 +10,14 @@ import type { MatchSummary } from "../_data-access/get-rounds-overview";
 import { CloseMatchButton } from "./close-match-button";
 import { DeleteMatchButton } from "./delete-match-button";
 
-const AWARD_ICONS: Record<AwardKind, LucideIcon> = {
-  craque: TrophyIcon,
-  gol: GoalIcon,
-  bola_murcha: FrownIcon,
-};
+/** Um item por prêmio: empates e o Time da Semana juntam os nomes ("Gui, Russo"). */
+function groupWinners(winners: MatchSummary["winners"]): { kind: AwardKind; nicknames: string[] }[] {
+  const groups = new Map<AwardKind, string[]>();
+  for (const winner of winners) {
+    groups.set(winner.kind, [...(groups.get(winner.kind) ?? []), winner.nickname]);
+  }
+  return [...groups].map(([kind, nicknames]) => ({ kind, nicknames }));
+}
 
 type MatchesListProps = {
   matches: MatchSummary[];
@@ -61,13 +65,13 @@ export function MatchesList({ matches, isOrganizer }: MatchesListProps) {
                   </p>
                   {match.winners.length > 0 && (
                     <ul aria-label="Cartas especiais da rodada" className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs">
-                      {match.winners.map((winner) => {
+                      {groupWinners(match.winners).map((winner) => {
                         const Icon = AWARD_ICONS[winner.kind];
                         return (
-                          <li key={`${winner.kind}-${winner.nickname}`} className="inline-flex items-center gap-1">
-                            <Icon aria-hidden className="size-3.5 text-primary" />
+                          <li key={winner.kind} className="inline-flex items-center gap-1">
+                            <Icon aria-hidden className="size-3.5 shrink-0 text-primary" />
                             <span className="text-muted-foreground">{AWARD_LABELS[winner.kind].title}:</span>
-                            <span className="font-medium">{winner.nickname}</span>
+                            <span className="font-medium">{winner.nicknames.join(", ")}</span>
                           </li>
                         );
                       })}
@@ -80,6 +84,17 @@ export function MatchesList({ matches, isOrganizer }: MatchesListProps) {
                     Mesa tática
                   </Link>
                 </Button>
+                {!isOpen && match.winners.length > 0 && (
+                  <Button asChild size="sm" variant="secondary" className="shrink-0">
+                    <Link
+                      href={`/rodadas/${match.id}/vencedores`}
+                      aria-label={`Ver a revelação dos vencedores da rodada ${match.round}`}
+                    >
+                      <PackageOpenIcon aria-hidden />
+                      Vencedores
+                    </Link>
+                  </Button>
+                )}
                 {isOrganizer && isOpen && <CloseMatchButton matchId={match.id} round={match.round} />}
                 {isOrganizer && <DeleteMatchButton matchId={match.id} round={match.round} isClosed={!isOpen} />}
               </li>

@@ -1,13 +1,13 @@
-import { BOOSTED_AWARDS } from "@/lib/award-bonus";
+import { AWARD_ICONS } from "@/components/award-icons";
+import { cn } from "@/lib/utils";
 import { AWARD_KINDS, AWARD_LABELS, type Award, type AwardKind } from "@/types/award";
-import { AWARD_ICONS } from "./award-icons";
 
 type CollectionSummaryProps = {
   awards: Award[];
   title: string;
 };
 
-/** Cabeçalho da coleção: total e quantas cartas de cada prêmio. */
+/** Cabeçalho da coleção: total e quantas cartas de cada um dos 10 prêmios. */
 export function CollectionSummary({ awards, title }: CollectionSummaryProps) {
   const countByKind = Object.fromEntries(
     AWARD_KINDS.map((kind) => [kind, awards.filter((award) => award.kind === kind).length]),
@@ -28,23 +28,22 @@ export function CollectionSummary({ awards, title }: CollectionSummaryProps) {
         </p>
       </div>
 
-      <dl className="grid grid-cols-3 gap-2">
+      {/* 5 colunas, ícone em cima e nome com quebra: cabe no celular sem cortar "Bola Murcha". */}
+      <dl className="grid grid-cols-5 gap-x-1 gap-y-3">
         {AWARD_KINDS.map((kind) => {
           const Icon = AWARD_ICONS[kind];
+          const count = countByKind[kind];
           return (
-            // justify-between: o número fica na mesma altura mesmo com nome de 1 ou 2 linhas.
-            <div key={kind} className="flex min-w-0 flex-col justify-between gap-2 rounded-lg bg-muted/50 px-3 py-2">
-              {/* Ícone em cima e nome com quebra: "Gol da Semana" não é cortado no celular. */}
-              <dt className="flex min-w-0 flex-col gap-1 text-xs leading-tight text-muted-foreground">
-                <Icon aria-hidden className="size-4 shrink-0" />
-                <span>{AWARD_LABELS[kind].title}</span>
+            <div
+              key={kind}
+              className={cn("flex min-w-0 flex-col items-center gap-0.5 text-center", count === 0 && "opacity-40")}
+            >
+              <Icon aria-hidden className="mb-0.5 size-5 shrink-0" />
+              {/* Na tela: ícone, número e nome (o nome é o <dt>, que vem antes no HTML). */}
+              <dt className="order-last text-[0.6875rem] leading-tight text-muted-foreground">
+                {AWARD_LABELS[kind].title}
               </dt>
-              <dd className="flex flex-col">
-                <span className="font-display text-2xl leading-tight font-bold tabular-nums">{countByKind[kind]}</span>
-                <span className="truncate text-xs text-muted-foreground">
-                  {BOOSTED_AWARDS.includes(kind) ? "+1 em tudo" : "sem bônus"}
-                </span>
-              </dd>
+              <dd className="font-display text-xl leading-none font-extrabold tabular-nums">{count}</dd>
             </div>
           );
         })}

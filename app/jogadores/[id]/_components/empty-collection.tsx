@@ -13,7 +13,7 @@ type EmptyCollectionProps = {
   theme: CardThemeKey;
 };
 
-/** Coleção vazia: prévia apagada das 3 cartas que o atleta pode ganhar, e como ganhar. */
+/** Coleção vazia: prévia apagada das cartas que o atleta pode ganhar, e como ganhar. */
 export function EmptyCollection({ player, isOwnProfile, theme }: EmptyCollectionProps) {
   return (
     <section aria-labelledby="empty-collection-title" className="flex flex-col gap-4 rounded-xl border border-dashed bg-card/50 p-4">
@@ -23,8 +23,8 @@ export function EmptyCollection({ player, isOwnProfile, theme }: EmptyCollection
         </h2>
         <p className="text-sm text-muted-foreground">
           {isOwnProfile
-            ? `Essas são as cartas que você pode ganhar ${theme === "default" ? "agora" : `no tema ${CARD_THEME_LABELS[theme]}`}. Os presentes votam na tela de notas e, quando a rodada fecha, quem tiver mais votos leva.`
-            : `Quando ${player.nickname} ganhar um prêmio por voto, a carta aparece aqui.`}
+            ? `Essas são as cartas que você pode ganhar ${theme === "default" ? "agora" : `no tema ${CARD_THEME_LABELS[theme]}`}. Os presentes votam na tela de notas e, quando a rodada fecha, quem tiver mais votos leva. As maiores notas entram no Time da Semana.`
+            : `Quando ${player.nickname} ganhar uma carta especial, ela aparece aqui.`}
         </p>
       </div>
 

@@ -4,7 +4,7 @@ import { BOOSTED_AWARDS, withAwardBonus } from "@/lib/award-bonus";
 import { type CardThemeKey, type CurrentCardEvent } from "@/lib/card-themes";
 import { formatShortDate } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
-import { AWARD_KINDS, AWARD_LABELS } from "@/types/award";
+import { AWARD_LABELS, TEAM_OF_THE_WEEK_MIN_RATINGS, VOTE_AWARD_KINDS, type AwardKind } from "@/types/award";
 import type { Player } from "@/types/player";
 
 type EventCopy = {
@@ -13,7 +13,7 @@ type EventCopy = {
   description: string;
   icon: LucideIcon;
   /** O que cada carta tem de diferente nesse tema. */
-  looks: Record<(typeof AWARD_KINDS)[number], string>;
+  looks: Record<AwardKind, string>;
 };
 
 const EVENT_COPY: Record<CardThemeKey, EventCopy> = {
@@ -26,7 +26,14 @@ const EVENT_COPY: Record<CardThemeKey, EventCopy> = {
     looks: {
       craque: "Abóbora",
       gol: "Roxo e gosma",
+      drible: "Gato preto",
+      atacante: "Fogo-fátuo",
+      defensor: "Lápide",
+      goleiro: "Vampiro",
+      fair_play: "Doce ou travessura",
+      fominha: "Zumbi",
       bola_murcha: "Fantasma",
+      time_da_semana: "Noite estrelada",
     },
   },
   default: {
@@ -38,15 +45,23 @@ const EVENT_COPY: Record<CardThemeKey, EventCopy> = {
     looks: {
       craque: "Preto e dourado",
       gol: "Azul elétrico",
+      drible: "Magenta",
+      atacante: "Laranja-fogo",
+      defensor: "Esmeralda",
+      goleiro: "Rubi",
+      fair_play: "Rosa",
+      fominha: "Mostarda",
       bola_murcha: "Couro velho",
+      time_da_semana: "Marinho e prata",
     },
   },
 };
 
 const STEPS = [
   "Jogue a rodada.",
-  "Na tela de notas, depois dos jogadores, vote no Craque, no Gol da Semana e na Bola Murcha.",
+  "Na tela de notas, depois dos jogadores, vote nos 9 prêmios. Goleiro só entre os goleiros; Atacante, Defensor e Drible só entre os de linha.",
   "Quando a rodada fecha, quem tiver mais votos ganha a carta. Empate: todos levam.",
+  "As 4 maiores notas da linha e a maior do gol entram no Time da Semana.",
 ];
 
 type CardEventShowcaseProps = {
@@ -82,11 +97,19 @@ export function CardEventShowcase({ event, player }: CardEventShowcaseProps) {
         <p className="mt-1 max-w-prose text-sm text-muted-foreground">{copy.description}</p>
       </div>
 
+      <p className="relative flex items-center gap-2.5 rounded-lg border border-primary/35 bg-primary/10 px-3 py-2.5 text-sm">
+        <SparklesIcon aria-hidden className="size-5 shrink-0 text-primary" />
+        <span>
+          <strong className="font-semibold">Novidade:</strong> agora são 9 cartas por voto e o Time da Semana, que sai
+          das notas.
+        </span>
+      </p>
+
       <div className="flex flex-col gap-2">
         <h3 className="text-xs font-medium text-muted-foreground uppercase">Prévia com a sua carta</h3>
         {/* 3 colunas que sempre cabem na tela: sem rolagem lateral no celular. */}
-        <ul aria-label="Cartas do evento" className="grid grid-cols-3 gap-2 sm:gap-4">
-          {AWARD_KINDS.map((kind) => (
+        <ul aria-label="Cartas do evento" className="grid grid-cols-3 gap-x-2 gap-y-4 sm:gap-x-4">
+          {VOTE_AWARD_KINDS.map((kind) => (
             <li key={kind} className="mx-auto flex w-full max-w-40 min-w-0 flex-col items-center gap-1.5 text-center">
               <PlayerCard player={withAwardBonus(player, kind)} award={{ kind, theme: event.theme }} size="fill" />
               <span className="text-xs leading-tight font-medium sm:text-sm">{AWARD_LABELS[kind].title}</span>
@@ -99,6 +122,29 @@ export function CardEventShowcase({ event, player }: CardEventShowcaseProps) {
             </li>
           ))}
         </ul>
+      </div>
+
+      <div className="flex flex-col gap-2.5 border-t pt-3">
+        <h3 className="text-xs font-medium text-muted-foreground uppercase">Time da Semana · sem voto</h3>
+        <div className="flex items-center gap-3.5">
+          <div className="w-26 shrink-0">
+            <PlayerCard
+              player={withAwardBonus(player, "time_da_semana")}
+              award={{ kind: "time_da_semana", theme: event.theme }}
+              size="fill"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <p className="text-sm">
+              As <strong className="font-semibold">4 maiores notas da linha</strong> e a{" "}
+              <strong className="font-semibold">maior nota do gol</strong> na rodada formam o time, em 1-2-1.
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Sai sozinho quando a rodada fecha, para quem recebeu pelo menos {TEAM_OF_THE_WEEK_MIN_RATINGS} notas.{" "}
+              {copy.looks.time_da_semana} · <span className="font-medium text-success">+1 em tudo</span>
+            </p>
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col gap-2 border-t pt-3">

@@ -2,8 +2,8 @@ import { PlayerCard } from "@/components/player-card";
 import { BOOSTED_AWARDS } from "@/lib/award-bonus";
 import { CARD_THEME_LABELS } from "@/lib/card-themes";
 import { formatWeekdayDate } from "@/lib/format-date";
-import { AWARD_LABELS, type Award } from "@/types/award";
-import { AWARD_ICONS } from "./award-icons";
+import { AWARD_LABELS, formatRoundScore, type Award } from "@/types/award";
+import { AWARD_ICONS } from "@/components/award-icons";
 
 type LatestAwardSpotlightProps = {
   award: Award;
@@ -13,6 +13,7 @@ type LatestAwardSpotlightProps = {
 export function LatestAwardSpotlight({ award }: LatestAwardSpotlightProps) {
   const Icon = AWARD_ICONS[award.kind];
   const isBoosted = BOOSTED_AWARDS.includes(award.kind);
+  const isTeamOfTheWeek = award.kind === "time_da_semana";
 
   return (
     <section
@@ -43,8 +44,10 @@ export function LatestAwardSpotlight({ award }: LatestAwardSpotlightProps) {
 
         <dl className="grid grid-cols-3 gap-2 text-left">
           <div className="rounded-lg bg-muted/50 px-3 py-2">
-            <dt className="text-xs text-muted-foreground">Votos</dt>
-            <dd className="font-display text-2xl font-bold tabular-nums">{award.votes}</dd>
+            <dt className="text-xs text-muted-foreground">{isTeamOfTheWeek ? "Nota" : "Votos"}</dt>
+            <dd className="font-display text-2xl font-bold tabular-nums">
+              {isTeamOfTheWeek ? (award.score === null ? "–" : formatRoundScore(award.score)) : award.votes}
+            </dd>
           </div>
           <div className="rounded-lg bg-muted/50 px-3 py-2">
             <dt className="text-xs text-muted-foreground">OVR</dt>

@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { PackageOpenIcon } from "lucide-react";
 import { PlayerCard } from "@/components/player-card";
 import { formatShortDate } from "@/lib/format-date";
-import { AWARD_LABELS, type Award } from "@/types/award";
+import { AWARD_LABELS, formatAwardResult, type Award } from "@/types/award";
 import type { Match } from "@/types/match";
 import type { RoundPerformer } from "../_data-access/get-home-data";
 
@@ -25,7 +26,7 @@ export function LatestRoundCard({ match, topPerformers, awards }: LatestRoundCar
       </div>
 
       {awards.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Ninguém recebeu votos para os prêmios dessa rodada.</p>
+        <p className="text-sm text-muted-foreground">Ninguém ganhou carta especial nessa rodada.</p>
       ) : (
         // Grade de 3 colunas (empates quebram linha): cabe no celular sem rolagem lateral.
         <ul aria-label="Prêmios da rodada" className="grid grid-cols-3 gap-x-2 gap-y-4 sm:gap-x-4">
@@ -40,13 +41,21 @@ export function LatestRoundCard({ match, topPerformers, awards }: LatestRoundCar
               </Link>
               <span className="flex flex-col text-xs leading-tight">
                 <span className="font-medium">{AWARD_LABELS[award.kind].title}</span>
-                <span className="text-muted-foreground">
-                  {award.votes} {award.votes === 1 ? "voto" : "votos"}
-                </span>
+                <span className="text-muted-foreground">{formatAwardResult(award)}</span>
               </span>
             </li>
           ))}
         </ul>
+      )}
+
+      {awards.length > 0 && (
+        <Link
+          href={`/rodadas/${match.id}/vencedores`}
+          className="inline-flex w-fit items-center gap-1.5 text-sm font-medium text-primary hover:underline"
+        >
+          <PackageOpenIcon aria-hidden className="size-4" />
+          Ver a revelação de novo
+        </Link>
       )}
 
       {topPerformers.length > 0 && (

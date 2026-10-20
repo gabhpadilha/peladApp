@@ -40,15 +40,15 @@ export function CloseMatchButton({ matchId, round }: CloseMatchButtonProps) {
       className="flex basis-full flex-col gap-2 rounded-lg border bg-muted/40 p-3 sm:flex-row sm:items-center sm:justify-between"
     >
       <p className="text-sm text-muted-foreground">
-        Fechar a rodada {round}? As notas passam a contar no OVR, ninguém mais envia e os mais votados
-        ganham as cartas especiais.
+        Fechar a rodada {round}? As notas passam a contar no OVR, ninguém mais envia e saem as cartas
+        especiais: os 9 prêmios por voto e o Time da Semana. Todo mundo vê o aviso na home para abrir o pacote.
       </p>
       <div className="flex shrink-0 justify-end gap-2">
         <Button size="sm" variant="ghost" onClick={() => setIsConfirming(false)} disabled={isPending}>
           Cancelar
         </Button>
         <Button size="sm" onClick={handleClose} disabled={isPending}>
-          {isPending ? "Fechando…" : "Confirmar"}
+          {isPending ? "Fechando…" : "Fechar e distribuir as cartas"}
         </Button>
       </div>
     </div>

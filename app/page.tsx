@@ -9,6 +9,7 @@ import { CardEventShowcase } from "./_components/card-event-showcase";
 import { LatestRoundCard } from "./_components/latest-round-card";
 import { MyCardSummary } from "./_components/my-card-summary";
 import { OpenRoundCard } from "./_components/open-round-card";
+import { WinnersBanner } from "./_components/winners-banner";
 import { ExpandableRanking } from "./_components/expandable-ranking";
 import { getHomeData } from "./_data-access/get-home-data";
 
@@ -37,6 +38,8 @@ async function HomeContent() {
         </div>
 
         <PendingEvaluationsBanner pending={data.pending} />
+
+        {data.winnersAlert && <WinnersBanner alert={data.winnersAlert} />}
 
         <CardEventShowcase event={data.cardEvent} player={data.currentPlayer} />
 

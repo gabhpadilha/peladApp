@@ -10,7 +10,7 @@ import {
 } from "@/lib/players";
 import { requireActiveMembership } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
-import type { Award } from "@/types/award";
+import { AWARD_KINDS, type Award } from "@/types/award";
 import type { Json } from "@/types/database";
 import type { Evaluation, Match } from "@/types/match";
 import {
@@ -62,7 +62,7 @@ export async function getLeague(nextPath = "/") {
       supabase.rpc("get_match_submissions", { target_group: membership.groupId }),
       supabase
         .from("awards")
-        .select("id, match_id, member_id, kind, theme, votes, position, ovr, attributes")
+        .select("id, match_id, member_id, kind, theme, votes, score, position, ovr, attributes")
         .eq("group_id", membership.groupId),
     ]);
 
@@ -142,6 +142,7 @@ export async function getLeague(nextPath = "/") {
           kind: award.kind,
           theme: parseCardTheme(award.theme),
           votes: award.votes,
+          score: award.score === null ? null : Number(award.score),
           matchId: award.match_id,
           round: match.round,
           date: match.date,
@@ -150,12 +151,8 @@ export async function getLeague(nextPath = "/") {
         },
       ];
     })
-    // Mais recentes primeiro; dentro da rodada, Craque → Gol → Bola Murcha.
-    .toSorted(
-      (a, b) =>
-        b.round - a.round ||
-        ["craque", "gol", "bola_murcha"].indexOf(a.kind) - ["craque", "gol", "bola_murcha"].indexOf(b.kind),
-    );
+    // Mais recentes primeiro; dentro da rodada, na ordem dos prêmios (AWARD_KINDS).
+    .toSorted((a, b) => b.round - a.round || AWARD_KINDS.indexOf(a.kind) - AWARD_KINDS.indexOf(b.kind));
 
   const latestClosedMatch = getLatestClosedMatch(matches);
   const players = buildPlayers(playerProfiles, matches, evaluations);

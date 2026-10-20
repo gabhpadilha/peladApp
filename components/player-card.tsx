@@ -1,7 +1,8 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import { cva, type VariantProps } from "class-variance-authority";
-import { FrownIcon, GhostIcon, GoalIcon, TrophyIcon, type LucideIcon } from "lucide-react";
+import { GhostIcon } from "lucide-react";
+import { AWARD_ICONS } from "@/components/award-icons";
 import { cn } from "@/lib/utils";
 import { CARD_TIER_LABELS, getCardTier, type CardTier } from "@/lib/card-tier";
 import type { CardThemeKey } from "@/lib/card-themes";
@@ -67,6 +68,34 @@ const DESIGNS: Record<CardDesign, { frame: string; face: string }> = {
     frame: "bg-award-bola-murcha-frame",
     face: "from-award-bola-murcha-from to-award-bola-murcha-to text-award-bola-murcha-foreground",
   },
+  drible: {
+    frame: "bg-award-drible-frame",
+    face: "from-award-drible-from to-award-drible-to text-award-drible-foreground",
+  },
+  atacante: {
+    frame: "bg-award-atacante-frame",
+    face: "from-award-atacante-from to-award-atacante-to text-award-atacante-foreground",
+  },
+  defensor: {
+    frame: "bg-award-defensor-frame",
+    face: "from-award-defensor-from to-award-defensor-to text-award-defensor-foreground",
+  },
+  goleiro: {
+    frame: "bg-award-goleiro-frame",
+    face: "from-award-goleiro-from to-award-goleiro-to text-award-goleiro-foreground",
+  },
+  fair_play: {
+    frame: "bg-award-fair-play-frame",
+    face: "from-award-fair-play-from to-award-fair-play-to text-award-fair-play-foreground",
+  },
+  fominha: {
+    frame: "bg-award-fominha-frame",
+    face: "from-award-fominha-from to-award-fominha-to text-award-fominha-foreground",
+  },
+  time_da_semana: {
+    frame: "bg-award-time-da-semana-frame",
+    face: "from-award-time-da-semana-from to-award-time-da-semana-to text-award-time-da-semana-foreground",
+  },
   "craque-halloween": {
     frame: "bg-award-craque-halloween-frame",
     face: "from-award-craque-halloween-from to-award-craque-halloween-to text-award-craque-halloween-foreground",
@@ -79,19 +108,69 @@ const DESIGNS: Record<CardDesign, { frame: string; face: string }> = {
     frame: "bg-award-bola-murcha-halloween-frame",
     face: "from-award-bola-murcha-halloween-from to-award-bola-murcha-halloween-to text-award-bola-murcha-halloween-foreground",
   },
+  "drible-halloween": {
+    frame: "bg-award-drible-halloween-frame",
+    face: "from-award-drible-halloween-from to-award-drible-halloween-to text-award-drible-halloween-foreground",
+  },
+  "atacante-halloween": {
+    frame: "bg-award-atacante-halloween-frame",
+    face: "from-award-atacante-halloween-from to-award-atacante-halloween-to text-award-atacante-halloween-foreground",
+  },
+  "defensor-halloween": {
+    frame: "bg-award-defensor-halloween-frame",
+    face: "from-award-defensor-halloween-from to-award-defensor-halloween-to text-award-defensor-halloween-foreground",
+  },
+  "goleiro-halloween": {
+    frame: "bg-award-goleiro-halloween-frame",
+    face: "from-award-goleiro-halloween-from to-award-goleiro-halloween-to text-award-goleiro-halloween-foreground",
+  },
+  "fair_play-halloween": {
+    frame: "bg-award-fair-play-halloween-frame",
+    face: "from-award-fair-play-halloween-from to-award-fair-play-halloween-to text-award-fair-play-halloween-foreground",
+  },
+  "fominha-halloween": {
+    frame: "bg-award-fominha-halloween-frame",
+    face: "from-award-fominha-halloween-from to-award-fominha-halloween-to text-award-fominha-halloween-foreground",
+  },
+  "time_da_semana-halloween": {
+    frame: "bg-award-time-da-semana-halloween-frame",
+    face: "from-award-time-da-semana-halloween-from to-award-time-da-semana-halloween-to text-award-time-da-semana-halloween-foreground",
+  },
 };
 
-const AWARD_ICONS: Record<AwardKind, LucideIcon> = {
-  craque: TrophyIcon,
-  gol: GoalIcon,
-  bola_murcha: FrownIcon,
+/** Textura da face: a padrão (linhas finas) ou a do prêmio, para cada carta ter a sua. */
+const DEFAULT_TEXTURE = "bg-[repeating-linear-gradient(115deg,rgb(255_255_255/0.07)_0_1px,transparent_1px_5cqw)]";
+const AWARD_TEXTURES: Partial<Record<AwardKind, string>> = {
+  // Losangos: o zigue-zague do drible.
+  drible:
+    "bg-[repeating-linear-gradient(60deg,rgb(255_255_255/0.08)_0_1px,transparent_1px_6cqw),repeating-linear-gradient(-60deg,rgb(255_255_255/0.08)_0_1px,transparent_1px_6cqw)]",
+  // Linhas de velocidade.
+  atacante: "bg-[repeating-linear-gradient(100deg,rgb(255_255_255/0.1)_0_1px,transparent_1px_3cqw)]",
+  // Muro.
+  defensor:
+    "bg-[repeating-linear-gradient(0deg,rgb(255_255_255/0.07)_0_1px,transparent_1px_7cqw),repeating-linear-gradient(90deg,rgb(255_255_255/0.05)_0_1px,transparent_1px_14cqw)]",
+  // Rede do gol.
+  goleiro:
+    "bg-[repeating-linear-gradient(45deg,rgb(255_255_255/0.08)_0_1px,transparent_1px_5cqw),repeating-linear-gradient(-45deg,rgb(255_255_255/0.08)_0_1px,transparent_1px_5cqw)]",
+  // Listras de bala.
+  fair_play: "bg-[repeating-linear-gradient(135deg,rgb(255_255_255/0.08)_0_3cqw,transparent_3cqw_6cqw)]",
+  // Céu estrelado.
+  time_da_semana:
+    "[background:radial-gradient(circle,rgb(255_255_255/0.4)_0_0.6cqw,transparent_0.9cqw)_0_0/9cqw_9cqw,radial-gradient(circle,rgb(255_255_255/0.22)_0_0.4cqw,transparent_0.7cqw)_4.5cqw_4.5cqw/9cqw_9cqw]",
 };
 
 /** Rótulo curto no rodapé da carta especial. */
 const AWARD_FOOTER: Record<AwardKind, string> = {
-  craque: "Craque",
-  gol: "Gol da semana",
+  craque: "Melhor jogador",
+  gol: "Gol da rodada",
+  drible: "Drible",
+  atacante: "Melhor atacante",
+  defensor: "Melhor defensor",
+  goleiro: "Melhor goleiro",
+  fair_play: "Fair play",
+  fominha: "Fominha",
   bola_murcha: "Bola murcha",
+  time_da_semana: "Time da semana",
 };
 
 const cardVariants = cva(cn("relative aspect-[5/7.4] shrink-0 select-none", SHAPE_CLIP), {
@@ -173,7 +252,7 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
       >
         <div
           aria-hidden
-          className="absolute inset-0 bg-[repeating-linear-gradient(115deg,rgb(255_255_255/0.07)_0_1px,transparent_1px_5cqw)]"
+          className={cn("absolute inset-0", (award && AWARD_TEXTURES[award.kind]) ?? DEFAULT_TEXTURE)}
         />
         <div
           aria-hidden

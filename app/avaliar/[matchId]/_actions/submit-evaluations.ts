@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireActiveMembership } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
-import { AWARD_KINDS } from "@/types/award";
+import { VOTE_AWARD_KINDS, canReceiveVote } from "@/types/award";
 import type { TablesInsert } from "@/types/database";
 import { getRatingSession } from "../_data-access/get-rating-session";
 import { submitEvaluationsSchema, type SubmitEvaluationsInput } from "../_schemas/evaluation-schema";
@@ -16,7 +16,7 @@ export type SubmitEvaluationsResult =
   | { success: false; message: string };
 
 /**
- * Envia as notas e os votos (Craque, Gol da Semana, Bola Murcha) que o jogador
+ * Envia as notas e os votos nos 9 prêmios (VOTE_AWARD_KINDS) que o jogador
  * logado deu na rodada. Tudo é conferido de novo aqui (rodada aberta, presença,
  * papel de cada avaliado); o banco ainda garante notas 1–10, sem autoavaliação
  * e só entre presentes.
@@ -56,12 +56,17 @@ export async function submitEvaluations(input: SubmitEvaluationsInput): Promise<
   }
 
   const voteRows: TablesInsert<"round_votes">[] = [];
-  for (const kind of AWARD_KINDS) {
+  for (const kind of VOTE_AWARD_KINDS) {
     const nomineeId = votes[kind];
     if (!nomineeId) continue;
     // Só quem jogou e não é você (os alvos já excluem o próprio jogador).
-    if (!roleByTarget.has(nomineeId)) {
+    const nomineeRole = roleByTarget.get(nomineeId);
+    if (!nomineeRole) {
       return { success: false, message: "Algum voto foi para quem não estava nessa rodada." };
+    }
+    // Melhor Goleiro só para goleiros; Drible, Atacante e Defensor só para a linha.
+    if (!canReceiveVote(kind, nomineeRole)) {
+      return { success: false, message: "Algum voto foi para quem não pode receber esse prêmio." };
     }
     voteRows.push({ match_id: matchId, voter_id: membership.memberId, kind, nominee_id: nomineeId });
   }
