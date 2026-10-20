@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { CARD_TIER_LABELS, getCardTier, type CardTier } from "@/lib/card-tier";
 import type { CardThemeKey } from "@/lib/card-themes";
 import { getInitials } from "@/lib/get-initials";
+import { photoFadeLayers } from "@/lib/photo-fades";
 import { AWARD_LABELS, type AwardKind } from "@/types/award";
 import type { CardSkinKey } from "@/types/card-skin";
 import {
@@ -568,53 +569,7 @@ function PremiumPlayerCard({
   );
 }
 
-/**
- * Degradês que fazem a foto sumir na carta.
- * Recorte enquadrado pelos ombros (`lib/photo-cutout.ts`): eles vão de borda a
- * borda da carta e só somem rente ao corte da face; o peito some embaixo, atrás
- * do apelido. A original (só fotos antigas) some também do lado do OVR. Regra: as quatro bordas da área terminam
- * transparentes (borda com opacidade vira fio no Safari do iPhone); as laterais
- * ainda ficam fora do corte da face.
- */
-const PHOTO_FADES: Record<NonNullable<Player["photo"]>["kind"], readonly string[]> = {
-  cutout: [
-    // Topo limpo: apaga a linha que o segmentador deixa na borda; embaixo, o
-    // peito some aos poucos atrás do apelido (que começa em ~94% da área).
-    "linear-gradient(to bottom, transparent 0%, black 3%, black 70%, transparent 100%)",
-    // Laterais: a face vai de ~4% a ~96% da área; o ombro some só no fim, rente à moldura.
-    "linear-gradient(to right, transparent 1%, black 11%, black 89%, transparent 99%)",
-  ],
-  original: [
-    "linear-gradient(to bottom, transparent 0%, black 4%, black 62%, transparent 100%)",
-    // Com fundo, o lado do OVR some mais (senão o número se perde na foto).
-    "linear-gradient(to right, transparent 4%, black 40%, black 92%, transparent 100%)",
-  ],
-};
-
 /** Monta a máscara: camadas intersectadas, cada uma cobrindo a área da foto. */
-/**
- * Reaplica a máscara da foto numa cópia da carta (o story que vira imagem).
- * A cópia leva a máscara como o navegador a calcula (atalho `mask` com
- * `source-in` e `mask-type`), que não vale ao redesenhar, e a foto sairia sem
- * os degradês: troca tudo de máscara pelas propriedades padrão, escritas à mão.
- */
-export function restorePhotoMask(node: Node) {
-  if (!(node instanceof HTMLElement)) return;
-  const kind = node.dataset.photoKind;
-  if (kind !== "cutout" && kind !== "original") return;
-  const layers = PHOTO_FADES[kind];
-  const image = layers.join(", ");
-  const sizes = layers.map(() => "100% 100%").join(", ");
-  const withoutMask = (node.getAttribute("style") ?? "")
-    .split(";")
-    .filter((declaration) => !/^\s*(-webkit-)?mask/.test(declaration))
-    .join(";");
-  node.setAttribute(
-    "style",
-    `${withoutMask}; mask-image: ${image}; -webkit-mask-image: ${image}; mask-size: ${sizes}; -webkit-mask-size: ${sizes}; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; mask-composite: intersect; mask-mode: alpha;`,
-  );
-}
-
 function maskStyle(layers: readonly string[]): CSSProperties {
   const image = layers.join(", ");
   const sizes = layers.map(() => "100% 100%").join(", ");
@@ -664,7 +619,8 @@ function PlayerCardPhoto({ player, size }: { player: Player; size: CardSize }) {
         // como uma faixa vertical, mesmo com o fundo 100% transparente.
         className="object-cover object-top"
         // Degradês explícitos (os utilitários mask-b-* do Tailwind escondiam a foto inteira).
-        style={maskStyle(PHOTO_FADES[player.photo.kind])}
+        style={maskStyle(photoFadeLayers(player.photo.kind))}
+        // O story acha a foto por aqui para aplicar os degradês nos pixels (`bakePhotoFades`).
         data-photo-kind={player.photo.kind}
       />
     </>

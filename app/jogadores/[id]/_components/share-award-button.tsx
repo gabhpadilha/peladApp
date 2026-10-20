@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { DownloadIcon, Loader2Icon, Share2Icon } from "lucide-react";
 import { domToBlob } from "modern-screenshot";
-import { restorePhotoMask } from "@/components/player-card";
+import { bakePhotoFades } from "@/lib/photo-fades";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { AWARD_LABELS, type Award } from "@/types/award";
 import { cn } from "@/lib/utils";
@@ -21,16 +21,43 @@ type ShareAwardButtonProps = {
 
 type StoryImage = { file: File; url: string; canShare: boolean };
 
+/**
+ * Troca cada foto da arte pela versão com os degradês já nos pixels: o Safari
+ * do iPhone ignora a máscara ao gerar a imagem (o fundo da foto saía preto).
+ */
+async function bakePhotos(node: HTMLElement) {
+  const photos = node.querySelectorAll<HTMLImageElement>("img[data-photo-kind]");
+  await Promise.all(
+    Array.from(photos).map(async (photo) => {
+      const kind = photo.dataset.photoKind;
+      if (kind !== "cutout" && kind !== "original") return;
+      const box = photo.getBoundingClientRect();
+      const baked = await bakePhotoFades(photo.currentSrc || photo.src, kind, box.width * STORY_SCALE, box.height * STORY_SCALE);
+      photo.removeAttribute("srcset");
+      photo.removeAttribute("sizes");
+      photo.src = baked;
+      photo.style.removeProperty("mask-image");
+      photo.style.removeProperty("-webkit-mask-image");
+      photo.style.removeProperty("mask-size");
+      photo.style.removeProperty("-webkit-mask-size");
+      photo.style.removeProperty("mask-repeat");
+      photo.style.removeProperty("-webkit-mask-repeat");
+      photo.style.removeProperty("mask-composite");
+      photo.style.removeProperty("-webkit-mask-composite");
+      await photo.decode();
+    }),
+  );
+}
+
 /** Transforma a arte do story numa imagem PNG, no próprio aparelho. */
 async function renderStory(node: HTMLElement, fileName: string): Promise<File> {
   await document.fonts.ready;
+  await bakePhotos(node);
   const blob = await domToBlob(node, {
     width: STORY_WIDTH,
     height: STORY_HEIGHT,
     scale: STORY_SCALE,
     type: "image/png",
-    // A cópia perde a máscara da foto (ver `restorePhotoMask`).
-    onCloneEachNode: restorePhotoMask,
   });
   return new File([blob], fileName, { type: "image/png" });
 }
