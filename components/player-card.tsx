@@ -462,14 +462,17 @@ function PremiumBlades({ skin }: { skin: CardSkinKey }) {
   );
 }
 
-/** Cabeça de lobo rosnando de perfil, virada para a esquerda (para a lua), em ~40 x 40 unidades. */
+/**
+ * Cabeça de lobo de perfil (desenho próprio, no estilo das referências do dono
+ * do app), virada para a direita em ~40 x 41 unidades; olho e pelo da bochecha
+ * são recortes (`evenodd`). Na carta ela é espelhada, olhando para a lua.
+ */
 const WEREWOLF_HEAD =
-  "M2,13 L6,11.4 L14,10 L17,8.4 L19,7.6 L25,0 L27.6,8.8 L28.6,9.6 L35,8.2 L31,12 L38,12.6 L33.4,16 L39,19 L34,21 L37.6,26.4 L32.4,26 L34.4,33 L29.6,29.6 L29.4,37.6 L26,32 L23.6,39 L22.4,32 L19,27 L15.6,24.6 L13,27.4 L12.6,24.2 L8,24.4 L5,23.6 L6,21.2 L7,22.6 L8,20.8 L9.2,22 L14,18 L9,16.6 L8.6,18.8 L7.6,17 L6.8,19.2 L6.2,16.4 L3,15.6 Z";
-const WEREWOLF_EYE = "M15.6,12.8 L20,11.6 L18.6,13.2 Z";
+  "M19.4,0.8 Q21,5.6 22,9.8 Q24,10.6 25.2,12.2 Q26.2,13.8 27.2,14.6 Q31.4,15.8 35.2,17.2 Q37.2,17.9 37,19.8 Q36.8,21.4 35.2,21.4 Q32,23 28.8,23.4 Q31,24.1 30.6,25.2 Q27,27.4 22.8,27.6 L20.6,27.8 Q21.2,30.6 23.6,32.4 Q21.6,32.4 20.4,31.8 Q20.4,36.4 22.4,40.4 Q16,37.6 11.8,32.4 Q10,33.8 7.4,33.8 Q8.4,29.8 6.4,26.8 Q4.6,26.8 2.6,25.8 Q5.8,22.8 6.6,20.4 Q8.6,15.4 11.4,13.2 Q13.2,11.4 14.8,10.6 Q16.2,4.6 19.4,0.8 Z M23.4,14.4 Q25,13 26.8,14.2 Q25,15 23.4,14.4 Z M14.6,19.6 Q17,24.4 21.4,26.2 Q16.8,25.8 14,21.8 Z M10.4,23.4 Q12.2,28.8 16.4,31 Q11.6,30.2 9.6,25.4 Z";
 
 /**
- * Detalhes do Lobisomem: lua cheia atrás da cabeça, cabeça de lobo rosnando
- * no vão ao lado dela e três arranhões rasgando o fio interno da lateral direita.
+ * Detalhes do Lobisomem: lua cheia atrás da cabeça, cabeça de lobo em marca
+ * d'água por cima dela e três arranhões rasgando o fio interno da lateral direita.
  */
 function WerewolfArt({ metal }: { metal: string }) {
   return (
@@ -498,23 +501,15 @@ function WerewolfArt({ metal }: { metal: string }) {
           <path d="M99,88 Q93,96 88.5,106" fill="none" stroke={`url(#${metal})`} strokeOpacity={0.85} strokeWidth={0.5} strokeLinecap="round" />
         </g>
       ))}
-      {/* Cabeça de lobo rosnando no vão ao lado da cabeça do jogador; some embaixo, atrás do ombro. */}
+      {/* Lobo em cinza translúcido, como marca d'água por cima da lua; some embaixo, atrás do ombro. */}
       <defs>
         <linearGradient id="werewolf-fill" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#03070d" stopOpacity={0.92} />
-          <stop offset="62%" stopColor="#03070d" stopOpacity={0.9} />
-          <stop offset="100%" stopColor="#03070d" stopOpacity={0} />
-        </linearGradient>
-        <linearGradient id="werewolf-rim" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#f4f8ff" stopOpacity={0.9} />
-          <stop offset="55%" stopColor="#b4bfcc" stopOpacity={0.6} />
-          <stop offset="92%" stopColor="#b4bfcc" stopOpacity={0} />
+          <stop offset="0%" stopColor="#dbe7f7" stopOpacity={0.5} />
+          <stop offset="62%" stopColor="#dbe7f7" stopOpacity={0.42} />
+          <stop offset="100%" stopColor="#dbe7f7" stopOpacity={0} />
         </linearGradient>
       </defs>
-      <g transform="translate(67.5 9) scale(0.76)">
-        <path d={WEREWOLF_HEAD} fill="url(#werewolf-fill)" stroke="url(#werewolf-rim)" strokeWidth={0.45} strokeLinejoin="round" />
-        <path d={WEREWOLF_EYE} fill="#dceaff" />
-      </g>
+      <path d={WEREWOLF_HEAD} transform="translate(97 11) scale(-0.8 0.8)" fill="url(#werewolf-fill)" fillRule="evenodd" />
     </>
   );
 }
