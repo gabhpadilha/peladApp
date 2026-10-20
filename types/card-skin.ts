@@ -1,9 +1,13 @@
+import { getThemeForDate } from "@/lib/card-themes";
+
 /**
  * Personalizações de carta vendidas na Loja (PeladaCoins). Cada uma aparece a
  * partir de um nível e custa um preço; comprada, é do jogador para sempre.
  * Sem personalização, a carta é a padrão (Bronze, Prata ou Ouro pelo OVR).
- * Carta nova (ex.: evento do mês): entre aqui + tokens `card-skin-<chave>` no
- * `app/globals.css`. O banco guarda só a chave (`group_members.card_skin`).
+ * Carta nova: entre aqui + tokens `card-skin-<chave>` no `app/globals.css` +
+ * `SKIN_CLASSES` no `player-card.tsx`. O banco guarda só a chave (`group_members.card_skin`).
+ * Carta de evento (`event`): só fica à venda durante o tema daquele ano; quem
+ * comprou continua usando depois (decisão do dono do app).
  */
 export const CARD_SKINS = [
   // Liberada desde o começo: dá para comprar com o bônus de boas-vindas.
@@ -14,9 +18,9 @@ export const CARD_SKINS = [
   { key: "turquesa", name: "Turquesa", level: 10, price: 600 },
   { key: "onix", name: "Ônix", level: 13, price: 800 },
   { key: "icone", name: "Ícone", level: 16, price: 1200 },
-  // Evento de Halloween (outubro de 2026).
-  { key: "lobisomem", name: "Lobisomem", level: 3, price: 200 },
-  { key: "vampiro", name: "Vampiro", level: 3, price: 200 },
+  // Evento de Halloween de 2026: à venda só em outubro de 2026.
+  { key: "lobisomem", name: "Lobisomem", level: 3, price: 200, event: { theme: "halloween", year: 2026 } },
+  { key: "vampiro", name: "Vampiro", level: 3, price: 200, event: { theme: "halloween", year: 2026 } },
 ] as const;
 
 export type CardSkin = (typeof CARD_SKINS)[number];
@@ -28,4 +32,10 @@ export function isCardSkinKey(value: unknown): value is CardSkinKey {
 
 export function getCardSkin(key: CardSkinKey): CardSkin {
   return CARD_SKINS.find((skin) => skin.key === key) ?? CARD_SKINS[0];
+}
+
+/** Carta de evento ainda à venda em `today` (`AAAA-MM-DD`, horário de Brasília)? As outras, sempre. */
+export function isCardSkinOnSale(skin: CardSkin, today: string): boolean {
+  if (!("event" in skin)) return true;
+  return today.startsWith(`${skin.event.year}-`) && getThemeForDate(today) === skin.event.theme;
 }

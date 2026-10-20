@@ -5,7 +5,10 @@ import { z } from "zod";
 import { getLeague } from "@/lib/league";
 import { requireActiveMembership } from "@/lib/session";
 import { createAdminClient, hasAdminEnv } from "@/lib/supabase/admin";
-import { getCardSkin, isCardSkinKey } from "@/types/card-skin";
+import { getCardSkin, isCardSkinKey, isCardSkinOnSale } from "@/types/card-skin";
+
+/** "Hoje" no fuso da pelada, `AAAA-MM-DD` (o servidor roda em UTC). */
+const todayFormatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" });
 
 export type ShopActionResult = { success: true; message: string } | { success: false; message: string };
 
@@ -29,6 +32,9 @@ export async function buyCardSkin(input: { skin: string; equip: boolean }): Prom
   }
 
   const skin = getCardSkin(parsed.data.skin);
+  if (!isCardSkinOnSale(skin, todayFormatter.format(new Date()))) {
+    return { success: false, message: `A ${skin.name} saiu da Loja com o fim do evento.` };
+  }
   const league = await getLeague("/loja");
   const progression = league.getProgression(membership.memberId);
   if (progression.level < skin.level) {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CoinsIcon, LockIcon } from "lucide-react";
+import { CoinsIcon, GhostIcon, LockIcon, SparklesIcon, WalletCardsIcon, type LucideIcon } from "lucide-react";
 import { PlayerCard } from "@/components/player-card";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -9,14 +9,35 @@ import { cn } from "@/lib/utils";
 import type { Player } from "@/types/player";
 import { buyCardSkin, type ShopActionResult } from "../_actions/buy-card-skin";
 import { equipCardSkin } from "../_actions/equip-card-skin";
-import type { ShopItem } from "../_data-access/get-shop";
+import type { ShopItem, ShopSection } from "../_data-access/get-shop";
+import { formatShortDate } from "@/lib/format-date";
 import { formatCoins } from "@/components/coin-pill";
 
 type ShopContentProps = {
   me: Player;
-  items: ShopItem[];
+  /** Padrão + compradas. */
+  mine: ShopItem[];
+  sections: ShopSection[];
   balance: number;
 };
+
+function formatDaysLeft(daysLeft: number): string {
+  if (daysLeft === 0) return "último dia";
+  return daysLeft === 1 ? "falta 1 dia" : `faltam ${daysLeft} dias`;
+}
+
+/** Título de cada vitrine, com ícone e uma linha de apoio. */
+function SectionHeader({ icon: Icon, title, text }: { icon: LucideIcon; title: string; text: string }) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <h2 className="flex items-center gap-2 font-display text-xl font-bold tracking-wide uppercase">
+        <Icon aria-hidden className="size-5 text-primary" />
+        {title}
+      </h2>
+      <p className="text-sm text-muted-foreground">{text}</p>
+    </div>
+  );
+}
 
 /** A própria carta do jogador com a personalização do item. */
 function withSkin(me: Player, item: ShopItem): Player {
@@ -24,7 +45,7 @@ function withSkin(me: Player, item: ShopItem): Player {
 }
 
 /** Grade de cartas da Loja; tocar numa à venda abre a confirmação de compra. */
-export function ShopContent({ me, items, balance }: ShopContentProps) {
+export function ShopContent({ me, mine, sections, balance }: ShopContentProps) {
   const [selected, setSelected] = useState<ShopItem | null>(null);
   const [message, setMessage] = useState<{ kind: "error" | "saved"; text: string } | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -43,14 +64,8 @@ export function ShopContent({ me, items, balance }: ShopContentProps) {
     });
   }
 
-  return (
-    <>
-      {message && (
-        <p role="status" className={cn("text-sm", message.kind === "saved" ? "text-success" : "text-destructive")}>
-          {message.text}
-        </p>
-      )}
-
+  function renderGrid(items: ShopItem[]) {
+    return (
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {items.map((item) => {
           const isLocked = item.state === "locked";
@@ -109,6 +124,40 @@ export function ShopContent({ me, items, balance }: ShopContentProps) {
           );
         })}
       </ul>
+    );
+  }
+
+  return (
+    <>
+      {message && (
+        <p role="status" className={cn("text-sm", message.kind === "saved" ? "text-success" : "text-destructive")}>
+          {message.text}
+        </p>
+      )}
+
+      <section aria-label="Minhas cartas" className="flex flex-col gap-3">
+        <SectionHeader
+          icon={WalletCardsIcon}
+          title={`Minhas cartas · ${mine.length}`}
+          text="Escolha qual carta usar. O que você comprou é seu para sempre."
+        />
+        {renderGrid(mine)}
+      </section>
+
+      {sections.map((section) => (
+        <section key={section.key} aria-label={section.title} className="flex flex-col gap-3">
+          <SectionHeader
+            icon={section.key === "event" ? GhostIcon : SparklesIcon}
+            title={section.title}
+            text={
+              section.event?.endDate && section.event.daysLeft !== null
+                ? `Só até ${formatShortDate(section.event.endDate)} · ${formatDaysLeft(section.event.daysLeft)}. Depois saem da Loja; quem comprou continua usando.`
+                : "Novas cartas liberam conforme você sobe de nível."
+            }
+          />
+          {renderGrid(section.items)}
+        </section>
+      ))}
 
       <Sheet open={selected !== null} onOpenChange={(open) => !open && setSelected(null)}>
         <SheetContent side="bottom" className="mx-auto max-h-[92dvh] w-full max-w-md gap-0 overflow-y-auto rounded-t-2xl">

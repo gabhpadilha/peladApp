@@ -462,9 +462,13 @@ function PremiumBlades({ skin }: { skin: CardSkinKey }) {
   );
 }
 
+/** Cabeça e pescoço de lobo uivando, focinho para cima e para a esquerda (para a lua), em ~21 x 40 unidades. */
+const HOWLING_WOLF =
+  "M3,2 L9,8 Q10,8.6 11.2,8.4 L13.6,2.6 L15.4,9.6 Q17,11 17.6,13.4 Q18.8,16.2 19.6,18.4 L21,18.8 L20.4,20.2 Q20.9,22 21.4,24 Q22.4,28 23,32 L11,32 Q11.4,28 11.8,25.4 L10.2,24.4 L11.4,22.8 Q11.2,20 10.4,18 Q9.4,15.4 8.2,14 Q6,11.6 4.4,9.8 L3.4,7.8 L7.4,9 L3.4,4.2 Q2.6,3.6 3,2 Z";
+
 /**
- * Detalhes do Lobisomem: lua cheia atrás da cabeça, pata no lugar do selo de
- * cima e três arranhões rasgando o fio interno da lateral direita.
+ * Detalhes do Lobisomem: lua cheia atrás da cabeça, lobo uivando no vão ao
+ * lado dela e três arranhões rasgando o fio interno da lateral direita.
  */
 function WerewolfArt({ metal }: { metal: string }) {
   return (
@@ -493,21 +497,37 @@ function WerewolfArt({ metal }: { metal: string }) {
           <path d="M99,88 Q93,96 88.5,106" fill="none" stroke={`url(#${metal})`} strokeOpacity={0.85} strokeWidth={0.5} strokeLinecap="round" />
         </g>
       ))}
-      {/* Pata no topo, no lugar do selo. */}
-      <g fill={`url(#${metal})`} transform="translate(50 8.6) scale(1.5) translate(-50 -8.6)">
-        <ellipse cx={50} cy={10.6} rx={2.2} ry={1.7} />
-        <ellipse cx={46.9} cy={7.9} rx={0.75} ry={1} />
-        <ellipse cx={48.9} cy={6.7} rx={0.75} ry={1.05} />
-        <ellipse cx={51.1} cy={6.7} rx={0.75} ry={1.05} />
-        <ellipse cx={53.1} cy={7.9} rx={0.75} ry={1} />
+      {/* Lobo uivando para a lua, no vão ao lado da cabeça (silhueta com fio de prata). */}
+      <defs>
+        {/* O pescoço some aos poucos atrás do ombro (sem corte reto). */}
+        <linearGradient id="werewolf-fill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#03070d" stopOpacity={0.92} />
+          <stop offset="68%" stopColor="#03070d" stopOpacity={0.9} />
+          <stop offset="100%" stopColor="#03070d" stopOpacity={0} />
+        </linearGradient>
+        <linearGradient id="werewolf-rim" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#f4f8ff" stopOpacity={1} />
+          <stop offset="55%" stopColor="#b4bfcc" stopOpacity={0.7} />
+          <stop offset="90%" stopColor="#b4bfcc" stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <g transform="translate(67 4) scale(1.2)">
+        <path
+          d={HOWLING_WOLF}
+          fill="url(#werewolf-fill)"
+          stroke="url(#werewolf-rim)"
+          strokeWidth={0.28}
+          strokeLinejoin="round"
+        />
+        <path d="M10,10.4 Q11,9.8 12,10.2" fill="none" stroke={`url(#${metal})`} strokeWidth={0.4} strokeLinecap="round" />
       </g>
     </>
   );
 }
 
 /**
- * Detalhes do Vampiro: lua de sangue pequena, três morcegos ao longe, presas no
- * lugar do selo de cima e duas gotas escorrendo do fio interno.
+ * Detalhes do Vampiro: lua de sangue atrás do ombro com morcegos contra ela,
+ * presas no lugar do selo de cima e duas gotas escorrendo do fio interno.
  */
 function VampireArt({ metal }: { metal: string }) {
   const bat = "M0,0 Q1.2,-1.4 2.6,-0.6 Q3.4,-1.8 4.2,-0.4 L4.6,-1.2 L5,-0.4 Q5.8,-1.8 6.6,-0.6 Q8,-1.4 9.2,0 Q7.6,0 6.8,1.2 Q5.8,0.6 4.6,1.6 Q3.4,0.6 2.4,1.2 Q1.6,0 0,0 Z";
@@ -520,12 +540,14 @@ function VampireArt({ metal }: { metal: string }) {
           <stop offset="100%" stopColor="#c41a32" stopOpacity={0} />
         </radialGradient>
       </defs>
-      <circle cx={76} cy={24} r={17} fill="url(#vampire-moon)" />
-      <circle cx={76} cy={24} r={8.5} fill="#ff8090" fillOpacity={0.16} />
-      <g fill="#000000" fillOpacity={0.75}>
-        <path d={bat} transform="translate(78 17) scale(0.85)" />
-        <path d={bat} transform="translate(88 25) scale(0.6)" />
-        <path d={bat} transform="translate(68 12) scale(0.5)" />
+      {/* Lua de sangue atrás do ombro: os morcegos aparecem contra ela. */}
+      <circle cx={80} cy={34} r={19} fill="url(#vampire-moon)" />
+      <circle cx={80} cy={34} r={10} fill="#ff8090" fillOpacity={0.2} />
+      <g fill="#050001" fillOpacity={0.9} stroke="#ff6b7c" strokeOpacity={0.45} strokeWidth={0.12} strokeLinejoin="round">
+        <path d={bat} transform="translate(73 33) scale(1.45)" />
+        <path d={bat} transform="translate(84 24) scale(0.95)" />
+        <path d={bat} transform="translate(87 43) scale(0.7)" />
+        <path d={bat} transform="translate(68 15) scale(0.55)" />
       </g>
       {/* Gotas escorrendo do fio interno, longe do OVR e do rosto. */}
       <g fill={`url(#${metal})`}>
@@ -545,7 +567,6 @@ function VampireArt({ metal }: { metal: string }) {
 function PremiumFaceArt({ skin }: { skin: CardSkinKey }) {
   const isIcon = skin === "icone";
   const metal = metalId(skin);
-  const isEvent = skin === "lobisomem" || skin === "vampiro";
   return (
     <svg aria-hidden viewBox="0 0 100 148" preserveAspectRatio="none" className="absolute inset-0 size-full">
       <defs>
@@ -582,7 +603,7 @@ function PremiumFaceArt({ skin }: { skin: CardSkinKey }) {
       />
       {skin === "lobisomem" && <WerewolfArt metal={metal} />}
       {skin === "vampiro" && <VampireArt metal={metal} />}
-      {!isEvent && (
+      {skin !== "vampiro" && (
         <path d="M47,7 L53,7 L53,10.6 Q50,13.6 47,10.6 Z" fill="none" stroke={`url(#${metal})`} strokeWidth={0.3} />
       )}
     </svg>
