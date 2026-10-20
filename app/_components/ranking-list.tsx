@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { OvrBadge } from "@/components/ovr-badge";
 import { OvrDelta } from "@/components/ovr-delta";
+import { PlayerCard } from "@/components/player-card";
 import { cn } from "@/lib/utils";
 import { POSITION_LABELS } from "@/types/player";
 import type { RankedPlayer } from "../_data-access/get-home-data";
@@ -21,11 +22,15 @@ export function RankingList({ title, players, currentPlayerId }: RankingListProp
             <Link
               href={`/jogadores/${player.id}`}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-muted",
+                "flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-muted",
                 player.id === currentPlayerId && "bg-muted/60",
               )}
             >
               <span className="w-4 text-sm text-muted-foreground tabular-nums">{position}</span>
+              {/* Miniatura da carta (com a foto, quando tem): a carta escala pela largura. */}
+              <div className="w-14 shrink-0">
+                <PlayerCard player={player} size="fill" />
+              </div>
               <span className="flex min-w-0 flex-1 flex-col">
                 <span className="truncate font-medium">{player.nickname}</span>
                 <span className="text-xs text-muted-foreground">
