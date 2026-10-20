@@ -5,7 +5,7 @@ import { AppHeader } from "@/components/app-header";
 import { GroupGate } from "@/components/group-gate";
 import { PendingEvaluationsBanner } from "@/components/pending-evaluations-banner";
 import { SectionTitle } from "@/components/section-title";
-import { CardEventShowcase } from "./_components/card-event-showcase";
+import { NewsSlider } from "./_components/news-slider";
 import { LatestRoundCard } from "./_components/latest-round-card";
 import { MyCardSummary } from "./_components/my-card-summary";
 import { OpenRoundCard } from "./_components/open-round-card";
@@ -45,7 +45,12 @@ async function HomeContent() {
 
         {data.winnersAlert && <WinnersBanner alert={data.winnersAlert} />}
 
-        <CardEventShowcase event={data.cardEvent} player={data.currentPlayer} />
+        <NewsSlider
+          event={data.cardEvent}
+          player={data.currentPlayer}
+          progress={data.levelProgress}
+          balance={data.balance}
+        />
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="flex flex-col gap-6">
