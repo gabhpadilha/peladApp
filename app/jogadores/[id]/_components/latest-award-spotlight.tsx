@@ -4,13 +4,17 @@ import { CARD_THEME_LABELS } from "@/lib/card-themes";
 import { formatWeekdayDate } from "@/lib/format-date";
 import { AWARD_LABELS, formatRoundScore, type Award } from "@/types/award";
 import { AWARD_ICONS } from "@/components/award-icons";
+import { ShareAwardButton } from "./share-award-button";
 
 type LatestAwardSpotlightProps = {
   award: Award;
+  /** Só o dono da carta, e só até a próxima rodada ser criada. */
+  isShareable: boolean;
+  groupName: string;
 };
 
 /** A conquista mais recente em destaque, com a carta grande. */
-export function LatestAwardSpotlight({ award }: LatestAwardSpotlightProps) {
+export function LatestAwardSpotlight({ award, isShareable, groupName }: LatestAwardSpotlightProps) {
   const Icon = AWARD_ICONS[award.kind];
   const isBoosted = BOOSTED_AWARDS.includes(award.kind);
   const isTeamOfTheWeek = award.kind === "time_da_semana";
@@ -64,6 +68,15 @@ export function LatestAwardSpotlight({ award }: LatestAwardSpotlightProps) {
             ? "Foto congelada do dia, com +1 em cada atributo e no OVR. Essa carta nunca muda."
             : "Foto congelada do dia, sem bônus. Essa carta nunca muda (para o bem e para o mal)."}
         </p>
+
+        {isShareable && (
+          <div className="flex flex-col gap-1.5">
+            <ShareAwardButton award={award} groupName={groupName} />
+            <p className="text-center text-xs text-muted-foreground sm:text-left">
+              Dá para compartilhar até a próxima rodada começar.
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

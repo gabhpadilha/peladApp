@@ -54,8 +54,12 @@ async function CollectionContent({ params }: { params: PageProps<"/jogadores/[id
         />
         {latest ? (
           <>
-            <LatestAwardSpotlight award={latest} />
-            <CollectionGallery awards={awards} />
+            <LatestAwardSpotlight
+              award={latest}
+              isShareable={profile.shareableAwardIds.includes(latest.id)}
+              groupName={profile.groupName}
+            />
+            <CollectionGallery awards={awards} shareableIds={profile.shareableAwardIds} groupName={profile.groupName} />
           </>
         ) : (
           <EmptyCollection player={player} isOwnProfile={profile.isOwnProfile} theme={profile.currentTheme} />

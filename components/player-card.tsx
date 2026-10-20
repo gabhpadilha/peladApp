@@ -592,6 +592,29 @@ const PHOTO_FADES: Record<NonNullable<Player["photo"]>["kind"], readonly string[
 };
 
 /** Monta a máscara: camadas intersectadas, cada uma cobrindo a área da foto. */
+/**
+ * Reaplica a máscara da foto numa cópia da carta (o story que vira imagem).
+ * A cópia leva a máscara como o navegador a calcula (atalho `mask` com
+ * `source-in` e `mask-type`), que não vale ao redesenhar, e a foto sairia sem
+ * os degradês: troca tudo de máscara pelas propriedades padrão, escritas à mão.
+ */
+export function restorePhotoMask(node: Node) {
+  if (!(node instanceof HTMLElement)) return;
+  const kind = node.dataset.photoKind;
+  if (kind !== "cutout" && kind !== "original") return;
+  const layers = PHOTO_FADES[kind];
+  const image = layers.join(", ");
+  const sizes = layers.map(() => "100% 100%").join(", ");
+  const withoutMask = (node.getAttribute("style") ?? "")
+    .split(";")
+    .filter((declaration) => !/^\s*(-webkit-)?mask/.test(declaration))
+    .join(";");
+  node.setAttribute(
+    "style",
+    `${withoutMask}; mask-image: ${image}; -webkit-mask-image: ${image}; mask-size: ${sizes}; -webkit-mask-size: ${sizes}; mask-repeat: no-repeat; -webkit-mask-repeat: no-repeat; mask-composite: intersect; mask-mode: alpha;`,
+  );
+}
+
 function maskStyle(layers: readonly string[]): CSSProperties {
   const image = layers.join(", ");
   const sizes = layers.map(() => "100% 100%").join(", ");
@@ -642,6 +665,7 @@ function PlayerCardPhoto({ player, size }: { player: Player; size: CardSize }) {
         className="object-cover object-top"
         // Degradês explícitos (os utilitários mask-b-* do Tailwind escondiam a foto inteira).
         style={maskStyle(PHOTO_FADES[player.photo.kind])}
+        data-photo-kind={player.photo.kind}
       />
     </>
   );

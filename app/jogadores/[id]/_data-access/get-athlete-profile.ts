@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getGroupAttributeAverages } from "@/lib/athlete-insights";
+import { getShareableAwardIds } from "@/lib/award-share";
 import { getCurrentCardEvent, type CardThemeKey } from "@/lib/card-themes";
 import { getLeague } from "@/lib/league";
 import {
@@ -24,6 +25,10 @@ export type AthleteProfile = {
   isActive: boolean;
   /** Coleção de cartas especiais do atleta (mais recentes primeiro). */
   awards: Award[];
+  /** Cartas que o jogador logado pode compartilhar (só no próprio perfil). */
+  shareableAwardIds: string[];
+  /** Nome da pelada, para o story. */
+  groupName: string;
   delta: number | null;
   rank: { position: number; total: number };
   gamesPlayed: number;
@@ -57,12 +62,16 @@ export async function getAthleteProfile(memberId: string): Promise<AthleteProfil
     performance.score === null ? [] : [performance.score],
   );
 
+  const awards = league.awards.filter((award) => award.memberId === player.id);
+
   return {
     player,
     currentPlayer: league.players.find((candidate) => candidate.id === league.currentMemberId),
     isOwnProfile,
     isActive,
-    awards: league.awards.filter((award) => award.memberId === player.id),
+    awards,
+    shareableAwardIds: isOwnProfile ? getShareableAwardIds(awards, league.matches, league.currentMemberId) : [],
+    groupName: league.membership.groupName,
     delta: league.getDelta(player),
     rank: {
       position: roleRanking.findIndex((candidate) => candidate.id === player.id) + 1,

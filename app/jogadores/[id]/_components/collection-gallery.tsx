@@ -5,6 +5,7 @@ import { PlayerCard } from "@/components/player-card";
 import { SectionTitle } from "@/components/section-title";
 import { CARD_THEME_LABELS } from "@/lib/card-themes";
 import { formatShortDate } from "@/lib/format-date";
+import { ShareAwardButton } from "./share-award-button";
 import { cn } from "@/lib/utils";
 import { AWARD_KINDS, AWARD_LABELS, formatAwardResult, type Award, type AwardKind } from "@/types/award";
 import { AWARD_ICONS } from "@/components/award-icons";
@@ -14,6 +15,9 @@ type Filter = "all" | AwardKind;
 type CollectionGalleryProps = {
   /** Mais recentes primeiro. */
   awards: Award[];
+  /** Cartas que o jogador logado ainda pode compartilhar. */
+  shareableIds: readonly string[];
+  groupName: string;
 };
 
 type AwardGroup = { key: string; label: string; awards: Award[] };
@@ -32,7 +36,7 @@ function groupByEvent(awards: readonly Award[]): AwardGroup[] {
 }
 
 /** Galeria filtrável das cartas especiais, agrupada por evento. */
-export function CollectionGallery({ awards }: CollectionGalleryProps) {
+export function CollectionGallery({ awards, shareableIds, groupName }: CollectionGalleryProps) {
   const [filter, setFilter] = useState<Filter>("all");
   const visible = filter === "all" ? awards : awards.filter((award) => award.kind === filter);
   const groups = groupByEvent(visible);
@@ -96,6 +100,9 @@ export function CollectionGallery({ awards }: CollectionGalleryProps) {
                   <p className="text-xs text-muted-foreground tabular-nums">
                     R{award.round} · {formatShortDate(award.date)} · {formatAwardResult(award)}
                   </p>
+                  {shareableIds.includes(award.id) && (
+                    <ShareAwardButton award={award} groupName={groupName} variant="compact" />
+                  )}
                 </li>
               ))}
             </ul>
