@@ -368,24 +368,53 @@ const SKIN_CLASSES: Record<CardSkinKey, string> = {
   turquesa: "card-skin-turquesa",
   onix: "card-skin-onix",
   icone: "card-skin-icone",
+  lobisomem: "card-skin-lobisomem",
+  vampiro: "card-skin-vampiro",
 };
 
 const GOLD_FILL = "[background:var(--card-gold)]";
-const CARD_GOLD_ID = "card-gold";
 
-/** Ouro champanhe para dentro dos SVGs (o mesmo do `--card-gold`). */
-function GoldGradient() {
-  const stops: [string, string][] = [
-    ["0%", "#fbf1d2"],
-    ["16%", "#d2af66"],
-    ["30%", "#f4e4b4"],
-    ["48%", "#94692d"],
-    ["64%", "#ddbb76"],
-    ["82%", "#735020"],
-    ["100%", "#e8cf95"],
-  ];
+/** Paradas do metal da moldura (as mesmas do `--card-gold` de cada carta, para os SVGs). */
+const METAL_STOPS: Partial<Record<CardSkinKey, readonly (readonly [string, string])[]>> = {
+  lobisomem: [
+    ["0%", "#ffffff"],
+    ["16%", "#b4bfcc"],
+    ["30%", "#eef3f8"],
+    ["48%", "#5f6b78"],
+    ["64%", "#d3dbe4"],
+    ["82%", "#434c56"],
+    ["100%", "#e2e8ef"],
+  ],
+  vampiro: [
+    ["0%", "#f1d9db"],
+    ["16%", "#8a1626"],
+    ["30%", "#d68791"],
+    ["48%", "#2c0309"],
+    ["64%", "#a42a3c"],
+    ["82%", "#1d0206"],
+    ["100%", "#dba3aa"],
+  ],
+};
+
+/** Ouro champanhe (o mesmo do `--card-gold`); as cartas de evento têm metal próprio. */
+const GOLD_STOPS: readonly (readonly [string, string])[] = [
+  ["0%", "#fbf1d2"],
+  ["16%", "#d2af66"],
+  ["30%", "#f4e4b4"],
+  ["48%", "#94692d"],
+  ["64%", "#ddbb76"],
+  ["82%", "#735020"],
+  ["100%", "#e8cf95"],
+];
+
+/** Id do degradê do metal dentro dos SVGs (um por carta, para não misturar metais). */
+const metalId = (skin: CardSkinKey) => (METAL_STOPS[skin] ? `card-metal-${skin}` : "card-gold");
+
+/** Metal da moldura para dentro dos SVGs. */
+function MetalGradient({ skin }: { skin: CardSkinKey }) {
+  const stops = METAL_STOPS[skin] ?? GOLD_STOPS;
   return (
-    <linearGradient id={CARD_GOLD_ID} x1="0" y1="0" x2="0.55" y2="1">
+    <linearGradient id={metalId(skin)} x1="0" y1="0" x2="0.55" y2="1">
       {stops.map(([offset, color]) => (
         <stop key={offset} offset={offset} stopColor={color} />
       ))}
@@ -403,8 +432,13 @@ const BLADES = [
   "M5,131.5 L0.5,133.5 L44,150 L50,152 L46,148 Z",
 ];
 
-/** Lâminas douradas finas por fora das laterais e da ponta, com fio de luz. */
-function PremiumBlades() {
+/** Asa de morcego no canto de cima, por fora da moldura (só o Vampiro). */
+const BAT_WING =
+  "M11,7.2 Q4,2.6 -7,5.6 Q-4.6,7 -5.4,9.2 Q-2.6,8.2 -1.8,10.6 Q0.6,9.4 1.8,11.8 Q3.6,9.4 6,10 Q7.6,8.2 11,7.2 Z";
+
+/** Lâminas finas de metal por fora das laterais e da ponta, com fio de luz. */
+function PremiumBlades({ skin }: { skin: CardSkinKey }) {
+  const blades = skin === "vampiro" ? [...BLADES, BAT_WING] : BLADES;
   return (
     <svg
       aria-hidden
@@ -412,13 +446,13 @@ function PremiumBlades() {
       className="pointer-events-none absolute top-[-17.57%] left-[-36%] h-[135.1%] w-[172%] overflow-visible"
     >
       <defs>
-        <GoldGradient />
+        <MetalGradient skin={skin} />
       </defs>
       {[undefined, MIRROR].map((transform) => (
         <g key={transform ?? "left"} transform={transform}>
-          {BLADES.map((d) => (
+          {blades.map((d) => (
             <g key={d}>
-              <path d={d} fill={`url(#${CARD_GOLD_ID})`} />
+              <path d={d} fill={`url(#${metalId(skin)})`} />
               <path d={d} fill="none" stroke="#fff7de" strokeOpacity={0.55} strokeWidth={0.18} />
             </g>
           ))}
@@ -428,13 +462,94 @@ function PremiumBlades() {
   );
 }
 
+/**
+ * Detalhes do Lobisomem: lua cheia atrás da cabeça, pata no lugar do selo de
+ * cima e três arranhões rasgando o fio interno da lateral direita.
+ */
+function WerewolfArt({ metal }: { metal: string }) {
+  return (
+    <>
+      <defs>
+        <radialGradient id="werewolf-moon" cx="0.42" cy="0.38" r="0.62">
+          <stop offset="0%" stopColor="#f4f8ff" stopOpacity={0.55} />
+          <stop offset="85%" stopColor="#c9dcf5" stopOpacity={0.34} />
+          <stop offset="100%" stopColor="#c9dcf5" stopOpacity={0.08} />
+        </radialGradient>
+        <radialGradient id="werewolf-halo" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="55%" stopColor="#cfe2ff" stopOpacity={0.2} />
+          <stop offset="100%" stopColor="#cfe2ff" stopOpacity={0} />
+        </radialGradient>
+      </defs>
+      <circle cx={60} cy={36} r={40} fill="url(#werewolf-halo)" />
+      <circle cx={60} cy={36} r={25} fill="url(#werewolf-moon)" />
+      <circle cx={51} cy={30} r={3.2} fill="#6f86a6" fillOpacity={0.22} />
+      <circle cx={67} cy={42} r={4.4} fill="#6f86a6" fillOpacity={0.18} />
+      <circle cx={64} cy={25} r={2} fill="#6f86a6" fillOpacity={0.22} />
+      <circle cx={56} cy={47} r={1.6} fill="#6f86a6" fillOpacity={0.2} />
+      {/* Arranhões: cortes escuros com borda de metal, atravessando o fio interno. */}
+      {[0, 3.6, 7.2].map((offset) => (
+        <g key={offset} transform={`translate(${offset * 0.35} ${offset})`}>
+          <path d="M99,88 Q93,96 88.5,106" fill="none" stroke="#000000" strokeOpacity={0.9} strokeWidth={2} strokeLinecap="round" />
+          <path d="M99,88 Q93,96 88.5,106" fill="none" stroke={`url(#${metal})`} strokeOpacity={0.85} strokeWidth={0.5} strokeLinecap="round" />
+        </g>
+      ))}
+      {/* Pata no topo, no lugar do selo. */}
+      <g fill={`url(#${metal})`} transform="translate(50 8.6) scale(1.5) translate(-50 -8.6)">
+        <ellipse cx={50} cy={10.6} rx={2.2} ry={1.7} />
+        <ellipse cx={46.9} cy={7.9} rx={0.75} ry={1} />
+        <ellipse cx={48.9} cy={6.7} rx={0.75} ry={1.05} />
+        <ellipse cx={51.1} cy={6.7} rx={0.75} ry={1.05} />
+        <ellipse cx={53.1} cy={7.9} rx={0.75} ry={1} />
+      </g>
+    </>
+  );
+}
+
+/**
+ * Detalhes do Vampiro: lua de sangue pequena, três morcegos ao longe, presas no
+ * lugar do selo de cima e duas gotas escorrendo do fio interno.
+ */
+function VampireArt({ metal }: { metal: string }) {
+  const bat = "M0,0 Q1.2,-1.4 2.6,-0.6 Q3.4,-1.8 4.2,-0.4 L4.6,-1.2 L5,-0.4 Q5.8,-1.8 6.6,-0.6 Q8,-1.4 9.2,0 Q7.6,0 6.8,1.2 Q5.8,0.6 4.6,1.6 Q3.4,0.6 2.4,1.2 Q1.6,0 0,0 Z";
+  return (
+    <>
+      <defs>
+        <radialGradient id="vampire-moon" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0%" stopColor="#ff6b7c" stopOpacity={0.5} />
+          <stop offset="60%" stopColor="#c41a32" stopOpacity={0.28} />
+          <stop offset="100%" stopColor="#c41a32" stopOpacity={0} />
+        </radialGradient>
+      </defs>
+      <circle cx={76} cy={24} r={17} fill="url(#vampire-moon)" />
+      <circle cx={76} cy={24} r={8.5} fill="#ff8090" fillOpacity={0.16} />
+      <g fill="#000000" fillOpacity={0.75}>
+        <path d={bat} transform="translate(78 17) scale(0.85)" />
+        <path d={bat} transform="translate(88 25) scale(0.6)" />
+        <path d={bat} transform="translate(68 12) scale(0.5)" />
+      </g>
+      {/* Gotas escorrendo do fio interno, longe do OVR e do rosto. */}
+      <g fill={`url(#${metal})`}>
+        <path d="M20,7.4 L22.2,7.1 L22,13 Q23,16 21.1,16.6 Q19.2,16 20.2,13 Z" />
+        <path d="M25.6,6.7 L27.2,6.5 L27.1,10.4 Q27.8,12.6 26.4,13 Q25,12.6 25.7,10.4 Z" />
+      </g>
+      {/* Presas no topo, no lugar do selo. */}
+      <g fill={`url(#${metal})`} transform="translate(50 8) scale(1.5) translate(-50 -8)">
+        <path d="M46.5,7.2 L53.5,7.2 Q50,9 46.5,7.2 Z" />
+        <path d="M47.4,7.6 L48.4,12 L49.2,7.9 Z M52.6,7.6 L51.6,12 L50.8,7.9 Z" />
+      </g>
+    </>
+  );
+}
+
 /** Face da carta da Loja: luz difusa, lâminas de vidro com fio dourado, aro de luz, vinheta e fio interno. */
 function PremiumFaceArt({ skin }: { skin: CardSkinKey }) {
   const isIcon = skin === "icone";
+  const metal = metalId(skin);
+  const isEvent = skin === "lobisomem" || skin === "vampiro";
   return (
     <svg aria-hidden viewBox="0 0 100 148" preserveAspectRatio="none" className="absolute inset-0 size-full">
       <defs>
-        <GoldGradient />
+        <MetalGradient skin={skin} />
         <linearGradient id={`skin-glass-${skin}`} x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopOpacity={isIcon ? 0.35 : 0.28} className="[stop-color:var(--skin-light)]" />
           <stop offset="60%" stopOpacity={0.04} className="[stop-color:var(--skin-light)]" />
@@ -451,21 +566,25 @@ function PremiumFaceArt({ skin }: { skin: CardSkinKey }) {
       </defs>
       <rect width="100" height="148" fill={`url(#skin-leak-${skin})`} />
       <path d="M60,4 L94,0 L100,52 L80,46 Z" fill={`url(#skin-glass-${skin})`} />
-      <path d="M60,4 L94,0 L100,52" fill="none" stroke={`url(#${CARD_GOLD_ID})`} strokeOpacity={0.55} strokeWidth={0.22} />
+      <path d="M60,4 L94,0 L100,52" fill="none" stroke={`url(#${metal})`} strokeOpacity={0.55} strokeWidth={0.22} />
       <path d="M82,14 L100,18 L100,70 Z" fill={`url(#skin-glass-${skin})`} />
-      <path d="M82,14 L100,70" fill="none" stroke={`url(#${CARD_GOLD_ID})`} strokeOpacity={0.7} strokeWidth={0.25} />
+      <path d="M82,14 L100,70" fill="none" stroke={`url(#${metal})`} strokeOpacity={0.7} strokeWidth={0.25} />
       <path d="M0,24 L14,16 L6,58 Z" fill={`url(#skin-glass-${skin})`} opacity={0.8} />
-      <path d="M14,16 L6,58" fill="none" stroke={`url(#${CARD_GOLD_ID})`} strokeOpacity={0.45} strokeWidth={0.2} />
+      <path d="M14,16 L6,58" fill="none" stroke={`url(#${metal})`} strokeOpacity={0.45} strokeWidth={0.2} />
       <circle cx={62} cy={42} r={33} fill="none" strokeOpacity={0.1} strokeWidth={0.3} className="stroke-[var(--skin-text)]" />
       <rect width="100" height="148" fill={`url(#skin-vignette-${skin})`} />
       <path
         d={SHIELD_PATH}
         transform="translate(50 74) scale(0.945) translate(-50 -74)"
         fill="none"
-        stroke={`url(#${CARD_GOLD_ID})`}
+        stroke={`url(#${metal})`}
         strokeWidth={0.4}
       />
-      <path d="M47,7 L53,7 L53,10.6 Q50,13.6 47,10.6 Z" fill="none" stroke={`url(#${CARD_GOLD_ID})`} strokeWidth={0.3} />
+      {skin === "lobisomem" && <WerewolfArt metal={metal} />}
+      {skin === "vampiro" && <VampireArt metal={metal} />}
+      {!isEvent && (
+        <path d="M47,7 L53,7 L53,10.6 Q50,13.6 47,10.6 Z" fill="none" stroke={`url(#${metal})`} strokeWidth={0.3} />
+      )}
     </svg>
   );
 }
@@ -506,7 +625,7 @@ function PremiumPlayerCard({
         aria-hidden
         className="pointer-events-none absolute -inset-x-[12%] -top-[4%] -bottom-[8%] [background:radial-gradient(closest-side,color-mix(in_oklab,var(--skin-light)_16%,transparent),rgb(0_0_0/0.35)_70%,transparent)]"
       />
-      <PremiumBlades />
+      <PremiumBlades skin={skin} />
       <article
         aria-label={`${player.nickname}, ${player.position}, OVR ${player.ovr ?? "sem avaliação"}, carta ${skin}`}
         className={cn("relative size-full text-[var(--skin-text)]", SHAPE_CLIP, GOLD_FILL)}

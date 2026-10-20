@@ -368,6 +368,28 @@
   --skin-light: #ffffff;
   --skin-text: #3a2a0e;
 }
+/*
+ * Cartas de evento (Halloween): o mesmo desenho, com metal próprio no lugar do
+ * ouro (`--card-gold` redefinido só dentro da carta) e detalhes do tema no SVG.
+ */
+/* Lobisomem: prata enluarada (a bala de prata), noite azul-ardósia. */
+@utility card-skin-lobisomem {
+  --card-gold: linear-gradient(155deg, #ffffff 0%, #b4bfcc 16%, #eef3f8 30%, #5f6b78 48%, #d3dbe4 64%, #434c56 82%, #e2e8ef 100%);
+  --skin-mid: #26405a;
+  --skin-deep: #060d16;
+  --skin-end: #000000;
+  --skin-light: #cfe2ff;
+  --skin-text: #e6edf5;
+}
+/* Vampiro: metal rubi escuro, veludo bordô e preto. */
+@utility card-skin-vampiro {
+  --card-gold: linear-gradient(155deg, #f1d9db 0%, #8a1626 16%, #d68791 30%, #2c0309 48%, #a42a3c 64%, #1d0206 82%, #dba3aa 100%);
+  --skin-mid: #420713;
+  --skin-deep: #0d0105;
+  --skin-end: #000000;
+  --skin-light: #e3384e;
+  --skin-text: #f3dfe1;
+}
 
 @layer base {
   * {

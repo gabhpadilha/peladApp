@@ -14,6 +14,9 @@ export const CARD_SKINS = [
   { key: "turquesa", name: "Turquesa", level: 10, price: 600 },
   { key: "onix", name: "Ônix", level: 13, price: 800 },
   { key: "icone", name: "Ícone", level: 16, price: 1200 },
+  // Evento de Halloween (outubro de 2026).
+  { key: "lobisomem", name: "Lobisomem", level: 3, price: 200 },
+  { key: "vampiro", name: "Vampiro", level: 3, price: 200 },
 ] as const;
 
 export type CardSkin = (typeof CARD_SKINS)[number];
