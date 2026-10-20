@@ -496,10 +496,15 @@ function PremiumPlayerCard({
       className={cn(
         cardSizeVariants({ size }),
         SKIN_CLASSES[skin],
-        "[filter:drop-shadow(0_6px_10px_rgb(0_0_0/0.5))_drop-shadow(0_0_8px_color-mix(in_oklab,var(--skin-light)_14%,transparent))]",
         className,
       )}
     >
+      {/* Sombra e brilho em degradê, sem `filter`: drop-shadow nesta carta (com as
+          lâminas passando das bordas) quebrava em blocos no Safari do iPhone. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute -inset-x-[12%] -top-[4%] -bottom-[8%] [background:radial-gradient(closest-side,color-mix(in_oklab,var(--skin-light)_16%,transparent),rgb(0_0_0/0.35)_70%,transparent)]"
+      />
       <PremiumBlades />
       <article
         aria-label={`${player.nickname}, ${player.position}, OVR ${player.ovr ?? "sem avaliação"}, carta ${skin}`}

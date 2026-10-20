@@ -63,7 +63,8 @@ export function ShopContent({ me, items, balance }: ShopContentProps) {
               )}
             >
               <div className="relative w-[70%]">
-                <div className={cn(isLocked && "opacity-45 saturate-50")}>
+                {/* Só opacidade: `saturate` (filtro) sobre as cartas desmontava a prévia no iPhone. */}
+                <div className={cn(isLocked && "opacity-40")}>
                   <PlayerCard player={withSkin(me, item)} size="fill" />
                 </div>
                 {isLocked && (
