@@ -1,13 +1,13 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowRightIcon, CoinsIcon, GhostIcon, SparklesIcon, StoreIcon, TrendingUpIcon, type LucideIcon } from "lucide-react";
+import { ArrowRightIcon, CoinsIcon, GhostIcon, SparklesIcon, StarIcon, StoreIcon, TrendingUpIcon, type LucideIcon } from "lucide-react";
 import { formatCoins } from "@/components/coin-pill";
 import { PlayerCard } from "@/components/player-card";
 import { withAwardBonus } from "@/lib/award-bonus";
 import type { CardThemeKey, CurrentCardEvent } from "@/lib/card-themes";
 import { formatShortDate } from "@/lib/format-date";
 import { COIN_RULES, XP_RULES, type LevelProgress } from "@/lib/progression";
-import type { AwardKind } from "@/types/award";
+import { TEAM_OF_THE_WEEK_MIN_RATINGS, type AwardKind } from "@/types/award";
 import type { CardSkinKey } from "@/types/card-skin";
 import type { Player } from "@/types/player";
 import { cn } from "@/lib/utils";
@@ -97,6 +97,14 @@ const pickRules = (rules: readonly Chip[], labels: readonly string[]) =>
   rules.filter((rule) => labels.includes(rule.label));
 
 const XP_CHIPS = pickRules(XP_RULES, ["Nota da rodada × 10", "Enviar as suas notas", "Melhor Jogador"]);
+/** Como entrar no Time da Semana (espelha `compute_match_awards`). */
+const TEAM_OF_THE_WEEK_CHIPS: readonly Chip[] = [
+  { label: "Linha", value: "4 maiores notas" },
+  { label: "Gol", value: "maior nota" },
+  { label: "Mínimo", value: `${TEAM_OF_THE_WEEK_MIN_RATINGS} notas` },
+  { label: "Bônus", value: "+1 em tudo" },
+];
+
 const COIN_CHIPS = pickRules(COIN_RULES, ["Jogar uma rodada", "Enviar as suas notas", "Melhor Jogador", "Subir de nível"]);
 
 /** Texto do 1º slide por tema do mês. Tema novo: entre aqui (e em `CARD_THEMES`). */
@@ -108,7 +116,7 @@ const EVENT_COPY: Record<CardThemeKey, { eyebrow: string; title: string; icon: L
 const EVENT_FAN: [AwardKind, AwardKind, AwardKind] = ["gol", "craque", "bola_murcha"];
 const SHOP_FAN: [CardSkinKey, CardSkinKey, CardSkinKey] = ["safira", "esmeralda", "icone"];
 
-/** Novidades do app na home: evento do mês, Loja, XP e PeladaCoins. */
+/** Novidades do app na home: evento do mês, Time da Semana, Loja, XP e PeladaCoins. */
 export function NewsSlider({ event, player, progress, balance }: NewsSliderProps) {
   const eventCopy = EVENT_COPY[event.theme];
   const percent = Math.min(100, Math.round((progress.xpIntoLevel / progress.xpNeeded) * 100));
@@ -134,6 +142,32 @@ export function NewsSlider({ event, player, progress, balance }: NewsSliderProps
                 <PlayerCard key={kind} player={withAwardBonus(player, kind)} award={{ kind, theme: event.theme }} size="fill" />
               )) as [ReactNode, ReactNode, ReactNode]}
             />
+          }
+          href={`/jogadores/${player.id}/colecao`}
+          cta="Ver a coleção"
+        />
+      ),
+    },
+    {
+      key: "time-da-semana",
+      title: "Time da Semana",
+      content: (
+        <Slide
+          icon={StarIcon}
+          eyebrow="Sem votação"
+          title="Time da Semana"
+          text="Sai das notas da rodada: os melhores da linha e do gol entram no time e levam a carta especial."
+          visual={
+            <div className="flex w-full items-center gap-4">
+              <div className="w-28 shrink-0">
+                <PlayerCard
+                  player={withAwardBonus(player, "time_da_semana")}
+                  award={{ kind: "time_da_semana", theme: event.theme }}
+                  size="fill"
+                />
+              </div>
+              <Chips items={TEAM_OF_THE_WEEK_CHIPS} />
+            </div>
           }
           href={`/jogadores/${player.id}/colecao`}
           cta="Ver a coleção"
