@@ -463,12 +463,11 @@ function PremiumBlades({ skin }: { skin: CardSkinKey }) {
 }
 
 /**
- * Cabeça de lobo de perfil (desenho próprio, no estilo das referências do dono
- * do app), virada para a direita em ~40 x 41 unidades; olho e pelo da bochecha
- * são recortes (`evenodd`). Na carta ela é espelhada, olhando para a lua.
+ * Cabeça de lobo rosnando, desenhada pelo dono do app e vetorizada (~38 x 40
+ * unidades, virada para a esquerda, olhando para a lua); olho e pelo são recortes.
  */
 const WEREWOLF_HEAD =
-  "M19.4,0.8 Q21,5.6 22,9.8 Q24,10.6 25.2,12.2 Q26.2,13.8 27.2,14.6 Q31.4,15.8 35.2,17.2 Q37.2,17.9 37,19.8 Q36.8,21.4 35.2,21.4 Q32,23 28.8,23.4 Q31,24.1 30.6,25.2 Q27,27.4 22.8,27.6 L20.6,27.8 Q21.2,30.6 23.6,32.4 Q21.6,32.4 20.4,31.8 Q20.4,36.4 22.4,40.4 Q16,37.6 11.8,32.4 Q10,33.8 7.4,33.8 Q8.4,29.8 6.4,26.8 Q4.6,26.8 2.6,25.8 Q5.8,22.8 6.6,20.4 Q8.6,15.4 11.4,13.2 Q13.2,11.4 14.8,10.6 Q16.2,4.6 19.4,0.8 Z M23.4,14.4 Q25,13 26.8,14.2 Q25,15 23.4,14.4 Z M14.6,19.6 Q17,24.4 21.4,26.2 Q16.8,25.8 14,21.8 Z M10.4,23.4 Q12.2,28.8 16.4,31 Q11.6,30.2 9.6,25.4 Z";
+  "M23.7,0.0 L22.2,9.1 L12.3,12.6 L9.1,16.3 L0.0,18.4 L0.0,18.5 L2.9,23.3 L7.6,25.9 L5.1,23.0 L5.3,23.0 L7.8,24.2 L6.4,22.3 L7.7,22.8 L7.7,22.6 L7.0,21.9 L7.1,21.7 L10.8,20.4 L15.4,21.0 L14.4,27.1 L12.7,29.2 L10.2,28.2 L10.7,29.6 L10.6,29.8 L9.2,28.6 L9.9,30.2 L9.9,30.4 L7.8,28.6 L9.1,31.3 L11.8,33.1 L15.3,32.3 L15.6,31.8 L16.5,28.1 L20.6,25.6 L21.5,29.1 L21.9,33.3 L24.2,30.4 L24.4,30.4 L24.1,38.8 L28.4,32.8 L28.7,40.0 L33.9,32.6 L33.8,38.2 L35.6,32.9 L35.6,32.3 L33.3,25.9 L33.4,25.6 L37.0,32.3 L35.2,21.7 L30.1,19.0 L36.0,20.0 L36.1,20.2 L37.9,25.3 L37.9,24.9 L36.7,16.3 L28.4,11.3 L28.2,7.7 Z M14.7,13.9 L13.0,16.6 L10.8,17.0 L9.7,17.5 L9.5,17.5 L12.0,15.3 Z";
 
 /**
  * Detalhes do Lobisomem: lua cheia atrás da cabeça, cabeça de lobo em marca
@@ -509,7 +508,7 @@ function WerewolfArt({ metal }: { metal: string }) {
           <stop offset="100%" stopColor="#dbe7f7" stopOpacity={0} />
         </linearGradient>
       </defs>
-      <path d={WEREWOLF_HEAD} transform="translate(97 11) scale(-0.8 0.8)" fill="url(#werewolf-fill)" fillRule="evenodd" />
+      <path d={WEREWOLF_HEAD} transform="translate(68 10) scale(0.74)" fill="url(#werewolf-fill)" fillRule="evenodd" />
     </>
   );
 }
