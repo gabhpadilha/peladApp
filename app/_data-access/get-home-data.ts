@@ -1,7 +1,8 @@
-import { getCurrentCardEvent, type CurrentCardEvent } from "@/lib/card-themes";
+import { getCurrentCardEvent, type CardThemeKey, type CurrentCardEvent } from "@/lib/card-themes";
 import { getLeague } from "@/lib/league";
 import { averageEvaluations } from "@/lib/ovr";
 import { getMatchPerformances, rankPlayers, type PendingEvaluation } from "@/lib/players";
+import { createClient } from "@/lib/supabase/server";
 import type { Award } from "@/types/award";
 import type { Match } from "@/types/match";
 import type { Player } from "@/types/player";
@@ -13,6 +14,8 @@ const todayFormatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao
 
 export type RankedPlayer = { player: Player; position: number; delta: number | null };
 export type RoundPerformer = { player: Player; score: number };
+/** Rodada fechada com cartas que o jogador ainda não abriu ("Confira os vencedores"). */
+export type WinnersAlert = { matchId: string; round: number; cardCount: number; hasTeam: boolean; theme: CardThemeKey };
 
 export type HomeData = {
   groupName: string;
@@ -30,7 +33,33 @@ export type HomeData = {
   goalkeeperRanking: RankedPlayer[];
   /** Evento do mês das cartas especiais (tema sazonal ou clássico). */
   cardEvent: CurrentCardEvent;
+  winnersAlert: WinnersAlert | null;
 };
+
+/** Aviso da última rodada fechada, enquanto o jogador não abrir o pacote dela. */
+async function getWinnersAlert(memberId: string, match: Match | null, awards: Award[]): Promise<WinnersAlert | null> {
+  if (!match) return null;
+  const roundAwards = awards.filter((award) => award.matchId === match.id);
+  if (roundAwards.length === 0) return null;
+
+  const supabase = await createClient();
+  // O RLS só devolve as próprias linhas.
+  const { count, error } = await supabase
+    .from("award_reveals")
+    .select("match_id", { count: "exact", head: true })
+    .eq("match_id", match.id)
+    .eq("member_id", memberId);
+  if (error) throw error;
+  if ((count ?? 0) > 0) return null;
+
+  return {
+    matchId: match.id,
+    round: match.round,
+    cardCount: roundAwards.filter((award) => award.kind !== "time_da_semana").length,
+    hasTeam: roundAwards.some((award) => award.kind === "time_da_semana"),
+    theme: roundAwards[0].theme,
+  };
+}
 
 export async function getHomeData(): Promise<HomeData> {
   const league = await getLeague("/");
@@ -64,6 +93,7 @@ export async function getHomeData(): Promise<HomeData> {
     : [];
 
   const openMatch = league.matches.findLast((match) => match.status === "open");
+  const winnersAlert = await getWinnersAlert(league.currentMemberId, latestMatch, league.awards);
 
   return {
     groupName: league.membership.groupName,
@@ -98,5 +128,6 @@ export async function getHomeData(): Promise<HomeData> {
     outfieldRanking: rankPlayers(league.activePlayers, "outfield").map(toRanked),
     goalkeeperRanking: rankPlayers(league.activePlayers, "goalkeeper").map(toRanked),
     cardEvent: getCurrentCardEvent(todayFormatter.format(new Date())),
+    winnersAlert,
   };
 }

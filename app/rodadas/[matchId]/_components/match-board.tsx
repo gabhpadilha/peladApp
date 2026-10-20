@@ -12,7 +12,7 @@ import {
 import type { RatingTarget } from "@/app/avaliar/[matchId]/_data-access/get-rating-session";
 import { Button } from "@/components/ui/button";
 import { countFilled, draftAverage, isDraftComplete, type ScoreDraft } from "@/lib/rating-drafts";
-import type { AwardKind } from "@/types/award";
+import type { VoteAwardKind } from "@/types/award";
 import { GOALKEEPER_ATTRIBUTES, OUTFIELD_ATTRIBUTES, type PlayerAttribute } from "@/types/player";
 import type { BoardPlayer, MatchBoard } from "../_data-access/get-match-board";
 import type { RatingState } from "./board-card";
@@ -66,7 +66,7 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
     setDrafts((current) => Object.fromEntries(Object.entries(current).filter(([id]) => id !== playerId)));
   }
 
-  function handleVote(kind: AwardKind, playerId: string | undefined) {
+  function handleVote(kind: VoteAwardKind, playerId: string | undefined) {
     setVotes((current) => ({ ...current, [kind]: playerId }));
   }
 

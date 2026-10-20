@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { formatWeekdayDate } from "@/lib/format-date";
 import { teamRoleLabel } from "@/lib/teams";
 import { cn } from "@/lib/utils";
-import { AWARD_KINDS, AWARD_LABELS, type AwardKind } from "@/types/award";
+import { AWARD_LABELS, VOTE_AWARD_KINDS, type VoteAwardKind } from "@/types/award";
 import {
   ATTRIBUTE_LABELS,
   GOALKEEPER_ATTRIBUTES,
@@ -46,7 +46,7 @@ type RatingWizardProps = {
 /** Passo atual: um jogador, um prêmio para votar ou a revisão. */
 type Step =
   | { type: "player"; target: RatingTarget }
-  | { type: "vote"; kind: AwardKind }
+  | { type: "vote"; kind: VoteAwardKind }
   | { type: "review" };
 
 function getAttributeKeys(player: Player): readonly PlayerAttribute[] {
@@ -71,7 +71,7 @@ function averageScore(draft: Draft): number {
 export function RatingWizard({ match, targets }: RatingWizardProps) {
   const steps: Step[] = [
     ...targets.map((target) => ({ type: "player" as const, target })),
-    ...AWARD_KINDS.map((kind) => ({ type: "vote" as const, kind })),
+    ...VOTE_AWARD_KINDS.map((kind) => ({ type: "vote" as const, kind })),
     { type: "review" },
   ];
   const reviewIndex = steps.length - 1;
@@ -98,7 +98,7 @@ export function RatingWizard({ match, targets }: RatingWizardProps) {
     form.setValue(`drafts.${playerId}`, { skipped: false, scores: { ...draft.scores, [key]: value } });
   }
 
-  function setVote(kind: AwardKind, playerId: string | undefined) {
+  function setVote(kind: VoteAwardKind, playerId: string | undefined) {
     form.setValue(`votes.${kind}`, playerId);
   }
 
@@ -171,7 +171,7 @@ export function RatingWizard({ match, targets }: RatingWizardProps) {
     step.type === "player"
       ? `${index + 1}/${targets.length}`
       : step.type === "vote"
-        ? `Voto ${index - firstVoteIndex + 1}/${AWARD_KINDS.length}`
+        ? `Voto ${index - firstVoteIndex + 1}/${VOTE_AWARD_KINDS.length}`
         : "Revisão";
 
   return (
@@ -324,7 +324,7 @@ function ReviewList({ targets, drafts, votes, nameById, ratedCount, firstVoteInd
       <div className="flex flex-col gap-1">
         <h2 className="text-xs font-medium text-muted-foreground uppercase">Seus votos</h2>
         <ul className="flex flex-col">
-          {AWARD_KINDS.map((kind, kindIndex) => {
+          {VOTE_AWARD_KINDS.map((kind, kindIndex) => {
             const nomineeId = votes[kind];
             return (
               <li key={kind} className="border-t first:border-t-0">

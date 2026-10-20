@@ -3,8 +3,19 @@ import type { Player } from "@/types/player";
 
 const MAX_CARD_VALUE = 99;
 
-/** Prêmios que somam +1 no OVR e em cada atributo (como o Team of the Week da EA FC). */
-export const BOOSTED_AWARDS: readonly AwardKind[] = ["craque", "gol"];
+/**
+ * Prêmios que somam +1 no OVR e em cada atributo (como o Team of the Week da EA FC).
+ * Bola Murcha, Fair Play e Fominha ficam sem bônus. Espelha `compute_match_awards`.
+ */
+export const BOOSTED_AWARDS: readonly AwardKind[] = [
+  "craque",
+  "gol",
+  "drible",
+  "atacante",
+  "defensor",
+  "goleiro",
+  "time_da_semana",
+];
 
 function boost(value: number | null): number | null {
   return value === null ? null : Math.min(MAX_CARD_VALUE, value + 1);

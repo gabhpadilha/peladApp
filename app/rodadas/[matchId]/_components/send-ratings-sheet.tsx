@@ -5,7 +5,7 @@ import type { RatingTarget } from "@/app/avaliar/[matchId]/_data-access/get-rati
 import type { RoundVotesInput } from "@/app/avaliar/[matchId]/_schemas/evaluation-schema";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { AWARD_KINDS, type AwardKind } from "@/types/award";
+import { VOTE_AWARD_KINDS, type VoteAwardKind } from "@/types/award";
 
 type SendRatingsSheetProps = {
   open: boolean;
@@ -13,13 +13,13 @@ type SendRatingsSheetProps = {
   targets: RatingTarget[];
   ratedCount: number;
   votes: RoundVotesInput;
-  onVote: (kind: AwardKind, playerId: string | undefined) => void;
+  onVote: (kind: VoteAwardKind, playerId: string | undefined) => void;
   error: string | null;
   isPending: boolean;
   onSubmit: () => void;
 };
 
-/** Votos (Craque, Gol da Semana, Bola Murcha) e envio de todas as notas de uma vez. */
+/** Votos nos 9 prêmios e envio de todas as notas de uma vez. */
 export function SendRatingsSheet({
   open,
   onOpenChange,
@@ -43,7 +43,7 @@ export function SendRatingsSheet({
         </SheetHeader>
 
         <div className="flex flex-1 flex-col gap-8 overflow-y-auto px-4 py-5">
-          {AWARD_KINDS.map((kind) => (
+          {VOTE_AWARD_KINDS.map((kind) => (
             <VoteStep
               key={kind}
               kind={kind}

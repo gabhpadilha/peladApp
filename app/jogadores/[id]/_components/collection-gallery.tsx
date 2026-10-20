@@ -6,8 +6,8 @@ import { SectionTitle } from "@/components/section-title";
 import { CARD_THEME_LABELS } from "@/lib/card-themes";
 import { formatShortDate } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
-import { AWARD_KINDS, AWARD_LABELS, type Award, type AwardKind } from "@/types/award";
-import { AWARD_ICONS } from "./award-icons";
+import { AWARD_KINDS, AWARD_LABELS, formatAwardResult, type Award, type AwardKind } from "@/types/award";
+import { AWARD_ICONS } from "@/components/award-icons";
 
 type Filter = "all" | AwardKind;
 
@@ -39,11 +39,12 @@ export function CollectionGallery({ awards }: CollectionGalleryProps) {
 
   const filters: { key: Filter; label: string; count: number }[] = [
     { key: "all", label: "Todas", count: awards.length },
+    // Só os prêmios que o atleta já tem (são 10 tipos), mais o filtro ativo.
     ...AWARD_KINDS.map((kind) => ({
       key: kind,
       label: AWARD_LABELS[kind].title,
       count: awards.filter((award) => award.kind === kind).length,
-    })),
+    })).filter((option) => option.count > 0 || option.key === filter),
   ];
 
   return (
@@ -93,8 +94,7 @@ export function CollectionGallery({ awards }: CollectionGalleryProps) {
                   <PlayerCard player={award.card} award={award} size="fill" />
                   <p className="text-sm leading-tight font-medium">{AWARD_LABELS[award.kind].title}</p>
                   <p className="text-xs text-muted-foreground tabular-nums">
-                    R{award.round} · {formatShortDate(award.date)} · {award.votes}{" "}
-                    {award.votes === 1 ? "voto" : "votos"}
+                    R{award.round} · {formatShortDate(award.date)} · {formatAwardResult(award)}
                   </p>
                 </li>
               ))}

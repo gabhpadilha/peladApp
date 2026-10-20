@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      award_reveals: {
+        Row: {
+          match_id: string
+          member_id: string
+          seen_at: string
+        }
+        Insert: {
+          match_id: string
+          member_id: string
+          seen_at?: string
+        }
+        Update: {
+          match_id?: string
+          member_id?: string
+          seen_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "award_reveals_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "award_reveals_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "group_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       awards: {
         Row: {
           attributes: Json
@@ -25,6 +58,7 @@ export type Database = {
           member_id: string
           ovr: number | null
           position: Database["public"]["Enums"]["player_position"]
+          score: number | null
           theme: string
           votes: number
         }
@@ -38,6 +72,7 @@ export type Database = {
           member_id: string
           ovr?: number | null
           position: Database["public"]["Enums"]["player_position"]
+          score?: number | null
           theme?: string
           votes: number
         }
@@ -51,6 +86,7 @@ export type Database = {
           member_id?: string
           ovr?: number | null
           position?: Database["public"]["Enums"]["player_position"]
+          score?: number | null
           theme?: string
           votes?: number
         }
@@ -463,7 +499,17 @@ export type Database = {
       }
     }
     Enums: {
-      award_kind: "craque" | "gol" | "bola_murcha"
+      award_kind:
+        | "craque"
+        | "gol"
+        | "bola_murcha"
+        | "drible"
+        | "atacante"
+        | "defensor"
+        | "goleiro"
+        | "fair_play"
+        | "fominha"
+        | "time_da_semana"
       match_status: "open" | "closed"
       member_role: "organizer" | "player"
       player_position: "FIX" | "ALA" | "PIV" | "GOL"
@@ -594,7 +640,18 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      award_kind: ["craque", "gol", "bola_murcha"],
+      award_kind: [
+        "craque",
+        "gol",
+        "bola_murcha",
+        "drible",
+        "atacante",
+        "defensor",
+        "goleiro",
+        "fair_play",
+        "fominha",
+        "time_da_semana",
+      ],
       match_status: ["open", "closed"],
       member_role: ["organizer", "player"],
       player_position: ["FIX", "ALA", "PIV", "GOL"],

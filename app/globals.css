@@ -52,6 +52,62 @@
   --color-award-bola-murcha-halloween-from: var(--award-bola-murcha-halloween-from);
   --color-award-bola-murcha-halloween-to: var(--award-bola-murcha-halloween-to);
   --color-award-bola-murcha-halloween-foreground: var(--award-bola-murcha-halloween-foreground);
+  --color-award-drible-frame: var(--award-drible-frame);
+  --color-award-drible-from: var(--award-drible-from);
+  --color-award-drible-to: var(--award-drible-to);
+  --color-award-drible-foreground: var(--award-drible-foreground);
+  --color-award-atacante-frame: var(--award-atacante-frame);
+  --color-award-atacante-from: var(--award-atacante-from);
+  --color-award-atacante-to: var(--award-atacante-to);
+  --color-award-atacante-foreground: var(--award-atacante-foreground);
+  --color-award-defensor-frame: var(--award-defensor-frame);
+  --color-award-defensor-from: var(--award-defensor-from);
+  --color-award-defensor-to: var(--award-defensor-to);
+  --color-award-defensor-foreground: var(--award-defensor-foreground);
+  --color-award-goleiro-frame: var(--award-goleiro-frame);
+  --color-award-goleiro-from: var(--award-goleiro-from);
+  --color-award-goleiro-to: var(--award-goleiro-to);
+  --color-award-goleiro-foreground: var(--award-goleiro-foreground);
+  --color-award-fair-play-frame: var(--award-fair-play-frame);
+  --color-award-fair-play-from: var(--award-fair-play-from);
+  --color-award-fair-play-to: var(--award-fair-play-to);
+  --color-award-fair-play-foreground: var(--award-fair-play-foreground);
+  --color-award-fominha-frame: var(--award-fominha-frame);
+  --color-award-fominha-from: var(--award-fominha-from);
+  --color-award-fominha-to: var(--award-fominha-to);
+  --color-award-fominha-foreground: var(--award-fominha-foreground);
+  --color-award-time-da-semana-frame: var(--award-time-da-semana-frame);
+  --color-award-time-da-semana-from: var(--award-time-da-semana-from);
+  --color-award-time-da-semana-to: var(--award-time-da-semana-to);
+  --color-award-time-da-semana-foreground: var(--award-time-da-semana-foreground);
+  --color-award-drible-halloween-frame: var(--award-drible-halloween-frame);
+  --color-award-drible-halloween-from: var(--award-drible-halloween-from);
+  --color-award-drible-halloween-to: var(--award-drible-halloween-to);
+  --color-award-drible-halloween-foreground: var(--award-drible-halloween-foreground);
+  --color-award-atacante-halloween-frame: var(--award-atacante-halloween-frame);
+  --color-award-atacante-halloween-from: var(--award-atacante-halloween-from);
+  --color-award-atacante-halloween-to: var(--award-atacante-halloween-to);
+  --color-award-atacante-halloween-foreground: var(--award-atacante-halloween-foreground);
+  --color-award-defensor-halloween-frame: var(--award-defensor-halloween-frame);
+  --color-award-defensor-halloween-from: var(--award-defensor-halloween-from);
+  --color-award-defensor-halloween-to: var(--award-defensor-halloween-to);
+  --color-award-defensor-halloween-foreground: var(--award-defensor-halloween-foreground);
+  --color-award-goleiro-halloween-frame: var(--award-goleiro-halloween-frame);
+  --color-award-goleiro-halloween-from: var(--award-goleiro-halloween-from);
+  --color-award-goleiro-halloween-to: var(--award-goleiro-halloween-to);
+  --color-award-goleiro-halloween-foreground: var(--award-goleiro-halloween-foreground);
+  --color-award-fair-play-halloween-frame: var(--award-fair-play-halloween-frame);
+  --color-award-fair-play-halloween-from: var(--award-fair-play-halloween-from);
+  --color-award-fair-play-halloween-to: var(--award-fair-play-halloween-to);
+  --color-award-fair-play-halloween-foreground: var(--award-fair-play-halloween-foreground);
+  --color-award-fominha-halloween-frame: var(--award-fominha-halloween-frame);
+  --color-award-fominha-halloween-from: var(--award-fominha-halloween-from);
+  --color-award-fominha-halloween-to: var(--award-fominha-halloween-to);
+  --color-award-fominha-halloween-foreground: var(--award-fominha-halloween-foreground);
+  --color-award-time-da-semana-halloween-frame: var(--award-time-da-semana-halloween-frame);
+  --color-award-time-da-semana-halloween-from: var(--award-time-da-semana-halloween-from);
+  --color-award-time-da-semana-halloween-to: var(--award-time-da-semana-halloween-to);
+  --color-award-time-da-semana-halloween-foreground: var(--award-time-da-semana-halloween-foreground);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -152,12 +208,12 @@
    * Cartas especiais (prêmios da rodada). Mesma estrutura: frame = moldura,
    * from/to = face, foreground = texto. Tema sazonal = sufixo (ex.: -halloween).
    */
-  /* Craque da Rodada: preta e dourada, como o Team of the Week */
+  /* Melhor Jogador (craque): preta e dourada, como o Team of the Week */
   --award-craque-frame: oklch(0.82 0.13 85);
   --award-craque-from: oklch(0.27 0.01 80);
   --award-craque-to: oklch(0.12 0.005 80);
   --award-craque-foreground: oklch(0.87 0.13 88);
-  /* Gol da Semana: azul elétrico */
+  /* Gol da Rodada: azul elétrico */
   --award-gol-frame: oklch(0.86 0.13 210);
   --award-gol-from: oklch(0.45 0.15 255);
   --award-gol-to: oklch(0.18 0.08 265);
@@ -167,6 +223,41 @@
   --award-bola-murcha-from: oklch(0.52 0.04 65);
   --award-bola-murcha-to: oklch(0.3 0.03 55);
   --award-bola-murcha-foreground: oklch(0.92 0.02 80);
+  /* Drible da Rodada: magenta e roxo */
+  --award-drible-frame: oklch(0.8 0.19 340);
+  --award-drible-from: oklch(0.45 0.2 335);
+  --award-drible-to: oklch(0.17 0.08 305);
+  --award-drible-foreground: oklch(0.96 0.04 340);
+  /* Melhor Atacante: laranja-fogo */
+  --award-atacante-frame: oklch(0.86 0.15 75);
+  --award-atacante-from: oklch(0.55 0.17 50);
+  --award-atacante-to: oklch(0.2 0.07 35);
+  --award-atacante-foreground: oklch(0.97 0.04 85);
+  /* Melhor Defensor: esmeralda e aço */
+  --award-defensor-frame: oklch(0.84 0.1 170);
+  --award-defensor-from: oklch(0.4 0.07 175);
+  --award-defensor-to: oklch(0.15 0.03 190);
+  --award-defensor-foreground: oklch(0.95 0.04 170);
+  /* Melhor Goleiro: rubi */
+  --award-goleiro-frame: oklch(0.78 0.16 28);
+  --award-goleiro-from: oklch(0.42 0.16 25);
+  --award-goleiro-to: oklch(0.15 0.05 15);
+  --award-goleiro-foreground: oklch(0.95 0.04 40);
+  /* Fair Play: rosa */
+  --award-fair-play-frame: oklch(0.86 0.08 350);
+  --award-fair-play-from: oklch(0.55 0.1 350);
+  --award-fair-play-to: oklch(0.24 0.05 340);
+  --award-fair-play-foreground: oklch(0.97 0.02 350);
+  /* Fominha: mostarda */
+  --award-fominha-frame: oklch(0.72 0.1 95);
+  --award-fominha-from: oklch(0.45 0.07 95);
+  --award-fominha-to: oklch(0.22 0.04 80);
+  --award-fominha-foreground: oklch(0.95 0.04 95);
+  /* Time da Semana: azul-marinho e prata, com estrelas */
+  --award-time-da-semana-frame: oklch(0.9 0.02 250);
+  --award-time-da-semana-from: oklch(0.32 0.06 260);
+  --award-time-da-semana-to: oklch(0.12 0.03 260);
+  --award-time-da-semana-foreground: oklch(0.95 0.02 250);
 
   /* Halloween: abóbora, gosma e fantasma */
   --award-craque-halloween-frame: oklch(0.76 0.17 55);
@@ -181,6 +272,41 @@
   --award-bola-murcha-halloween-from: oklch(0.36 0.03 280);
   --award-bola-murcha-halloween-to: oklch(0.14 0.02 280);
   --award-bola-murcha-halloween-foreground: oklch(0.93 0.02 280);
+  /* gato preto */
+  --award-drible-halloween-frame: oklch(0.88 0.17 100);
+  --award-drible-halloween-from: oklch(0.24 0.01 280);
+  --award-drible-halloween-to: oklch(0.08 0 0);
+  --award-drible-halloween-foreground: oklch(0.9 0.15 100);
+  /* fogo-fátuo */
+  --award-atacante-halloween-frame: oklch(0.86 0.13 190);
+  --award-atacante-halloween-from: oklch(0.33 0.08 205);
+  --award-atacante-halloween-to: oklch(0.11 0.04 225);
+  --award-atacante-halloween-foreground: oklch(0.93 0.09 190);
+  /* lápide */
+  --award-defensor-halloween-frame: oklch(0.72 0.08 140);
+  --award-defensor-halloween-from: oklch(0.4 0.03 150);
+  --award-defensor-halloween-to: oklch(0.14 0.01 150);
+  --award-defensor-halloween-foreground: oklch(0.92 0.04 140);
+  /* vampiro */
+  --award-goleiro-halloween-frame: oklch(0.62 0.21 25);
+  --award-goleiro-halloween-from: oklch(0.34 0.15 20);
+  --award-goleiro-halloween-to: oklch(0.09 0.02 20);
+  --award-goleiro-halloween-foreground: oklch(0.88 0.1 25);
+  /* doce ou travessura */
+  --award-fair-play-halloween-frame: oklch(0.85 0.1 350);
+  --award-fair-play-halloween-from: oklch(0.45 0.12 350);
+  --award-fair-play-halloween-to: oklch(0.16 0.05 330);
+  --award-fair-play-halloween-foreground: oklch(0.96 0.04 350);
+  /* zumbi */
+  --award-fominha-halloween-frame: oklch(0.68 0.09 95);
+  --award-fominha-halloween-from: oklch(0.36 0.05 90);
+  --award-fominha-halloween-to: oklch(0.12 0.02 80);
+  --award-fominha-halloween-foreground: oklch(0.9 0.08 100);
+  /* noite estrelada (azul-royal: não confundir com o fantasma da Bola Murcha) */
+  --award-time-da-semana-halloween-frame: oklch(0.7 0.17 260);
+  --award-time-da-semana-halloween-from: oklch(0.36 0.16 265);
+  --award-time-da-semana-halloween-to: oklch(0.12 0.07 270);
+  --award-time-da-semana-halloween-foreground: oklch(0.93 0.06 250);
 }
 
 @layer base {
@@ -193,4 +319,84 @@
   html {
     @apply font-sans;
   }
+}
+/*
+ * Revelação dos vencedores (/rodadas/[id]/vencedores): pacote, walkout e cartas.
+ * Usadas por classes `animate-[reveal-…]`; `--reveal-dx/--reveal-dy` dão a
+ * direção de cada faísca.
+ */
+@keyframes reveal-float {
+  0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+  50% { transform: translateY(-10px) rotate(1.5deg); }
+}
+@keyframes reveal-shine {
+  0% { transform: translateX(-200%) skewX(-20deg); }
+  60%, 100% { transform: translateX(400%) skewX(-20deg); }
+}
+@keyframes reveal-shake {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  15% { transform: translate(-6px, 2px) rotate(-4deg); }
+  30% { transform: translate(6px, -2px) rotate(4deg); }
+  45% { transform: translate(-8px, 0) rotate(-5deg); }
+  60% { transform: translate(8px, 2px) rotate(5deg); }
+  75% { transform: translate(-4px, -2px) rotate(-2deg); }
+}
+@keyframes reveal-cap-off {
+  0% { transform: translate(0, 0) rotate(0); opacity: 1; }
+  100% { transform: translate(90px, -420px) rotate(38deg); opacity: 0; }
+}
+@keyframes reveal-seam {
+  0% { opacity: 0; transform: scaleX(0.2); }
+  100% { opacity: 1; transform: scaleX(1.4); }
+}
+@keyframes reveal-burst {
+  0% { transform: scale(0); opacity: 0; }
+  40% { opacity: 1; }
+  100% { transform: scale(5); opacity: 1; }
+}
+@keyframes reveal-flash {
+  0%, 60% { opacity: 0; }
+  80% { opacity: 1; }
+  100% { opacity: 0; }
+}
+@keyframes reveal-in {
+  0% { opacity: 0; transform: translateY(24px) scale(0.92); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes reveal-slam {
+  0% { opacity: 0; transform: scale(2.4); }
+  60% { opacity: 1; transform: scale(0.94); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes reveal-out {
+  0% { opacity: 1; }
+  100% { opacity: 0; transform: scale(0.9); visibility: hidden; }
+}
+@keyframes reveal-fade {
+  0% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes reveal-flip {
+  0% { opacity: 0; transform: rotateY(100deg) scale(0.55); }
+  60% { opacity: 1; transform: rotateY(-10deg) scale(1.06); }
+  100% { opacity: 1; transform: rotateY(0) scale(1); }
+}
+@keyframes reveal-deflate {
+  0% { opacity: 0; transform: translateY(-360px) rotate(-8deg); }
+  55% { opacity: 1; transform: translateY(0) scaleY(0.78) scaleX(1.12); }
+  75% { transform: translateY(-18px) scaleY(1.04) scaleX(0.97) rotate(3deg); }
+  100% { opacity: 1; transform: translateY(0) rotate(4deg) scale(1); }
+}
+@keyframes reveal-spin {
+  0% { transform: rotate(0); }
+  100% { transform: rotate(360deg); }
+}
+@keyframes reveal-spark {
+  0% { opacity: 0; transform: translate(0, 0) scale(1); }
+  10% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--reveal-dx), var(--reveal-dy)) scale(0.2); }
+}
+@keyframes reveal-pop {
+  0% { opacity: 0; transform: translateY(16px) scale(0.8); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
 }
