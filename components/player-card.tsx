@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import Image from "next/image";
 import { cva, type VariantProps } from "class-variance-authority";
-import { GhostIcon } from "lucide-react";
+import { GhostIcon, TrophyIcon } from "lucide-react";
 import { AWARD_ICONS } from "@/components/award-icons";
 import { cn } from "@/lib/utils";
 import { CARD_TIER_LABELS, getCardTier, type CardTier } from "@/lib/card-tier";
@@ -9,7 +9,7 @@ import type { CardThemeKey } from "@/lib/card-themes";
 import { getInitials } from "@/lib/get-initials";
 import { photoFadeLayers } from "@/lib/photo-fades";
 import { AWARD_LABELS, type AwardKind } from "@/types/award";
-import type { CardSkinKey } from "@/types/card-skin";
+import { getCardSkin, type CardSkinKey } from "@/types/card-skin";
 import {
   ATTRIBUTE_LABELS,
   GOALKEEPER_ATTRIBUTES,
@@ -37,7 +37,7 @@ export function PlayerCardDefs() {
 }
 
 /** Visual da carta: faixa da carta base ou prêmio (com tema sazonal). */
-type AwardDesign = AwardKind | `${AwardKind}-halloween`;
+type AwardDesign = AwardKind | `${AwardKind}-halloween` | `${AwardKind}-brasileirao`;
 type CardDesign = CardTier | AwardDesign;
 
 /** Classes literais (o Tailwind precisa enxergá-las inteiras). */
@@ -137,6 +137,46 @@ const DESIGNS: Record<CardDesign, { frame: string; face: string }> = {
   "time_da_semana-halloween": {
     frame: "bg-award-time-da-semana-halloween-frame",
     face: "from-award-time-da-semana-halloween-from to-award-time-da-semana-halloween-to text-award-time-da-semana-halloween-foreground",
+  },
+  "craque-brasileirao": {
+    frame: "bg-award-craque-brasileirao-frame",
+    face: "from-award-craque-brasileirao-from to-award-craque-brasileirao-to text-award-craque-brasileirao-foreground",
+  },
+  "gol-brasileirao": {
+    frame: "bg-award-gol-brasileirao-frame",
+    face: "from-award-gol-brasileirao-from to-award-gol-brasileirao-to text-award-gol-brasileirao-foreground",
+  },
+  "bola_murcha-brasileirao": {
+    frame: "bg-award-bola-murcha-brasileirao-frame",
+    face: "from-award-bola-murcha-brasileirao-from to-award-bola-murcha-brasileirao-to text-award-bola-murcha-brasileirao-foreground",
+  },
+  "drible-brasileirao": {
+    frame: "bg-award-drible-brasileirao-frame",
+    face: "from-award-drible-brasileirao-from to-award-drible-brasileirao-to text-award-drible-brasileirao-foreground",
+  },
+  "atacante-brasileirao": {
+    frame: "bg-award-atacante-brasileirao-frame",
+    face: "from-award-atacante-brasileirao-from to-award-atacante-brasileirao-to text-award-atacante-brasileirao-foreground",
+  },
+  "defensor-brasileirao": {
+    frame: "bg-award-defensor-brasileirao-frame",
+    face: "from-award-defensor-brasileirao-from to-award-defensor-brasileirao-to text-award-defensor-brasileirao-foreground",
+  },
+  "goleiro-brasileirao": {
+    frame: "bg-award-goleiro-brasileirao-frame",
+    face: "from-award-goleiro-brasileirao-from to-award-goleiro-brasileirao-to text-award-goleiro-brasileirao-foreground",
+  },
+  "fair_play-brasileirao": {
+    frame: "bg-award-fair-play-brasileirao-frame",
+    face: "from-award-fair-play-brasileirao-from to-award-fair-play-brasileirao-to text-award-fair-play-brasileirao-foreground",
+  },
+  "fominha-brasileirao": {
+    frame: "bg-award-fominha-brasileirao-frame",
+    face: "from-award-fominha-brasileirao-from to-award-fominha-brasileirao-to text-award-fominha-brasileirao-foreground",
+  },
+  "time_da_semana-brasileirao": {
+    frame: "bg-award-time-da-semana-brasileirao-frame",
+    face: "from-award-time-da-semana-brasileirao-from to-award-time-da-semana-brasileirao-to text-award-time-da-semana-brasileirao-foreground",
   },
 };
 
@@ -281,6 +321,13 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
             className="absolute top-[18%] right-[-6%] size-[62cqw] rotate-12 opacity-[0.12]"
           />
         )}
+        {award?.theme === "brasileirao" && (
+          <TrophyIcon
+            aria-hidden
+            strokeWidth={1.2}
+            className="absolute top-[14%] right-[6%] size-[50cqw] opacity-[0.14]"
+          />
+        )}
 
         <div className="absolute top-[13%] left-[10%] z-10 flex flex-col items-center font-display leading-none">
           {/* 21cqw: ~85% do tamanho anterior (pedido do dono do app). */}
@@ -370,9 +417,40 @@ const SKIN_CLASSES: Record<CardSkinKey, string> = {
   icone: "card-skin-icone",
   lobisomem: "card-skin-lobisomem",
   vampiro: "card-skin-vampiro",
+  "clube-athletico-pr": "card-skin-clube-athletico-pr",
+  "clube-atletico-mg": "card-skin-clube-atletico-mg",
+  "clube-bahia": "card-skin-clube-bahia",
+  "clube-botafogo": "card-skin-clube-botafogo",
+  "clube-chapecoense": "card-skin-clube-chapecoense",
+  "clube-corinthians": "card-skin-clube-corinthians",
+  "clube-coritiba": "card-skin-clube-coritiba",
+  "clube-cruzeiro": "card-skin-clube-cruzeiro",
+  "clube-flamengo": "card-skin-clube-flamengo",
+  "clube-fluminense": "card-skin-clube-fluminense",
+  "clube-gremio": "card-skin-clube-gremio",
+  "clube-internacional": "card-skin-clube-internacional",
+  "clube-mirassol": "card-skin-clube-mirassol",
+  "clube-palmeiras": "card-skin-clube-palmeiras",
+  "clube-bragantino": "card-skin-clube-bragantino",
+  "clube-remo": "card-skin-clube-remo",
+  "clube-santos": "card-skin-clube-santos",
+  "clube-sao-paulo": "card-skin-clube-sao-paulo",
+  "clube-vasco": "card-skin-clube-vasco",
+  "clube-vitoria": "card-skin-clube-vitoria",
 };
 
 const GOLD_FILL = "[background:var(--card-gold)]";
+
+/** Prata dos clubes alvinegros (o mesmo `--card-gold` das utilities deles). */
+const CLUB_SILVER: readonly (readonly [string, string])[] = [
+    ["0%", "#ffffff"],
+    ["16%", "#b8bcc2"],
+    ["30%", "#f3f4f6"],
+    ["48%", "#5c6066"],
+    ["64%", "#d6d9dd"],
+    ["82%", "#3f4247"],
+    ["100%", "#e5e7ea"],
+  ];
 
 /** Paradas do metal da moldura (as mesmas do `--card-gold` de cada carta, para os SVGs). */
 const METAL_STOPS: Partial<Record<CardSkinKey, readonly (readonly [string, string])[]>> = {
@@ -385,6 +463,10 @@ const METAL_STOPS: Partial<Record<CardSkinKey, readonly (readonly [string, strin
     ["82%", "#434c56"],
     ["100%", "#e2e8ef"],
   ],
+  "clube-atletico-mg": CLUB_SILVER,
+  "clube-botafogo": CLUB_SILVER,
+  "clube-corinthians": CLUB_SILVER,
+  "clube-vasco": CLUB_SILVER,
   vampiro: [
     ["0%", "#f1d9db"],
     ["16%", "#8a1626"],
@@ -619,6 +701,8 @@ function PremiumPlayerCard({
     player.role === "goalkeeper" ? GOALKEEPER_ATTRIBUTES : OUTFIELD_ATTRIBUTES;
   const attributeValues: Partial<Record<PlayerAttribute, number | null>> = player.attributes;
   const columns = [attributeKeys.slice(0, 3), attributeKeys.slice(3)];
+  const skinInfo = getCardSkin(skin);
+  const crest = "crest" in skinInfo ? skinInfo.crest : null;
 
   return (
     <div
@@ -646,6 +730,8 @@ function PremiumPlayerCard({
             SHAPE_CLIP,
           )}
         >
+          {/* Camisa do clube (cartas de clube), por baixo do vidro. */}
+          <div className="absolute inset-0 [background:var(--skin-pattern,none)]" />
           <PremiumFaceArt skin={skin} />
 
           <div className="absolute top-[12%] left-[10%] z-10 flex flex-col items-center font-display leading-none">
@@ -653,6 +739,13 @@ function PremiumPlayerCard({
             <span className="text-[8.5cqw] font-medium tracking-wide">{player.position}</span>
             <span className={cn("mt-[2.5cqw] h-px w-[12cqw]", GOLD_FILL)} />
           </div>
+
+          {crest && (
+            // Escudo do clube sob o OVR, como nas cartas do EA FC (aprovado pelo dono do app).
+            <div className="absolute top-[34.5%] left-[9.5%] z-10 h-[13%] w-[19%]">
+              <Image src={crest} alt="" fill sizes="64px" className="object-contain" />
+            </div>
+          )}
 
           <div className="absolute top-[2%] -right-[4%] -left-[4%] z-0 h-[62%]">
             <PlayerCardPhoto player={player} size={size} />

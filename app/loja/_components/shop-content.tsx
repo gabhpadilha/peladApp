@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CoinsIcon, GhostIcon, LockIcon, SparklesIcon, WalletCardsIcon, type LucideIcon } from "lucide-react";
+import { CoinsIcon, GhostIcon, LockIcon, SparklesIcon, TrophyIcon, WalletCardsIcon, type LucideIcon } from "lucide-react";
+import type { CardThemeKey } from "@/lib/card-themes";
 import { PlayerCard } from "@/components/player-card";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -9,6 +10,7 @@ import { cn } from "@/lib/utils";
 import type { Player } from "@/types/player";
 import { buyCardSkin, type ShopActionResult } from "../_actions/buy-card-skin";
 import { equipCardSkin } from "../_actions/equip-card-skin";
+import type { ShopSale } from "@/lib/shop-sale";
 import type { ShopItem, ShopSection } from "../_data-access/get-shop";
 import { formatShortDate } from "@/lib/format-date";
 import { formatCoins } from "@/components/coin-pill";
@@ -19,7 +21,41 @@ type ShopContentProps = {
   mine: ShopItem[];
   sections: ShopSection[];
   balance: number;
+  /** Promoção valendo hoje (faixa no topo e preços riscados). */
+  sale: ShopSale | null;
 };
+
+/** Ícone da vitrine de evento, pelo tema (tema novo: entre aqui). */
+const EVENT_ICONS: Record<CardThemeKey, LucideIcon> = {
+  default: SparklesIcon,
+  halloween: GhostIcon,
+  brasileirao: TrophyIcon,
+};
+
+/** Preço com o de tabela riscado ao lado quando há promoção. */
+function Price({ item }: { item: ShopItem }) {
+  return (
+    <>
+      {item.originalPrice !== null && <span className="text-sm line-through opacity-60">{formatCoins(item.originalPrice)}</span>}
+      <span className="font-semibold">{formatCoins(item.price)}</span>
+    </>
+  );
+}
+
+/** Faixa da promoção (ex.: Black Friday), no topo da Loja. */
+function SaleBanner({ sale }: { sale: ShopSale }) {
+  return (
+    <div className="flex items-center justify-between gap-3 rounded-xl bg-black px-4 py-3 ring-1 ring-amber-300/40">
+      <div className="min-w-0">
+        <p className="font-display text-2xl leading-none font-extrabold tracking-wide text-white uppercase">{sale.label}</p>
+        <p className="text-xs text-amber-200/80">Só até {formatShortDate(sale.end)} · em todas as personalizações</p>
+      </div>
+      <span className="shrink-0 rounded-md bg-amber-300 px-2.5 py-1 font-display text-2xl font-extrabold text-black">
+        -{sale.percent}%
+      </span>
+    </div>
+  );
+}
 
 function formatDaysLeft(daysLeft: number): string {
   if (daysLeft === 0) return "último dia";
@@ -45,7 +81,7 @@ function withSkin(me: Player, item: ShopItem): Player {
 }
 
 /** Grade de cartas da Loja; tocar numa à venda abre a confirmação de compra. */
-export function ShopContent({ me, mine, sections, balance }: ShopContentProps) {
+export function ShopContent({ me, mine, sections, balance, sale }: ShopContentProps) {
   const [selected, setSelected] = useState<ShopItem | null>(null);
   const [message, setMessage] = useState<{ kind: "error" | "saved"; text: string } | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -111,12 +147,12 @@ export function ShopContent({ me, mine, sections, balance }: ShopContentProps) {
                 {item.state === "available" && (
                   <Button type="button" className="h-10 w-full gap-1.5" disabled={isPending} onClick={() => setSelected(item)}>
                     <CoinsIcon aria-hidden className="size-4" />
-                    {formatCoins(item.price)}
+                    <Price item={item} />
                   </Button>
                 )}
                 {isLocked && (
                   <span className="flex h-10 w-full items-center justify-center rounded-md bg-muted/50 px-1 text-center text-xs text-muted-foreground">
-                    Nível {item.level} · {formatCoins(item.price)} PC
+                    Nível {item.level} · {formatCoins(item.price)} PC{item.originalPrice !== null && ` (era ${formatCoins(item.originalPrice)})`}
                   </span>
                 )}
               </div>
@@ -135,6 +171,8 @@ export function ShopContent({ me, mine, sections, balance }: ShopContentProps) {
         </p>
       )}
 
+      {sale && <SaleBanner sale={sale} />}
+
       <section aria-label="Minhas cartas" className="flex flex-col gap-3">
         <SectionHeader
           icon={WalletCardsIcon}
@@ -147,7 +185,7 @@ export function ShopContent({ me, mine, sections, balance }: ShopContentProps) {
       {sections.map((section) => (
         <section key={section.key} aria-label={section.title} className="flex flex-col gap-3">
           <SectionHeader
-            icon={section.key === "event" ? GhostIcon : SparklesIcon}
+            icon={section.event ? EVENT_ICONS[section.event.theme] : SparklesIcon}
             title={section.title}
             text={
               section.event?.endDate && section.event.daysLeft !== null
@@ -194,7 +232,9 @@ export function ShopContent({ me, mine, sections, balance }: ShopContentProps) {
                     }}
                   >
                     <CoinsIcon aria-hidden className="size-5" />
-                    {isPending ? "Comprando…" : `Comprar e usar · ${formatCoins(selected.price)}`}
+                    {isPending
+                      ? "Comprando…"
+                      : `Comprar e usar · ${formatCoins(selected.price)}${selected.originalPrice !== null ? ` (era ${formatCoins(selected.originalPrice)})` : ""}`}
                   </Button>
                 )}
                 <Button type="button" variant="ghost" size="lg" className="h-11 text-base" onClick={() => setSelected(null)}>

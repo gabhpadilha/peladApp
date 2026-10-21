@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowRightIcon, CoinsIcon, GhostIcon, SparklesIcon, StarIcon, StoreIcon, TrendingUpIcon, type LucideIcon } from "lucide-react";
+import { ArrowRightIcon, CoinsIcon, GhostIcon, SparklesIcon, StarIcon, StoreIcon, TrendingUpIcon, TrophyIcon, type LucideIcon } from "lucide-react";
 import { formatCoins } from "@/components/coin-pill";
 import { PlayerCard } from "@/components/player-card";
 import { withAwardBonus } from "@/lib/award-bonus";
@@ -9,12 +9,17 @@ import { formatShortDate } from "@/lib/format-date";
 import { COIN_RULES, XP_RULES, type LevelProgress } from "@/lib/progression";
 import { TEAM_OF_THE_WEEK_MIN_RATINGS, type AwardKind } from "@/types/award";
 import { CARD_SKINS, isCardSkinOnSale, type CardSkinKey } from "@/types/card-skin";
+import type { ShopSale } from "@/lib/shop-sale";
 import type { Player } from "@/types/player";
 import { cn } from "@/lib/utils";
 import { NewsCarousel } from "./news-carousel";
 
 type NewsSliderProps = {
   event: CurrentCardEvent;
+  /** "Hoje", `AAAA-MM-DD` (horário de Brasília): quais cartas de evento estão à venda. */
+  today: string;
+  /** Promoção da Loja valendo hoje (ex.: Black Friday). */
+  shopSale: ShopSale | null;
   player: Player;
   progress: LevelProgress;
   balance: number;
@@ -110,6 +115,7 @@ const COIN_CHIPS = pickRules(COIN_RULES, ["Jogar uma rodada", "Enviar as suas no
 /** Texto do 1º slide por tema do mês. Tema novo: entre aqui (e em `CARD_THEMES`). */
 const EVENT_COPY: Record<CardThemeKey, { eyebrow: string; title: string; icon: LucideIcon }> = {
   halloween: { eyebrow: "Evento de outubro", title: "Halloween na pelada", icon: GhostIcon },
+  brasileirao: { eyebrow: "Evento de novembro", title: "Brasileirão na pelada", icon: TrophyIcon },
   default: { eyebrow: "Coleção", title: "Cartas especiais", icon: SparklesIcon },
 };
 
@@ -118,18 +124,23 @@ const SHOP_FAN: [CardSkinKey, CardSkinKey, CardSkinKey] = ["safira", "esmeralda"
 
 const listFormatter = new Intl.ListFormat("pt-BR", { style: "long", type: "conjunction" });
 
-/** Cartas de evento à venda agora (o último dia do evento está dentro dele). */
-function getEventSkins(event: CurrentCardEvent) {
-  const lastDay = event.endDate;
-  return lastDay ? CARD_SKINS.filter((skin) => "event" in skin && isCardSkinOnSale(skin, lastDay)) : [];
+/** Cartas de evento à venda em `today`. */
+function getEventSkins(today: string) {
+  return CARD_SKINS.filter((skin) => "event" in skin && isCardSkinOnSale(skin, today));
 }
 
+/** Texto do slide da Loja: com poucas cartas de evento, os nomes; com muitas (clubes), a quantidade. */
+function describeEventSkins(skins: ReturnType<typeof getEventSkins>): string {
+  const level = Math.min(...skins.map((skin) => skin.level));
+  const what = skins.length <= 3 ? listFormatter.format(skins.map((skin) => skin.name)) : `${skins.length} personalizações do evento`;
+  return `Chegaram ${what}, no nível ${level}. Só ficam à venda durante o evento; quem comprar continua usando depois.`;
+}
 /** Novidades do app na home: evento do mês, Time da Semana, Loja (com as cartas do evento), XP e PeladaCoins. */
-export function NewsSlider({ event, player, progress, balance }: NewsSliderProps) {
+export function NewsSlider({ event, today, shopSale, player, progress, balance }: NewsSliderProps) {
   const eventCopy = EVENT_COPY[event.theme];
   const percent = Math.min(100, Math.round((progress.xpIntoLevel / progress.xpNeeded) * 100));
   // Com evento na Loja, as cartas dele vão no leque (a primeira no meio).
-  const eventSkins = getEventSkins(event);
+  const eventSkins = getEventSkins(today);
   const shopFan: [CardSkinKey, CardSkinKey, CardSkinKey] =
     eventSkins.length >= 2 ? [eventSkins[1].key, eventSkins[0].key, "esmeralda"] : SHOP_FAN;
 
@@ -195,13 +206,15 @@ export function NewsSlider({ event, player, progress, balance }: NewsSliderProps
           eyebrow={eventSkins.length > 0 ? `Novidade · ${CARD_THEME_LABELS[event.theme]}` : "Novidade"}
           title="Loja de cartas"
           meta={
-            eventSkins.length > 0 && event.endDate !== null && event.daysLeft !== null
-              ? `Cartas de evento até ${formatShortDate(event.endDate)} · ${formatDaysLeft(event.daysLeft)}`
-              : undefined
+            shopSale
+              ? `${shopSale.label}: -${shopSale.percent}% em tudo até ${formatShortDate(shopSale.end)}`
+              : eventSkins.length > 0 && event.endDate !== null && event.daysLeft !== null
+                ? `Cartas de evento até ${formatShortDate(event.endDate)} · ${formatDaysLeft(event.daysLeft)}`
+                : undefined
           }
           text={
             eventSkins.length > 0
-              ? `Chegaram ${listFormatter.format(eventSkins.map((skin) => skin.name))}, no nível ${Math.min(...eventSkins.map((skin) => skin.level))}. Só ficam à venda durante o evento; quem comprar continua usando depois.`
+              ? describeEventSkins(eventSkins)
               : "Troque o visual da sua carta por uma premium. Novas cartas liberam por nível; a Esmeralda já está liberada."
           }
           visual={

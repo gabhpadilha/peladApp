@@ -1,4 +1,5 @@
 import { getCurrentCardEvent, type CardThemeKey, type CurrentCardEvent } from "@/lib/card-themes";
+import { getActiveSale, type ShopSale } from "@/lib/shop-sale";
 import { getLeague } from "@/lib/league";
 import { averageEvaluations } from "@/lib/ovr";
 import { getMatchPerformances, rankPlayers, type PendingEvaluation } from "@/lib/players";
@@ -35,6 +36,10 @@ export type HomeData = {
   goalkeeperRanking: RankedPlayer[];
   /** Evento do mês das cartas especiais (tema sazonal ou clássico). */
   cardEvent: CurrentCardEvent;
+  /** "Hoje" no fuso da pelada, `AAAA-MM-DD` (cartas de evento à venda no slide da Loja). */
+  today: string;
+  /** Promoção da Loja valendo hoje (ex.: Black Friday). */
+  shopSale: ShopSale | null;
   winnersAlert: WinnersAlert | null;
   /** Aviso do bônus de boas-vindas, enquanto o jogador não o fechar. */
   showWelcomeBonus: boolean;
@@ -82,6 +87,7 @@ async function getWinnersAlert(memberId: string, match: Match | null, awards: Aw
 
 export async function getHomeData(): Promise<HomeData> {
   const league = await getLeague("/");
+  const today = todayFormatter.format(new Date());
   const currentPlayer = league.players.find((player) => player.id === league.currentMemberId);
   if (!currentPlayer) {
     throw new Error("Jogador logado não encontrado na pelada");
@@ -151,7 +157,9 @@ export async function getHomeData(): Promise<HomeData> {
     // Completos: a home mostra o resumo e expande para o ranking inteiro.
     outfieldRanking: rankPlayers(league.activePlayers, "outfield").map(toRanked),
     goalkeeperRanking: rankPlayers(league.activePlayers, "goalkeeper").map(toRanked),
-    cardEvent: getCurrentCardEvent(todayFormatter.format(new Date())),
+    cardEvent: getCurrentCardEvent(today),
+    today,
+    shopSale: getActiveSale(today),
     winnersAlert,
     showWelcomeBonus,
     levelProgress: progression,

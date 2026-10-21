@@ -5,6 +5,7 @@ import { z } from "zod";
 import { getLeague } from "@/lib/league";
 import { requireActiveMembership } from "@/lib/session";
 import { createAdminClient, hasAdminEnv } from "@/lib/supabase/admin";
+import { getActiveSale, getSalePrice } from "@/lib/shop-sale";
 import { getCardSkin, isCardSkinKey, isCardSkinOnSale } from "@/types/card-skin";
 
 /** "Hoje" no fuso da pelada, `AAAA-MM-DD` (o servidor roda em UTC). */
@@ -32,7 +33,8 @@ export async function buyCardSkin(input: { skin: string; equip: boolean }): Prom
   }
 
   const skin = getCardSkin(parsed.data.skin);
-  if (!isCardSkinOnSale(skin, todayFormatter.format(new Date()))) {
+  const today = todayFormatter.format(new Date());
+  if (!isCardSkinOnSale(skin, today)) {
     return { success: false, message: `A ${skin.name} saiu da Loja com o fim do evento.` };
   }
   const league = await getLeague("/loja");
@@ -54,15 +56,17 @@ export async function buyCardSkin(input: { skin: string; equip: boolean }): Prom
     return { success: false, message: `Você já tem a ${skin.name}.` };
   }
   const balance = progression.coinsEarned - purchases.reduce((total, purchase) => total + purchase.price, 0);
-  if (balance < skin.price) {
-    return { success: false, message: `Faltam ${skin.price - balance} PeladaCoins para a ${skin.name}.` };
+  // Promoção (ex.: Black Friday) calculada aqui, nunca vinda do aparelho; a compra grava o preço pago.
+  const price = getSalePrice(skin.price, getActiveSale(today));
+  if (balance < price) {
+    return { success: false, message: `Faltam ${price - balance} PeladaCoins para a ${skin.name}.` };
   }
 
   const { error: insertError } = await admin.from("card_skin_purchases").insert({
     group_id: membership.groupId,
     member_id: membership.memberId,
     skin: skin.key,
-    price: skin.price,
+    price,
   });
   if (insertError) {
     console.error("buyCardSkin: compra recusada", insertError);

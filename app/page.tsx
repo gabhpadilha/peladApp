@@ -47,6 +47,8 @@ async function HomeContent() {
 
         <NewsSlider
           event={data.cardEvent}
+          today={data.today}
+          shopSale={data.shopSale}
           player={data.currentPlayer}
           progress={data.levelProgress}
           balance={data.balance}

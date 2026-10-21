@@ -6,6 +6,7 @@
  */
 export const CARD_THEMES = [
   { key: "halloween", label: "Halloween", startMonthDay: "10-01", endMonthDay: "10-31" },
+  { key: "brasileirao", label: "Brasileirão", startMonthDay: "11-01", endMonthDay: "11-30" },
 ] as const;
 
 export type CardThemeKey = "default" | (typeof CARD_THEMES)[number]["key"];
