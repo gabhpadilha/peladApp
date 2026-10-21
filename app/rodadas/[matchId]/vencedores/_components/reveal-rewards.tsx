@@ -47,7 +47,8 @@ export function RevealRewards({ round, rewards, onDone }: RevealRewardsProps) {
   return (
     <section
       aria-label="O que você ganhou na rodada"
-      className="absolute inset-0 overflow-y-auto px-4 pt-18 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+      // pt-22: abaixo da barrinha de progresso do topo.
+      className="absolute inset-0 overflow-y-auto px-4 pt-22 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
     >
       <div className="mx-auto flex w-full max-w-md flex-col gap-4">
         <div className="flex animate-[reveal-in_0.4s_ease-out_both] flex-col items-center gap-1 text-center">
