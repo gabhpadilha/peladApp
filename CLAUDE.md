@@ -111,6 +111,7 @@ Desenvolvimento no VS Code + WSL (Ubuntu), com Node 20 via nvm. Se o Claude roda
 - **Sessão na nuvem** (sem WSL, sem o login do CLI do Supabase e da Vercel desta máquina): `npm` e `git` rodam direto; migration, `db:types`, consultas ao banco e logs da Vercel podem não estar disponíveis. Nesse caso, deixe a migration pronta com o SQL revisado e peça para o dono aplicar na máquina dele (`npx supabase db push` e `npm run db:types`).
 
 ## 🗺️ Próximos passos (combinados com o dono do app)
+- **Calendário de eventos e cartas futuras:** `docs/calendario-eventos.md` é a memória desse planejamento (eventos dos próximos meses, ideias de cartas, cartas animadas, decisões e perguntas em aberto). Leia antes de criar evento ou carta nova e atualize-o a cada decisão.
 - Fechamento automático da rodada 24h depois do jogo.
 - Animação de revelação do OVR ao fechar a rodada (subiu/caiu, troca de faixa).
 - Loja: liberar itens novos por nível e por evento temático; foto especial ou dinâmica por carta.
