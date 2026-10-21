@@ -18,7 +18,7 @@ type WelcomeBonusDialogProps = {
 
 const FEATURED_SKIN = getCardSkin("esmeralda");
 
-/** Aviso do bônus de primeiro login: aparece uma vez e some ao fechar. */
+/** Aviso do prêmio de primeiro login (150 PC + Esmeralda grátis): aparece uma vez e some ao fechar. */
 export function WelcomeBonusDialog({ player, coins }: WelcomeBonusDialogProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
@@ -41,19 +41,25 @@ export function WelcomeBonusDialog({ player, coins }: WelcomeBonusDialogProps) {
             <CoinsIcon aria-hidden className="size-6 text-amber-300" />
           </span>
           <DialogTitle className="font-display text-sm font-bold tracking-widest text-muted-foreground uppercase">
-            Bônus de primeiro login
+            Prêmio pelo seu primeiro login
           </DialogTitle>
           <p className="font-display text-5xl leading-none font-extrabold text-amber-200 tabular-nums">
             +{formatCoins(coins)}
             <span className="ml-1.5 text-xl text-amber-200/70">PC</span>
           </p>
           <DialogDescription>
-            Bem-vindo à Loja! Com essas PeladaCoins você já compra a carta {FEATURED_SKIN.name}, liberada para todo mundo.
+            Você recebeu {formatCoins(coins)} PeladaCoins na sua conta e a carta {FEATURED_SKIN.name} de graça: ela está na
+            Loja esperando por você.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="mx-auto w-32">
-          <PlayerCard player={{ ...player, cardSkin: FEATURED_SKIN.key }} size="fill" />
+        <div className="flex flex-col items-center gap-2">
+          <div className="w-32">
+            <PlayerCard player={{ ...player, cardSkin: FEATURED_SKIN.key }} size="fill" />
+          </div>
+          <span className="rounded-full bg-primary/15 px-3 py-1 text-sm font-semibold text-primary">
+            {FEATURED_SKIN.name} · Grátis
+          </span>
         </div>
 
         <DialogFooter>

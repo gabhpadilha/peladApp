@@ -10,8 +10,8 @@ import { getThemeForDate } from "@/lib/card-themes";
  * comprou continua usando depois (decisão do dono do app).
  */
 export const CARD_SKINS = [
-  // Liberada desde o começo: dá para comprar com o bônus de boas-vindas.
-  { key: "esmeralda", name: "Esmeralda", level: 0, price: 150 },
+  // Prêmio de primeiro login: de graça para todo mundo (decisão do dono do app, 2026-10-21).
+  { key: "esmeralda", name: "Esmeralda", level: 0, price: 0 },
   { key: "safira", name: "Safira", level: 4, price: 250 },
   { key: "ametista", name: "Ametista", level: 6, price: 350 },
   { key: "rubi", name: "Rubi", level: 8, price: 450 },

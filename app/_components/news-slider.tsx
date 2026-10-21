@@ -215,7 +215,7 @@ export function NewsSlider({ event, today, shopSale, player, progress, balance }
           text={
             eventSkins.length > 0
               ? describeEventSkins(eventSkins)
-              : "Troque o visual da sua carta por uma premium. Novas cartas liberam por nível; a Esmeralda já está liberada."
+              : "Troque o visual da sua carta por uma premium. Novas cartas liberam por nível; a Esmeralda é grátis para todo mundo."
           }
           visual={
             <CardFan

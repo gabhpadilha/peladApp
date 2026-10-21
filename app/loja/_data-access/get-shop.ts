@@ -76,7 +76,7 @@ export async function getShop(): Promise<Shop | null> {
     name: skin.name,
     level: skin.level,
     price: getSalePrice(skin.price, sale),
-    originalPrice: sale ? skin.price : null,
+    originalPrice: sale && skin.price > 0 ? skin.price : null,
     state:
       equipped === skin.key ? "equipped" : owned.has(skin.key) ? "owned" : progression.level >= skin.level ? "available" : "locked",
   });

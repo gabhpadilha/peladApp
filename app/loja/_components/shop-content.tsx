@@ -34,6 +34,7 @@ const EVENT_ICONS: Record<CardThemeKey, LucideIcon> = {
 
 /** Preço com o de tabela riscado ao lado quando há promoção. */
 function Price({ item }: { item: ShopItem }) {
+  if (item.price === 0) return <span className="font-semibold">Grátis</span>;
   return (
     <>
       {item.originalPrice !== null && <span className="text-sm line-through opacity-60">{formatCoins(item.originalPrice)}</span>}
@@ -206,16 +207,20 @@ export function ShopContent({ me, mine, sections, balance, sale }: ShopContentPr
                   <PlayerCard player={withSkin(me, selected)} size="fill" />
                 </div>
                 <SheetTitle className="font-display text-3xl font-extrabold uppercase">{selected.name}</SheetTitle>
-                <SheetDescription>Liberada no nível {selected.level} · sua para sempre</SheetDescription>
+                <SheetDescription>
+                  {selected.price === 0 ? "Prêmio de primeiro login" : `Liberada no nível ${selected.level}`} · sua para sempre
+                </SheetDescription>
               </SheetHeader>
               <div className="flex flex-col gap-3 px-4 pt-2 pb-[max(1rem,env(safe-area-inset-bottom))]">
-                <div className="flex items-center justify-between rounded-xl border px-4 py-3 text-sm">
-                  <span className="text-muted-foreground">Seu saldo</span>
-                  <span className="flex items-center gap-1.5 font-display text-base font-bold tabular-nums">
-                    <CoinsIcon aria-hidden className="size-4 text-amber-300" />
-                    {formatCoins(balance)} → {formatCoins(balance - selected.price)}
-                  </span>
-                </div>
+                {selected.price > 0 && (
+                  <div className="flex items-center justify-between rounded-xl border px-4 py-3 text-sm">
+                    <span className="text-muted-foreground">Seu saldo</span>
+                    <span className="flex items-center gap-1.5 font-display text-base font-bold tabular-nums">
+                      <CoinsIcon aria-hidden className="size-4 text-amber-300" />
+                      {formatCoins(balance)} → {formatCoins(balance - selected.price)}
+                    </span>
+                  </div>
+                )}
                 {balance < selected.price ? (
                   <p className="text-center text-sm text-muted-foreground">
                     Faltam {formatCoins(selected.price - balance)} PeladaCoins. Jogue, avalie e ganhe prêmios para juntar.
@@ -234,6 +239,8 @@ export function ShopContent({ me, mine, sections, balance, sale }: ShopContentPr
                     <CoinsIcon aria-hidden className="size-5" />
                     {isPending
                       ? "Comprando…"
+                      : selected.price === 0
+                      ? "Pegar de graça e usar"
                       : `Comprar e usar · ${formatCoins(selected.price)}${selected.originalPrice !== null ? ` (era ${formatCoins(selected.originalPrice)})` : ""}`}
                   </Button>
                 )}
