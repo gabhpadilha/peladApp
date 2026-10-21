@@ -65,7 +65,8 @@ Cada ideia pode ter: tema das cartas especiais, 1 ou 2 cartas na Loja e, opciona
 
 ## Perguntas em aberto
 
-- Novembro: trocar os escudos com erro (Coritiba, Chapecoense, Internacional) pelos oficiais.
+- Novembro: o dono do app vai mandar **até o fim de outubro os escudos oficiais dos 20 clubes**, em qualidade melhor; trocar todos em `public/clubes/` (os atuais vieram do pôster, com erros no Coritiba, na Chapecoense e no Internacional).
+- Novembro: com 20 cartas de clube, a seção "Evento · Brasileirão" da Loja deve ficar comprida demais; conferir na prática em novembro e pensar numa solução (ex.: filtro ou busca por clube, carrossel horizontal ou "Ver todos").
 - Todo mês terá evento, ou só nos meses com data forte (Natal, Carnaval, São João)?
 - Cada evento sempre traz 2 cartas na Loja? Mesmo nível e preço do Halloween (nível 3, 200 PC) ou sobe com o tempo?
 - Vale ter regras especiais por evento (desconto, Time do Ano, prêmio extra) ou só visual?
