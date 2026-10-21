@@ -19,7 +19,7 @@ const BAN_FOREVER = "876000h";
 export async function setMemberActive(memberId: string, active: boolean): Promise<SetMemberActiveResult> {
   const membership = await requireActiveMembership("/elenco");
   if (!membership.isOwner) {
-    return { success: false, message: "Só o dono da pelada desativa jogadores." };
+    return { success: false, message: "Só o administrador da pelada desativa jogadores." };
   }
   if (!z.uuid().safeParse(memberId).success) {
     return { success: false, message: "Jogador inválido." };

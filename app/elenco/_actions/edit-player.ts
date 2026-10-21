@@ -23,7 +23,7 @@ const ROLE_LOCKED =
 export async function editPlayer(memberId: string, input: EditPlayerInput): Promise<EditPlayerResult> {
   const membership = await requireActiveMembership("/elenco");
   if (!membership.isOwner) {
-    return { success: false, message: "Só o dono da pelada edita o cadastro dos jogadores." };
+    return { success: false, message: "Só o administrador da pelada edita o cadastro dos jogadores." };
   }
   if (!z.uuid().safeParse(memberId).success) {
     return { success: false, message: "Jogador inválido." };

@@ -19,10 +19,10 @@ export async function setMemberRole(
 ): Promise<SetMemberRoleResult> {
   const membership = await requireActiveMembership("/elenco");
   if (!membership.isOwner) {
-    return { success: false, message: "Só o dono da pelada muda quem é organizador." };
+    return { success: false, message: "Só o administrador da pelada muda quem é organizador." };
   }
   if (memberId === membership.memberId) {
-    return { success: false, message: "O dono da pelada é sempre organizador." };
+    return { success: false, message: "O administrador da pelada é sempre organizador." };
   }
 
   const validation = inputSchema.safeParse({ memberId, role });

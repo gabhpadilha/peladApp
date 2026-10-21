@@ -48,7 +48,7 @@ export function OwnProfileCard() {
         </h2>
         <p className="text-sm text-muted-foreground">
           Preencha só o que quer trocar; o que ficar em branco continua igual. Posição e usuário de login, só com o
-          dono da pelada.
+          administrador da pelada.
         </p>
       </div>
       <form onSubmit={form.handleSubmit(handleSubmit)} noValidate>

@@ -17,9 +17,9 @@ export type ShopItem = {
   state: ShopItemState;
 };
 
-/** Uma vitrine da Loja (cartas de evento ou de lançamento). */
+/** Uma vitrine da Loja (cartas de evento ou cartas premium, as fixas). */
 export type ShopSection = {
-  key: "event" | "launch";
+  key: "event" | "premium";
   title: string;
   /** Ex.: "Até 31 de out. · faltam 10 dias". */
   event: CurrentCardEvent | null;
@@ -81,13 +81,13 @@ export async function getShop(): Promise<Shop | null> {
   const forSale = CARD_SKINS.filter((skin) => !owned.has(skin.key) && isCardSkinOnSale(skin, today));
   const event = getCurrentCardEvent(today);
   const eventSkins = forSale.filter((skin) => "event" in skin);
-  const launchSkins = forSale.filter((skin) => !("event" in skin));
+  const premiumSkins = forSale.filter((skin) => !("event" in skin));
 
   const sections: ShopSection[] = [
     ...(eventSkins.length > 0
       ? [{ key: "event" as const, title: `Evento · ${CARD_THEME_LABELS[event.theme]}`, event, items: eventSkins.map(toItem) }]
       : []),
-    ...(launchSkins.length > 0 ? [{ key: "launch" as const, title: "Lançamento", event: null, items: launchSkins.map(toItem) }] : []),
+    ...(premiumSkins.length > 0 ? [{ key: "premium" as const, title: "Cartas premium", event: null, items: premiumSkins.map(toItem) }] : []),
   ];
 
   return {

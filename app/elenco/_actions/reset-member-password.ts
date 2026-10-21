@@ -18,7 +18,7 @@ export type ResetMemberPasswordResult =
 export async function resetMemberPassword(memberId: string): Promise<ResetMemberPasswordResult> {
   const membership = await requireActiveMembership("/elenco");
   if (!membership.isOwner) {
-    return { success: false, message: "Só o dono da pelada redefine senhas." };
+    return { success: false, message: "Só o administrador da pelada redefine senhas." };
   }
   if (!z.uuid().safeParse(memberId).success) {
     return { success: false, message: "Jogador inválido." };

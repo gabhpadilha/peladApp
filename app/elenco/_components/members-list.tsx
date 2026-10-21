@@ -36,7 +36,7 @@ export function MembersList({ members, inactiveMembers, currentMemberId, canMana
                 </span>
                 <span className="truncate text-xs text-muted-foreground">
                   {POSITION_LABELS[member.position]}
-                  {member.isOwner ? " · Dono da pelada" : isOrganizer && " · Organizador"}
+                  {member.isOwner ? " · Administrador" : isOrganizer && " · Organizador"}
                   {canManage && member.username && (
                     <span className="font-mono"> · @{member.username}</span>
                   )}
