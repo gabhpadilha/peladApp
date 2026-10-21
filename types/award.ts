@@ -31,8 +31,8 @@ export function awardOrder(kind: AwardKind): number {
   return index === -1 ? AWARD_KINDS.length : index;
 }
 
-/** Prêmios por voto, na ordem da votação (só os que não dá para tirar das notas). */
-export const VOTE_AWARD_KINDS = ["gol", "fominha", "bola_murcha"] as const;
+/** Prêmios por voto, na ordem da votação (só os que não dá para tirar das notas; ordem pedida pelo dono do app). */
+export const VOTE_AWARD_KINDS = ["gol", "bola_murcha", "fominha"] as const;
 export type VoteAwardKind = (typeof VOTE_AWARD_KINDS)[number];
 
 /** Notas mínimas recebidas na rodada para entrar no Time da Semana e nos prêmios das notas (igual ao banco). */
