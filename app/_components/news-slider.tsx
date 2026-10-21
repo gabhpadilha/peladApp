@@ -113,7 +113,8 @@ const TEAM_OF_THE_WEEK_CHIPS: readonly Chip[] = [
 
 /** Como ganhar o Jogador do Mês (espelha `compute_match_awards`). */
 const PLAYER_OF_THE_MONTH_CHIPS: readonly Chip[] = [
-  { label: "Linha e gol", value: "maior média" },
+  { label: "Linha", value: "4 maiores médias" },
+  { label: "Gol", value: "maior média" },
   { label: "Mínimo", value: `${PLAYER_OF_THE_MONTH_MIN_RATINGS} notas no mês` },
   { label: "Quando", value: "última quinta" },
   { label: "Bônus", value: "+1 em tudo" },
@@ -166,7 +167,7 @@ export function NewsSlider({ event, today, shopSale, player, progress, balance }
           eyebrow="Novidade · sem votação"
           title="Jogador do Mês"
           meta={`Próxima carta: ${formatShortDate(getNextPlayerOfTheMonthDate(today))}, ao fechar a rodada`}
-          text="Na última quinta do mês, a maior média de notas do mês na linha e no gol leva a carta mais rara da pelada."
+          text="Na última quinta do mês, as 4 maiores médias de notas do mês na linha e a maior do gol levam a carta mais rara da pelada."
           visual={
             <div className="flex w-full items-center gap-5 pr-3">
               <div className="w-28 shrink-0">

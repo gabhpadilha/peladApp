@@ -115,7 +115,7 @@ export const AWARD_LABELS: Record<
   jogador_do_mes: {
     title: "Jogador do Mês",
     question: "",
-    hint: `A maior nota média do mês na linha e no gol (com pelo menos ${PLAYER_OF_THE_MONTH_MIN_RATINGS} notas), ao fechar a rodada da última quinta. Sem voto.`,
+    hint: `As 4 maiores notas médias do mês na linha e a maior do gol (com pelo menos ${PLAYER_OF_THE_MONTH_MIN_RATINGS} notas), ao fechar a rodada da última quinta. Sem voto.`,
     eligibility: "all",
   },
 };
