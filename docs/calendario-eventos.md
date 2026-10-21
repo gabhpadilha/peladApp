@@ -19,19 +19,21 @@ Regras de visual que valem para todo evento: sem `filter` e sem `mix-blend-mode`
 | Período | Evento | Status | Cartas na Loja |
 |---|---|---|---|
 | 01/10 – 31/10/2026 | **Halloween** | 🟢 no ar | Lobisomem e Vampiro (nível 3, 200 PC) |
-| Novembro/2026 | _a definir_ | 💡 | — |
+| 01/11 – 30/11/2026 | **Brasileirão + Black Friday** | 💡 referências enviadas (2026-10-21) | Cores de clube da Série A (a definir quantas) |
 | Dezembro/2026 | _a definir_ | 💡 | — |
 | Janeiro/2027 | _a definir_ | 💡 | — |
 | Fevereiro/2027 | _a definir_ | 💡 | — |
 
-Hoje, fora de outubro, não há tema: as cartas especiais voltam ao visual clássico e o slide mostra "Cartas especiais". **Novembro começa sem evento** se nada for decidido até lá.
+Hoje, fora de outubro, não há tema: as cartas especiais voltam ao visual clássico e o slide mostra "Cartas especiais". **Novembro precisa estar pronto até 01/11** para não começar sem evento.
 
 ## Ideias de eventos (para discutir)
 
 Cada ideia pode ter: tema das cartas especiais, 1 ou 2 cartas na Loja e, opcionalmente, uma **regra especial** do mês (o que deixa o evento mais do que só visual).
 
-- 💡 **Novembro: "Black Friday da Pelada".** Regra especial: desconto na Loja por alguns dias (ex.: 30% nas personalizações premium). Tema das cartas em preto e dourado-neon, etiqueta de preço riscado como marca d'água.
-- 💡 **Novembro (alternativa): "Reta final do Brasileirão".** Clima de decisão de campeonato: troféu, faixa de campeão, confete. Cartas da Loja tipo "Camisa 10" e "Capitão".
+- 💡 **Novembro: Brasileirão + Black Friday** (escolhido pelo dono do app em 2026-10-21; referências visuais enviadas, aguardando aprovação):
+  - **Loja, personalizações de clube:** uma por clube da Série A, **nas cores e no padrão da camisa, sem escudo nem nome oficial** (escudos e nomes são marcas registradas). Referências feitas: Rubro-negra (listras horizontais vermelho e preto), Alviverde (verde fechado com fios brancos), Alvinegra (listras verticais preto e branco, metal prata), Tricolor com faixa (branca com faixa vermelha e preta), Grená e verde (listras com fio branco) e Celeste (azul-real com estrelas). Técnica: a carta premium ganha uma camada `--skin-pattern` (degradês em CSS) por baixo do vidro. A lista dos 20 clubes da Série A 2026 precisa ser conferida antes.
+  - **Cartas especiais, tema "Brasileirão":** verde, amarelo e azul da bandeira, taça de marca d'água. Nomes do mês: Melhor Jogador → "Craque do Brasileirão" (verde e ouro), Gol da Rodada → "Gol de Placa" (azul e amarelo), Time da Semana → "Seleção da Rodada" (amarelo-canarinho e verde), Bola Murcha → "Rebaixado (Z4)" (vermelho de zona de rebaixamento). Os outros prêmios a definir (ideias: Drible → "Pedalada", Atacante → "Artilheiro", Defensor → "Muralha", Goleiro → "Paredão", Fominha → "Fominha da arquibancada").
+  - **Black Friday:** desconto (ex.: 30%) nas personalizações premium por um período, com faixa preta "Black Friday · -30%" na Loja e preço riscado (250 → 175).
 - 💡 **Dezembro: "Natal e Retrospectiva".** Tema natalino discreto (vermelho e verde-pinheiro, neve leve). Regra especial: **Time do Ano** da pelada (as maiores médias de 2026, como o TOTY da EA FC), carta especial única distribuída no fim do ano, e uma tela de "Retrospectiva" (jogos, melhor rodada, prêmios de cada um).
 - 💡 **Janeiro: "Verão".** Praia, pôr do sol, futevôlei. Cartas da Loja em tons de areia e mar.
 - 💡 **Fevereiro: "Carnaval".** Purpurina, serpentina, máscara de carnaval como marca d'água. Prêmio zoeira do mês pode ganhar fantasia.
@@ -56,7 +58,7 @@ Cada ideia pode ter: tema das cartas especiais, 1 ou 2 cartas na Loja e, opciona
 
 ## Perguntas em aberto
 
-- Qual evento entra em **novembro**? (a decidir antes de 01/11)
+- Novembro: quantos clubes (todos os 20 da Série A?), nível e preço das personalizações de clube, período e tamanho do desconto da Black Friday (o mês todo ou só a última semana?) e se o desconto vale também para as cartas de clube.
 - Todo mês terá evento, ou só nos meses com data forte (Natal, Carnaval, São João)?
 - Cada evento sempre traz 2 cartas na Loja? Mesmo nível e preço do Halloween (nível 3, 200 PC) ou sobe com o tempo?
 - Vale ter regras especiais por evento (desconto, Time do Ano, prêmio extra) ou só visual?
