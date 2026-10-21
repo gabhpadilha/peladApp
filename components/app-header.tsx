@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { LogOutIcon, ShuffleIcon, StoreIcon, UsersIcon } from "lucide-react";
 import { signOut } from "@/app/_actions/sign-out";
-import { OvrBadge } from "@/components/ovr-badge";
+import { LevelBadge } from "@/components/player-card";
 import type { Player } from "@/types/player";
 
 type AppHeaderProps = {
-  /** Jogador logado (apelido + OVR). Omitido onde ainda não há carta para mostrar. */
+  /** Jogador logado (apelido + nível, no estilo da carta). Omitido onde ainda não há carta para mostrar. */
   currentPlayer?: Player;
 };
 
@@ -35,11 +35,11 @@ export function AppHeader({ currentPlayer }: AppHeaderProps) {
             // Perfil: Estatísticas, com aba para a Coleção (/colecao).
             <Link
               href={`/jogadores/${currentPlayer.id}`}
-              aria-label={`Meu perfil: ${currentPlayer.nickname}`}
+              aria-label={`Meu perfil: ${currentPlayer.nickname}, nível ${currentPlayer.level ?? 0}`}
               className="flex items-center gap-2 rounded-lg py-1 pr-1 pl-2.5 text-sm font-medium transition-colors hover:bg-muted"
             >
               <span className="hidden sm:inline">{currentPlayer.nickname}</span>
-              <OvrBadge ovr={currentPlayer.ovr} />
+              <LevelBadge player={currentPlayer} />
             </Link>
           )}
           <form action={signOut}>

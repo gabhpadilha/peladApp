@@ -521,6 +521,38 @@ function LevelSeal({ level, rimClass, innerClass }: { level: number; rimClass: s
   );
 }
 
+/**
+ * Nível do jogador no cabeçalho (aprovado pelo dono do app em 2026-10-21): o
+ * mesmo selo hexagonal da ponta da carta, no estilo da carta em uso. Carta
+ * padrão: borda na cor da faixa e fundo escuro; carta da Loja: borda no metal
+ * dela e fundo na cor da face.
+ */
+export function LevelBadge({ player }: { player: Player }) {
+  const level = player.level ?? 0;
+  const skin = player.cardSkin ?? null;
+  const rim = skin ? GOLD_FILL : DESIGNS[getCardTier(player.ovr ?? 0)].frame;
+  const face = skin
+    ? "[background:radial-gradient(circle_at_50%_30%,var(--skin-mid),var(--skin-deep))] text-[var(--skin-text)]"
+    : "bg-black/75 text-white";
+
+  return (
+    <span
+      title={`Nível ${level}`}
+      className={cn("relative inline-block aspect-[1/1.15] w-8 shrink-0", HEXAGON, rim, skin && SKIN_CLASSES[skin])}
+    >
+      <span
+        className={cn(
+          "absolute inset-[2px] flex items-center justify-center font-display text-sm leading-none font-bold tabular-nums",
+          HEXAGON,
+          face,
+        )}
+      >
+        {level}
+      </span>
+    </span>
+  );
+}
+
 /** Classe de cores de cada carta da Loja (tokens em `app/globals.css`); literais para o Tailwind. */
 const SKIN_CLASSES: Record<CardSkinKey, string> = {
   esmeralda: "card-skin-esmeralda",
