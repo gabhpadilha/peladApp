@@ -37,14 +37,19 @@ export function NewsCarousel({ label, slides }: NewsCarouselProps) {
     const track = trackRef.current;
     if (!track) return;
     const next = (index + slides.length) % slides.length;
-    track.scrollTo({ left: next * track.clientWidth, behavior: "smooth" });
+    // Pela posição do slide (e não pela largura da faixa), por causa do vão entre eles.
+    const target = track.children[next] as HTMLElement | undefined;
+    const first = track.children[0] as HTMLElement | undefined;
+    if (!target || !first) return;
+    track.scrollTo({ left: target.offsetLeft - first.offsetLeft, behavior: "smooth" });
   }
 
   return (
     <section aria-roledescription="carrossel" aria-label={label} className="flex flex-col gap-3">
       <ul
         ref={trackRef}
-        className="flex snap-x snap-mandatory overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        // Vão entre os slides: ao arrastar, um não encosta no outro (pedido do dono do app).
+        className="flex gap-4 snap-x snap-mandatory overflow-x-auto overscroll-x-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {slides.map((slide, index) => (
           <li

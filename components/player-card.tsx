@@ -26,7 +26,7 @@ const MONTH_STRIPES_ID = "player-card-month-stripes";
 /**
  * Formato da carta estilo Ultimate Team (cantos de cima recortados, ponta embaixo),
  * em unidades relativas para escalar com qualquer tamanho, e o degradê/listras das
- * pontas que vazam do Jogador do Mês. Renderizado uma única vez no layout raiz.
+ * pontas que vazam do Time do Mês. Renderizado uma única vez no layout raiz.
  */
 export function PlayerCardDefs() {
   return (
@@ -46,7 +46,7 @@ export function PlayerCardDefs() {
   );
 }
 
-/** Visual da carta: faixa da carta base ou prêmio (com tema sazonal; o Jogador do Mês não veste tema). */
+/** Visual da carta: faixa da carta base ou prêmio (com tema sazonal; o Time do Mês não veste tema). */
 type ThemedAwardKind = Exclude<AwardKind, "jogador_do_mes">;
 type AwardDesign = AwardKind | `${ThemedAwardKind}-halloween` | `${ThemedAwardKind}-brasileirao`;
 type CardDesign = CardTier | AwardDesign;
@@ -242,7 +242,7 @@ const AWARD_FOOTER: Record<AwardKind, string> = {
   fominha: "Fominha",
   bola_murcha: "Bola murcha",
   time_da_semana: "Time da semana",
-  jogador_do_mes: "Jogador do mês",
+  jogador_do_mes: "Time do mês",
 };
 
 /** Tamanho da carta (sem o recorte), usado também pela carta da Loja, que tem enfeites por fora. */
@@ -323,7 +323,7 @@ function getDesign(player: Player, award: PlayerCardAward | undefined): CardDesi
   return `${award.kind}-${award.theme}`;
 }
 
-/** Pontas roxas do Jogador do Mês: a grande nasce na face e fura o canto; a menor, mais baixa. */
+/** Pontas roxas do Time do Mês: a grande nasce na face e fura o canto; a menor, mais baixa. */
 const MONTH_SHARDS = [
   { points: "80,17 104,-7 98,10 91,21", edge: "80,17 104,-7 98,10", edgeWidth: 0.45 },
   { points: "90,27 109,19 100,30", edge: "90,27 109,19 100,30", edgeWidth: 0.4 },
@@ -341,7 +341,7 @@ function OverflowBolt({ d }: { d: string }) {
 }
 
 /**
- * A arte que vaza da carta do Jogador do Mês (aprovada pelo dono do app, como
+ * A arte que vaza da carta do Time do Mês (aprovada pelo dono do app, como
  * no desenho dele): duas pontas roxas listradas furando o canto de cima à
  * direita e raios saindo pela lateral. Fica por cima da carta, fora do recorte
  * do escudo. Coordenadas no espaço da carta (100 × 148); degradê e listras

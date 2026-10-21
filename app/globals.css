@@ -304,7 +304,7 @@
   --award-time-da-semana-from: oklch(0.32 0.06 260);
   --award-time-da-semana-to: oklch(0.12 0.03 260);
   --award-time-da-semana-foreground: oklch(0.95 0.02 250);
-  /* Jogador do Mês: moldura dourada em degradê sobre a arte roxa do dono do app
+  /* Time do Mês: moldura dourada em degradê sobre a arte roxa do dono do app
      (public/cartas/jogador-do-mes-fundo.webp); não veste tema sazonal. */
   --award-jogador-do-mes-frame: #d9b866;
   --award-jogador-do-mes-frame-light: #f6e6a8;

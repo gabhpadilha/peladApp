@@ -8,7 +8,7 @@ function lastThursdayOfMonth(year: number, monthIndex: number): Date {
 }
 
 /**
- * Dia (`AAAA-MM-DD`) em que sai a próxima carta Jogador do Mês: a última
+ * Dia (`AAAA-MM-DD`) em que sai a próxima carta Time do Mês: a última
  * quinta-feira do mês de `today` ou, se ela já passou, a do mês seguinte.
  * Espelha a regra de `compute_match_awards` (a carta sai ao fechar a rodada desse dia).
  */

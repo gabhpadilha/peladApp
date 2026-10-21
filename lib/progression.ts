@@ -34,7 +34,7 @@ export const COIN_RULES = [
   { label: "Nota 7+ / 8+ / 9+", value: `+${COINS_SCORE_BONUS[70]} / +${COINS_SCORE_BONUS[80]} / +${COINS_SCORE_BONUS[90]}` },
   { label: "OVR subiu na rodada", value: `+${COINS_OVR_UP}` },
   { label: "Melhor Jogador", value: `+${COINS_BEST_PLAYER}` },
-  { label: "Jogador do Mês", value: `+${COINS_BEST_PLAYER}` },
+  { label: "Time do Mês", value: `+${COINS_BEST_PLAYER}` },
   { label: "Outros prêmios positivos", value: `+${COINS_OTHER_POSITIVE_AWARD}` },
   { label: "Subir de nível", value: `+${COINS_PER_LEVEL}` },
 ] as const;
@@ -44,7 +44,7 @@ export const XP_RULES = [
   { label: "Nota 8+ / 9+", value: `+${XP_HIGH_SCORE_BONUS[80]} / +${XP_HIGH_SCORE_BONUS[90]} XP` },
   { label: "Enviar as suas notas", value: `+${XP_SUBMITTED} XP` },
   { label: "Melhor Jogador", value: `+${XP_BEST_PLAYER} XP` },
-  { label: "Jogador do Mês", value: `+${XP_BEST_PLAYER} XP` },
+  { label: "Time do Mês", value: `+${XP_BEST_PLAYER} XP` },
   { label: "Outros prêmios positivos", value: `+${XP_OTHER_POSITIVE_AWARD} XP` },
 ] as const;
 
@@ -137,7 +137,7 @@ export function computeProgression({ playerId, matches, evaluations, awards, sub
         coins += isBestPlayer ? COINS_BEST_PLAYER : COINS_OTHER_POSITIVE_AWARD;
       }
     }
-    // Jogador do Mês: vale o mesmo que o Melhor Jogador, mesmo sem ter jogado a última quinta.
+    // Time do Mês: vale o mesmo que o Melhor Jogador, mesmo sem ter jogado a última quinta.
     for (const award of awards) {
       if (award.matchId !== match.id || award.memberId !== playerId || award.kind !== "jogador_do_mes") continue;
       xp += XP_BEST_PLAYER;

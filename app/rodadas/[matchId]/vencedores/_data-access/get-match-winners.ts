@@ -6,7 +6,7 @@ import type { Award, AwardKind } from "@/types/award";
 import type { Match } from "@/types/match";
 
 /**
- * Ordem da revelação: a zoeira abre, o Melhor Jogador e o Jogador do Mês (só na
+ * Ordem da revelação: a zoeira abre, o Melhor Jogador e o Time do Mês (só na
  * rodada da última quinta) fecham; o Time da Semana vem por último, em campo.
  */
 const REVEAL_ORDER: readonly AwardKind[] = [

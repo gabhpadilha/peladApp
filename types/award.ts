@@ -25,7 +25,7 @@ export type AwardKind = (typeof AWARD_KINDS)[number];
 /** Prêmios que saem das notas, sem votação. */
 type ScoreAwardKind = "time_da_semana" | "jogador_do_mes";
 
-/** Prêmios por voto, na ordem da votação. O Time da Semana e o Jogador do Mês saem das notas. */
+/** Prêmios por voto, na ordem da votação. O Time da Semana e o Time do Mês saem das notas. */
 export const VOTE_AWARD_KINDS = AWARD_KINDS.filter(
   (kind): kind is Exclude<AwardKind, ScoreAwardKind> => kind !== "time_da_semana" && kind !== "jogador_do_mes",
 );
@@ -34,11 +34,11 @@ export type VoteAwardKind = (typeof VOTE_AWARD_KINDS)[number];
 /** Notas mínimas recebidas na rodada para entrar no Time da Semana (igual ao banco). */
 export const TEAM_OF_THE_WEEK_MIN_RATINGS = 3;
 
-/** Notas mínimas recebidas no mês para concorrer ao Jogador do Mês (igual ao banco). */
+/** Notas mínimas recebidas no mês para concorrer ao Time do Mês (igual ao banco). */
 export const PLAYER_OF_THE_MONTH_MIN_RATINGS = 5;
 
 /**
- * O Jogador do Mês tem visual próprio (arte do dono do app) e não veste o tema
+ * O Time do Mês tem visual próprio (arte do dono do app) e não veste o tema
  * sazonal; os outros prêmios vestem o tema do mês.
  */
 export function hasSeasonalTheme(kind: AwardKind): boolean {
@@ -113,7 +113,7 @@ export const AWARD_LABELS: Record<
     eligibility: "all",
   },
   jogador_do_mes: {
-    title: "Jogador do Mês",
+    title: "Time do Mês",
     question: "",
     hint: `As 4 maiores notas médias do mês na linha e a maior do gol (com pelo menos ${PLAYER_OF_THE_MONTH_MIN_RATINGS} notas), ao fechar a rodada da última quinta. Sem voto.`,
     eligibility: "all",
@@ -141,9 +141,9 @@ export type Award = {
   id: string;
   kind: AwardKind;
   theme: CardThemeKey;
-  /** Votos recebidos; no Time da Semana, quantas notas recebeu na rodada (no Jogador do Mês, no mês). */
+  /** Votos recebidos; no Time da Semana, quantas notas recebeu na rodada (no Time do Mês, no mês). */
   votes: number;
-  /** Só no Time da Semana e no Jogador do Mês: média (1–10) das notas recebidas na rodada ou no mês. */
+  /** Só no Time da Semana e no Time do Mês: média (1–10) das notas recebidas na rodada ou no mês. */
   score: number | null;
   matchId: string;
   round: number;
@@ -160,13 +160,13 @@ export function formatRoundScore(score: number): string {
   return scoreFormatter.format(score);
 }
 
-/** "6 votos" ou, no Time da Semana, "nota 8,6" (no Jogador do Mês, "média 8,6 no mês"). */
+/** "6 votos" ou, no Time da Semana, "nota 8,6" (no Time do Mês, "média 8,6 no mês"). */
 export function formatAwardResult(award: Pick<Award, "kind" | "votes" | "score">): string {
   if (award.kind === "time_da_semana") {
     return award.score === null ? "Time da Semana" : `nota ${formatRoundScore(award.score)}`;
   }
   if (award.kind === "jogador_do_mes") {
-    return award.score === null ? "Jogador do Mês" : `média ${formatRoundScore(award.score)} no mês`;
+    return award.score === null ? "Time do Mês" : `média ${formatRoundScore(award.score)} no mês`;
   }
   return `${award.votes} ${award.votes === 1 ? "voto" : "votos"}`;
 }
