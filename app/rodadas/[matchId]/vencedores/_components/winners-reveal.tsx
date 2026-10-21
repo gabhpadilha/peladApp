@@ -9,6 +9,7 @@ import type { MatchWinners } from "../_data-access/get-match-winners";
 import { markAwardsSeen } from "../_actions/mark-awards-seen";
 import { RevealAward } from "./reveal-award";
 import { RevealPack } from "./reveal-pack";
+import { RevealRewards } from "./reveal-rewards";
 import { RevealSummary } from "./reveal-summary";
 import { RevealTeam } from "./reveal-team";
 import { PACK_THEMES } from "./reveal-theme";
@@ -18,15 +19,15 @@ const OPENING_MS = 1600;
 
 type Stage = { type: "pack" } | { type: "opening" } | { type: "step"; index: number } | { type: "summary" };
 
-/** Um passo da revelação: uma carta ou o Time da Semana em campo. */
-type Step = { type: "award"; award: Award } | { type: "team" };
+/** Um passo da revelação: uma carta, o Time da Semana em campo ou o que você ganhou. */
+type Step = { type: "award"; award: Award } | { type: "team" } | { type: "rewards" };
 
 /**
  * Ordem pelo peso do prêmio (pedido do dono do app em 2026-10-21): os prêmios
- * individuais (zoeira primeiro), o Time da Semana, as cartas do Time do Mês e,
- * por último, o Melhor Jogador.
+ * individuais (zoeira primeiro), o Time da Semana, as cartas do Time do Mês, o
+ * Melhor Jogador e, fechando o pacote, o XP e as PeladaCoins de quem abriu.
  */
-function buildSteps(revealed: Award[], hasTeam: boolean): Step[] {
+function buildSteps(revealed: Award[], hasTeam: boolean, hasRewards: boolean): Step[] {
   const toSteps = (awards: Award[]): Step[] => awards.map((award) => ({ type: "award", award }));
   const others = revealed.filter((award) => award.kind !== "jogador_do_mes" && award.kind !== "craque");
   return [
@@ -34,6 +35,7 @@ function buildSteps(revealed: Award[], hasTeam: boolean): Step[] {
     ...(hasTeam ? [{ type: "team" } as const] : []),
     ...toSteps(revealed.filter((award) => award.kind === "jogador_do_mes")),
     ...toSteps(revealed.filter((award) => award.kind === "craque")),
+    ...(hasRewards ? [{ type: "rewards" } as const] : []),
   ];
 }
 
@@ -43,6 +45,8 @@ function nextLabel(steps: Step[], index: number): string {
   const next = steps[index + 1];
   if (!next) return "Ver todos os vencedores";
   if (next.type === "team") return "E o Time da Semana…";
+  if (next.type === "rewards") return "Ver o que você ganhou";
+  if (current.type === "rewards") return "Ver todos os vencedores";
   const isNewKind = current.type === "team" || current.award.kind !== next.award.kind;
   if (isNewKind && (next.award.kind === "jogador_do_mes" || next.award.kind === "craque")) {
     return `E o ${AWARD_LABELS[next.award.kind].title}…`;
@@ -63,11 +67,11 @@ function describeContents(cardCount: number, hasTeam: boolean): string {
 
 /** Abertura do pacote da rodada: um passo por vez (`buildSteps`), depois o resumo. */
 export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) {
-  const { match, theme, revealed, team } = winners;
+  const { match, theme, revealed, team, rewards } = winners;
   const [stage, setStage] = useState<Stage>({ type: "pack" });
   const [, startTransition] = useTransition();
   const openingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const steps = buildSteps(revealed, team.length > 0);
+  const steps = buildSteps(revealed, team.length > 0, Boolean(rewards));
 
   useEffect(() => {
     return () => {
@@ -126,7 +130,11 @@ export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) 
         {isPlaying ? (
           <button
             type="button"
-            onClick={() => setStage({ type: "summary" })}
+            // Pular leva ao "Você ganhou" (se houver), para ninguém perder o que ganhou.
+            onClick={() => {
+              const rewardsIndex = steps.findIndex((candidate) => candidate.type === "rewards");
+              goToStep(rewardsIndex >= 0 && current?.type !== "rewards" ? rewardsIndex : steps.length);
+            }}
             className="h-11 px-3 text-sm text-muted-foreground hover:text-foreground"
           >
             Pular
@@ -172,6 +180,10 @@ export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) 
 
       {step !== null && current?.type === "team" && (
         <RevealTeam team={team} doneLabel={nextLabel(steps, step)} onDone={() => goToStep(step + 1)} />
+      )}
+
+      {step !== null && current?.type === "rewards" && rewards && (
+        <RevealRewards round={match.round} rewards={rewards} onDone={() => goToStep(step + 1)} />
       )}
 
       {stage.type === "summary" && (

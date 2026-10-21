@@ -683,6 +683,10 @@
  * Usadas por classes `animate-[reveal-…]`; `--reveal-dx/--reveal-dy` dão a
  * direção de cada faísca.
  */
+/* Barra de nível da tela "Você ganhou": anda de --fill-from até a largura final. */
+@keyframes reveal-fill {
+  from { width: var(--fill-from); }
+}
 @keyframes reveal-float {
   0%, 100% { transform: translateY(0) rotate(-1.5deg); }
   50% { transform: translateY(-10px) rotate(1.5deg); }

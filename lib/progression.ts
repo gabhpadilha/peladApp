@@ -1,6 +1,6 @@
 import { averageEvaluations, computeOvr } from "@/lib/ovr";
 import { getClosedMatches } from "@/lib/players";
-import type { AwardKind } from "@/types/award";
+import { AWARD_LABELS, type AwardKind } from "@/types/award";
 import type { Evaluation, Match } from "@/types/match";
 
 /*
@@ -104,9 +104,20 @@ export function submissionKey(matchId: string, memberId: string): string {
   return `${matchId}:${memberId}`;
 }
 
-export function computeProgression({ playerId, matches, evaluations, awards, submissions }: ProgressionInput): Progression {
-  let xp = 0;
-  let coins = 0;
+/** Uma linha do que a rodada deu ao jogador (tela "Você ganhou" depois do pacote). */
+export type RoundGain = {
+  key: string;
+  label: string;
+  /** Ex.: "7,8 × 10" na nota, "74 → 75" no OVR. */
+  detail?: string;
+  xp: number;
+  coins: number;
+};
+
+const scoreFormatter = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+
+/** Rodada a rodada (só as fechadas), na ordem: o que cada uma deu ao jogador. */
+function* walkRounds({ playerId, matches, evaluations, awards, submissions }: ProgressionInput) {
   let previousOvr: number | null = null;
   const receivedSoFar: Evaluation[] = [];
 
@@ -114,38 +125,99 @@ export function computeProgression({ playerId, matches, evaluations, awards, sub
     const received = evaluations.filter((evaluation) => evaluation.matchId === match.id && evaluation.playerId === playerId);
     receivedSoFar.push(...received);
     const ovr = computeOvr(receivedSoFar);
+    const gains: RoundGain[] = [];
 
     if (match.presentPlayerIds.includes(playerId)) {
-      coins += COINS_PLAYED;
-
       const score = averageEvaluations(received);
       if (score !== null) {
-        xp += score + pickBonus(score, XP_HIGH_SCORE_BONUS);
-        coins += pickBonus(score, COINS_SCORE_BONUS);
+        const xpBonus = pickBonus(score, XP_HIGH_SCORE_BONUS);
+        const bonusLabel = score >= 90 ? " + bônus nota 9+" : score >= 80 ? " + bônus nota 8+" : "";
+        gains.push({
+          key: "score",
+          label: "Nota da rodada",
+          detail: `${scoreFormatter.format(score / 10)} × 10${bonusLabel}`,
+          xp: score + xpBonus,
+          coins: pickBonus(score, COINS_SCORE_BONUS),
+        });
       }
-      if (submissions.has(submissionKey(match.id, playerId))) {
-        xp += XP_SUBMITTED;
-        coins += COINS_SUBMITTED;
-      }
-      if (previousOvr !== null && ovr !== null && ovr > previousOvr) coins += COINS_OVR_UP;
-
       for (const award of awards) {
         if (award.matchId !== match.id || award.memberId !== playerId || NON_POSITIVE_AWARDS.has(award.kind)) continue;
         if (award.kind === "jogador_do_mes") continue;
         const isBestPlayer = award.kind === "craque";
-        xp += isBestPlayer ? XP_BEST_PLAYER : XP_OTHER_POSITIVE_AWARD;
-        coins += isBestPlayer ? COINS_BEST_PLAYER : COINS_OTHER_POSITIVE_AWARD;
+        gains.push({
+          key: `award-${award.kind}`,
+          label: `Prêmio: ${AWARD_LABELS[award.kind].title}`,
+          xp: isBestPlayer ? XP_BEST_PLAYER : XP_OTHER_POSITIVE_AWARD,
+          coins: isBestPlayer ? COINS_BEST_PLAYER : COINS_OTHER_POSITIVE_AWARD,
+        });
+      }
+      if (submissions.has(submissionKey(match.id, playerId))) {
+        gains.push({ key: "submitted", label: "Enviou as suas notas", xp: XP_SUBMITTED, coins: COINS_SUBMITTED });
+      }
+      gains.push({ key: "played", label: "Jogou a rodada", xp: 0, coins: COINS_PLAYED });
+      if (previousOvr !== null && ovr !== null && ovr > previousOvr) {
+        gains.push({
+          key: "ovr",
+          label: "OVR subiu",
+          detail: `${Math.round(previousOvr)} → ${Math.round(ovr)}`,
+          xp: 0,
+          coins: COINS_OVR_UP,
+        });
       }
     }
     // Time do Mês: vale o mesmo que o Melhor Jogador, mesmo sem ter jogado a última quinta.
     for (const award of awards) {
       if (award.matchId !== match.id || award.memberId !== playerId || award.kind !== "jogador_do_mes") continue;
-      xp += XP_BEST_PLAYER;
-      coins += COINS_BEST_PLAYER;
+      gains.unshift({ key: "award-jogador_do_mes", label: "Prêmio: Time do Mês", xp: XP_BEST_PLAYER, coins: COINS_BEST_PLAYER });
     }
     if (ovr !== null) previousOvr = ovr;
+    yield { match, gains };
+  }
+}
+
+const sumGains = (gains: readonly RoundGain[]) => ({
+  xp: gains.reduce((total, gain) => total + gain.xp, 0),
+  coins: gains.reduce((total, gain) => total + gain.coins, 0),
+});
+
+export function computeProgression(input: ProgressionInput): Progression {
+  let xp = 0;
+  let coins = 0;
+  for (const { gains } of walkRounds(input)) {
+    const round = sumGains(gains);
+    xp += round.xp;
+    coins += round.coins;
   }
 
   const progress = getLevelProgress(xp);
   return { ...progress, xp, coinsEarned: WELCOME_BONUS_COINS + coins + progress.level * COINS_PER_LEVEL };
+}
+
+export type RoundRewards = {
+  gains: RoundGain[];
+  /** XP e PeladaCoins da rodada (as moedas já com o bônus de nível). */
+  xp: number;
+  coins: number;
+  before: LevelProgress;
+  after: LevelProgress;
+  /** PeladaCoins do bônus por nível que a rodada fez subir. */
+  levelUpCoins: number;
+};
+
+/** O que uma rodada fechada deu ao jogador; `null` se ela não deu nada (ou não está fechada). */
+export function computeRoundRewards(input: ProgressionInput & { matchId: string }): RoundRewards | null {
+  let xpBefore = 0;
+  for (const { match, gains } of walkRounds(input)) {
+    const round = sumGains(gains);
+    if (match.id !== input.matchId) {
+      xpBefore += round.xp;
+      continue;
+    }
+    if (gains.length === 0) return null;
+    const before = getLevelProgress(xpBefore);
+    const after = getLevelProgress(xpBefore + round.xp);
+    const levelUpCoins = (after.level - before.level) * COINS_PER_LEVEL;
+    return { gains, xp: round.xp, coins: round.coins + levelUpCoins, before, after, levelUpCoins };
+  }
+  return null;
 }

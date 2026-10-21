@@ -1,7 +1,9 @@
 import "server-only";
 import { z } from "zod";
+import { getOwnPurchases } from "@/app/loja/_data-access/get-shop";
 import { getLeague } from "@/lib/league";
 import type { CardThemeKey } from "@/lib/card-themes";
+import type { RoundRewards } from "@/lib/progression";
 import type { Award, AwardKind } from "@/types/award";
 import type { Match } from "@/types/match";
 
@@ -31,6 +33,8 @@ export type MatchWinners = {
   revealed: Award[];
   /** Time da Semana (pode passar de 5 com empate). */
   team: Award[];
+  /** O que a rodada deu a quem abriu o pacote (XP e PeladaCoins), com o saldo de hoje. */
+  rewards?: (RoundRewards & { balance: number }) | null;
 };
 
 /** Cartas especiais de uma rodada fechada, para a animação. `null` se a rodada não existe ou está aberta. */
@@ -49,5 +53,14 @@ export async function getMatchWinners(matchId: string): Promise<MatchWinners | n
     .filter((award) => award.kind === "time_da_semana")
     .toSorted((a, b) => (b.score ?? 0) - (a.score ?? 0));
 
-  return { match, theme: awards[0]?.theme ?? "default", revealed, team };
+  const memberId = league.currentMemberId;
+  const roundRewards = league.getRoundRewards(memberId, match.id);
+  const rewards = roundRewards
+    ? {
+        ...roundRewards,
+        balance: Math.max(0, league.getProgression(memberId).coinsEarned - (await getOwnPurchases(memberId)).spent),
+      }
+    : null;
+
+  return { match, theme: awards[0]?.theme ?? "default", revealed, team, rewards };
 }
