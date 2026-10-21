@@ -1,4 +1,5 @@
 import {
+  CrownIcon,
   FlameIcon,
   FrownIcon,
   GoalIcon,
@@ -25,4 +26,5 @@ export const AWARD_ICONS: Record<AwardKind, LucideIcon> = {
   fominha: UtensilsIcon,
   bola_murcha: FrownIcon,
   time_da_semana: StarIcon,
+  jogador_do_mes: CrownIcon,
 };

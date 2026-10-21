@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import type { CardThemeKey } from "@/lib/card-themes";
-import type { AwardKind } from "@/types/award";
+import { hasSeasonalTheme, type AwardKind } from "@/types/award";
 
 /** Prêmios de zoeira: a carta cai e amassa, sem raios nem faíscas. */
 export const ZOEIRA_AWARDS: readonly AwardKind[] = ["bola_murcha", "fominha"];
@@ -10,7 +10,8 @@ export const ZOEIRA_AWARDS: readonly AwardKind[] = ["bola_murcha", "fominha"];
  * para as classes da revelação (brilho, raios, ícone).
  */
 export function revealColorStyle(kind: AwardKind, theme: CardThemeKey): CSSProperties {
-  const token = `--award-${kind.replaceAll("_", "-")}${theme === "default" ? "" : `-${theme}`}-frame`;
+  const isThemed = theme !== "default" && hasSeasonalTheme(kind);
+  const token = `--award-${kind.replaceAll("_", "-")}${isThemed ? `-${theme}` : ""}-frame`;
   return { "--reveal-color": `var(${token})` } as CSSProperties;
 }
 

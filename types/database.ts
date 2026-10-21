@@ -565,6 +565,7 @@ export type Database = {
         | "fair_play"
         | "fominha"
         | "time_da_semana"
+        | "jogador_do_mes"
       match_status: "open" | "closed"
       member_role: "organizer" | "player"
       player_position: "FIX" | "ALA" | "PIV" | "GOL"
@@ -706,6 +707,7 @@ export const Constants = {
         "fair_play",
         "fominha",
         "time_da_semana",
+        "jogador_do_mes",
       ],
       match_status: ["open", "closed"],
       member_role: ["organizer", "player"],

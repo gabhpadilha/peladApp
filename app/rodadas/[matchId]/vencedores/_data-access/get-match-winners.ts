@@ -5,7 +5,10 @@ import type { CardThemeKey } from "@/lib/card-themes";
 import type { Award, AwardKind } from "@/types/award";
 import type { Match } from "@/types/match";
 
-/** Ordem da revelação: a zoeira abre, o Melhor Jogador fecha; o Time da Semana vem por último. */
+/**
+ * Ordem da revelação: a zoeira abre, o Melhor Jogador e o Jogador do Mês (só na
+ * rodada da última quinta) fecham; o Time da Semana vem por último, em campo.
+ */
 const REVEAL_ORDER: readonly AwardKind[] = [
   "bola_murcha",
   "fominha",
@@ -16,6 +19,7 @@ const REVEAL_ORDER: readonly AwardKind[] = [
   "atacante",
   "gol",
   "craque",
+  "jogador_do_mes",
 ];
 
 export type MatchWinners = {

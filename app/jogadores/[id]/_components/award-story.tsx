@@ -3,8 +3,8 @@ import { AWARD_ICONS } from "@/components/award-icons";
 import { PlayerCard, PlayerCardDefs } from "@/components/player-card";
 import { PACK_THEMES, revealColorStyle } from "@/app/rodadas/[matchId]/vencedores/_components/reveal-theme";
 import { CARD_THEME_LABELS } from "@/lib/card-themes";
-import { formatWeekdayDate } from "@/lib/format-date";
-import { AWARD_LABELS, formatRoundScore, type Award } from "@/types/award";
+import { formatMonth, formatWeekdayDate } from "@/lib/format-date";
+import { AWARD_LABELS, formatRoundScore, hasSeasonalTheme, type Award } from "@/types/award";
 import { cn } from "@/lib/utils";
 
 /** Tamanho do story na tela; a imagem sai em 3x (1080 × 1920, o formato do Instagram). */
@@ -21,6 +21,10 @@ function storySubtitle(award: Award): string {
   if (award.kind === "time_da_semana") {
     const ratings = award.votes === 1 ? "1 avaliação" : `${award.votes} avaliações`;
     return award.score === null ? ratings : `Nota ${formatRoundScore(award.score)} na rodada · ${ratings}`;
+  }
+  if (award.kind === "jogador_do_mes") {
+    const ratings = award.votes === 1 ? "1 avaliação" : `${award.votes} avaliações`;
+    return award.score === null ? ratings : `Média ${formatRoundScore(award.score)} no mês · ${ratings}`;
   }
   return award.votes === 1 ? "1 voto da galera" : `${award.votes} votos da galera`;
 }
@@ -55,7 +59,7 @@ export function AwardStory({ award, groupName, ref }: AwardStoryProps) {
 
       <p className="relative font-display text-xl font-extrabold tracking-wide text-primary">PELADAPP</p>
       <p className="relative mt-1 max-w-full truncate text-xs tracking-[0.14em] text-white/60 uppercase">
-        {groupName} · {CARD_THEME_LABELS[award.theme]} {year}
+        {groupName} · {hasSeasonalTheme(award.kind) ? CARD_THEME_LABELS[award.theme] : formatMonth(award.date)} {year}
       </p>
 
       <div className="relative mt-7 flex items-center gap-2 text-(--reveal-color)">

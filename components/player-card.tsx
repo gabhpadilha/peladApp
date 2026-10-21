@@ -8,7 +8,7 @@ import { CARD_TIER_LABELS, getCardTier, type CardTier } from "@/lib/card-tier";
 import type { CardThemeKey } from "@/lib/card-themes";
 import { getInitials } from "@/lib/get-initials";
 import { photoFadeLayers } from "@/lib/photo-fades";
-import { AWARD_LABELS, type AwardKind } from "@/types/award";
+import { AWARD_LABELS, hasSeasonalTheme, type AwardKind } from "@/types/award";
 import { getCardSkin, type CardSkinKey } from "@/types/card-skin";
 import {
   ATTRIBUTE_LABELS,
@@ -20,11 +20,13 @@ import {
 
 const CARD_SHAPE_ID = "player-card-shape";
 const SHAPE_CLIP = "[clip-path:url(#player-card-shape)]";
+const MONTH_SHARD_ID = "player-card-month-shard";
+const MONTH_STRIPES_ID = "player-card-month-stripes";
 
 /**
  * Formato da carta estilo Ultimate Team (cantos de cima recortados, ponta embaixo),
- * em unidades relativas para escalar com qualquer tamanho.
- * Renderizado uma única vez no layout raiz.
+ * em unidades relativas para escalar com qualquer tamanho, e o degradê/listras das
+ * pontas que vazam do Jogador do Mês. Renderizado uma única vez no layout raiz.
  */
 export function PlayerCardDefs() {
   return (
@@ -32,16 +34,34 @@ export function PlayerCardDefs() {
       <clipPath id={CARD_SHAPE_ID} clipPathUnits="objectBoundingBox">
         <path d="M0.16,0.035 Q0.5,0 0.84,0.035 Q0.88,0.09 1,0.085 L1,0.84 Q1,0.88 0.94,0.9 L0.56,0.985 Q0.5,1 0.44,0.985 L0.06,0.9 Q0,0.88 0,0.84 L0,0.085 Q0.12,0.09 0.16,0.035 Z" />
       </clipPath>
+      <linearGradient id={MONTH_SHARD_ID} x1="0" y1="1" x2="1" y2="0">
+        <stop offset="0" stopColor="#5a1fb8" />
+        <stop offset="0.55" stopColor="#a63ee6" />
+        <stop offset="1" stopColor="#e070ff" />
+      </linearGradient>
+      <pattern id={MONTH_STRIPES_ID} width="2.2" height="2.2" patternUnits="userSpaceOnUse" patternTransform="rotate(-38)">
+        <rect width="2.2" height="0.7" fill="#d9c8ff" fillOpacity={0.55} />
+      </pattern>
     </svg>
   );
 }
 
-/** Visual da carta: faixa da carta base ou prêmio (com tema sazonal). */
-type AwardDesign = AwardKind | `${AwardKind}-halloween` | `${AwardKind}-brasileirao`;
+/** Visual da carta: faixa da carta base ou prêmio (com tema sazonal; o Jogador do Mês não veste tema). */
+type ThemedAwardKind = Exclude<AwardKind, "jogador_do_mes">;
+type AwardDesign = AwardKind | `${ThemedAwardKind}-halloween` | `${ThemedAwardKind}-brasileirao`;
 type CardDesign = CardTier | AwardDesign;
 
+type Design = {
+  frame: string;
+  face: string;
+  /** Face com arte em imagem: sem o degradê, a textura e o brilho padrão. */
+  hasArt?: boolean;
+  /** Cor da sombra atrás da foto; sem ela, o token da moldura (mesmo nome da classe). */
+  shadow?: string;
+};
+
 /** Classes literais (o Tailwind precisa enxergá-las inteiras). */
-const DESIGNS: Record<CardDesign, { frame: string; face: string }> = {
+const DESIGNS: Record<CardDesign, Design> = {
   bronze: {
     frame: "bg-rarity-bronze-frame",
     face: "from-rarity-bronze-from to-rarity-bronze-to text-rarity-bronze-foreground",
@@ -178,6 +198,15 @@ const DESIGNS: Record<CardDesign, { frame: string; face: string }> = {
     frame: "bg-award-time-da-semana-brasileirao-frame",
     face: "from-award-time-da-semana-brasileirao-from to-award-time-da-semana-brasileirao-to text-award-time-da-semana-brasileirao-foreground",
   },
+  // Arte do dono do app (aprovada em 2026-10-21), alinhada à direita: os raios
+  // de dentro encostam na borda de onde saem os de fora (`MonthCardOverflow`).
+  jogador_do_mes: {
+    frame:
+      "bg-linear-to-br from-award-jogador-do-mes-frame-light via-award-jogador-do-mes-frame to-award-jogador-do-mes-frame-dark",
+    face: "bg-[url(/cartas/jogador-do-mes-fundo.webp)] bg-cover bg-right text-award-jogador-do-mes-foreground",
+    hasArt: true,
+    shadow: "var(--award-jogador-do-mes-to)",
+  },
 };
 
 /** Textura da face: a padrão (linhas finas) ou a do prêmio, para cada carta ter a sua. */
@@ -213,6 +242,7 @@ const AWARD_FOOTER: Record<AwardKind, string> = {
   fominha: "Fominha",
   bola_murcha: "Bola murcha",
   time_da_semana: "Time da semana",
+  jogador_do_mes: "Jogador do mês",
 };
 
 /** Tamanho da carta (sem o recorte), usado também pela carta da Loja, que tem enfeites por fora. */
@@ -264,9 +294,76 @@ type PlayerCardProps = {
   className?: string;
 };
 
+/** Opacidade da sombra atrás da foto (intensidade "B · média", aprovada pelo dono do app). */
+const PHOTO_SHADOW_OPACITY = 0.4;
+
+/**
+ * Sombra atrás da pessoa, num tom escuro da carta, para foto e carta parecerem
+ * uma coisa só. Só degradês radiais (sem `filter`, `mix-blend-mode` nem máscara
+ * com a foto, que quebram no iPhone), terminando transparentes antes das bordas
+ * da área da foto.
+ */
+function PhotoShadow({ color }: { color: string }) {
+  const tone = (alpha: number) =>
+    `color-mix(in oklab, color-mix(in oklab, ${color} 30%, black) ${Math.round(alpha * PHOTO_SHADOW_OPACITY * 100)}%, transparent)`;
+  const style: CSSProperties = {
+    backgroundImage: [
+      // Halo justo atrás da cabeça e dos ombros: descola a pessoa da face.
+      `radial-gradient(ellipse 40% 38% at 52% 46%, ${tone(1)} 0%, ${tone(0.55)} 45%, transparent 100%)`,
+      // Reflexo largo e baixo na face, como a sombra da pessoa caindo na carta.
+      `radial-gradient(ellipse 46% 26% at 54% 78%, ${tone(0.7)} 0%, ${tone(0.3)} 50%, transparent 100%)`,
+    ].join(", "),
+  };
+  return <div aria-hidden className="absolute inset-0" style={style} />;
+}
+
 function getDesign(player: Player, award: PlayerCardAward | undefined): CardDesign {
   if (!award) return getCardTier(player.ovr ?? 0);
-  return award.theme === "default" ? award.kind : `${award.kind}-${award.theme}`;
+  if (award.kind === "jogador_do_mes" || award.theme === "default") return award.kind;
+  return `${award.kind}-${award.theme}`;
+}
+
+/** Pontas roxas do Jogador do Mês: a grande nasce na face e fura o canto; a menor, mais baixa. */
+const MONTH_SHARDS = [
+  { points: "80,17 104,-7 98,10 91,21", edge: "80,17 104,-7 98,10", edgeWidth: 0.45 },
+  { points: "90,27 109,19 100,30", edge: "90,27 109,19 100,30", edgeWidth: 0.4 },
+] as const;
+
+/** Raio: brilho largo e fraco + brilho médio + miolo claro (sem `filter`). */
+function OverflowBolt({ d }: { d: string }) {
+  return (
+    <g fill="none" strokeLinecap="round" strokeLinejoin="round">
+      <path d={d} stroke="#fff1a8" strokeOpacity={0.18} strokeWidth={2.6} />
+      <path d={d} stroke="#fff1a8" strokeOpacity={0.45} strokeWidth={1.1} />
+      <path d={d} stroke="#fffbe8" strokeWidth={0.4} />
+    </g>
+  );
+}
+
+/**
+ * A arte que vaza da carta do Jogador do Mês (aprovada pelo dono do app, como
+ * no desenho dele): duas pontas roxas listradas furando o canto de cima à
+ * direita e raios saindo pela lateral. Fica por cima da carta, fora do recorte
+ * do escudo. Coordenadas no espaço da carta (100 × 148); degradê e listras
+ * ficam em `PlayerCardDefs`.
+ */
+function MonthCardOverflow() {
+  return (
+    <svg aria-hidden viewBox="0 0 100 148" className="pointer-events-none absolute inset-0 size-full overflow-visible">
+      {MONTH_SHARDS.map((shard) => (
+        <g key={shard.points}>
+          <polygon points={shard.points} fill={`url(#${MONTH_SHARD_ID})`} />
+          <polygon points={shard.points} fill={`url(#${MONTH_STRIPES_ID})`} />
+          <polyline points={shard.edge} fill="none" stroke="#f3dfa0" strokeWidth={shard.edgeWidth} />
+        </g>
+      ))}
+      <OverflowBolt d="M95 33 L99 31 L98 35 L103 35.5 L101 39 L107 41" />
+      <OverflowBolt d="M101 35.3 L104 32 L103.5 29.5 L106.5 27" />
+      <OverflowBolt d="M96 47 L100.5 48 L99 51.5 L104 53 L102 56.5 L105.5 59" />
+      <OverflowBolt d="M102 56.5 L99.5 60.5 L101 63" />
+      <OverflowBolt d="M96 22 L100 21.5 L102.5 18" />
+    </svg>
+  );
 }
 
 /**
@@ -281,6 +378,9 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
   }
 
   const design = getDesign(player, award);
+  const { frame, face, hasArt, shadow } = DESIGNS[design];
+  // A arte que vaza precisa ficar fora do recorte do escudo: a carta vai num invólucro.
+  const hasOverflow = design === "jogador_do_mes";
   const tier = getCardTier(player.ovr ?? 0);
   const attributeKeys: readonly PlayerAttribute[] =
     player.role === "goalkeeper" ? GOALKEEPER_ATTRIBUTES : OUTFIELD_ATTRIBUTES;
@@ -290,38 +390,43 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
     ? `${AWARD_LABELS[award.kind].title}, ${award.round === undefined ? "prévia" : `rodada ${award.round}`}`
     : `carta ${CARD_TIER_LABELS[tier]}`;
 
-  return (
+  const card = (
     <article
       aria-label={`${player.nickname}, ${player.position}, OVR ${player.ovr ?? "sem avaliação"}, ${label}`}
-      className={cn(cardVariants({ size }), DESIGNS[design].frame, className)}
+      className={cn(hasOverflow ? ["relative size-full", SHAPE_CLIP] : [cardVariants({ size }), className], frame)}
     >
       <div
         className={cn(
-          "@container absolute inset-[1.8%] overflow-hidden bg-linear-to-br",
-          DESIGNS[design].face,
+          "@container absolute inset-[1.8%] overflow-hidden",
+          !hasArt && "bg-linear-to-br",
+          face,
           SHAPE_CLIP,
         )}
       >
-        <div
-          aria-hidden
-          className={cn("absolute inset-0", (award && AWARD_TEXTURES[award.kind]) ?? DEFAULT_TEXTURE)}
-        />
-        <div
-          aria-hidden
-          className={cn(
-            "absolute inset-0 bg-[linear-gradient(115deg,transparent_28%,rgb(255_255_255/0.22)_42%,transparent_56%)]",
-            // Ouro raro: brilho mais largo e intenso.
-            design === "rare" &&
-              "bg-[linear-gradient(115deg,transparent_18%,rgb(255_255_255/0.45)_38%,transparent_50%,rgb(255_255_255/0.2)_62%,transparent_72%)]",
-          )}
-        />
-        {award?.theme === "halloween" && (
+        {!hasArt && (
+          <>
+            <div
+              aria-hidden
+              className={cn("absolute inset-0", (award && AWARD_TEXTURES[award.kind]) ?? DEFAULT_TEXTURE)}
+            />
+            <div
+              aria-hidden
+              className={cn(
+                "absolute inset-0 bg-[linear-gradient(115deg,transparent_28%,rgb(255_255_255/0.22)_42%,transparent_56%)]",
+                // Ouro raro: brilho mais largo e intenso.
+                design === "rare" &&
+                  "bg-[linear-gradient(115deg,transparent_18%,rgb(255_255_255/0.45)_38%,transparent_50%,rgb(255_255_255/0.2)_62%,transparent_72%)]",
+              )}
+            />
+          </>
+        )}
+        {award && hasSeasonalTheme(award.kind) && award.theme === "halloween" && (
           <GhostIcon
             aria-hidden
             className="absolute top-[18%] right-[-6%] size-[62cqw] rotate-12 opacity-[0.12]"
           />
         )}
-        {award?.theme === "brasileirao" && (
+        {award && hasSeasonalTheme(award.kind) && award.theme === "brasileirao" && (
           <TrophyIcon
             aria-hidden
             strokeWidth={1.2}
@@ -342,6 +447,8 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
         {/* Área da foto (estilo EA FC): centralizada, passa um pouco das laterais da face */}
         {/* (as bordas ficam fora do corte) e vai até o apelido. Proporção ~1,18, a mesma de lib/photo-cutout.ts. */}
         <div className="absolute top-[2%] -right-[4%] -left-[4%] z-0 h-[62%]">
+          {/* Sombra no tom da moldura: o token tem o mesmo nome da classe da moldura. */}
+          {player.photo && <PhotoShadow color={shadow ?? `var(${frame.replace("bg-", "--")})`} />}
           <PlayerCardPhoto player={player} size={size} />
         </div>
 
@@ -376,10 +483,18 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
             : CARD_TIER_LABELS[tier]}
         </span>
         {!award && typeof player.level === "number" && (
-          <LevelSeal level={player.level} rimClass={DESIGNS[design].frame} innerClass="bg-black/75 text-white" />
+          <LevelSeal level={player.level} rimClass={frame} innerClass="bg-black/75 text-white" />
         )}
       </div>
     </article>
+  );
+
+  if (!hasOverflow) return card;
+  return (
+    <div className={cn(cardSizeVariants({ size }), className)}>
+      {card}
+      <MonthCardOverflow />
+    </div>
   );
 }
 
@@ -748,6 +863,8 @@ function PremiumPlayerCard({
           )}
 
           <div className="absolute top-[2%] -right-[4%] -left-[4%] z-0 h-[62%]">
+            {/* Na carta da Loja, o tom vem da face (a moldura é sempre o metal). */}
+            {player.photo && <PhotoShadow color="var(--skin-deep)" />}
             <PlayerCardPhoto player={player} size={size} />
           </div>
 

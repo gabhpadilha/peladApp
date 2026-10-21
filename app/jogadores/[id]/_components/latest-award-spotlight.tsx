@@ -2,7 +2,7 @@ import { PlayerCard } from "@/components/player-card";
 import { BOOSTED_AWARDS } from "@/lib/award-bonus";
 import { CARD_THEME_LABELS } from "@/lib/card-themes";
 import { formatWeekdayDate } from "@/lib/format-date";
-import { AWARD_LABELS, formatRoundScore, type Award } from "@/types/award";
+import { AWARD_LABELS, formatRoundScore, hasSeasonalTheme, type Award } from "@/types/award";
 import { AWARD_ICONS } from "@/components/award-icons";
 import { ShareAwardButton } from "./share-award-button";
 
@@ -17,7 +17,9 @@ type LatestAwardSpotlightProps = {
 export function LatestAwardSpotlight({ award, isShareable, groupName }: LatestAwardSpotlightProps) {
   const Icon = AWARD_ICONS[award.kind];
   const isBoosted = BOOSTED_AWARDS.includes(award.kind);
+  // Prêmios das notas (sem voto) mostram a nota média no lugar dos votos.
   const isTeamOfTheWeek = award.kind === "time_da_semana";
+  const isScored = isTeamOfTheWeek || award.kind === "jogador_do_mes";
 
   return (
     <section
@@ -48,9 +50,9 @@ export function LatestAwardSpotlight({ award, isShareable, groupName }: LatestAw
 
         <dl className="grid grid-cols-3 gap-2 text-left">
           <div className="rounded-lg bg-muted/50 px-3 py-2">
-            <dt className="text-xs text-muted-foreground">{isTeamOfTheWeek ? "Nota" : "Votos"}</dt>
+            <dt className="text-xs text-muted-foreground">{isScored ? (isTeamOfTheWeek ? "Nota" : "Média do mês") : "Votos"}</dt>
             <dd className="font-display text-2xl font-bold tabular-nums">
-              {isTeamOfTheWeek ? (award.score === null ? "–" : formatRoundScore(award.score)) : award.votes}
+              {isScored ? (award.score === null ? "–" : formatRoundScore(award.score)) : award.votes}
             </dd>
           </div>
           <div className="rounded-lg bg-muted/50 px-3 py-2">
@@ -59,7 +61,9 @@ export function LatestAwardSpotlight({ award, isShareable, groupName }: LatestAw
           </div>
           <div className="min-w-0 rounded-lg bg-muted/50 px-3 py-2">
             <dt className="text-xs text-muted-foreground">Tema</dt>
-            <dd className="truncate font-display text-lg leading-8 font-bold">{CARD_THEME_LABELS[award.theme]}</dd>
+            <dd className="truncate font-display text-lg leading-8 font-bold">
+              {hasSeasonalTheme(award.kind) ? CARD_THEME_LABELS[award.theme] : "Exclusiva"}
+            </dd>
           </div>
         </dl>
 

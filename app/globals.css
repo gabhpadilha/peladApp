@@ -80,6 +80,12 @@
   --color-award-time-da-semana-from: var(--award-time-da-semana-from);
   --color-award-time-da-semana-to: var(--award-time-da-semana-to);
   --color-award-time-da-semana-foreground: var(--award-time-da-semana-foreground);
+  --color-award-jogador-do-mes-frame: var(--award-jogador-do-mes-frame);
+  --color-award-jogador-do-mes-frame-light: var(--award-jogador-do-mes-frame-light);
+  --color-award-jogador-do-mes-frame-dark: var(--award-jogador-do-mes-frame-dark);
+  --color-award-jogador-do-mes-from: var(--award-jogador-do-mes-from);
+  --color-award-jogador-do-mes-to: var(--award-jogador-do-mes-to);
+  --color-award-jogador-do-mes-foreground: var(--award-jogador-do-mes-foreground);
   --color-award-drible-halloween-frame: var(--award-drible-halloween-frame);
   --color-award-drible-halloween-from: var(--award-drible-halloween-from);
   --color-award-drible-halloween-to: var(--award-drible-halloween-to);
@@ -298,6 +304,14 @@
   --award-time-da-semana-from: oklch(0.32 0.06 260);
   --award-time-da-semana-to: oklch(0.12 0.03 260);
   --award-time-da-semana-foreground: oklch(0.95 0.02 250);
+  /* Jogador do Mês: moldura dourada em degradê sobre a arte roxa do dono do app
+     (public/cartas/jogador-do-mes-fundo.webp); não veste tema sazonal. */
+  --award-jogador-do-mes-frame: #d9b866;
+  --award-jogador-do-mes-frame-light: #f6e6a8;
+  --award-jogador-do-mes-frame-dark: #a9843d;
+  --award-jogador-do-mes-from: #6b1a8f;
+  --award-jogador-do-mes-to: #1c0629;
+  --award-jogador-do-mes-foreground: #f7e8b4;
 
   /* Halloween: abóbora, gosma e fantasma */
   --award-craque-halloween-frame: oklch(0.76 0.17 55);

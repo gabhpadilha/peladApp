@@ -12,6 +12,8 @@ const weekdayDateFormatter = new Intl.DateTimeFormat("pt-BR", {
   timeZone: "UTC",
 });
 
+const monthFormatter = new Intl.DateTimeFormat("pt-BR", { month: "long", timeZone: "UTC" });
+
 function toDate(date: string): Date {
   return new Date(`${date}T00:00:00Z`);
 }
@@ -19,6 +21,11 @@ function toDate(date: string): Date {
 /** Ex.: "17 de out." */
 export function formatShortDate(date: string): string {
   return shortDateFormatter.format(toDate(date));
+}
+
+/** Ex.: "outubro" */
+export function formatMonth(date: string): string {
+  return monthFormatter.format(toDate(date));
 }
 
 /** Ex.: "sáb., 17 de out." */

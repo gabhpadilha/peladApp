@@ -1,13 +1,14 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowRightIcon, CoinsIcon, GhostIcon, SparklesIcon, StarIcon, StoreIcon, TrendingUpIcon, TrophyIcon, type LucideIcon } from "lucide-react";
+import { ArrowRightIcon, CoinsIcon, CrownIcon, GhostIcon, SparklesIcon, StarIcon, StoreIcon, TrendingUpIcon, TrophyIcon, type LucideIcon } from "lucide-react";
 import { formatCoins } from "@/components/coin-pill";
 import { PlayerCard } from "@/components/player-card";
 import { withAwardBonus } from "@/lib/award-bonus";
 import { CARD_THEME_LABELS, type CardThemeKey, type CurrentCardEvent } from "@/lib/card-themes";
 import { formatShortDate } from "@/lib/format-date";
 import { COIN_RULES, XP_RULES, type LevelProgress } from "@/lib/progression";
-import { TEAM_OF_THE_WEEK_MIN_RATINGS, type AwardKind } from "@/types/award";
+import { getNextPlayerOfTheMonthDate } from "@/lib/player-of-the-month";
+import { PLAYER_OF_THE_MONTH_MIN_RATINGS, TEAM_OF_THE_WEEK_MIN_RATINGS, type AwardKind } from "@/types/award";
 import { CARD_SKINS, isCardSkinOnSale, type CardSkinKey } from "@/types/card-skin";
 import type { ShopSale } from "@/lib/shop-sale";
 import type { Player } from "@/types/player";
@@ -110,6 +111,14 @@ const TEAM_OF_THE_WEEK_CHIPS: readonly Chip[] = [
   { label: "Bônus", value: "+1 em tudo" },
 ];
 
+/** Como ganhar o Jogador do Mês (espelha `compute_match_awards`). */
+const PLAYER_OF_THE_MONTH_CHIPS: readonly Chip[] = [
+  { label: "Linha e gol", value: "maior média" },
+  { label: "Mínimo", value: `${PLAYER_OF_THE_MONTH_MIN_RATINGS} notas no mês` },
+  { label: "Quando", value: "última quinta" },
+  { label: "Bônus", value: "+1 em tudo" },
+];
+
 const COIN_CHIPS = pickRules(COIN_RULES, ["Jogar uma rodada", "Enviar as suas notas", "Melhor Jogador", "Subir de nível"]);
 
 /** Texto do 1º slide por tema do mês. Tema novo: entre aqui (e em `CARD_THEMES`). */
@@ -135,7 +144,10 @@ function describeEventSkins(skins: ReturnType<typeof getEventSkins>): string {
   const what = skins.length <= 3 ? listFormatter.format(skins.map((skin) => skin.name)) : `${skins.length} personalizações do evento`;
   return `Chegaram ${what}, no nível ${level}. Só ficam à venda durante o evento; quem comprar continua usando depois.`;
 }
-/** Novidades do app na home: evento do mês, Time da Semana, Loja (com as cartas do evento), XP e PeladaCoins. */
+/**
+ * Novidades do app na home: Jogador do Mês (a mais nova), evento do mês, Time da
+ * Semana, Loja (com as cartas do evento), XP e PeladaCoins.
+ */
 export function NewsSlider({ event, today, shopSale, player, progress, balance }: NewsSliderProps) {
   const eventCopy = EVENT_COPY[event.theme];
   const percent = Math.min(100, Math.round((progress.xpIntoLevel / progress.xpNeeded) * 100));
@@ -145,6 +157,33 @@ export function NewsSlider({ event, today, shopSale, player, progress, balance }
     eventSkins.length >= 2 ? [eventSkins[1].key, eventSkins[0].key, "esmeralda"] : SHOP_FAN;
 
   const slides = [
+    {
+      key: "jogador-do-mes",
+      title: "Jogador do Mês",
+      content: (
+        <Slide
+          icon={CrownIcon}
+          eyebrow="Novidade · sem votação"
+          title="Jogador do Mês"
+          meta={`Próxima carta: ${formatShortDate(getNextPlayerOfTheMonthDate(today))}, ao fechar a rodada`}
+          text="Na última quinta do mês, a maior média de notas do mês na linha e no gol leva a carta mais rara da pelada."
+          visual={
+            <div className="flex w-full items-center gap-5 pr-3">
+              <div className="w-28 shrink-0">
+                <PlayerCard
+                  player={withAwardBonus(player, "jogador_do_mes")}
+                  award={{ kind: "jogador_do_mes", theme: "default" }}
+                  size="fill"
+                />
+              </div>
+              <Chips items={PLAYER_OF_THE_MONTH_CHIPS} />
+            </div>
+          }
+          href={`/jogadores/${player.id}/colecao`}
+          cta="Ver a coleção"
+        />
+      ),
+    },
     {
       key: "evento",
       title: eventCopy.title,
