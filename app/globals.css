@@ -64,6 +64,18 @@
   --color-award-defensor-from: var(--award-defensor-from);
   --color-award-defensor-to: var(--award-defensor-to);
   --color-award-defensor-foreground: var(--award-defensor-foreground);
+  --color-award-foguete-frame: var(--award-foguete-frame);
+  --color-award-foguete-from: var(--award-foguete-from);
+  --color-award-foguete-to: var(--award-foguete-to);
+  --color-award-foguete-foreground: var(--award-foguete-foreground);
+  --color-award-garcom-frame: var(--award-garcom-frame);
+  --color-award-garcom-from: var(--award-garcom-from);
+  --color-award-garcom-to: var(--award-garcom-to);
+  --color-award-garcom-foreground: var(--award-garcom-foreground);
+  --color-award-motor-frame: var(--award-motor-frame);
+  --color-award-motor-from: var(--award-motor-from);
+  --color-award-motor-to: var(--award-motor-to);
+  --color-award-motor-foreground: var(--award-motor-foreground);
   --color-award-goleiro-frame: var(--award-goleiro-frame);
   --color-award-goleiro-from: var(--award-goleiro-from);
   --color-award-goleiro-to: var(--award-goleiro-to);
@@ -98,6 +110,18 @@
   --color-award-defensor-halloween-from: var(--award-defensor-halloween-from);
   --color-award-defensor-halloween-to: var(--award-defensor-halloween-to);
   --color-award-defensor-halloween-foreground: var(--award-defensor-halloween-foreground);
+  --color-award-foguete-halloween-frame: var(--award-foguete-halloween-frame);
+  --color-award-foguete-halloween-from: var(--award-foguete-halloween-from);
+  --color-award-foguete-halloween-to: var(--award-foguete-halloween-to);
+  --color-award-foguete-halloween-foreground: var(--award-foguete-halloween-foreground);
+  --color-award-garcom-halloween-frame: var(--award-garcom-halloween-frame);
+  --color-award-garcom-halloween-from: var(--award-garcom-halloween-from);
+  --color-award-garcom-halloween-to: var(--award-garcom-halloween-to);
+  --color-award-garcom-halloween-foreground: var(--award-garcom-halloween-foreground);
+  --color-award-motor-halloween-frame: var(--award-motor-halloween-frame);
+  --color-award-motor-halloween-from: var(--award-motor-halloween-from);
+  --color-award-motor-halloween-to: var(--award-motor-halloween-to);
+  --color-award-motor-halloween-foreground: var(--award-motor-halloween-foreground);
   --color-award-goleiro-halloween-frame: var(--award-goleiro-halloween-frame);
   --color-award-goleiro-halloween-from: var(--award-goleiro-halloween-from);
   --color-award-goleiro-halloween-to: var(--award-goleiro-halloween-to);
@@ -138,6 +162,18 @@
   --color-award-defensor-brasileirao-from: var(--award-defensor-brasileirao-from);
   --color-award-defensor-brasileirao-to: var(--award-defensor-brasileirao-to);
   --color-award-defensor-brasileirao-foreground: var(--award-defensor-brasileirao-foreground);
+  --color-award-foguete-brasileirao-frame: var(--award-foguete-brasileirao-frame);
+  --color-award-foguete-brasileirao-from: var(--award-foguete-brasileirao-from);
+  --color-award-foguete-brasileirao-to: var(--award-foguete-brasileirao-to);
+  --color-award-foguete-brasileirao-foreground: var(--award-foguete-brasileirao-foreground);
+  --color-award-garcom-brasileirao-frame: var(--award-garcom-brasileirao-frame);
+  --color-award-garcom-brasileirao-from: var(--award-garcom-brasileirao-from);
+  --color-award-garcom-brasileirao-to: var(--award-garcom-brasileirao-to);
+  --color-award-garcom-brasileirao-foreground: var(--award-garcom-brasileirao-foreground);
+  --color-award-motor-brasileirao-frame: var(--award-motor-brasileirao-frame);
+  --color-award-motor-brasileirao-from: var(--award-motor-brasileirao-from);
+  --color-award-motor-brasileirao-to: var(--award-motor-brasileirao-to);
+  --color-award-motor-brasileirao-foreground: var(--award-motor-brasileirao-foreground);
   --color-award-goleiro-brasileirao-frame: var(--award-goleiro-brasileirao-frame);
   --color-award-goleiro-brasileirao-from: var(--award-goleiro-brasileirao-from);
   --color-award-goleiro-brasileirao-to: var(--award-goleiro-brasileirao-to);
@@ -284,6 +320,21 @@
   --award-defensor-from: oklch(0.4 0.07 175);
   --award-defensor-to: oklch(0.15 0.03 190);
   --award-defensor-foreground: oklch(0.95 0.04 170);
+  /* Foguete da Rodada (VEL): violeta-elétrico, riscos de velocidade */
+  --award-foguete-frame: oklch(0.8 0.16 300);
+  --award-foguete-from: oklch(0.44 0.2 295);
+  --award-foguete-to: oklch(0.14 0.08 285);
+  --award-foguete-foreground: oklch(0.96 0.04 300);
+  /* Garçom da Rodada (PAS): bandeja de prata, pontilhado de passe */
+  --award-garcom-frame: oklch(0.94 0.01 230);
+  --award-garcom-from: oklch(0.5 0.025 235);
+  --award-garcom-to: oklch(0.19 0.015 240);
+  --award-garcom-foreground: oklch(0.98 0.005 230);
+  /* Motor da Rodada (FIS): grafite e amarelo industrial */
+  --award-motor-frame: oklch(0.88 0.17 98);
+  --award-motor-from: oklch(0.34 0.01 260);
+  --award-motor-to: oklch(0.12 0.005 260);
+  --award-motor-foreground: oklch(0.92 0.15 98);
   /* Melhor Goleiro: rubi */
   --award-goleiro-frame: oklch(0.78 0.16 28);
   --award-goleiro-from: oklch(0.42 0.16 25);
@@ -341,6 +392,21 @@
   --award-defensor-halloween-from: oklch(0.4 0.03 150);
   --award-defensor-halloween-to: oklch(0.14 0.01 150);
   --award-defensor-halloween-foreground: oklch(0.92 0.04 140);
+  /* vassoura de bruxa */
+  --award-foguete-halloween-frame: oklch(0.72 0.2 330);
+  --award-foguete-halloween-from: oklch(0.26 0.05 320);
+  --award-foguete-halloween-to: oklch(0.08 0.01 320);
+  --award-foguete-halloween-foreground: oklch(0.86 0.15 330);
+  /* osso e caveira */
+  --award-garcom-halloween-frame: oklch(0.92 0.03 90);
+  --award-garcom-halloween-from: oklch(0.32 0.02 60);
+  --award-garcom-halloween-to: oklch(0.1 0.01 50);
+  --award-garcom-halloween-foreground: oklch(0.94 0.03 90);
+  /* fogo do caldeirão */
+  --award-motor-halloween-frame: oklch(0.74 0.19 45);
+  --award-motor-halloween-from: oklch(0.3 0.11 35);
+  --award-motor-halloween-to: oklch(0.09 0.03 30);
+  --award-motor-halloween-foreground: oklch(0.88 0.13 55);
   /* vampiro */
   --award-goleiro-halloween-frame: oklch(0.62 0.21 25);
   --award-goleiro-halloween-from: oklch(0.34 0.15 20);
@@ -393,6 +459,21 @@
   --award-defensor-brasileirao-from: #3a3f47;
   --award-defensor-brasileirao-to: #0d0f12;
   --award-defensor-brasileirao-foreground: #ffe066;
+  /* celeste e branca */
+  --award-foguete-brasileirao-frame: #ffffff;
+  --award-foguete-brasileirao-from: #3d8bff;
+  --award-foguete-brasileirao-to: #0a2a7a;
+  --award-foguete-brasileirao-foreground: #ffffff;
+  /* branca e amarela */
+  --award-garcom-brasileirao-frame: #ffd400;
+  --award-garcom-brasileirao-from: #f4f6fb;
+  --award-garcom-brasileirao-to: #c9d1e0;
+  --award-garcom-brasileirao-foreground: #0b2a78;
+  /* vermelha e preta */
+  --award-motor-brasileirao-frame: #e8e8e8;
+  --award-motor-brasileirao-from: #d1121f;
+  --award-motor-brasileirao-to: #3a0006;
+  --award-motor-brasileirao-foreground: #ffffff;
   /* preta e azul */
   --award-goleiro-brasileirao-frame: #2f6bff;
   --award-goleiro-brasileirao-from: #1b1b1f;

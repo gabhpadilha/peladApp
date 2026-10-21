@@ -170,8 +170,9 @@ function* walkRounds({ playerId, matches, evaluations, awards, submissions }: Pr
       if (award.matchId !== match.id || award.memberId !== playerId || award.kind !== "jogador_do_mes") continue;
       gains.unshift({ key: "award-jogador_do_mes", label: "Prêmio: Time do Mês", xp: XP_BEST_PLAYER, coins: COINS_BEST_PLAYER });
     }
+    const ovrBefore = previousOvr;
     if (ovr !== null) previousOvr = ovr;
-    yield { match, gains };
+    yield { match, gains, ovrBefore, ovrAfter: ovr, score: averageEvaluations(received), ratings: received.length };
   }
 }
 
@@ -202,12 +203,18 @@ export type RoundRewards = {
   after: LevelProgress;
   /** PeladaCoins do bônus por nível que a rodada fez subir. */
   levelUpCoins: number;
+  /** Nota recebida na rodada (0–99, ex.: 7,8 → 78) e de quantas avaliações; `null` sem notas. */
+  score: number | null;
+  ratings: number;
+  /** OVR antes e depois da rodada (0–99); `null` enquanto não tinha notas. */
+  ovrBefore: number | null;
+  ovrAfter: number | null;
 };
 
 /** O que uma rodada fechada deu ao jogador; `null` se ela não deu nada (ou não está fechada). */
 export function computeRoundRewards(input: ProgressionInput & { matchId: string }): RoundRewards | null {
   let xpBefore = 0;
-  for (const { match, gains } of walkRounds(input)) {
+  for (const { match, gains, ovrBefore, ovrAfter, score, ratings } of walkRounds(input)) {
     const round = sumGains(gains);
     if (match.id !== input.matchId) {
       xpBefore += round.xp;
@@ -217,7 +224,18 @@ export function computeRoundRewards(input: ProgressionInput & { matchId: string 
     const before = getLevelProgress(xpBefore);
     const after = getLevelProgress(xpBefore + round.xp);
     const levelUpCoins = (after.level - before.level) * COINS_PER_LEVEL;
-    return { gains, xp: round.xp, coins: round.coins + levelUpCoins, before, after, levelUpCoins };
+    return {
+      gains,
+      xp: round.xp,
+      coins: round.coins + levelUpCoins,
+      before,
+      after,
+      levelUpCoins,
+      score,
+      ratings,
+      ovrBefore,
+      ovrAfter,
+    };
   }
   return null;
 }

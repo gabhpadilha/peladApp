@@ -23,9 +23,9 @@ type SendRatingsSheetProps = {
 };
 
 /**
- * Votos nos 3 prêmios por voto, um por tela (Gol → Bola Murcha → Fominha, pedido
- * do dono do app: antes ficavam um embaixo do outro e era preciso rolar), e o
- * envio de todas as notas de uma vez na última.
+ * Votos nos prêmios por voto, um por tela (hoje só o Gol da Rodada; pedido do
+ * dono do app: nada de rolar entre prêmios), e o envio de todas as notas de uma
+ * vez na última.
  */
 export function SendRatingsSheet({ open, onOpenChange, ...props }: SendRatingsSheetProps) {
   return (
@@ -50,6 +50,8 @@ function VoteSteps({
   const [step, setStep] = useState(0);
   const kind = VOTE_AWARD_KINDS[step];
   const isLast = step === VOTE_AWARD_KINDS.length - 1;
+  // Com um voto só (hoje, o Gol), sem contador nem barrinhas.
+  const hasManyVotes = VOTE_AWARD_KINDS.length > 1;
 
   return (
     <>
@@ -57,15 +59,19 @@ function VoteSteps({
         {/* pr-9: o contador não encosta no X de fechar a folha. */}
         <div className="flex items-center justify-between gap-3 pr-9">
           <SheetTitle className="font-display text-2xl font-bold">Votar e enviar</SheetTitle>
-          <span className="text-sm text-muted-foreground tabular-nums">
-            Voto {step + 1} de {VOTE_AWARD_KINDS.length}
-          </span>
+          {hasManyVotes && (
+            <span className="text-sm text-muted-foreground tabular-nums">
+              Voto {step + 1} de {VOTE_AWARD_KINDS.length}
+            </span>
+          )}
         </div>
-        <div aria-hidden className="flex gap-1.5">
-          {VOTE_AWARD_KINDS.map((key, index) => (
-            <span key={key} className={cn("h-1 flex-1 rounded-full", index <= step ? "bg-primary" : "bg-muted")} />
-          ))}
-        </div>
+        {hasManyVotes && (
+          <div aria-hidden className="flex gap-1.5">
+            {VOTE_AWARD_KINDS.map((key, index) => (
+              <span key={key} className={cn("h-1 flex-1 rounded-full", index <= step ? "bg-primary" : "bg-muted")} />
+            ))}
+          </div>
+        )}
         <SheetDescription>
           Você avaliou {ratedCount} de {targets.length}. Os votos são opcionais e anônimos; quem você não avaliar fica
           sem nota sua.

@@ -23,7 +23,7 @@ export function EmptyCollection({ player, isOwnProfile, theme }: EmptyCollection
         </h2>
         <p className="text-sm text-muted-foreground">
           {isOwnProfile
-            ? `Essas são as cartas que você pode ganhar ${theme === "default" ? "agora" : `no tema ${CARD_THEME_LABELS[theme]}`}. Quando a rodada fecha, as maiores notas levam o Melhor Jogador, o Drible, o Atacante, o Defensor, o Goleiro e o Time da Semana; Gol da Rodada, Fominha e Bola Murcha vão para os mais votados.`
+            ? `Essas são as cartas que você pode ganhar ${theme === "default" ? "agora" : `no tema ${CARD_THEME_LABELS[theme]}`}. Quando a rodada fecha, as notas decidem quase tudo: Melhor Jogador, um prêmio por atributo, Goleiro, Time da Semana e, na zoeira, a Bola Murcha (a menor nota). Só o Gol da Rodada é no voto.`
             : `Quando ${player.nickname} ganhar uma carta especial, ela aparece aqui.`}
         </p>
       </div>

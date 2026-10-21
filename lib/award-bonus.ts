@@ -10,6 +10,9 @@ const MAX_CARD_VALUE = 99;
 export const BOOSTED_AWARDS: readonly AwardKind[] = [
   "craque",
   "gol",
+  "foguete",
+  "garcom",
+  "motor",
   "drible",
   "atacante",
   "defensor",

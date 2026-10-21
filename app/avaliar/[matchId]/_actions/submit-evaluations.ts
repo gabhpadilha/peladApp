@@ -16,7 +16,7 @@ export type SubmitEvaluationsResult =
   | { success: false; message: string };
 
 /**
- * Envia as notas e os votos nos 3 prêmios por voto (VOTE_AWARD_KINDS) que o jogador
+ * Envia as notas e o voto no Gol da Rodada (VOTE_AWARD_KINDS) que o jogador
  * logado deu na rodada. Tudo é conferido de novo aqui (rodada aberta, presença,
  * papel de cada avaliado); o banco ainda garante notas 1–10, sem autoavaliação
  * e só entre presentes.

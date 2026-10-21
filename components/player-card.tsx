@@ -198,6 +198,43 @@ const DESIGNS: Record<CardDesign, Design> = {
     frame: "bg-award-time-da-semana-brasileirao-frame",
     face: "from-award-time-da-semana-brasileirao-from to-award-time-da-semana-brasileirao-to text-award-time-da-semana-brasileirao-foreground",
   },
+  // Prêmios dos atributos VEL, PAS e FIS (2026-10-21): clássico, Halloween e Brasileirão.
+  foguete: {
+    frame: "bg-award-foguete-frame",
+    face: "from-award-foguete-from to-award-foguete-to text-award-foguete-foreground",
+  },
+  garcom: {
+    frame: "bg-award-garcom-frame",
+    face: "from-award-garcom-from to-award-garcom-to text-award-garcom-foreground",
+  },
+  motor: {
+    frame: "bg-award-motor-frame",
+    face: "from-award-motor-from to-award-motor-to text-award-motor-foreground",
+  },
+  "foguete-halloween": {
+    frame: "bg-award-foguete-halloween-frame",
+    face: "from-award-foguete-halloween-from to-award-foguete-halloween-to text-award-foguete-halloween-foreground",
+  },
+  "garcom-halloween": {
+    frame: "bg-award-garcom-halloween-frame",
+    face: "from-award-garcom-halloween-from to-award-garcom-halloween-to text-award-garcom-halloween-foreground",
+  },
+  "motor-halloween": {
+    frame: "bg-award-motor-halloween-frame",
+    face: "from-award-motor-halloween-from to-award-motor-halloween-to text-award-motor-halloween-foreground",
+  },
+  "foguete-brasileirao": {
+    frame: "bg-award-foguete-brasileirao-frame",
+    face: "from-award-foguete-brasileirao-from to-award-foguete-brasileirao-to text-award-foguete-brasileirao-foreground",
+  },
+  "garcom-brasileirao": {
+    frame: "bg-award-garcom-brasileirao-frame",
+    face: "from-award-garcom-brasileirao-from to-award-garcom-brasileirao-to text-award-garcom-brasileirao-foreground",
+  },
+  "motor-brasileirao": {
+    frame: "bg-award-motor-brasileirao-frame",
+    face: "from-award-motor-brasileirao-from to-award-motor-brasileirao-to text-award-motor-brasileirao-foreground",
+  },
   // Arte do dono do app (aprovada em 2026-10-21), alinhada à direita: os raios
   // de dentro encostam na borda de onde saem os de fora (`MonthCardOverflow`).
   jogador_do_mes: {
@@ -223,6 +260,12 @@ const AWARD_TEXTURES: Partial<Record<AwardKind, string>> = {
   // Rede do gol.
   goleiro:
     "bg-[repeating-linear-gradient(45deg,rgb(255_255_255/0.08)_0_1px,transparent_1px_5cqw),repeating-linear-gradient(-45deg,rgb(255_255_255/0.08)_0_1px,transparent_1px_5cqw)]",
+  // Riscos de velocidade, bem inclinados.
+  foguete: "bg-[repeating-linear-gradient(160deg,rgb(255_255_255/0.1)_0_2px,transparent_2px_8cqw)]",
+  // Pontilhado de passe.
+  garcom: "[background:radial-gradient(circle,rgb(255_255_255/0.2)_0_0.5cqw,transparent_0.8cqw)_0_0/6cqw_6cqw]",
+  // Listras de máquina.
+  motor: "bg-[repeating-linear-gradient(-45deg,rgb(255_255_255/0.07)_0_2.5cqw,transparent_2.5cqw_5cqw)]",
   // Listras de bala.
   fair_play: "bg-[repeating-linear-gradient(135deg,rgb(255_255_255/0.08)_0_3cqw,transparent_3cqw_6cqw)]",
   // Céu estrelado.
@@ -235,6 +278,9 @@ const AWARD_FOOTER: Record<AwardKind, string> = {
   craque: "Melhor jogador",
   gol: "Gol da rodada",
   drible: "Drible",
+  foguete: "Foguete",
+  garcom: "Garçom",
+  motor: "Motor",
   atacante: "Melhor atacante",
   defensor: "Melhor defensor",
   goleiro: "Melhor goleiro",

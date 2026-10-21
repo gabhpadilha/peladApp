@@ -1,12 +1,28 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
-import { ArrowUpIcon, CoinsIcon, SendIcon, SparklesIcon, StarIcon, TrendingUpIcon, UserCheckIcon, type LucideIcon } from "lucide-react";
+import {
+  ArrowDownIcon,
+  ArrowUpIcon,
+  ChevronDownIcon,
+  CoinsIcon,
+  SendIcon,
+  SparklesIcon,
+  StarIcon,
+  TrendingUpIcon,
+  UserCheckIcon,
+  type LucideIcon,
+} from "lucide-react";
+import { PlayerCard } from "@/components/player-card";
 import { Button } from "@/components/ui/button";
+import { CARD_TIER_LABELS, getCardTier } from "@/lib/card-tier";
 import type { RoundRewards } from "@/lib/progression";
+import { cn } from "@/lib/utils";
+import { formatRoundScore } from "@/types/award";
+import type { Player } from "@/types/player";
 
 type RevealRewardsProps = {
   round: number;
-  rewards: RoundRewards & { balance: number };
+  rewards: RoundRewards & { balance: number; card: Player | null };
   onDone: () => void;
 };
 
@@ -23,7 +39,7 @@ function Tile({ value, unit, label, className }: { value: number; unit: string; 
   return (
     <div className={`flex flex-1 flex-col items-center gap-1 rounded-xl border p-3 ${className}`}>
       <span className="flex items-baseline gap-1 font-display leading-none font-extrabold tabular-nums">
-        <span className="text-5xl">+{value}</span>
+        <span className="text-4xl">+{value}</span>
         <span className="text-lg">{unit}</span>
       </span>
       <span className="text-xs tracking-wide uppercase opacity-80">{label}</span>
@@ -32,11 +48,15 @@ function Tile({ value, unit, label, className }: { value: number; unit: string; 
 }
 
 /**
- * "Você ganhou": o XP e as PeladaCoins que a rodada deu a quem abriu o pacote,
- * linha a linha, com a barra de nível andando (aprovado pelo dono do app em 2026-10-21).
+ * "Sua rodada", o fim do pacote (aprovado pelo dono do app em 2026-10-21): a sua
+ * carta de hoje, a nota da rodada, o OVR antes → depois, o XP e as PeladaCoins
+ * que a rodada deu, com a barra de nível andando e o detalhe recolhido.
  */
 export function RevealRewards({ round, rewards, onDone }: RevealRewardsProps) {
-  const { gains, before, after, levelUpCoins, balance } = rewards;
+  const { gains, before, after, levelUpCoins, balance, card, score, ratings, ovrBefore, ovrAfter } = rewards;
+  const ovrDelta = ovrBefore === null || ovrAfter === null ? 0 : Math.round(ovrAfter) - Math.round(ovrBefore);
+  const tierChanged =
+    ovrBefore !== null && ovrAfter !== null && getCardTier(Math.round(ovrBefore)) !== getCardTier(Math.round(ovrAfter));
   const hasLeveledUp = after.level > before.level;
   const fillTo = Math.round((after.xpIntoLevel / after.xpNeeded) * 100);
   // Subiu de nível: a barra do nível novo começa vazia.
@@ -46,17 +66,57 @@ export function RevealRewards({ round, rewards, onDone }: RevealRewardsProps) {
 
   return (
     <section
-      aria-label="O que você ganhou na rodada"
-      // pt-22: abaixo da barrinha de progresso do topo.
-      className="absolute inset-0 overflow-y-auto px-4 pt-22 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
+      aria-label="Sua rodada"
+      // A área que rola começa abaixo do cabeçalho e da barrinha de progresso: nada passa por baixo deles.
+      className="absolute inset-x-0 top-20 bottom-0 overflow-y-auto px-4 pt-2 pb-[max(1.5rem,env(safe-area-inset-bottom))]"
     >
       <div className="mx-auto flex w-full max-w-md flex-col gap-4">
         <div className="flex animate-[reveal-in_0.4s_ease-out_both] flex-col items-center gap-1 text-center">
           <p className="text-xs font-medium tracking-wide text-primary uppercase">Rodada {round}</p>
-          <h1 className="font-display text-4xl leading-none font-extrabold uppercase">Você ganhou</h1>
+          <h1 className="font-display text-4xl leading-none font-extrabold uppercase">Sua rodada</h1>
         </div>
 
-        <div className="flex animate-[reveal-pop_0.45s_ease-out_0.15s_both] gap-3">
+        {/* A sua carta de hoje, a nota da rodada e o OVR antes → depois. */}
+        <div className="flex animate-[reveal-pop_0.45s_ease-out_0.1s_both] items-center gap-4 rounded-xl border bg-card/80 p-3">
+          {card && (
+            <div className="w-28 shrink-0">
+              <PlayerCard player={card} size="fill" />
+            </div>
+          )}
+          <dl className="flex min-w-0 flex-1 flex-col gap-3">
+            <div>
+              <dt className="text-xs text-muted-foreground uppercase">Sua nota</dt>
+              <dd className="flex items-baseline gap-2">
+                <span className="font-display text-5xl leading-none font-extrabold tabular-nums">
+                  {score === null ? "–" : formatRoundScore(score / 10)}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  {ratings === 1 ? "1 avaliação" : `${ratings} avaliações`}
+                </span>
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs text-muted-foreground uppercase">Seu OVR</dt>
+              <dd className="flex items-baseline gap-2 font-display font-extrabold tabular-nums">
+                {ovrBefore !== null && <span className="text-2xl text-muted-foreground">{Math.round(ovrBefore)} →</span>}
+                <span className="animate-[reveal-slam_0.5s_ease-out_0.7s_both] text-4xl leading-none">
+                  {ovrAfter === null ? "–" : Math.round(ovrAfter)}
+                </span>
+                {ovrDelta !== 0 && (
+                  <span className={cn("flex items-center text-lg", ovrDelta > 0 ? "text-success" : "text-destructive")}>
+                    {ovrDelta > 0 ? <ArrowUpIcon aria-hidden className="size-4" /> : <ArrowDownIcon aria-hidden className="size-4" />}
+                    {Math.abs(ovrDelta)}
+                  </span>
+                )}
+              </dd>
+              {tierChanged && ovrAfter !== null && (
+                <p className="mt-1 text-xs font-medium text-primary">Agora sua carta é {CARD_TIER_LABELS[getCardTier(ovrAfter)]}!</p>
+              )}
+            </div>
+          </dl>
+        </div>
+
+        <div className="flex animate-[reveal-pop_0.45s_ease-out_0.3s_both] gap-3">
           <Tile value={Math.round(rewards.xp)} unit="XP" label="Experiência" className="border-primary/40 bg-primary/10 text-primary" />
           <Tile value={rewards.coins} unit="PC" label="PeladaCoins" className="border-amber-300/40 bg-amber-300/10 text-amber-200" />
         </div>
@@ -93,7 +153,13 @@ export function RevealRewards({ round, rewards, onDone }: RevealRewardsProps) {
           </p>
         </div>
 
-        <ul className="flex animate-[reveal-fade_0.4s_ease-out_0.7s_both] flex-col divide-y rounded-xl border bg-card/80">
+        {/* Detalhe recolhido: a tela fica enxuta; quem quiser abre. */}
+        <details className="group animate-[reveal-fade_0.4s_ease-out_0.7s_both] rounded-xl border bg-card/80">
+          <summary className="flex h-11 cursor-pointer list-none items-center justify-between px-3 text-sm font-medium [&::-webkit-details-marker]:hidden">
+            De onde veio o XP e as PeladaCoins
+            <ChevronDownIcon aria-hidden className="size-4 text-muted-foreground transition-transform group-open:rotate-180" />
+          </summary>
+        <ul className="flex flex-col divide-y border-t">
           {gains.map((gain) => {
             const Icon = gainIcon(gain.key);
             return (
@@ -111,6 +177,7 @@ export function RevealRewards({ round, rewards, onDone }: RevealRewardsProps) {
             );
           })}
         </ul>
+        </details>
 
         <div className="flex animate-[reveal-fade_0.4s_ease-out_0.9s_both] items-center justify-between rounded-xl border border-amber-300/30 bg-amber-300/10 px-3 py-2.5">
           <span className="flex items-center gap-2 text-sm text-amber-200/80">

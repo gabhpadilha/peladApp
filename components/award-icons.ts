@@ -1,5 +1,8 @@
 import {
+  CogIcon,
   CrownIcon,
+  HandPlatterIcon,
+  RocketIcon,
   FlameIcon,
   FrownIcon,
   GoalIcon,
@@ -18,6 +21,9 @@ import type { AwardKind } from "@/types/award";
 export const AWARD_ICONS: Record<AwardKind, LucideIcon> = {
   craque: TrophyIcon,
   gol: GoalIcon,
+  foguete: RocketIcon,
+  garcom: HandPlatterIcon,
+  motor: CogIcon,
   drible: SparklesIcon,
   atacante: FlameIcon,
   defensor: ShieldCheckIcon,

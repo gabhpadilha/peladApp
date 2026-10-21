@@ -6,6 +6,7 @@ import type { CardThemeKey } from "@/lib/card-themes";
 import type { RoundRewards } from "@/lib/progression";
 import type { Award, AwardKind } from "@/types/award";
 import type { Match } from "@/types/match";
+import type { Player } from "@/types/player";
 
 /**
  * Ordem das cartas: a zoeira abre e os prêmios mais importantes vêm depois. O
@@ -32,8 +33,8 @@ export type MatchWinners = {
   revealed: Award[];
   /** Time da Semana (pode passar de 5 com empate). */
   team: Award[];
-  /** O que a rodada deu a quem abriu o pacote (XP e PeladaCoins), com o saldo de hoje. */
-  rewards?: (RoundRewards & { balance: number }) | null;
+  /** O que a rodada deu a quem abriu o pacote (XP e PeladaCoins), com o saldo e a carta de hoje. */
+  rewards?: (RoundRewards & { balance: number; card: Player | null }) | null;
 };
 
 /** Cartas especiais de uma rodada fechada, para a animação. `null` se a rodada não existe ou está aberta. */
@@ -58,6 +59,7 @@ export async function getMatchWinners(matchId: string): Promise<MatchWinners | n
     ? {
         ...roundRewards,
         balance: Math.max(0, league.getProgression(memberId).coinsEarned - (await getOwnPurchases(memberId)).spent),
+        card: league.players.find((player) => player.id === memberId) ?? null,
       }
     : null;
 

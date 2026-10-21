@@ -10,18 +10,20 @@ type PlayerRole = Player["role"];
 export const AWARD_KINDS = [
   "craque",
   "gol",
-  "drible",
+  "foguete",
   "atacante",
+  "garcom",
+  "drible",
   "defensor",
+  "motor",
   "goleiro",
-  "fominha",
   "bola_murcha",
   "time_da_semana",
   "jogador_do_mes",
 ] as const;
 
 /** Prêmios que saíram do jogo (decisão do dono do app em 2026-10-21): o tipo ainda aceita, ninguém ganha mais. */
-type RetiredAwardKind = "fair_play";
+type RetiredAwardKind = "fair_play" | "fominha";
 
 export type AwardKind = (typeof AWARD_KINDS)[number] | RetiredAwardKind;
 
@@ -31,8 +33,8 @@ export function awardOrder(kind: AwardKind): number {
   return index === -1 ? AWARD_KINDS.length : index;
 }
 
-/** Prêmios por voto, na ordem da votação (só os que não dá para tirar das notas; ordem pedida pelo dono do app). */
-export const VOTE_AWARD_KINDS = ["gol", "bola_murcha", "fominha"] as const;
+/** Prêmios por voto: só o Gol da Rodada (o único que não dá para tirar das notas; decisão do dono do app). */
+export const VOTE_AWARD_KINDS = ["gol"] as const;
 export type VoteAwardKind = (typeof VOTE_AWARD_KINDS)[number];
 
 /** Notas mínimas recebidas na rodada para entrar no Time da Semana e nos prêmios das notas (igual ao banco). */
@@ -46,10 +48,17 @@ export const TEAM_OF_THE_WEEK_MIN_RATINGS = 3;
 export const STAT_AWARD_SOURCES: Partial<Record<AwardKind, { label: string; short: string }>> = {
   craque: { label: "Nota da rodada", short: "nota" },
   goleiro: { label: "Nota da rodada", short: "nota" },
-  drible: { label: "Drible na rodada", short: "DRI" },
+  foguete: { label: "Velocidade na rodada", short: "VEL" },
   atacante: { label: "Chute na rodada", short: "CHU" },
+  garcom: { label: "Passe na rodada", short: "PAS" },
+  drible: { label: "Drible na rodada", short: "DRI" },
   defensor: { label: "Defesa na rodada", short: "DEF" },
+  motor: { label: "Físico na rodada", short: "FIS" },
+  bola_murcha: { label: "Nota da rodada", short: "nota" },
 };
+
+/** Prêmios dos atributos da linha: os "Destaques da rodada" no quadro tático da revelação (+ Goleiro e Gol). */
+export const ATTRIBUTE_AWARD_KINDS = ["foguete", "atacante", "garcom", "drible", "defensor", "motor"] as const;
 
 /** Notas mínimas recebidas no mês para concorrer ao Time do Mês (igual ao banco). */
 export const PLAYER_OF_THE_MONTH_MIN_RATINGS = 5;
@@ -80,6 +89,24 @@ export const AWARD_LABELS: Record<
     question: "Quem fez o gol mais bonito?",
     hint: "O golaço da rodada. A carta vem com +1 em cada atributo.",
     eligibility: "all",
+  },
+  foguete: {
+    title: "Foguete da Rodada",
+    question: "",
+    hint: "A maior nota de velocidade (VEL) da rodada na linha. Sem voto. A carta vem com +1 em cada atributo.",
+    eligibility: "outfield",
+  },
+  garcom: {
+    title: "Garçom da Rodada",
+    question: "",
+    hint: "A maior nota de passe (PAS) da rodada na linha. Sem voto. A carta vem com +1 em cada atributo.",
+    eligibility: "outfield",
+  },
+  motor: {
+    title: "Motor da Rodada",
+    question: "",
+    hint: "A maior nota de físico (FIS) da rodada na linha. Sem voto. A carta vem com +1 em cada atributo.",
+    eligibility: "outfield",
   },
   drible: {
     title: "Drible da Rodada",
@@ -112,17 +139,18 @@ export const AWARD_LABELS: Record<
     hint: "Saiu do jogo.",
     eligibility: "all",
   },
+  // Saiu do jogo (2026-10-21): fica só para cartas antigas.
   fominha: {
     title: "Fominha",
-    question: "Quem foi o fominha?",
-    hint: "Não passou a bola de jeito nenhum. Vale a zoeira.",
+    question: "",
+    hint: "Saiu do jogo.",
     eligibility: "all",
   },
   bola_murcha: {
     title: "Bola Murcha",
-    question: "Quem foi a bola murcha?",
-    hint: "Aquele que não estava nos seus dias. Vale a zoeira.",
-    eligibility: "all",
+    question: "",
+    hint: "A menor nota da rodada na linha. Sem voto. Vale a zoeira (a carta não tem bônus).",
+    eligibility: "outfield",
   },
   time_da_semana: {
     title: "Time da Semana",

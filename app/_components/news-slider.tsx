@@ -198,7 +198,7 @@ export function NewsSlider({ event, today, shopSale, player, progress, balance }
               ? `Até ${formatShortDate(event.endDate)} · ${formatDaysLeft(event.daysLeft)}`
               : undefined
           }
-          text="As maiores notas da rodada levam Melhor Jogador, Drible, Atacante, Defensor e Goleiro; Gol, Fominha e Bola Murcha são no voto. A carta vem com o visual do evento e fica na coleção para sempre."
+          text="As notas da rodada decidem Melhor Jogador, um prêmio por atributo, Goleiro e a Bola Murcha; só o Gol é no voto. A carta vem com o visual do evento e fica na coleção para sempre."
           visual={
             <CardFan
               cards={EVENT_FAN.map((kind) => (

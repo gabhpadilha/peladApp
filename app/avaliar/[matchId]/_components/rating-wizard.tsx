@@ -65,7 +65,7 @@ function averageScore(draft: Draft): number {
 /**
  * Notas da rodada, um jogador por vez (mobile, no vestiário): 6 sliders,
  * "Próximo" só com os 6 tocados, "Pular" para quem você não viu jogar.
- * Depois, um voto por prêmio (Gol da Rodada, Fominha, Bola Murcha; o resto sai das notas), revisão
+ * Depois, um voto por prêmio (só o Gol da Rodada; o resto sai das notas), revisão
  * e envio de tudo de uma vez.
  */
 export function RatingWizard({ match, targets }: RatingWizardProps) {

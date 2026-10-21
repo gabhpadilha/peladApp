@@ -8,50 +8,70 @@ import { AWARD_LABELS, awardOrder, type Award } from "@/types/award";
 import type { MatchWinners } from "../_data-access/get-match-winners";
 import { markAwardsSeen } from "../_actions/mark-awards-seen";
 import { RevealAward } from "./reveal-award";
+import { RevealHighlights } from "./reveal-highlights";
 import { RevealPack } from "./reveal-pack";
 import { RevealRewards } from "./reveal-rewards";
 import { RevealSummary } from "./reveal-summary";
 import { RevealTeam } from "./reveal-team";
-import { PACK_THEMES } from "./reveal-theme";
+import { PACK_THEMES, ZOEIRA_AWARDS } from "./reveal-theme";
+import { RevealZoeira } from "./reveal-zoeira";
 
 /** Tempo do pacote tremendo e abrindo antes da primeira carta (igual às animações do CSS). */
 const OPENING_MS = 1600;
 
 type Stage = { type: "pack" } | { type: "opening" } | { type: "step"; index: number } | { type: "summary" };
 
-/** Um passo da revelação: uma carta, o Time da Semana em campo ou o que você ganhou. */
-type Step = { type: "award"; award: Award } | { type: "team" } | { type: "rewards" };
+/** Um passo da revelação: um grupo de cartas numa tela só, o Melhor Jogador ou a sua rodada. */
+type Step =
+  | { type: "zoeira"; awards: Award[] }
+  | { type: "highlights"; awards: Award[] }
+  | { type: "team" }
+  | { type: "month"; awards: Award[] }
+  | { type: "award"; award: Award }
+  | { type: "rewards" };
 
 /**
- * Ordem pelo peso do prêmio (pedido do dono do app em 2026-10-21): os prêmios
- * individuais (zoeira primeiro), o Time da Semana, as cartas do Time do Mês, o
- * Melhor Jogador e, fechando o pacote, o XP e as PeladaCoins de quem abriu.
+ * O pacote em até 6 passos (pedido do dono do app em 2026-10-21, "menos
+ * maçante"): a zoeira (Bola Murcha e Fominha juntas), os destaques da rodada num
+ * quadro (atributos, Goleiro e Gol), o Time da Semana, o Time do Mês (só na última
+ * quinta), o Melhor Jogador sozinho e, fechando, a sua rodada.
  */
 function buildSteps(revealed: Award[], hasTeam: boolean, hasRewards: boolean): Step[] {
-  const toSteps = (awards: Award[]): Step[] => awards.map((award) => ({ type: "award", award }));
-  const others = revealed.filter((award) => award.kind !== "jogador_do_mes" && award.kind !== "craque");
-  return [
-    ...toSteps(others),
-    ...(hasTeam ? [{ type: "team" } as const] : []),
-    ...toSteps(revealed.filter((award) => award.kind === "jogador_do_mes")),
-    ...toSteps(revealed.filter((award) => award.kind === "craque")),
-    ...(hasRewards ? [{ type: "rewards" } as const] : []),
-  ];
+  const zoeira = revealed.filter((award) => ZOEIRA_AWARDS.includes(award.kind));
+  const month = revealed.filter((award) => award.kind === "jogador_do_mes");
+  const best = revealed.filter((award) => award.kind === "craque");
+  const highlights = revealed.filter(
+    (award) => !ZOEIRA_AWARDS.includes(award.kind) && award.kind !== "jogador_do_mes" && award.kind !== "craque",
+  );
+  const steps: Step[] = [];
+  if (zoeira.length > 0) steps.push({ type: "zoeira", awards: zoeira });
+  if (highlights.length > 0) steps.push({ type: "highlights", awards: highlights });
+  if (hasTeam) steps.push({ type: "team" });
+  if (month.length > 0) steps.push({ type: "month", awards: month });
+  for (const award of best) steps.push({ type: "award", award });
+  if (hasRewards) steps.push({ type: "rewards" });
+  return steps;
 }
 
-/** Texto do botão que leva ao próximo passo (anuncia o Time da Semana, o do Mês e o Melhor Jogador). */
+/** Texto do botão que leva ao próximo passo (anuncia o que vem). */
 function nextLabel(steps: Step[], index: number): string {
   const current = steps[index];
   const next = steps[index + 1];
-  if (!next) return "Ver todos os vencedores";
-  if (next.type === "team") return "E o Time da Semana…";
-  if (next.type === "rewards") return "Ver o que você ganhou";
-  if (current.type === "rewards") return "Ver todos os vencedores";
-  const isNewKind = current.type === "team" || current.award.kind !== next.award.kind;
-  if (isNewKind && (next.award.kind === "jogador_do_mes" || next.award.kind === "craque")) {
-    return `E o ${AWARD_LABELS[next.award.kind].title}…`;
+  if (!next || current.type === "rewards") return "Ver todos os vencedores";
+  switch (next.type) {
+    case "highlights":
+      return "Ver os destaques da rodada";
+    case "team":
+      return "E o Time da Semana…";
+    case "month":
+      return "E o Time do Mês…";
+    case "rewards":
+      return "Ver a sua rodada";
+    case "award":
+      return current.type === "award" ? "Próxima carta" : `E o ${AWARD_LABELS[next.award.kind].title}…`;
+    default:
+      return "Próximo";
   }
-  return "Próxima carta";
 }
 
 type WinnersRevealProps = {
@@ -116,6 +136,11 @@ export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) 
         "motion-reduce:**:animate-none!",
       )}
     >
+      {/* Sombra atrás do cabeçalho: o que rola por baixo não se mistura ao título. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 z-10 h-20 bg-linear-to-b from-black/85 via-black/60 to-transparent"
+      />
       <header className="absolute inset-x-0 top-0 z-20 flex h-14 items-center justify-between gap-2 px-2">
         <Link
           href="/"
@@ -130,7 +155,7 @@ export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) 
         {isPlaying ? (
           <button
             type="button"
-            // Pular leva ao "Você ganhou" (se houver), para ninguém perder o que ganhou.
+            // Pular leva à "Sua rodada" (se houver), para ninguém perder o que ganhou.
             onClick={() => {
               const rewardsIndex = steps.findIndex((candidate) => candidate.type === "rewards");
               goToStep(rewardsIndex >= 0 && current?.type !== "rewards" ? rewardsIndex : steps.length);
@@ -178,8 +203,32 @@ export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) 
         />
       )}
 
+      {step !== null && current?.type === "zoeira" && (
+        <RevealZoeira awards={current.awards} nextLabel={nextLabel(steps, step)} onNext={() => goToStep(step + 1)} />
+      )}
+
+      {step !== null && current?.type === "highlights" && (
+        <RevealHighlights awards={current.awards} nextLabel={nextLabel(steps, step)} onNext={() => goToStep(step + 1)} />
+      )}
+
       {step !== null && current?.type === "team" && (
-        <RevealTeam team={team} doneLabel={nextLabel(steps, step)} onDone={() => goToStep(step + 1)} />
+        <RevealTeam
+          key="time-da-semana"
+          team={team}
+          subtitle="As 4 maiores notas da linha e a maior do gol"
+          doneLabel={nextLabel(steps, step)}
+          onDone={() => goToStep(step + 1)}
+        />
+      )}
+
+      {step !== null && current?.type === "month" && (
+        <RevealTeam
+          key="time-do-mes"
+          team={current.awards}
+          subtitle="As 4 maiores médias do mês na linha e a maior do gol"
+          doneLabel={nextLabel(steps, step)}
+          onDone={() => goToStep(step + 1)}
+        />
       )}
 
       {step !== null && current?.type === "rewards" && rewards && (
