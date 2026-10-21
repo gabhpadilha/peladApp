@@ -87,7 +87,7 @@ export async function getShop(): Promise<Shop | null> {
     ...(eventSkins.length > 0
       ? [{ key: "event" as const, title: `Evento · ${CARD_THEME_LABELS[event.theme]}`, event, items: eventSkins.map(toItem) }]
       : []),
-    ...(premiumSkins.length > 0 ? [{ key: "premium" as const, title: "Cartas premium", event: null, items: premiumSkins.map(toItem) }] : []),
+    ...(premiumSkins.length > 0 ? [{ key: "premium" as const, title: "Personalização premium", event: null, items: premiumSkins.map(toItem) }] : []),
   ];
 
   return {
