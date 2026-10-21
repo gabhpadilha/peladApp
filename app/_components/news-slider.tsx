@@ -4,11 +4,11 @@ import { ArrowRightIcon, CoinsIcon, GhostIcon, SparklesIcon, StarIcon, StoreIcon
 import { formatCoins } from "@/components/coin-pill";
 import { PlayerCard } from "@/components/player-card";
 import { withAwardBonus } from "@/lib/award-bonus";
-import type { CardThemeKey, CurrentCardEvent } from "@/lib/card-themes";
+import { CARD_THEME_LABELS, type CardThemeKey, type CurrentCardEvent } from "@/lib/card-themes";
 import { formatShortDate } from "@/lib/format-date";
 import { COIN_RULES, XP_RULES, type LevelProgress } from "@/lib/progression";
 import { TEAM_OF_THE_WEEK_MIN_RATINGS, type AwardKind } from "@/types/award";
-import type { CardSkinKey } from "@/types/card-skin";
+import { CARD_SKINS, isCardSkinOnSale, type CardSkinKey } from "@/types/card-skin";
 import type { Player } from "@/types/player";
 import { cn } from "@/lib/utils";
 import { NewsCarousel } from "./news-carousel";
@@ -116,10 +116,22 @@ const EVENT_COPY: Record<CardThemeKey, { eyebrow: string; title: string; icon: L
 const EVENT_FAN: [AwardKind, AwardKind, AwardKind] = ["gol", "craque", "bola_murcha"];
 const SHOP_FAN: [CardSkinKey, CardSkinKey, CardSkinKey] = ["safira", "esmeralda", "icone"];
 
-/** Novidades do app na home: evento do mês, Time da Semana, Loja, XP e PeladaCoins. */
+const listFormatter = new Intl.ListFormat("pt-BR", { style: "long", type: "conjunction" });
+
+/** Cartas de evento à venda agora (o último dia do evento está dentro dele). */
+function getEventSkins(event: CurrentCardEvent) {
+  const lastDay = event.endDate;
+  return lastDay ? CARD_SKINS.filter((skin) => "event" in skin && isCardSkinOnSale(skin, lastDay)) : [];
+}
+
+/** Novidades do app na home: evento do mês, Time da Semana, Loja (com as cartas do evento), XP e PeladaCoins. */
 export function NewsSlider({ event, player, progress, balance }: NewsSliderProps) {
   const eventCopy = EVENT_COPY[event.theme];
   const percent = Math.min(100, Math.round((progress.xpIntoLevel / progress.xpNeeded) * 100));
+  // Com evento na Loja, as cartas dele vão no leque (a primeira no meio).
+  const eventSkins = getEventSkins(event);
+  const shopFan: [CardSkinKey, CardSkinKey, CardSkinKey] =
+    eventSkins.length >= 2 ? [eventSkins[1].key, eventSkins[0].key, "esmeralda"] : SHOP_FAN;
 
   const slides = [
     {
@@ -180,12 +192,21 @@ export function NewsSlider({ event, player, progress, balance }: NewsSliderProps
       content: (
         <Slide
           icon={StoreIcon}
-          eyebrow="Novidade"
+          eyebrow={eventSkins.length > 0 ? `Novidade · ${CARD_THEME_LABELS[event.theme]}` : "Novidade"}
           title="Loja de cartas"
-          text="Troque o visual da sua carta por uma premium. Novas cartas liberam por nível; a Esmeralda já está liberada."
+          meta={
+            eventSkins.length > 0 && event.endDate !== null && event.daysLeft !== null
+              ? `Cartas de evento até ${formatShortDate(event.endDate)} · ${formatDaysLeft(event.daysLeft)}`
+              : undefined
+          }
+          text={
+            eventSkins.length > 0
+              ? `Chegaram ${listFormatter.format(eventSkins.map((skin) => skin.name))}, no nível ${Math.min(...eventSkins.map((skin) => skin.level))}. Só ficam à venda durante o evento; quem comprar continua usando depois.`
+              : "Troque o visual da sua carta por uma premium. Novas cartas liberam por nível; a Esmeralda já está liberada."
+          }
           visual={
             <CardFan
-              cards={SHOP_FAN.map((skin) => (
+              cards={shopFan.map((skin) => (
                 <PlayerCard key={skin} player={{ ...player, cardSkin: skin }} size="fill" />
               )) as [ReactNode, ReactNode, ReactNode]}
             />
