@@ -6,8 +6,9 @@ import type { Award, AwardKind } from "@/types/award";
 import type { Match } from "@/types/match";
 
 /**
- * Ordem da revelação: a zoeira abre, o Melhor Jogador e o Time do Mês (só na
- * rodada da última quinta) fecham; o Time da Semana vem por último, em campo.
+ * Ordem das cartas: a zoeira abre e os prêmios mais importantes vêm depois. O
+ * Time da Semana, o Time do Mês (só na rodada da última quinta) e o Melhor
+ * Jogador, nessa ordem, ficam no fim (`buildSteps` em `winners-reveal.tsx`).
  */
 const REVEAL_ORDER: readonly AwardKind[] = [
   "bola_murcha",
@@ -18,8 +19,8 @@ const REVEAL_ORDER: readonly AwardKind[] = [
   "goleiro",
   "atacante",
   "gol",
-  "craque",
   "jogador_do_mes",
+  "craque",
 ];
 
 export type MatchWinners = {

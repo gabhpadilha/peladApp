@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { XIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AWARD_KINDS } from "@/types/award";
+import { AWARD_KINDS, AWARD_LABELS, type Award } from "@/types/award";
 import type { MatchWinners } from "../_data-access/get-match-winners";
 import { markAwardsSeen } from "../_actions/mark-awards-seen";
 import { RevealAward } from "./reveal-award";
@@ -16,12 +16,39 @@ import { PACK_THEMES } from "./reveal-theme";
 /** Tempo do pacote tremendo e abrindo antes da primeira carta (igual às animações do CSS). */
 const OPENING_MS = 1600;
 
-type Stage =
-  | { type: "pack" }
-  | { type: "opening" }
-  | { type: "award"; index: number }
-  | { type: "team" }
-  | { type: "summary" };
+type Stage = { type: "pack" } | { type: "opening" } | { type: "step"; index: number } | { type: "summary" };
+
+/** Um passo da revelação: uma carta ou o Time da Semana em campo. */
+type Step = { type: "award"; award: Award } | { type: "team" };
+
+/**
+ * Ordem pelo peso do prêmio (pedido do dono do app em 2026-10-21): os prêmios
+ * individuais (zoeira primeiro), o Time da Semana, as cartas do Time do Mês e,
+ * por último, o Melhor Jogador.
+ */
+function buildSteps(revealed: Award[], hasTeam: boolean): Step[] {
+  const toSteps = (awards: Award[]): Step[] => awards.map((award) => ({ type: "award", award }));
+  const others = revealed.filter((award) => award.kind !== "jogador_do_mes" && award.kind !== "craque");
+  return [
+    ...toSteps(others),
+    ...(hasTeam ? [{ type: "team" } as const] : []),
+    ...toSteps(revealed.filter((award) => award.kind === "jogador_do_mes")),
+    ...toSteps(revealed.filter((award) => award.kind === "craque")),
+  ];
+}
+
+/** Texto do botão que leva ao próximo passo (anuncia o Time da Semana, o do Mês e o Melhor Jogador). */
+function nextLabel(steps: Step[], index: number): string {
+  const current = steps[index];
+  const next = steps[index + 1];
+  if (!next) return "Ver todos os vencedores";
+  if (next.type === "team") return "E o Time da Semana…";
+  const isNewKind = current.type === "team" || current.award.kind !== next.award.kind;
+  if (isNewKind && (next.award.kind === "jogador_do_mes" || next.award.kind === "craque")) {
+    return `E o ${AWARD_LABELS[next.award.kind].title}…`;
+  }
+  return "Próxima carta";
+}
 
 type WinnersRevealProps = {
   winners: MatchWinners;
@@ -34,12 +61,13 @@ function describeContents(cardCount: number, hasTeam: boolean): string {
   return hasTeam ? `${cards} + Time da Semana` : cards;
 }
 
-/** Abertura do pacote da rodada: uma carta por vez, depois o Time da Semana e o resumo. */
+/** Abertura do pacote da rodada: um passo por vez (`buildSteps`), depois o resumo. */
 export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) {
   const { match, theme, revealed, team } = winners;
   const [stage, setStage] = useState<Stage>({ type: "pack" });
   const [, startTransition] = useTransition();
   const openingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const steps = buildSteps(revealed, team.length > 0);
 
   useEffect(() => {
     return () => {
@@ -47,8 +75,8 @@ export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) 
     };
   }, []);
 
-  function goAfterAwards() {
-    setStage(team.length > 0 ? { type: "team" } : { type: "summary" });
+  function goToStep(index: number) {
+    setStage(index < steps.length ? { type: "step", index } : { type: "summary" });
   }
 
   function handleOpen() {
@@ -62,24 +90,17 @@ export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) 
         console.error("markAwardsSeen", error);
       }
     });
-    openingTimer.current = setTimeout(() => {
-      if (revealed.length > 0) setStage({ type: "award", index: 0 });
-      else goAfterAwards();
-    }, OPENING_MS);
-  }
-
-  function handleNext(index: number) {
-    if (index + 1 < revealed.length) setStage({ type: "award", index: index + 1 });
-    else goAfterAwards();
+    openingTimer.current = setTimeout(() => goToStep(0), OPENING_MS);
   }
 
   function handleReplay() {
     setStage({ type: "pack" });
   }
 
-  const total = revealed.length + (team.length > 0 ? 1 : 0);
-  const step = stage.type === "award" ? stage.index : stage.type === "team" ? revealed.length : null;
+  const total = steps.length;
+  const step = stage.type === "step" ? stage.index : null;
   const isPlaying = step !== null;
+  const current = step === null ? null : steps[step];
   const summaryAwards = revealed.toSorted((a, b) => AWARD_KINDS.indexOf(a.kind) - AWARD_KINDS.indexOf(b.kind));
 
   return (
@@ -139,23 +160,19 @@ export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) 
         />
       )}
 
-      {stage.type === "award" && (
+      {step !== null && current?.type === "award" && (
         <RevealAward
           // Nova `key` a cada carta: a sequência de animações recomeça.
-          key={revealed[stage.index].id}
-          award={revealed[stage.index]}
-          nextLabel={
-            stage.index + 1 < revealed.length
-              ? `Próxima carta (${stage.index + 2}/${revealed.length})`
-              : team.length > 0
-                ? "E o Time da Semana…"
-                : "Ver todos os vencedores"
-          }
-          onNext={() => handleNext(stage.index)}
+          key={current.award.id}
+          award={current.award}
+          nextLabel={nextLabel(steps, step)}
+          onNext={() => goToStep(step + 1)}
         />
       )}
 
-      {stage.type === "team" && <RevealTeam team={team} onDone={() => setStage({ type: "summary" })} />}
+      {step !== null && current?.type === "team" && (
+        <RevealTeam team={team} doneLabel={nextLabel(steps, step)} onDone={() => goToStep(step + 1)} />
+      )}
 
       {stage.type === "summary" && (
         <RevealSummary

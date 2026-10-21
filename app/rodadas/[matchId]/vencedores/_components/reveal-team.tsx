@@ -8,6 +8,8 @@ import { revealColorStyle } from "./reveal-theme";
 
 type RevealTeamProps = {
   team: Award[];
+  /** Texto do botão: o próximo passo ("E o Time do Mês…") ou "Ver todos os vencedores". */
+  doneLabel: string;
   onDone: () => void;
 };
 
@@ -34,7 +36,7 @@ function TeamCard({ award }: { award: Award }) {
 }
 
 /** Time da Semana entrando em campo no 1-2-1, uma carta por vez, com a nota da rodada. */
-export function RevealTeam({ team, onDone }: RevealTeamProps) {
+export function RevealTeam({ team, doneLabel, onDone }: RevealTeamProps) {
   const slots = assignFormation(team.map((award) => ({ position: award.card.position, award })));
   const placed = new Set(Object.values(slots).flatMap((slot) => (slot ? [slot.award.id] : [])));
   // Empate na última vaga: quem não coube nas 5 vagas aparece embaixo do campo.
@@ -93,7 +95,7 @@ export function RevealTeam({ team, onDone }: RevealTeamProps) {
         className="relative h-11 w-full max-w-sm shrink-0 animate-[reveal-fade_0.4s_ease-out_3.2s_both] text-base"
         onClick={onDone}
       >
-        Ver todos os vencedores
+        {doneLabel}
       </Button>
     </section>
   );
