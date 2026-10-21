@@ -830,7 +830,7 @@ function PremiumFaceArt({ skin }: { skin: CardSkinKey }) {
 /**
  * Carta comprada na Loja (inspirada na Team of the Year do EA FC): moldura de
  * ouro champanhe com lâminas finas por fora, face escura na cor da carta e
- * atributos em duas colunas. Mesma foto, OVR e atributos da carta padrão.
+ * atributos numa linha, como a carta padrão. Mesma foto, OVR e atributos da carta padrão.
  * Sem `mix-blend-mode` nem máscara com a URL da foto (viram faixas no iPhone).
  */
 function PremiumPlayerCard({
@@ -847,7 +847,6 @@ function PremiumPlayerCard({
   const attributeKeys: readonly PlayerAttribute[] =
     player.role === "goalkeeper" ? GOALKEEPER_ATTRIBUTES : OUTFIELD_ATTRIBUTES;
   const attributeValues: Partial<Record<PlayerAttribute, number | null>> = player.attributes;
-  const columns = [attributeKeys.slice(0, 3), attributeKeys.slice(3)];
   const skinInfo = getCardSkin(skin);
   const crest = "crest" in skinInfo ? skinInfo.crest : null;
 
@@ -905,25 +904,20 @@ function PremiumPlayerCard({
               {player.nickname}
             </span>
             <span className={cn("h-px w-full opacity-50", GOLD_FILL)} />
-            <div className="grid w-[86%] grid-cols-[1fr_1px_1fr] gap-x-[5cqw]">
-              {columns.map((column, index) => (
-                <dl key={column.join("-")} className={cn("flex flex-col gap-[1.6cqw]", index === 1 && "col-start-3")}>
-                  {column.map((key) => (
-                    <div key={key} className="flex items-baseline gap-[2.2cqw]">
-                      <dd className="w-[11cqw] text-right text-[9cqw] font-semibold tabular-nums">
-                        {attributeValues[key] ?? EMPTY_VALUE}
-                      </dd>
-                      <dt className="text-[8cqw] font-normal opacity-90">
-                        <abbr title={ATTRIBUTE_LABELS[key].name} className="no-underline">
-                          {ATTRIBUTE_LABELS[key].abbreviation}
-                        </abbr>
-                      </dt>
-                    </div>
-                  ))}
-                </dl>
+            {/* 6 atributos numa linha, sigla em cima e valor embaixo, como a carta base e as
+                especiais (pedido do dono do app em 2026-10-21; antes eram 2 colunas de 3). */}
+            <dl className="grid w-[112%] grid-cols-6 text-center">
+              {attributeKeys.map((key) => (
+                <div key={key} className="flex flex-col items-center gap-[1cqw]">
+                  <dt className="text-[6.2cqw] font-medium opacity-80">
+                    <abbr title={ATTRIBUTE_LABELS[key].name} className="no-underline">
+                      {ATTRIBUTE_LABELS[key].abbreviation}
+                    </abbr>
+                  </dt>
+                  <dd className="text-[9.5cqw] font-semibold tabular-nums">{attributeValues[key] ?? EMPTY_VALUE}</dd>
+                </div>
               ))}
-              <span className={cn("col-start-2 row-start-1 h-full w-px opacity-45", GOLD_FILL)} />
-            </div>
+            </dl>
           </div>
 
           {typeof player.level === "number" && (
