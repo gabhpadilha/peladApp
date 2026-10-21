@@ -43,7 +43,7 @@ export function CollectionGallery({ awards, shareableIds, groupName }: Collectio
 
   const filters: { key: Filter; label: string; count: number }[] = [
     { key: "all", label: "Todas", count: awards.length },
-    // Só os prêmios que o atleta já tem (são 10 tipos), mais o filtro ativo.
+    // Só os prêmios que o atleta já tem, mais o filtro ativo.
     ...AWARD_KINDS.map((kind) => ({
       key: kind,
       label: AWARD_LABELS[kind].title,

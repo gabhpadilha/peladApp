@@ -2,7 +2,7 @@ import { PlayerCard } from "@/components/player-card";
 import { BOOSTED_AWARDS } from "@/lib/award-bonus";
 import { CARD_THEME_LABELS } from "@/lib/card-themes";
 import { formatWeekdayDate } from "@/lib/format-date";
-import { AWARD_LABELS, formatRoundScore, hasSeasonalTheme, type Award } from "@/types/award";
+import { AWARD_LABELS, formatRoundScore, hasSeasonalTheme, STAT_AWARD_SOURCES, type Award } from "@/types/award";
 import { AWARD_ICONS } from "@/components/award-icons";
 import { ShareAwardButton } from "./share-award-button";
 
@@ -17,9 +17,10 @@ type LatestAwardSpotlightProps = {
 export function LatestAwardSpotlight({ award, isShareable, groupName }: LatestAwardSpotlightProps) {
   const Icon = AWARD_ICONS[award.kind];
   const isBoosted = BOOSTED_AWARDS.includes(award.kind);
-  // Prêmios das notas (sem voto) mostram a nota média no lugar dos votos.
-  const isTeamOfTheWeek = award.kind === "time_da_semana";
-  const isScored = isTeamOfTheWeek || award.kind === "jogador_do_mes";
+  // Prêmios das notas (sem voto) mostram a média que decidiu no lugar dos votos.
+  const isScored = award.score !== null;
+  const scoreLabel =
+    award.kind === "jogador_do_mes" ? "Média do mês" : (STAT_AWARD_SOURCES[award.kind]?.short ?? "nota").replace("nota", "Nota");
 
   return (
     <section
@@ -50,7 +51,7 @@ export function LatestAwardSpotlight({ award, isShareable, groupName }: LatestAw
 
         <dl className="grid grid-cols-3 gap-2 text-left">
           <div className="rounded-lg bg-muted/50 px-3 py-2">
-            <dt className="text-xs text-muted-foreground">{isScored ? (isTeamOfTheWeek ? "Nota" : "Média do mês") : "Votos"}</dt>
+            <dt className="text-xs text-muted-foreground">{isScored ? scoreLabel : "Votos"}</dt>
             <dd className="font-display text-2xl font-bold tabular-nums">
               {isScored ? (award.score === null ? "–" : formatRoundScore(award.score)) : award.votes}
             </dd>

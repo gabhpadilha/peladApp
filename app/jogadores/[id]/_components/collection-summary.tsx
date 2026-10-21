@@ -7,7 +7,7 @@ type CollectionSummaryProps = {
   title: string;
 };
 
-/** Cabeçalho da coleção: total e quantas cartas de cada um dos 10 prêmios. */
+/** Cabeçalho da coleção: total e quantas cartas de cada prêmio em jogo. */
 export function CollectionSummary({ awards, title }: CollectionSummaryProps) {
   const countByKind = Object.fromEntries(
     AWARD_KINDS.map((kind) => [kind, awards.filter((award) => award.kind === kind).length]),

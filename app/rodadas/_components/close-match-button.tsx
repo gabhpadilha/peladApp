@@ -41,7 +41,8 @@ export function CloseMatchButton({ matchId, round }: CloseMatchButtonProps) {
     >
       <p className="text-sm text-muted-foreground">
         Fechar a rodada {round}? As notas passam a contar no OVR, ninguém mais envia e saem as cartas
-        especiais: os 9 prêmios por voto e o Time da Semana. Todo mundo vê o aviso na home para abrir o pacote.
+        especiais: os prêmios das notas (Melhor Jogador, Drible, Atacante, Defensor e Goleiro), os 3 por voto e o
+        Time da Semana. Todo mundo vê o aviso na home para abrir o pacote.
       </p>
       <div className="flex shrink-0 justify-end gap-2">
         <Button size="sm" variant="ghost" onClick={() => setIsConfirming(false)} disabled={isPending}>

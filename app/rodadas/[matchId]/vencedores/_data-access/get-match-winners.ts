@@ -15,7 +15,6 @@ import type { Match } from "@/types/match";
 const REVEAL_ORDER: readonly AwardKind[] = [
   "bola_murcha",
   "fominha",
-  "fair_play",
   "drible",
   "defensor",
   "goleiro",

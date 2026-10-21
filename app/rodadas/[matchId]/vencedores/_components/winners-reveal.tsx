@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import Link from "next/link";
 import { XIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AWARD_KINDS, AWARD_LABELS, type Award } from "@/types/award";
+import { AWARD_LABELS, awardOrder, type Award } from "@/types/award";
 import type { MatchWinners } from "../_data-access/get-match-winners";
 import { markAwardsSeen } from "../_actions/mark-awards-seen";
 import { RevealAward } from "./reveal-award";
@@ -105,7 +105,7 @@ export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) 
   const step = stage.type === "step" ? stage.index : null;
   const isPlaying = step !== null;
   const current = step === null ? null : steps[step];
-  const summaryAwards = revealed.toSorted((a, b) => AWARD_KINDS.indexOf(a.kind) - AWARD_KINDS.indexOf(b.kind));
+  const summaryAwards = revealed.toSorted((a, b) => awardOrder(a.kind) - awardOrder(b.kind));
 
   return (
     <div

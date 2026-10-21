@@ -18,7 +18,7 @@ import {
 } from "@/lib/progression";
 import { requireActiveMembership } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
-import { AWARD_KINDS, type Award } from "@/types/award";
+import { awardOrder, type Award } from "@/types/award";
 import { isCardSkinKey } from "@/types/card-skin";
 import type { Json } from "@/types/database";
 import type { Evaluation, Match } from "@/types/match";
@@ -189,7 +189,7 @@ export async function getLeague(nextPath = "/") {
       ];
     })
     // Mais recentes primeiro; dentro da rodada, na ordem dos prêmios (AWARD_KINDS).
-    .toSorted((a, b) => b.round - a.round || AWARD_KINDS.indexOf(a.kind) - AWARD_KINDS.indexOf(b.kind));
+    .toSorted((a, b) => b.round - a.round || awardOrder(a.kind) - awardOrder(b.kind));
 
   const latestClosedMatch = getLatestClosedMatch(matches);
   const players = buildPlayers(playerProfiles, matches, evaluations);

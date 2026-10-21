@@ -4,7 +4,7 @@ import { PlayerCard, PlayerCardDefs } from "@/components/player-card";
 import { PACK_THEMES, revealColorStyle } from "@/app/rodadas/[matchId]/vencedores/_components/reveal-theme";
 import { CARD_THEME_LABELS } from "@/lib/card-themes";
 import { formatMonth, formatWeekdayDate } from "@/lib/format-date";
-import { AWARD_LABELS, formatRoundScore, hasSeasonalTheme, type Award } from "@/types/award";
+import { AWARD_LABELS, formatRoundScore, hasSeasonalTheme, STAT_AWARD_SOURCES, type Award } from "@/types/award";
 import { cn } from "@/lib/utils";
 
 /** Tamanho do story na tela; a imagem sai em 3x (1080 × 1920, o formato do Instagram). */
@@ -25,6 +25,11 @@ function storySubtitle(award: Award): string {
   if (award.kind === "jogador_do_mes") {
     const ratings = award.votes === 1 ? "1 avaliação" : `${award.votes} avaliações`;
     return award.score === null ? ratings : `Média ${formatRoundScore(award.score)} no mês · ${ratings}`;
+  }
+  const source = STAT_AWARD_SOURCES[award.kind];
+  if (source && award.score !== null) {
+    const ratings = award.votes === 1 ? "1 avaliação" : `${award.votes} avaliações`;
+    return `${source.label}: ${formatRoundScore(award.score)} · ${ratings}`;
   }
   return award.votes === 1 ? "1 voto da galera" : `${award.votes} votos da galera`;
 }

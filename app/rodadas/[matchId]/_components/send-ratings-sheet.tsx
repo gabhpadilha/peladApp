@@ -19,7 +19,7 @@ type SendRatingsSheetProps = {
   onSubmit: () => void;
 };
 
-/** Votos nos 9 prêmios e envio de todas as notas de uma vez. */
+/** Votos nos 3 prêmios por voto (Gol, Fominha, Bola Murcha) e envio de todas as notas de uma vez. */
 export function SendRatingsSheet({
   open,
   onOpenChange,
