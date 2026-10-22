@@ -34,8 +34,6 @@ const NAV_ITEMS: readonly NavItem[] = [
   { href: "/eu", label: "Eu", icon: UserIcon, isActive: (path) => path.startsWith("/eu") },
 ];
 
-/** A mesa tática já tem a barra "Votar e enviar" no pé da tela. */
-const HIDE_BOTTOM_NAV = /^\/rodadas\/[^/]+$/;
 
 export type MainNavProps = {
   /** `bottom`: barra fixa no pé da tela (celular). `top`: no cabeçalho (computador). */
@@ -124,7 +122,6 @@ export function MainNavView({ variant, isOwner, currentPlayer, pathname }: MainN
     );
   }
 
-  if (HIDE_BOTTOM_NAV.test(pathname)) return null;
   return (
     <nav
       aria-label="Principal"

@@ -36,6 +36,8 @@ export type MatchBoard = {
   canRate: boolean;
   /** O logado já enviou as notas dessa rodada. */
   hasSubmitted: boolean;
+  /** Rodada aberta e o logado não foi escalado: só vê os times. */
+  isOutOfRound: boolean;
   /** Quantos jogadores o logado pode avaliar (todos menos ele). */
   ratableCount: number;
 };
@@ -115,6 +117,7 @@ export async function getMatchBoard(matchId: string): Promise<MatchBoard | null>
     isOrganizer: league.membership.role === "organizer",
     canRate: match.status === "open" && isPresent && isPending,
     hasSubmitted: match.status === "open" && isPresent && !isPending,
+    isOutOfRound: match.status === "open" && !isPresent,
     ratableCount: onBoard.filter((entry) => !entry.isSelf).length,
   };
 }

@@ -602,3 +602,15 @@
   0% { opacity: 0; transform: translateY(16px) scale(0.8); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
+
+/*
+ * Mesa tática: enquanto a barra "Votar e enviar" (`data-rate-bar`) aparece, o menu
+ * de baixo sai do caminho e o <body> não reserva o espaço dele. Fora do @layer de
+ * propósito: vence as classes do Tailwind sem depender de especificidade.
+ */
+body:has([data-rate-bar]) [data-bottom-nav] {
+  display: none;
+}
+body:has([data-rate-bar]):has([data-bottom-nav]) {
+  padding-bottom: 0;
+}

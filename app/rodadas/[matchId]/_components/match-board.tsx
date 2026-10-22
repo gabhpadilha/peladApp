@@ -125,6 +125,12 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
           </span>
         </p>
       )}
+      {board.isOutOfRound && (
+        <p role="status" className="rounded-xl bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
+          Você não jogou essa rodada: aqui é só para ver os times. Quem jogou dá as notas até o organizador fechar a
+          rodada.
+        </p>
+      )}
       {(board.hasSubmitted || sent) && !sent && (
         <p role="status" className="rounded-xl bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
           Você já enviou suas notas dessa rodada. Elas entram no OVR quando o organizador fechar a rodada.
@@ -139,7 +145,8 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
 
       {canRate && (
         <>
-          <div className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 backdrop-blur">
+          {/* `data-rate-bar`: enquanto ela aparece, o menu de baixo sai do caminho (globals.css). */}
+          <div data-rate-bar className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 backdrop-blur">
             <div className="mx-auto flex w-full max-w-5xl items-center gap-3 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium tabular-nums">
