@@ -27,6 +27,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   themeColor: "#0b130f",
   colorScheme: "dark",
+  // TESTE (spike/bottom-nav): libera env(safe-area-inset-bottom) para a barra de baixo.
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -35,7 +37,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="pt-BR"
       className={`dark ${geistSans.variable} ${geistMono.variable} ${barlowCondensed.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col pb-[calc(4rem+env(safe-area-inset-bottom))] sm:pb-0">
         <PlayerCardDefs />
         {children}
       </body>

@@ -1,6 +1,8 @@
+import { Suspense } from "react";
 import Link from "next/link";
 import { LogOutIcon, ShuffleIcon, StoreIcon, UsersIcon } from "lucide-react";
 import { signOut } from "@/app/_actions/sign-out";
+import { BottomNav, BottomNavView } from "@/components/bottom-nav";
 import { LevelBadge } from "@/components/player-card";
 import type { Player } from "@/types/player";
 
@@ -13,6 +15,7 @@ const NAV_LINK = "flex items-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-
 
 export function AppHeader({ currentPlayer }: AppHeaderProps) {
   return (
+    <>
     <header className="sticky top-0 z-20 border-b bg-background/85 backdrop-blur">
       <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between gap-2 px-4">
         <Link href="/" className="font-display text-2xl font-extrabold tracking-wide uppercase">
@@ -51,5 +54,10 @@ export function AppHeader({ currentPlayer }: AppHeaderProps) {
         </nav>
       </div>
     </header>
+    {/* Fora do header: o backdrop-blur dele prenderia o `fixed` dentro do cabeçalho. */}
+    <Suspense fallback={<BottomNavView pathname="" />}>
+      <BottomNav />
+    </Suspense>
+    </>
   );
 }
