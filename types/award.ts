@@ -57,6 +57,39 @@ export const STAT_AWARD_SOURCES: Partial<Record<AwardKind, { label: string; shor
   bola_murcha: { label: "Nota da rodada", short: "nota" },
 };
 
+/**
+ * Visual de cada prêmio (proposta do dono do app em 2026-10-21): o Melhor
+ * Jogador, o Time da Semana e a Bola Murcha têm o seu; os destaques (Gol e os
+ * prêmios das estatísticas) usam todos o visual do Gol, e só o ícone muda.
+ */
+export function awardDesignKind(kind: AwardKind): AwardDesignKind {
+  switch (kind) {
+    case "craque":
+    case "bola_murcha":
+    case "time_da_semana":
+    case "jogador_do_mes":
+      return kind;
+    // Carta antiga de Fominha veste a zoeira.
+    case "fominha":
+      return "bola_murcha";
+    default:
+      return "gol";
+  }
+}
+
+/** Os únicos visuais de carta especial (cada um com as versões dos temas). */
+export type AwardDesignKind = "craque" | "gol" | "bola_murcha" | "time_da_semana" | "jogador_do_mes";
+
+/** O atributo que deu o prêmio, destacado na carta (VEL no Foguete, DRI no Drible…). */
+export const AWARD_ATTRIBUTES: Partial<Record<AwardKind, string>> = {
+  foguete: "vel",
+  atacante: "chu",
+  garcom: "pas",
+  drible: "dri",
+  defensor: "def",
+  motor: "fis",
+};
+
 /** Prêmios dos atributos da linha: os "Destaques da rodada" no quadro tático da revelação (+ Goleiro e Gol). */
 export const ATTRIBUTE_AWARD_KINDS = ["foguete", "atacante", "garcom", "drible", "defensor", "motor"] as const;
 

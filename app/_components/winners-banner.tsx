@@ -15,7 +15,7 @@ const BANNER_THEMES: Record<CardThemeKey, { box: string; eyebrow: string; cards:
     box: "border-award-craque-frame/50 bg-[radial-gradient(circle_at_85%_30%,oklch(0.4_0.08_85/0.55),transparent_55%),linear-gradient(160deg,oklch(0.24_0.01_80),oklch(0.11_0.005_80))]",
     eyebrow: "text-award-craque-foreground",
     cards: [
-      "from-award-drible-frame to-award-drible-to",
+      "from-award-time-da-semana-frame to-award-time-da-semana-to",
       "from-award-gol-frame to-award-gol-to",
       "bg-award-craque-frame",
       "from-award-craque-from to-award-craque-to text-award-craque-foreground",
@@ -26,7 +26,7 @@ const BANNER_THEMES: Record<CardThemeKey, { box: string; eyebrow: string; cards:
     eyebrow: "text-award-craque-halloween-foreground",
     cards: [
       "from-award-gol-halloween-frame to-award-gol-halloween-to",
-      "from-award-goleiro-halloween-frame to-award-goleiro-halloween-to",
+      "from-award-time-da-semana-halloween-frame to-award-time-da-semana-halloween-to",
       "bg-award-craque-halloween-frame",
       "from-award-craque-halloween-from to-award-craque-halloween-to text-award-craque-halloween-foreground",
     ],
@@ -36,7 +36,7 @@ const BANNER_THEMES: Record<CardThemeKey, { box: string; eyebrow: string; cards:
     eyebrow: "text-award-craque-brasileirao-from",
     cards: [
       "from-award-gol-brasileirao-from to-award-gol-brasileirao-to",
-      "from-award-atacante-brasileirao-from to-award-atacante-brasileirao-to",
+      "from-award-time-da-semana-brasileirao-from to-award-time-da-semana-brasileirao-to",
       "bg-award-craque-brasileirao-frame",
       "from-award-craque-brasileirao-from to-award-craque-brasileirao-to text-award-craque-brasileirao-foreground",
     ],

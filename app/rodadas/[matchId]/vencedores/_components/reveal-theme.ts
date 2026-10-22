@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import type { CardThemeKey } from "@/lib/card-themes";
-import { hasSeasonalTheme, type AwardKind } from "@/types/award";
+import { awardDesignKind, hasSeasonalTheme, type AwardKind } from "@/types/award";
 
 /** Prêmios de zoeira: a carta cai e amassa, sem raios nem faíscas. */
 export const ZOEIRA_AWARDS: readonly AwardKind[] = ["bola_murcha", "fominha"];
@@ -11,7 +11,8 @@ export const ZOEIRA_AWARDS: readonly AwardKind[] = ["bola_murcha", "fominha"];
  */
 export function revealColorStyle(kind: AwardKind, theme: CardThemeKey): CSSProperties {
   const isThemed = theme !== "default" && hasSeasonalTheme(kind);
-  const token = `--award-${kind.replaceAll("_", "-")}${isThemed ? `-${theme}` : ""}-frame`;
+  const designKind = awardDesignKind(kind);
+  const token = `--award-${designKind.replaceAll("_", "-")}${isThemed ? `-${theme}` : ""}-frame`;
   return { "--reveal-color": `var(${token})` } as CSSProperties;
 }
 

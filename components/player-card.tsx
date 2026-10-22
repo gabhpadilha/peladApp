@@ -8,7 +8,14 @@ import { CARD_TIER_LABELS, getCardTier, type CardTier } from "@/lib/card-tier";
 import type { CardThemeKey } from "@/lib/card-themes";
 import { getInitials } from "@/lib/get-initials";
 import { photoFadeLayers } from "@/lib/photo-fades";
-import { AWARD_LABELS, hasSeasonalTheme, type AwardKind } from "@/types/award";
+import {
+  AWARD_ATTRIBUTES,
+  AWARD_LABELS,
+  awardDesignKind,
+  hasSeasonalTheme,
+  type AwardDesignKind,
+  type AwardKind,
+} from "@/types/award";
 import { getCardSkin, type CardSkinKey } from "@/types/card-skin";
 import {
   ATTRIBUTE_LABELS,
@@ -46,9 +53,12 @@ export function PlayerCardDefs() {
   );
 }
 
-/** Visual da carta: faixa da carta base ou prêmio (com tema sazonal; o Time do Mês não veste tema). */
-type ThemedAwardKind = Exclude<AwardKind, "jogador_do_mes">;
-type AwardDesign = AwardKind | `${ThemedAwardKind}-halloween` | `${ThemedAwardKind}-brasileirao`;
+/**
+ * Visual da carta: faixa da carta base ou um dos 4 visuais de prêmio (com tema
+ * sazonal; o Time do Mês não veste tema). Ver `awardDesignKind`.
+ */
+type ThemedAwardKind = Exclude<AwardDesignKind, "jogador_do_mes">;
+type AwardDesign = AwardDesignKind | `${ThemedAwardKind}-halloween` | `${ThemedAwardKind}-brasileirao`;
 type CardDesign = CardTier | AwardDesign;
 
 type Design = {
@@ -90,30 +100,6 @@ const DESIGNS: Record<CardDesign, Design> = {
     frame: "bg-award-bola-murcha-frame",
     face: "from-award-bola-murcha-from to-award-bola-murcha-to text-award-bola-murcha-foreground",
   },
-  drible: {
-    frame: "bg-award-drible-frame",
-    face: "from-award-drible-from to-award-drible-to text-award-drible-foreground",
-  },
-  atacante: {
-    frame: "bg-award-atacante-frame",
-    face: "from-award-atacante-from to-award-atacante-to text-award-atacante-foreground",
-  },
-  defensor: {
-    frame: "bg-award-defensor-frame",
-    face: "from-award-defensor-from to-award-defensor-to text-award-defensor-foreground",
-  },
-  goleiro: {
-    frame: "bg-award-goleiro-frame",
-    face: "from-award-goleiro-from to-award-goleiro-to text-award-goleiro-foreground",
-  },
-  fair_play: {
-    frame: "bg-award-fair-play-frame",
-    face: "from-award-fair-play-from to-award-fair-play-to text-award-fair-play-foreground",
-  },
-  fominha: {
-    frame: "bg-award-fominha-frame",
-    face: "from-award-fominha-from to-award-fominha-to text-award-fominha-foreground",
-  },
   time_da_semana: {
     frame: "bg-award-time-da-semana-frame",
     face: "from-award-time-da-semana-from to-award-time-da-semana-to text-award-time-da-semana-foreground",
@@ -129,30 +115,6 @@ const DESIGNS: Record<CardDesign, Design> = {
   "bola_murcha-halloween": {
     frame: "bg-award-bola-murcha-halloween-frame",
     face: "from-award-bola-murcha-halloween-from to-award-bola-murcha-halloween-to text-award-bola-murcha-halloween-foreground",
-  },
-  "drible-halloween": {
-    frame: "bg-award-drible-halloween-frame",
-    face: "from-award-drible-halloween-from to-award-drible-halloween-to text-award-drible-halloween-foreground",
-  },
-  "atacante-halloween": {
-    frame: "bg-award-atacante-halloween-frame",
-    face: "from-award-atacante-halloween-from to-award-atacante-halloween-to text-award-atacante-halloween-foreground",
-  },
-  "defensor-halloween": {
-    frame: "bg-award-defensor-halloween-frame",
-    face: "from-award-defensor-halloween-from to-award-defensor-halloween-to text-award-defensor-halloween-foreground",
-  },
-  "goleiro-halloween": {
-    frame: "bg-award-goleiro-halloween-frame",
-    face: "from-award-goleiro-halloween-from to-award-goleiro-halloween-to text-award-goleiro-halloween-foreground",
-  },
-  "fair_play-halloween": {
-    frame: "bg-award-fair-play-halloween-frame",
-    face: "from-award-fair-play-halloween-from to-award-fair-play-halloween-to text-award-fair-play-halloween-foreground",
-  },
-  "fominha-halloween": {
-    frame: "bg-award-fominha-halloween-frame",
-    face: "from-award-fominha-halloween-from to-award-fominha-halloween-to text-award-fominha-halloween-foreground",
   },
   "time_da_semana-halloween": {
     frame: "bg-award-time-da-semana-halloween-frame",
@@ -170,70 +132,9 @@ const DESIGNS: Record<CardDesign, Design> = {
     frame: "bg-award-bola-murcha-brasileirao-frame",
     face: "from-award-bola-murcha-brasileirao-from to-award-bola-murcha-brasileirao-to text-award-bola-murcha-brasileirao-foreground",
   },
-  "drible-brasileirao": {
-    frame: "bg-award-drible-brasileirao-frame",
-    face: "from-award-drible-brasileirao-from to-award-drible-brasileirao-to text-award-drible-brasileirao-foreground",
-  },
-  "atacante-brasileirao": {
-    frame: "bg-award-atacante-brasileirao-frame",
-    face: "from-award-atacante-brasileirao-from to-award-atacante-brasileirao-to text-award-atacante-brasileirao-foreground",
-  },
-  "defensor-brasileirao": {
-    frame: "bg-award-defensor-brasileirao-frame",
-    face: "from-award-defensor-brasileirao-from to-award-defensor-brasileirao-to text-award-defensor-brasileirao-foreground",
-  },
-  "goleiro-brasileirao": {
-    frame: "bg-award-goleiro-brasileirao-frame",
-    face: "from-award-goleiro-brasileirao-from to-award-goleiro-brasileirao-to text-award-goleiro-brasileirao-foreground",
-  },
-  "fair_play-brasileirao": {
-    frame: "bg-award-fair-play-brasileirao-frame",
-    face: "from-award-fair-play-brasileirao-from to-award-fair-play-brasileirao-to text-award-fair-play-brasileirao-foreground",
-  },
-  "fominha-brasileirao": {
-    frame: "bg-award-fominha-brasileirao-frame",
-    face: "from-award-fominha-brasileirao-from to-award-fominha-brasileirao-to text-award-fominha-brasileirao-foreground",
-  },
   "time_da_semana-brasileirao": {
     frame: "bg-award-time-da-semana-brasileirao-frame",
     face: "from-award-time-da-semana-brasileirao-from to-award-time-da-semana-brasileirao-to text-award-time-da-semana-brasileirao-foreground",
-  },
-  // Prêmios dos atributos VEL, PAS e FIS (2026-10-21): clássico, Halloween e Brasileirão.
-  foguete: {
-    frame: "bg-award-foguete-frame",
-    face: "from-award-foguete-from to-award-foguete-to text-award-foguete-foreground",
-  },
-  garcom: {
-    frame: "bg-award-garcom-frame",
-    face: "from-award-garcom-from to-award-garcom-to text-award-garcom-foreground",
-  },
-  motor: {
-    frame: "bg-award-motor-frame",
-    face: "from-award-motor-from to-award-motor-to text-award-motor-foreground",
-  },
-  "foguete-halloween": {
-    frame: "bg-award-foguete-halloween-frame",
-    face: "from-award-foguete-halloween-from to-award-foguete-halloween-to text-award-foguete-halloween-foreground",
-  },
-  "garcom-halloween": {
-    frame: "bg-award-garcom-halloween-frame",
-    face: "from-award-garcom-halloween-from to-award-garcom-halloween-to text-award-garcom-halloween-foreground",
-  },
-  "motor-halloween": {
-    frame: "bg-award-motor-halloween-frame",
-    face: "from-award-motor-halloween-from to-award-motor-halloween-to text-award-motor-halloween-foreground",
-  },
-  "foguete-brasileirao": {
-    frame: "bg-award-foguete-brasileirao-frame",
-    face: "from-award-foguete-brasileirao-from to-award-foguete-brasileirao-to text-award-foguete-brasileirao-foreground",
-  },
-  "garcom-brasileirao": {
-    frame: "bg-award-garcom-brasileirao-frame",
-    face: "from-award-garcom-brasileirao-from to-award-garcom-brasileirao-to text-award-garcom-brasileirao-foreground",
-  },
-  "motor-brasileirao": {
-    frame: "bg-award-motor-brasileirao-frame",
-    face: "from-award-motor-brasileirao-from to-award-motor-brasileirao-to text-award-motor-brasileirao-foreground",
   },
   // Arte do dono do app (aprovada em 2026-10-21), alinhada à direita: os raios
   // de dentro encostam na borda de onde saem os de fora (`MonthCardOverflow`).
@@ -246,28 +147,9 @@ const DESIGNS: Record<CardDesign, Design> = {
   },
 };
 
-/** Textura da face: a padrão (linhas finas) ou a do prêmio, para cada carta ter a sua. */
+/** Textura da face: a padrão (linhas finas) ou a do visual do prêmio. */
 const DEFAULT_TEXTURE = "bg-[repeating-linear-gradient(115deg,rgb(255_255_255/0.07)_0_1px,transparent_1px_5cqw)]";
-const AWARD_TEXTURES: Partial<Record<AwardKind, string>> = {
-  // Losangos: o zigue-zague do drible.
-  drible:
-    "bg-[repeating-linear-gradient(60deg,rgb(255_255_255/0.08)_0_1px,transparent_1px_6cqw),repeating-linear-gradient(-60deg,rgb(255_255_255/0.08)_0_1px,transparent_1px_6cqw)]",
-  // Linhas de velocidade.
-  atacante: "bg-[repeating-linear-gradient(100deg,rgb(255_255_255/0.1)_0_1px,transparent_1px_3cqw)]",
-  // Muro.
-  defensor:
-    "bg-[repeating-linear-gradient(0deg,rgb(255_255_255/0.07)_0_1px,transparent_1px_7cqw),repeating-linear-gradient(90deg,rgb(255_255_255/0.05)_0_1px,transparent_1px_14cqw)]",
-  // Rede do gol.
-  goleiro:
-    "bg-[repeating-linear-gradient(45deg,rgb(255_255_255/0.08)_0_1px,transparent_1px_5cqw),repeating-linear-gradient(-45deg,rgb(255_255_255/0.08)_0_1px,transparent_1px_5cqw)]",
-  // Riscos de velocidade, bem inclinados.
-  foguete: "bg-[repeating-linear-gradient(160deg,rgb(255_255_255/0.1)_0_2px,transparent_2px_8cqw)]",
-  // Pontilhado de passe.
-  garcom: "[background:radial-gradient(circle,rgb(255_255_255/0.2)_0_0.5cqw,transparent_0.8cqw)_0_0/6cqw_6cqw]",
-  // Listras de máquina.
-  motor: "bg-[repeating-linear-gradient(-45deg,rgb(255_255_255/0.07)_0_2.5cqw,transparent_2.5cqw_5cqw)]",
-  // Listras de bala.
-  fair_play: "bg-[repeating-linear-gradient(135deg,rgb(255_255_255/0.08)_0_3cqw,transparent_3cqw_6cqw)]",
+const AWARD_TEXTURES: Partial<Record<AwardDesignKind, string>> = {
   // Céu estrelado.
   time_da_semana:
     "[background:radial-gradient(circle,rgb(255_255_255/0.4)_0_0.6cqw,transparent_0.9cqw)_0_0/9cqw_9cqw,radial-gradient(circle,rgb(255_255_255/0.22)_0_0.4cqw,transparent_0.7cqw)_4.5cqw_4.5cqw/9cqw_9cqw]",
@@ -365,8 +247,10 @@ function PhotoShadow({ color }: { color: string }) {
 
 function getDesign(player: Player, award: PlayerCardAward | undefined): CardDesign {
   if (!award) return getCardTier(player.ovr ?? 0);
-  if (award.kind === "jogador_do_mes" || award.theme === "default") return award.kind;
-  return `${award.kind}-${award.theme}`;
+  // Destaques (Gol e prêmios das estatísticas) dividem o visual do Gol; só o ícone muda.
+  const kind = awardDesignKind(award.kind);
+  if (kind === "jogador_do_mes" || award.theme === "default") return kind;
+  return `${kind}-${award.theme}`;
 }
 
 /** Pontas roxas do Time do Mês: a grande nasce na face e fura o canto; a menor, mais baixa. */
@@ -453,7 +337,7 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
           <>
             <div
               aria-hidden
-              className={cn("absolute inset-0", (award && AWARD_TEXTURES[award.kind]) ?? DEFAULT_TEXTURE)}
+              className={cn("absolute inset-0", (award && AWARD_TEXTURES[awardDesignKind(award.kind)]) ?? DEFAULT_TEXTURE)}
             />
             <div
               aria-hidden
@@ -504,7 +388,16 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
           </span>
           <dl className="grid w-full grid-cols-6 text-center">
             {attributeKeys.map((key) => (
-              <div key={key} className="flex flex-col items-center gap-[1cqw]">
+              <div
+                key={key}
+                className={cn(
+                  "flex flex-col items-center gap-[1cqw]",
+                  award && AWARD_ATTRIBUTES[award.kind] && "rounded-[2cqw] py-[0.8cqw]",
+                  // O atributo que deu o prêmio ganha um fundo (a identidade de cada destaque).
+                  award && AWARD_ATTRIBUTES[award.kind] === key &&
+                    "[background:color-mix(in_oklab,currentColor_20%,transparent)]",
+                )}
+              >
                 <dt className="text-[6.2cqw] font-semibold opacity-75">
                   <abbr title={ATTRIBUTE_LABELS[key].name} className="no-underline">
                     {ATTRIBUTE_LABELS[key].abbreviation}
