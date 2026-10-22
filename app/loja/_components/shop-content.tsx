@@ -5,6 +5,7 @@ import { CoinsIcon, GhostIcon, SparklesIcon, TrophyIcon, type LucideIcon } from 
 import { CardSkinTile } from "@/components/card-skin-tile";
 import type { CardThemeKey } from "@/lib/card-themes";
 import { PlayerCard } from "@/components/player-card";
+import { SAMPLE_PLAYER } from "@/lib/sample-player";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
@@ -16,7 +17,6 @@ import { formatShortDate } from "@/lib/format-date";
 import { formatCoins } from "@/components/coin-pill";
 
 type ShopContentProps = {
-  me: Player;
   sections: ShopSection[];
   balance: number;
   /** Promoção valendo hoje (faixa no topo e preços riscados). */
@@ -74,13 +74,16 @@ function SectionHeader({ icon: Icon, title, text }: { icon: LucideIcon; title: s
   );
 }
 
-/** A própria carta do jogador com a personalização do item. */
-function withSkin(me: Player, item: ShopItem): Player {
-  return { ...me, cardSkin: item.skin };
+/**
+ * A carta de exemplo com a personalização do item: o que está à venda ainda não é
+ * do jogador, então a vitrine não usa o rosto nem os dados dele (`SAMPLE_PLAYER`).
+ */
+function withSkin(item: ShopItem): Player {
+  return { ...SAMPLE_PLAYER, cardSkin: item.skin };
 }
 
 /** Grade de cartas da Loja; tocar numa à venda abre a confirmação de compra. */
-export function ShopContent({ me, sections, balance, sale }: ShopContentProps) {
+export function ShopContent({ sections, balance, sale }: ShopContentProps) {
   const [selected, setSelected] = useState<ShopItem | null>(null);
   const [message, setMessage] = useState<{ kind: "error" | "saved"; text: string } | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -106,7 +109,7 @@ export function ShopContent({ me, sections, balance, sale }: ShopContentProps) {
           const isLocked = item.state === "locked";
           // Só o que o jogador ainda não tem aparece aqui; as dele ficam em Eu → Minhas cartas.
           return (
-            <CardSkinTile key={item.skin ?? "padrao"} player={withSkin(me, item)} name={item.name} isLocked={isLocked}>
+            <CardSkinTile key={item.skin ?? "padrao"} player={withSkin(item)} name={item.name} isLocked={isLocked}>
               {item.state === "available" && (
                 <Button type="button" className="h-10 w-full gap-1.5" disabled={isPending} onClick={() => setSelected(item)}>
                   <CoinsIcon aria-hidden className="size-4" />
@@ -156,7 +159,7 @@ export function ShopContent({ me, sections, balance, sale }: ShopContentProps) {
             <>
               <SheetHeader className="items-center gap-1 pt-8 text-center">
                 <div className="mb-4 w-40">
-                  <PlayerCard player={withSkin(me, selected)} size="fill" />
+                  <PlayerCard player={withSkin(selected)} size="fill" />
                 </div>
                 <SheetTitle className="font-display text-3xl font-extrabold uppercase">{selected.name}</SheetTitle>
                 <SheetDescription>

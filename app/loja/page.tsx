@@ -55,7 +55,7 @@ async function ShopPageContent() {
           hint={shop.nextUnlock ? `no nível ${shop.nextUnlock.level} libera a ${shop.nextUnlock.name}` : undefined}
         />
 
-        <ShopContent me={shop.me} sections={shop.sections} balance={shop.balance} sale={shop.sale} />
+        <ShopContent sections={shop.sections} balance={shop.balance} sale={shop.sale} />
 
         <section className="flex flex-col gap-2 rounded-xl border bg-card p-4">
           <h2 className="flex items-center gap-2 font-display text-lg font-bold tracking-wide uppercase">

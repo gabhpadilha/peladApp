@@ -39,7 +39,7 @@ async function HomeContent() {
           <h1 className="font-display text-3xl font-bold">Fala, {data.currentPlayer.nickname}</h1>
         </div>
 
-        {data.showWelcomeBonus && <WelcomeBonusDialog player={data.currentPlayer} coins={WELCOME_BONUS_COINS} />}
+        {data.showWelcomeBonus && <WelcomeBonusDialog coins={WELCOME_BONUS_COINS} />}
 
         <PendingEvaluationsBanner pending={data.pending} />
 

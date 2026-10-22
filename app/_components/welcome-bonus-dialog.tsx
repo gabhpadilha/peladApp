@@ -5,21 +5,20 @@ import { useRouter } from "next/navigation";
 import { CoinsIcon, StoreIcon } from "lucide-react";
 import { formatCoins } from "@/components/coin-pill";
 import { PlayerCard } from "@/components/player-card";
+import { SAMPLE_PLAYER } from "@/lib/sample-player";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getCardSkin } from "@/types/card-skin";
-import type { Player } from "@/types/player";
 import { dismissWelcomeBonus } from "../_actions/dismiss-welcome-bonus";
 
 type WelcomeBonusDialogProps = {
-  player: Player;
   coins: number;
 };
 
 const FEATURED_SKIN = getCardSkin("esmeralda");
 
 /** Aviso do prêmio de primeiro login (150 PC + Esmeralda grátis): aparece uma vez e some ao fechar. */
-export function WelcomeBonusDialog({ player, coins }: WelcomeBonusDialogProps) {
+export function WelcomeBonusDialog({ coins }: WelcomeBonusDialogProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
   const [isPending, startTransition] = useTransition();
@@ -55,7 +54,7 @@ export function WelcomeBonusDialog({ player, coins }: WelcomeBonusDialogProps) {
 
         <div className="flex flex-col items-center gap-2">
           <div className="w-32">
-            <PlayerCard player={{ ...player, cardSkin: FEATURED_SKIN.key }} size="fill" />
+            <PlayerCard player={{ ...SAMPLE_PLAYER, cardSkin: FEATURED_SKIN.key }} size="fill" />
           </div>
           <span className="rounded-full bg-primary/15 px-3 py-1 text-sm font-semibold text-primary">
             {FEATURED_SKIN.name} · Grátis

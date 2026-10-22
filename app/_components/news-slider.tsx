@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { ArrowRightIcon, CoinsIcon, CrownIcon, GhostIcon, SparklesIcon, StarIcon, StoreIcon, TrendingUpIcon, TrophyIcon, type LucideIcon } from "lucide-react";
 import { formatCoins } from "@/components/coin-pill";
 import { PlayerCard } from "@/components/player-card";
+import { SAMPLE_PLAYER } from "@/lib/sample-player";
 import { withAwardBonus } from "@/lib/award-bonus";
 import { CARD_THEME_LABELS, type CardThemeKey, type CurrentCardEvent } from "@/lib/card-themes";
 import { formatShortDate } from "@/lib/format-date";
@@ -172,7 +173,7 @@ export function NewsSlider({ event, today, shopSale, player, progress, balance }
             <div className="flex w-full items-center gap-5 pr-3">
               <div className="w-28 shrink-0">
                 <PlayerCard
-                  player={withAwardBonus(player, "jogador_do_mes")}
+                  player={withAwardBonus(SAMPLE_PLAYER, "jogador_do_mes")}
                   award={{ kind: "jogador_do_mes", theme: "default" }}
                   size="fill"
                 />
@@ -202,7 +203,7 @@ export function NewsSlider({ event, today, shopSale, player, progress, balance }
           visual={
             <CardFan
               cards={EVENT_FAN.map((kind) => (
-                <PlayerCard key={kind} player={withAwardBonus(player, kind)} award={{ kind, theme: event.theme }} size="fill" />
+                <PlayerCard key={kind} player={withAwardBonus(SAMPLE_PLAYER, kind)} award={{ kind, theme: event.theme }} size="fill" />
               )) as [ReactNode, ReactNode, ReactNode]}
             />
           }
@@ -224,7 +225,7 @@ export function NewsSlider({ event, today, shopSale, player, progress, balance }
             <div className="flex w-full items-center gap-4">
               <div className="w-28 shrink-0">
                 <PlayerCard
-                  player={withAwardBonus(player, "time_da_semana")}
+                  player={withAwardBonus(SAMPLE_PLAYER, "time_da_semana")}
                   award={{ kind: "time_da_semana", theme: event.theme }}
                   size="fill"
                 />
@@ -260,7 +261,7 @@ export function NewsSlider({ event, today, shopSale, player, progress, balance }
           visual={
             <CardFan
               cards={shopFan.map((skin) => (
-                <PlayerCard key={skin} player={{ ...player, cardSkin: skin }} size="fill" />
+                <PlayerCard key={skin} player={{ ...SAMPLE_PLAYER, cardSkin: skin }} size="fill" />
               )) as [ReactNode, ReactNode, ReactNode]}
             />
           }
