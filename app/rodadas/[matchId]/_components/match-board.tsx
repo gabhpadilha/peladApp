@@ -121,7 +121,7 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
           <span>
             Notas enviadas! Você avaliou {sent.ratedCount} {sent.ratedCount === 1 ? "jogador" : "jogadores"}
             {sent.voteCount > 0 && ` e deu ${sent.voteCount} ${sent.voteCount === 1 ? "voto" : "votos"}`}. Quando o
-            organizador fechar a rodada, as notas entram no OVR e os mais votados ganham as cartas especiais.
+            organizador fechar a rodada, as notas entram no OVR e as cartas especiais da rodada saem.
           </span>
         </p>
       )}

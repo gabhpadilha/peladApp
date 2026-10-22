@@ -11,8 +11,8 @@ export type CloseMatchResult =
   | { success: false; message: string };
 
 /**
- * Fecha a rodada: as notas passam a contar no OVR, ninguém mais envia, e os
- * mais votados ganham as cartas especiais (com o tema sazonal da data do jogo).
+ * Fecha a rodada: as notas passam a contar no OVR, ninguém mais envia, e as
+ * cartas especiais saem das notas e do voto no Gol (com o tema sazonal da data do jogo).
  */
 export async function closeMatch(matchId: string): Promise<CloseMatchResult> {
   const membership = await requireActiveMembership("/rodadas");

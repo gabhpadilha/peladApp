@@ -113,6 +113,7 @@ Desenvolvimento no VS Code + WSL (Ubuntu), com Node 20 via nvm. Se o Claude roda
 
 ## 🗺️ Próximos passos (combinados com o dono do app)
 - **Calendário de eventos e cartas futuras:** `docs/calendario-eventos.md` é a memória desse planejamento (eventos dos próximos meses, ideias de cartas, cartas animadas, decisões e perguntas em aberto). Leia antes de criar evento ou carta nova e atualize-o a cada decisão.
+- **Atualizar o Next.js** (combinado para 2026-10-23): a 16.4.0 tem falha de segurança conhecida (o próprio `next build` avisa quando roda por um agente e para na 1ª tentativa; na Vercel não trava). Fazer numa branch, testar tudo e só depois mandar para a `main`.
 - Fechamento automático da rodada 24h depois do jogo.
 - Animação de revelação do OVR ao fechar a rodada: em parte feita na "Sua rodada" do pacote (OVR antes → depois e aviso de troca de faixa); falta a carta virando.
 - Loja: liberar itens novos por nível e por evento temático; foto especial ou dinâmica por carta.

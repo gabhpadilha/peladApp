@@ -157,8 +157,8 @@ export function RatingWizard({ match, targets }: RatingWizardProps) {
         <p className="text-muted-foreground">
           Você avaliou {result.ratedCount} {result.ratedCount === 1 ? "jogador" : "jogadores"}
           {result.voteCount > 0 && ` e deu ${result.voteCount} ${result.voteCount === 1 ? "voto" : "votos"}`} na
-          rodada {match.round}. Quando o organizador fechar a rodada, as notas entram no OVR e os mais votados
-          ganham as cartas especiais.
+          rodada {match.round}. Quando o organizador fechar a rodada, as notas entram no OVR e as cartas especiais
+          da rodada saem.
         </p>
         <Button asChild size="lg" className="h-11 w-full text-base">
           <Link href="/">Voltar ao início</Link>
