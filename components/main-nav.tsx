@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -45,9 +46,52 @@ export type MainNavProps = {
   currentPlayer?: Player;
 };
 
+/*
+ * Enquanto a sessão de uma página nova carrega, a navegação aparece provisória
+ * (`MainNavPlaceholder`). Ela usa o que o aparelho já sabe (é Administrador?),
+ * para o botão Elenco não sumir e voltar a cada troca de página.
+ */
+const OWNER_STORAGE_KEY = "peladapp_nav_owner";
+let rememberedOwner: boolean | null = null;
+
+function readRememberedOwner(): boolean {
+  if (rememberedOwner === null) {
+    try {
+      rememberedOwner = window.sessionStorage.getItem(OWNER_STORAGE_KEY) === "1";
+    } catch {
+      rememberedOwner = false;
+    }
+  }
+  return rememberedOwner;
+}
+
+function rememberOwner(isOwner: boolean) {
+  if (rememberedOwner === isOwner) return;
+  rememberedOwner = isOwner;
+  try {
+    window.sessionStorage.setItem(OWNER_STORAGE_KEY, isOwner ? "1" : "0");
+  } catch {
+    // Sem armazenamento (aba privada): só a troca de página fica sem a memória.
+  }
+}
+
+/** Nada muda por fora durante a tela: a leitura serve só para separar servidor e aparelho. */
+function subscribeNothing() {
+  return () => {};
+}
+
 /** Navegação principal: a mesma lista no celular (embaixo) e no computador (em cima). */
 export function MainNav(props: MainNavProps) {
+  const { isOwner } = props;
+  useEffect(() => rememberOwner(isOwner), [isOwner]);
   return <MainNavView {...props} pathname={usePathname()} />;
+}
+
+/** Provisória, dentro do `<Suspense>`: no servidor sai sem Elenco e sem destaque; no aparelho, com o que ele já sabe. */
+export function MainNavPlaceholder(props: Omit<MainNavProps, "isOwner">) {
+  const isOwner = useSyncExternalStore(subscribeNothing, readRememberedOwner, () => false);
+  const pathname = useSyncExternalStore(subscribeNothing, () => window.location.pathname, () => "");
+  return <MainNavView {...props} isOwner={isOwner} pathname={pathname} />;
 }
 
 /** Sem rota (`pathname` vazio): aparece sem destaque enquanto o `<Suspense>` carrega. */

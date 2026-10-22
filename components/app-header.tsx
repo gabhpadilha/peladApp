@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { MainNav, MainNavView, type MainNavProps } from "@/components/main-nav";
+import { MainNav, MainNavPlaceholder, type MainNavProps } from "@/components/main-nav";
 import { getActiveMembership, getUserId } from "@/lib/session";
 import type { Player } from "@/types/player";
 
@@ -28,13 +28,13 @@ export function AppHeader({ currentPlayer }: AppHeaderProps) {
           <Link href="/" className="font-display text-2xl font-extrabold tracking-wide uppercase">
             Pelad<span className="text-primary">App</span>
           </Link>
-          <Suspense fallback={<MainNavView variant="top" isOwner={false} currentPlayer={currentPlayer} pathname="" />}>
+          <Suspense fallback={<MainNavPlaceholder variant="top" currentPlayer={currentPlayer} />}>
             <NavWithAccess variant="top" currentPlayer={currentPlayer} />
           </Suspense>
         </div>
       </header>
       {/* Fora do header: o backdrop-blur dele prenderia o `fixed` dentro do cabeçalho. */}
-      <Suspense fallback={<MainNavView variant="bottom" isOwner={false} pathname="" />}>
+      <Suspense fallback={<MainNavPlaceholder variant="bottom" />}>
         <NavWithAccess variant="bottom" />
       </Suspense>
     </>
