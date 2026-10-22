@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CoinsIcon } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
@@ -38,7 +39,13 @@ async function ShopPageContent() {
           <div className="flex flex-col gap-1">
             <p className="text-sm text-muted-foreground">{shop.groupName}</p>
             <h1 className="font-display text-4xl leading-none font-extrabold uppercase">Loja</h1>
-            <p className="text-sm text-muted-foreground">Personalize a sua carta com PeladaCoins.</p>
+            <p className="text-sm text-muted-foreground">
+              Personalize a sua carta com PeladaCoins. As que você já tem ficam em{" "}
+              <Link href="/eu#minhas-cartas" className="text-primary underline-offset-2 hover:underline">
+                Eu → Minhas cartas
+              </Link>
+              .
+            </p>
           </div>
           <CoinPill value={shop.balance} className="mt-6 shrink-0" />
         </div>
@@ -48,7 +55,7 @@ async function ShopPageContent() {
           hint={shop.nextUnlock ? `no nível ${shop.nextUnlock.level} libera a ${shop.nextUnlock.name}` : undefined}
         />
 
-        <ShopContent me={shop.me} mine={shop.mine} sections={shop.sections} balance={shop.balance} sale={shop.sale} />
+        <ShopContent me={shop.me} sections={shop.sections} balance={shop.balance} sale={shop.sale} />
 
         <section className="flex flex-col gap-2 rounded-xl border bg-card p-4">
           <h2 className="flex items-center gap-2 font-display text-lg font-bold tracking-wide uppercase">

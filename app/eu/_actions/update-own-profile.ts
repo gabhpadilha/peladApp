@@ -15,8 +15,8 @@ export type UpdateOwnProfileResult =
  * banco só deixa mexer na própria linha, e posição/usuário ficam com o dono.
  */
 export async function updateOwnProfile(input: OwnProfileInput): Promise<UpdateOwnProfileResult> {
-  const userId = await requireUserId("/elenco");
-  const membership = await requireActiveMembership("/elenco");
+  const userId = await requireUserId("/eu");
+  const membership = await requireActiveMembership("/eu");
 
   const validation = ownProfileSchema.safeParse(input);
   if (!validation.success) {

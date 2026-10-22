@@ -11,7 +11,7 @@ export type SetPasswordResult =
 
 /** Troca a senha de quem está logado (opcional: a senha gerada pelo dono também vale). */
 export async function setPassword(input: SetPasswordInput): Promise<SetPasswordResult> {
-  await requireUserId("/elenco");
+  await requireUserId("/eu");
 
   const validation = setPasswordSchema.safeParse(input);
   if (!validation.success) {

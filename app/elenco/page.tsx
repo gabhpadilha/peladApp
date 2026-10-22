@@ -3,16 +3,13 @@ import { Suspense } from "react";
 import { AppHeader } from "@/components/app-header";
 import { CreatePlayerForm } from "./_components/create-player-form";
 import { MembersList } from "./_components/members-list";
-import { OwnPhotoCard } from "./_components/own-photo-card";
-import { OwnProfileCard } from "./_components/own-profile-card";
-import { PasswordCard } from "./_components/password-card";
 import { getRoster } from "./_data-access/get-roster";
 
 export const metadata: Metadata = {
   title: "Elenco · PeladApp",
 };
 
-/** Gestão de cadastro: o dono cadastra e gerencia; cada um edita o próprio perfil e senha. */
+/** Gestão de cadastro, só do Administrador. A própria conta (foto, nome, senha) fica em /eu. */
 export default function RosterPage() {
   return (
     <>
@@ -29,8 +26,6 @@ export default function RosterPage() {
 
 async function RosterContent() {
   const roster = await getRoster();
-  const { isOwner } = roster.membership;
-  const me = roster.members.find((member) => member.id === roster.membership.memberId);
 
   return (
     <>
@@ -38,40 +33,26 @@ async function RosterContent() {
         <p className="text-sm text-muted-foreground">{roster.membership.groupName}</p>
         <h1 className="font-display text-4xl font-extrabold uppercase">Elenco</h1>
         <p className="max-w-prose text-sm text-muted-foreground">
-          {isOwner
-            ? "Cadastre a galera, corrija dados, redefina senhas e desative quem saiu da pelada."
-            : "Quem joga a pelada. Aqui você também troca seu nome, apelido e senha."}
+          Cadastre a galera, corrija dados, redefina senhas e desative quem saiu da pelada.
         </p>
       </div>
 
       {/*
-        Celular: "Sua foto" primeiro (antes do cadastro longo do dono), depois elenco, perfil e senha.
-        Desktop: elenco à esquerda ocupando as duas linhas; foto e perfil/senha à direita.
+        Celular: cadastro e, embaixo, a lista. Desktop: lado a lado.
         key: trocou de conta na mesma aba, os formulários recomeçam do zero.
       */}
       <div
         key={roster.membership.memberId}
-        className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:grid-rows-[auto_1fr] lg:items-start"
+        className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start"
       >
-        {me && (
-          <div className="lg:col-start-2 lg:row-start-1">
-            <OwnPhotoCard member={me} />
-          </div>
-        )}
-        <div className="flex flex-col gap-6 lg:col-start-1 lg:row-span-2 lg:row-start-1">
-          {isOwner && <CreatePlayerForm loginUrl={roster.loginUrl} />}
-          <MembersList
-            members={roster.members}
-            inactiveMembers={roster.inactiveMembers}
-            currentMemberId={roster.membership.memberId}
-            canManage={isOwner}
-            loginUrl={roster.loginUrl}
-          />
-        </div>
-        <div className="flex flex-col gap-6 lg:col-start-2 lg:row-start-2">
-          <OwnProfileCard />
-          <PasswordCard login={roster.login} />
-        </div>
+        <CreatePlayerForm loginUrl={roster.loginUrl} />
+        <MembersList
+          members={roster.members}
+          inactiveMembers={roster.inactiveMembers}
+          currentMemberId={roster.membership.memberId}
+          canManage
+          loginUrl={roster.loginUrl}
+        />
       </div>
     </>
   );

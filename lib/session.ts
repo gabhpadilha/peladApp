@@ -41,7 +41,7 @@ export const getUserId = cache(async (): Promise<string | null> => {
 
 /**
  * Exige login; sem sessão, manda para /entrar voltando a `nextPath`. A senha
- * gerada pelo dono vale até a pessoa querer trocar (Elenco → "Sua senha").
+ * gerada pelo dono vale até a pessoa querer trocar (Eu → "Sua senha").
  */
 export async function requireUserId(nextPath = "/"): Promise<string> {
   const userId = await getUserId();

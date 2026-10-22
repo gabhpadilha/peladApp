@@ -12,6 +12,7 @@ import { updateOwnProfile } from "../_actions/update-own-profile";
 const EMPTY_FORM: OwnProfileInput = { fullName: "", nickname: "" };
 
 /**
+ * Formulário de "Seu nome e apelido" (página Eu, dentro de `AccountDisclosure`).
  * Todo jogador edita o próprio nome e apelido (o resto do cadastro é com o
  * dono). Campos em branco, como os de senha: preenche só o que quer trocar.
  */
@@ -41,16 +42,11 @@ export function OwnProfileCard() {
   }
 
   return (
-    <section aria-labelledby="own-profile-title" className="flex flex-col gap-4 rounded-xl border bg-card p-4">
-      <div>
-        <h2 id="own-profile-title" className="font-display text-lg font-bold tracking-wide uppercase">
-          Seu perfil
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          Preencha só o que quer trocar; o que ficar em branco continua igual. Posição e usuário de login, só com o
-          administrador da pelada.
-        </p>
-      </div>
+    <div className="flex flex-col gap-4">
+      <p className="text-sm text-muted-foreground">
+        Preencha só o que quer trocar; o que ficar em branco continua igual. Posição e usuário de login, só com o
+        administrador da pelada.
+      </p>
       <form onSubmit={form.handleSubmit(handleSubmit)} noValidate>
         <FieldGroup>
           <Controller
@@ -105,6 +101,6 @@ export function OwnProfileCard() {
           </Button>
         </FieldGroup>
       </form>
-    </section>
+    </div>
   );
 }

@@ -11,7 +11,7 @@ function pick(alphabet: string, length: number): string {
 
 /**
  * Senha gerada fácil de repassar, ex.: "pelada-4827-kxm". Vale até o jogador
- * trocar (opcional, em Elenco → "Sua senha").
+ * trocar (opcional, em Eu → "Sua senha").
  */
 export function generateTempPassword(): string {
   return `pelada-${pick(DIGITS, 4)}-${pick(LETTERS, 3)}`;

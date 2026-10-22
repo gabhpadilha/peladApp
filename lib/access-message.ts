@@ -13,6 +13,6 @@ export function buildAccessMessage({ nickname, login, tempPassword, loginUrl }: 
     loginUrl,
     `${login.includes("@") ? "E-mail" : "Usuário"}: ${login}`,
     `Senha: ${tempPassword}`,
-    "Se quiser trocar a senha, vá em Elenco → Sua senha.",
+    "Se quiser trocar a senha, vá em Eu → Sua senha.",
   ].join("\n");
 }

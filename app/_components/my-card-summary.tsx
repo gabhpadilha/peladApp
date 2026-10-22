@@ -93,10 +93,10 @@ export function MyCardSummary({
         </p>
       )}
 
-      {/* Sem foto: atalho direto para o upload (fica no Elenco, longe no celular). */}
+      {/* Sem foto: atalho direto para o upload (em Eu → "Sua foto"). */}
       {!player.photo && (
         <Link
-          href="/elenco#sua-foto"
+          href="/eu#sua-foto"
           className={cn(buttonVariants({ variant: "default", size: "lg" }), "h-11 text-sm")}
         >
           <CameraIcon aria-hidden />

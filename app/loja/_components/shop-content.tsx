@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CoinsIcon, GhostIcon, LockIcon, SparklesIcon, TrophyIcon, WalletCardsIcon, type LucideIcon } from "lucide-react";
+import { CoinsIcon, GhostIcon, SparklesIcon, TrophyIcon, type LucideIcon } from "lucide-react";
+import { CardSkinTile } from "@/components/card-skin-tile";
 import type { CardThemeKey } from "@/lib/card-themes";
 import { PlayerCard } from "@/components/player-card";
 import { Button } from "@/components/ui/button";
@@ -9,7 +10,6 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "
 import { cn } from "@/lib/utils";
 import type { Player } from "@/types/player";
 import { buyCardSkin, type ShopActionResult } from "../_actions/buy-card-skin";
-import { equipCardSkin } from "../_actions/equip-card-skin";
 import type { ShopSale } from "@/lib/shop-sale";
 import type { ShopItem, ShopSection } from "../_data-access/get-shop";
 import { formatShortDate } from "@/lib/format-date";
@@ -17,8 +17,6 @@ import { formatCoins } from "@/components/coin-pill";
 
 type ShopContentProps = {
   me: Player;
-  /** Padrão + compradas. */
-  mine: ShopItem[];
   sections: ShopSection[];
   balance: number;
   /** Promoção valendo hoje (faixa no topo e preços riscados). */
@@ -82,7 +80,7 @@ function withSkin(me: Player, item: ShopItem): Player {
 }
 
 /** Grade de cartas da Loja; tocar numa à venda abre a confirmação de compra. */
-export function ShopContent({ me, mine, sections, balance, sale }: ShopContentProps) {
+export function ShopContent({ me, sections, balance, sale }: ShopContentProps) {
   const [selected, setSelected] = useState<ShopItem | null>(null);
   const [message, setMessage] = useState<{ kind: "error" | "saved"; text: string } | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -106,58 +104,21 @@ export function ShopContent({ me, mine, sections, balance, sale }: ShopContentPr
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {items.map((item) => {
           const isLocked = item.state === "locked";
+          // Só o que o jogador ainda não tem aparece aqui; as dele ficam em Eu → Minhas cartas.
           return (
-            <li
-              key={item.skin ?? "padrao"}
-              className={cn(
-                "flex flex-col items-center gap-4 rounded-xl border bg-card px-2 pt-6 pb-3",
-                item.state === "equipped" && "border-primary/60 bg-primary/5",
+            <CardSkinTile key={item.skin ?? "padrao"} player={withSkin(me, item)} name={item.name} isLocked={isLocked}>
+              {item.state === "available" && (
+                <Button type="button" className="h-10 w-full gap-1.5" disabled={isPending} onClick={() => setSelected(item)}>
+                  <CoinsIcon aria-hidden className="size-4" />
+                  <Price item={item} />
+                </Button>
               )}
-            >
-              <div className="relative w-[70%]">
-                {/* Só opacidade: `saturate` (filtro) sobre as cartas desmontava a prévia no iPhone. */}
-                <div className={cn(isLocked && "opacity-40")}>
-                  <PlayerCard player={withSkin(me, item)} size="fill" />
-                </div>
-                {isLocked && (
-                  <span className="absolute inset-0 flex items-center justify-center">
-                    <span className="flex size-10 items-center justify-center rounded-full bg-background/85 ring-1 ring-border">
-                      <LockIcon aria-hidden className="size-5 text-muted-foreground" />
-                    </span>
-                  </span>
-                )}
-              </div>
-              <div className="flex w-full flex-col items-center gap-2">
-                <p className="font-display text-lg leading-none font-bold uppercase">{item.name}</p>
-                {item.state === "equipped" && (
-                  <span className="flex h-10 w-full items-center justify-center rounded-md bg-primary/15 text-sm font-semibold text-primary">
-                    Em uso
-                  </span>
-                )}
-                {item.state === "owned" && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="h-10 w-full"
-                    disabled={isPending}
-                    onClick={() => run(() => equipCardSkin(item.skin))}
-                  >
-                    Usar
-                  </Button>
-                )}
-                {item.state === "available" && (
-                  <Button type="button" className="h-10 w-full gap-1.5" disabled={isPending} onClick={() => setSelected(item)}>
-                    <CoinsIcon aria-hidden className="size-4" />
-                    <Price item={item} />
-                  </Button>
-                )}
-                {isLocked && (
-                  <span className="flex h-10 w-full items-center justify-center rounded-md bg-muted/50 px-1 text-center text-xs text-muted-foreground">
-                    Nível {item.level} · {formatCoins(item.price)} PC{item.originalPrice !== null && ` (era ${formatCoins(item.originalPrice)})`}
-                  </span>
-                )}
-              </div>
-            </li>
+              {isLocked && (
+                <span className="flex h-10 w-full items-center justify-center rounded-md bg-muted/50 px-1 text-center text-xs text-muted-foreground">
+                  Nível {item.level} · {formatCoins(item.price)} PC{item.originalPrice !== null && ` (era ${formatCoins(item.originalPrice)})`}
+                </span>
+              )}
+            </CardSkinTile>
           );
         })}
       </ul>
@@ -173,15 +134,6 @@ export function ShopContent({ me, mine, sections, balance, sale }: ShopContentPr
       )}
 
       {sale && <SaleBanner sale={sale} />}
-
-      <section aria-label="Minhas cartas" className="flex flex-col gap-3">
-        <SectionHeader
-          icon={WalletCardsIcon}
-          title={`Minhas cartas · ${mine.length}`}
-          text="Escolha qual carta usar. O que você comprou é seu para sempre."
-        />
-        {renderGrid(mine)}
-      </section>
 
       {sections.map((section) => (
         <section key={section.key} aria-label={section.title} className="flex flex-col gap-3">

@@ -36,8 +36,6 @@ export type Shop = {
   progression: Progression;
   /** PeladaCoins ganhas − o que já gastou. */
   balance: number;
-  /** "Minhas cartas": a padrão e as compradas (inclusive de eventos que já acabaram). */
-  mine: ShopItem[];
   /** Cartas à venda que o jogador ainda não tem: evento do mês primeiro. */
   sections: ShopSection[];
   /** Promoção valendo hoje (ex.: Black Friday), ou nenhuma. */
@@ -57,6 +55,27 @@ export async function getOwnPurchases(memberId: string) {
   const owned = new Set(data.map((purchase) => purchase.skin).filter(isCardSkinKey));
   const spent = data.reduce((total, purchase) => total + purchase.price, 0);
   return { owned, spent };
+}
+
+/**
+ * "Minhas cartas" (página Eu): a padrão e as compradas, inclusive de eventos que
+ * já acabaram, com a que está em uso marcada.
+ */
+export function getMyCards(me: Player, owned: ReadonlySet<CardSkinKey>): ShopItem[] {
+  const equipped = me.cardSkin ?? null;
+  return [
+    { skin: null, name: "Padrão", level: 0, price: 0, originalPrice: null, state: equipped === null ? "equipped" : "owned" },
+    ...CARD_SKINS.filter((skin) => owned.has(skin.key)).map(
+      (skin): ShopItem => ({
+        skin: skin.key,
+        name: skin.name,
+        level: skin.level,
+        price: skin.price,
+        originalPrice: null,
+        state: equipped === skin.key ? "equipped" : "owned",
+      }),
+    ),
+  ];
 }
 
 export async function getShop(): Promise<Shop | null> {
@@ -81,10 +100,6 @@ export async function getShop(): Promise<Shop | null> {
       equipped === skin.key ? "equipped" : owned.has(skin.key) ? "owned" : progression.level >= skin.level ? "available" : "locked",
   });
 
-  const mine: ShopItem[] = [
-    { skin: null, name: "Padrão", level: 0, price: 0, originalPrice: null, state: equipped === null ? "equipped" : "owned" },
-    ...CARD_SKINS.filter((skin) => owned.has(skin.key)).map(toItem),
-  ];
   // À venda: o que o jogador ainda não tem (carta de evento só durante o evento).
   const forSale = CARD_SKINS.filter((skin) => !owned.has(skin.key) && isCardSkinOnSale(skin, today));
   const event = getCurrentCardEvent(today);
@@ -103,7 +118,6 @@ export async function getShop(): Promise<Shop | null> {
     groupName: league.membership.groupName,
     progression,
     balance: Math.max(0, progression.coinsEarned - spent),
-    mine,
     sections,
     sale,
     nextUnlock: forSale.filter((skin) => skin.level > progression.level).sort((a, b) => a.level - b.level)[0] ?? null,

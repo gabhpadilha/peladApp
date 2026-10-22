@@ -1,5 +1,5 @@
-import type { GroupMemberSummary } from "../_data-access/get-roster";
-import { PlayerPhotoUploader } from "./player-photo-uploader";
+import type { GroupMemberSummary } from "@/app/elenco/_data-access/get-roster";
+import { PlayerPhotoUploader } from "@/app/elenco/_components/player-photo-uploader";
 
 type OwnPhotoCardProps = {
   member: GroupMemberSummary;

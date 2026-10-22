@@ -12,8 +12,13 @@ const nextConfig: NextConfig = {
   serverExternalPackages: ["onnxruntime-node"],
   // O modelo é lido do disco em tempo de execução e o binding nativo carrega a
   // libonnxruntime.so ao lado dele: o rastreio não enxerga nenhum dos dois sozinho.
+  // A foto é trocada em /eu (cada um) e em /elenco (o Administrador): as duas levam o modelo.
   outputFileTracingIncludes: {
     "/elenco": [
+      "./models/modnet-portrait-q.onnx",
+      "./node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime.so.1",
+    ],
+    "/eu": [
       "./models/modnet-portrait-q.onnx",
       "./node_modules/onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime.so.1",
     ],
@@ -36,8 +41,8 @@ const nextConfig: NextConfig = {
     return [
       // /pelada virou duas páginas: Rodadas (principal) e Elenco.
       { source: "/pelada", destination: "/rodadas", permanent: false },
-      // Troca de senha deixou de ser obrigatória; agora fica em Elenco → "Sua senha".
-      { source: "/trocar-senha", destination: "/elenco", permanent: false },
+      // Troca de senha deixou de ser obrigatória; agora fica em Eu → "Sua senha".
+      { source: "/trocar-senha", destination: "/eu", permanent: false },
     ];
   },
   turbopack: {
