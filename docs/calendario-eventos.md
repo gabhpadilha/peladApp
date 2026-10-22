@@ -20,7 +20,7 @@ Regras de visual que valem para todo evento: sem `filter` e sem `mix-blend-mode`
 |---|---|---|---|
 | 01/10 – 31/10/2026 | **Halloween** | 🟢 no ar | Lobisomem e Vampiro (nível 3, 200 PC) |
 | 01/11 – 30/11/2026 | **Brasileirão + Black Friday** | 🚧 implementado (2026-10-21), entra sozinho em 01/11 | Cores de clube da Série A (a definir quantas) |
-| Dezembro/2026 | **Natal + Vingadores: Doomsday** | ✅ escolhido pelo dono do app (2026-10-22), detalhes a definir | _a definir_ |
+| Dezembro/2026 | **Natal** (cartas especiais) **+ Vingadores: Doomsday** (Loja), ao mesmo tempo; **Time do Ano** na última semana | ✅ escolhido pelo dono do app (2026-10-22), detalhes a definir | Cartas dos Vingadores (quantidade, nível e preço a definir) |
 | Janeiro/2027 | _a definir_ | 💡 | — |
 | Fevereiro/2027 | _a definir_ | 💡 | — |
 
@@ -41,8 +41,11 @@ Cada ideia pode ter: tema das cartas especiais, 1 ou 2 cartas na Loja e, opciona
     - Fominha: **A** mostarda (`#8a6a1a` · `#d89a00`→`#6b4a00` · `#fff1c2`) ou **B** pipoca (`#7a3b00` · `#ffcf6b`→`#e07b00` · `#4a2200`).
     - Já definidos: Gol da Rodada (`#ffd400` · `#1d4fb8`→`#03113a` · `#ffe56b`) e Bola Murcha (`#7c7f86` · `#8f1022`→`#2a0308` · `#ffd5da`).
   - **Black Friday (✅ aprovada, 30%, o mês inteiro: 01/11 a 30/11):** desconto de 30% nas personalizações premium **e nas de clube** (✅ dono do app, 2026-10-21), com faixa preta "Black Friday · -30%" na Loja e preço riscado (250 → 175).
-- ✅ **Dezembro: Natal + Vingadores: Doomsday** (escolhido pelo dono do app em 2026-10-22; o resto ainda não foi discutido). Dois temas no mesmo mês: o **Natal** e o filme **Vingadores: Doomsday** (Marvel; estreia prevista para meados de dezembro de 2026, conferir a data no Brasil antes de montar o calendário do evento).
-  - Ideias anteriores para o Natal, ainda em aberto: tema natalino discreto (vermelho e verde-pinheiro, neve leve); regra especial **Time do Ano** da pelada (as maiores médias de 2026, como o TOTY da EA FC), carta especial única no fim do ano; tela de "Retrospectiva" (jogos, melhor rodada, prêmios de cada um).
+- ✅ **Dezembro: Natal + Vingadores: Doomsday** (decidido pelo dono do app em 2026-10-22). **Os dois eventos acontecem ao mesmo tempo, o mês inteiro**, cada um num lugar:
+  - **Natal nas cartas de premiação:** é o tema sazonal de dezembro em `CARD_THEMES` (as cartas especiais da rodada vestem o Natal). Ideia anterior para o visual, ainda a aprovar: natalino discreto (vermelho e verde-pinheiro, neve leve).
+  - **Vingadores: Doomsday na Loja:** as cartas de evento à venda em dezembro são dos Vingadores (filme da Marvel; estreia prevista para meados de dezembro de 2026, conferir a data no Brasil).
+  - **Time do Ano ("Team of the Season") na última semana do ano:** carta especial da temporada, como o TOTY/TOTS da EA FC; ideia anterior: as maiores médias de 2026 da pelada. Regra exata (quem entra, mínimo de notas, em que rodada sai) a definir.
+  - **A decidir aos poucos** (palavras do dono do app): quantidade de cartas, temas/visuais e valores (nível e preço). A tela de "Retrospectiva" do ano (jogos, melhor rodada, prêmios de cada um) era ideia antiga e não foi confirmada.
   - Atenção (como nos escudos de clube): personagens, nomes e logos dos Vingadores são da Marvel/Disney. O app é de uso pessoal entre amigos, mas fica na internet (com login) e o story publica as cartas especiais; levar ao dono do app a escolha entre visual **inspirado** (cores, "heróis", sem logos nem personagens) e referências diretas, e manter as cartas desse tema fora do story se forem diretas.
 - 💡 **Janeiro: "Verão".** Praia, pôr do sol, futevôlei. Cartas da Loja em tons de areia e mar.
 - 💡 **Fevereiro: "Carnaval".** Purpurina, serpentina, máscara de carnaval como marca d'água. Prêmio zoeira do mês pode ganhar fantasia.
@@ -69,7 +72,7 @@ Cada ideia pode ter: tema das cartas especiais, 1 ou 2 cartas na Loja e, opciona
 
 - Novembro: o dono do app vai mandar **até o fim de outubro os escudos oficiais dos 20 clubes**, em qualidade melhor; trocar todos em `public/clubes/` (os atuais vieram do pôster, com erros no Coritiba, na Chapecoense e no Internacional).
 - Novembro: com 20 cartas de clube, a seção "Evento · Brasileirão" da Loja deve ficar comprida demais; conferir na prática em novembro e pensar numa solução (ex.: filtro ou busca por clube, carrossel horizontal ou "Ver todos").
-- Dezembro: como dividir o mês entre Natal e Vingadores? (ex.: Natal no tema das cartas especiais e Vingadores nas cartas da Loja; ou um tema em cada metade do mês, com Vingadores a partir da estreia; ou um tema só, "heróis de Natal"). Quantas cartas na Loja, nível e preço? O Time do Ano e a Retrospectiva entram?
+- Dezembro: quantas cartas dos Vingadores na Loja, quais e com que nível e preço? Visual do Natal nas cartas especiais? Regra do Time do Ano (quem entra, mínimo de notas, em que rodada da última semana sai)? A Retrospectiva entra?
 - Todo mês terá evento, ou só nos meses com data forte (Natal, Carnaval, São João)?
 - Cada evento sempre traz 2 cartas na Loja? Mesmo nível e preço do Halloween (nível 3, 200 PC) ou sobe com o tempo?
 - Vale ter regras especiais por evento (desconto, Time do Ano, prêmio extra) ou só visual?
