@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import Link from "next/link";
 import { CheckIcon, PlusIcon } from "lucide-react";
 import { PlayerCard } from "@/components/player-card";
@@ -54,8 +55,24 @@ function Badge({ entry, mode, rating }: Pick<BoardCardProps, "entry" | "mode" | 
   );
 }
 
-/** Carta de um atleta na mesa tática. */
-export function BoardCard({ entry, mode, rating, onRate }: BoardCardProps) {
+/** Mesmo selo? `RatingState` é recriado a cada render da mesa, então compara pelo valor. */
+function isSameRating(a: RatingState, b: RatingState): boolean {
+  if (a.kind !== b.kind) return false;
+  if (a.kind === "partial" && b.kind === "partial") return a.filled === b.filled;
+  if (a.kind === "done" && b.kind === "done") return a.average === b.average;
+  return true;
+}
+
+/**
+ * Carta de um atleta na mesa tática.
+ *
+ * Performance: `memo` com comparação do selo pelo valor. Cada passo de um slider
+ * na folha de notas muda o estado da mesa; antes, isso re-renderizava as 10–14
+ * cartas (SVG pesado, com foto e máscaras) dos dois times. Agora só a carta cujo
+ * selo mudou é re-renderizada. `entry` vem da página (estável) e `onRate` é o
+ * `setState` do React (estável).
+ */
+export const BoardCard = memo(function BoardCard({ entry, mode, rating, onRate }: BoardCardProps) {
   const { player, isSelf } = entry;
   const content = (
     <span className="relative block w-full">
@@ -86,4 +103,8 @@ export function BoardCard({ entry, mode, rating, onRate }: BoardCardProps) {
       {content}
     </Link>
   );
-}
+}, (previous, next) =>
+  previous.entry === next.entry &&
+  previous.mode === next.mode &&
+  previous.onRate === next.onRate &&
+  isSameRating(previous.rating, next.rating));

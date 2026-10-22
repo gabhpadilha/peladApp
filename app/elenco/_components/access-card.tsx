@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { buildAccessMessage } from "@/lib/access-message";
@@ -21,11 +21,27 @@ type AccessCardProps = {
 /** Acesso do jogador (usuário + senha gerada) com cópia da mensagem para o WhatsApp. */
 export function AccessCard({ title, nickname, login, tempPassword, loginUrl, children }: AccessCardProps) {
   const [isCopied, setIsCopied] = useState(false);
+  const copiedTimers = useRef(new Set<ReturnType<typeof setTimeout>>());
+
+  // Performance (vazamento): o timer do "Copiado" é cancelado ao desmontar (fechar o
+  // cartão ou trocar de jogador). Antes, ele continuava vivo e tentava mudar o estado
+  // de um componente que já tinha saído da tela.
+  useEffect(() => {
+    const timers = copiedTimers.current;
+    return () => {
+      for (const timer of timers) clearTimeout(timer);
+      timers.clear();
+    };
+  }, []);
 
   async function handleCopy() {
     await navigator.clipboard.writeText(buildAccessMessage({ nickname, login, tempPassword, loginUrl }));
     setIsCopied(true);
-    setTimeout(() => setIsCopied(false), COPIED_FEEDBACK_MS);
+    const timer = setTimeout(() => {
+      copiedTimers.current.delete(timer);
+      setIsCopied(false);
+    }, COPIED_FEEDBACK_MS);
+    copiedTimers.current.add(timer);
   }
 
   return (

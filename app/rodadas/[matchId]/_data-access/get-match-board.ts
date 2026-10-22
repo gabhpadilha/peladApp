@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { getLeague } from "@/lib/league";
-import { getMatchPerformances } from "@/lib/players";
+import { averageEvaluations } from "@/lib/ovr";
 import { createClient } from "@/lib/supabase/server";
 import { teamName } from "@/lib/teams";
-import type { Match } from "@/types/match";
+import type { Evaluation, Match } from "@/types/match";
 import type { Player } from "@/types/player";
 
 export type BoardPlayer = {
@@ -44,24 +44,36 @@ export type MatchBoard = {
 export async function getMatchBoard(matchId: string): Promise<MatchBoard | null> {
   if (!z.uuid().safeParse(matchId).success) return null;
 
-  const league = await getLeague(`/rodadas/${matchId}`);
+  // Performance: a presença da rodada é buscada em paralelo com a liga (antes, só
+  // depois dela: uma ida e volta a mais ao banco). O RLS protege a consulta do mesmo
+  // jeito, e quem não pode ver a pelada continua barrado pelo `getLeague`.
+  const supabase = await createClient();
+  const [league, attendanceResult] = await Promise.all([
+    getLeague(`/rodadas/${matchId}`),
+    supabase.from("match_attendance").select("member_id, team, reserve").eq("match_id", matchId),
+  ]);
   const match = league.matches.find((candidate) => candidate.id === matchId);
   if (!match) return null;
 
-  const supabase = await createClient();
-  const { data: attendance, error } = await supabase
-    .from("match_attendance")
-    .select("member_id, team, reserve")
-    .eq("match_id", matchId);
+  const { data: attendance, error } = attendanceResult;
   if (error) throw error;
 
   const playerById = new Map(league.players.map((player) => [player.id, player]));
+  // Performance: a nota de cada um nesta rodada sai das notas desta rodada, agrupadas
+  // numa passada só. Antes, cada jogador montava o desempenho de todas as rodadas
+  // (O(jogadores × (rodadas + notas))) para depois pegar uma. A nota só aparece em
+  // rodada fechada, como em `getMatchPerformances` (que só olha as fechadas).
+  const receivedByPlayer = new Map<string, Evaluation[]>();
+  if (match.status === "closed") {
+    for (const evaluation of league.evaluations) {
+      if (evaluation.matchId !== matchId) continue;
+      const received = receivedByPlayer.get(evaluation.playerId);
+      if (received) received.push(evaluation);
+      else receivedByPlayer.set(evaluation.playerId, [evaluation]);
+    }
+  }
   const scoreByPlayer = new Map(
-    league.players.map((player) => [
-      player.id,
-      getMatchPerformances(player.id, league.matches, league.evaluations).find((performance) => performance.match.id === matchId)
-        ?.score ?? null,
-    ]),
+    [...receivedByPlayer].map(([playerId, received]) => [playerId, averageEvaluations(received)]),
   );
 
   const onBoard: BoardPlayer[] = attendance.flatMap((row) => {

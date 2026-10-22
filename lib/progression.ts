@@ -1,4 +1,4 @@
-import { averageEvaluations, computeOvr } from "@/lib/ovr";
+import { averageEvaluations, getEvaluationScore, toCardScale } from "@/lib/ovr";
 import { getClosedMatches } from "@/lib/players";
 import { AWARD_LABELS, type AwardKind } from "@/types/award";
 import type { Evaluation, Match } from "@/types/match";
@@ -92,11 +92,19 @@ type ProgressionInput = {
   submissions: ReadonlySet<string>;
 };
 
+// Performance: os limites de cada tabela são ordenados uma vez só (antes, a cada
+// chamada: Object.keys + map + sort por jogador e por rodada).
+const sortedThresholds = new WeakMap<object, number[]>();
+
 function pickBonus(score: number, table: Readonly<Record<number, number>>): number {
-  const threshold = Object.keys(table)
-    .map(Number)
-    .toSorted((a, b) => b - a)
-    .find((value) => score >= value);
+  let thresholds = sortedThresholds.get(table);
+  if (!thresholds) {
+    thresholds = Object.keys(table)
+      .map(Number)
+      .toSorted((a, b) => b - a);
+    sortedThresholds.set(table, thresholds);
+  }
+  const threshold = thresholds.find((value) => score >= value);
   return threshold === undefined ? 0 : (table[threshold] ?? 0);
 }
 
@@ -116,15 +124,60 @@ export type RoundGain = {
 
 const scoreFormatter = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 
+const NO_EVALUATIONS: readonly Evaluation[] = [];
+const NO_AWARDS: readonly ProgressionAward[] = [];
+
+/**
+ * Performance: índice `jogador → rodada → itens`, montado uma vez por lista e
+ * reaproveitado (WeakMap pela própria lista, sem vazar memória entre requisições).
+ * Antes, `walkRounds` filtrava todas as notas e todos os prêmios a cada rodada de
+ * cada jogador: O(jogadores × rodadas × notas) só para a home. Agora cada lista é
+ * percorrida uma vez e a busca por rodada é O(1).
+ */
+const evaluationIndexes = new WeakMap<readonly Evaluation[], Map<string, Map<string, Evaluation[]>>>();
+const awardIndexes = new WeakMap<readonly ProgressionAward[], Map<string, Map<string, ProgressionAward[]>>>();
+
+function indexByPlayerAndMatch<Item>(
+  items: readonly Item[],
+  cacheMap: WeakMap<readonly Item[], Map<string, Map<string, Item[]>>>,
+  keysOf: (item: Item) => { playerId: string; matchId: string },
+): Map<string, Map<string, Item[]>> {
+  const cached = cacheMap.get(items);
+  if (cached) return cached;
+  const index = new Map<string, Map<string, Item[]>>();
+  for (const item of items) {
+    const { playerId, matchId } = keysOf(item);
+    let byMatch = index.get(playerId);
+    if (!byMatch) index.set(playerId, (byMatch = new Map()));
+    const list = byMatch.get(matchId);
+    // A ordem original é mantida: as somas (e o arredondamento) ficam idênticas.
+    if (list) list.push(item);
+    else byMatch.set(matchId, [item]);
+  }
+  cacheMap.set(items, index);
+  return index;
+}
+
 /** Rodada a rodada (só as fechadas), na ordem: o que cada uma deu ao jogador. */
 function* walkRounds({ playerId, matches, evaluations, awards, submissions }: ProgressionInput) {
   let previousOvr: number | null = null;
-  const receivedSoFar: Evaluation[] = [];
+  // Performance: OVR acumulado com soma e contagem correntes. Antes, `computeOvr`
+  // recalculava todo o histórico a cada rodada (O(rodadas²) por jogador). A soma é
+  // feita na mesma ordem de antes, então o resultado é exatamente o mesmo.
+  let scoreSum = 0;
+  let scoreCount = 0;
+  const evaluationsByMatch = indexByPlayerAndMatch(evaluations, evaluationIndexes, (evaluation) => evaluation).get(playerId);
+  const awardsByMatch = indexByPlayerAndMatch(awards, awardIndexes, (award) => ({
+    playerId: award.memberId,
+    matchId: award.matchId,
+  })).get(playerId);
 
   for (const match of getClosedMatches(matches)) {
-    const received = evaluations.filter((evaluation) => evaluation.matchId === match.id && evaluation.playerId === playerId);
-    receivedSoFar.push(...received);
-    const ovr = computeOvr(receivedSoFar);
+    const received = evaluationsByMatch?.get(match.id) ?? NO_EVALUATIONS;
+    const playerAwards = awardsByMatch?.get(match.id) ?? NO_AWARDS;
+    for (const evaluation of received) scoreSum += getEvaluationScore(evaluation);
+    scoreCount += received.length;
+    const ovr = scoreCount === 0 ? null : toCardScale(scoreSum / scoreCount);
     const gains: RoundGain[] = [];
 
     if (match.presentPlayerIds.includes(playerId)) {
@@ -140,8 +193,8 @@ function* walkRounds({ playerId, matches, evaluations, awards, submissions }: Pr
           coins: pickBonus(score, COINS_SCORE_BONUS),
         });
       }
-      for (const award of awards) {
-        if (award.matchId !== match.id || award.memberId !== playerId || NON_POSITIVE_AWARDS.has(award.kind)) continue;
+      for (const award of playerAwards) {
+        if (NON_POSITIVE_AWARDS.has(award.kind)) continue;
         if (award.kind === "jogador_do_mes") continue;
         const isBestPlayer = award.kind === "craque";
         gains.push({
@@ -166,8 +219,8 @@ function* walkRounds({ playerId, matches, evaluations, awards, submissions }: Pr
       }
     }
     // Time do Mês: vale o mesmo que o Melhor Jogador, mesmo sem ter jogado a última quinta.
-    for (const award of awards) {
-      if (award.matchId !== match.id || award.memberId !== playerId || award.kind !== "jogador_do_mes") continue;
+    for (const award of playerAwards) {
+      if (award.kind !== "jogador_do_mes") continue;
       gains.unshift({ key: "award-jogador_do_mes", label: "Prêmio: Time do Mês", xp: XP_BEST_PLAYER, coins: COINS_BEST_PLAYER });
     }
     const ovrBefore = previousOvr;

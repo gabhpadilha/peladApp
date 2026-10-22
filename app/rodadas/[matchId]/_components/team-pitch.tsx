@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useMemo, type ReactNode } from "react";
 import { ArmchairIcon } from "lucide-react";
 import { assignFormation, type FormationSlotKey } from "@/lib/formation";
 import { cn } from "@/lib/utils";
@@ -54,7 +54,12 @@ function Swatch({ team }: { team: number }) {
 
 /** Um time na mesa tática: título, campo com os titulares nas posições e a fileira de reservas. */
 export function TeamPitch({ team, mode, ratingOf, onRate }: TeamPitchProps): ReactNode {
-  const slots = assignFormation(team.starters.map((entry) => ({ ...entry, position: entry.player.position })));
+  // Performance: a formação só depende dos titulares (vindos da página, estáveis);
+  // antes era recalculada, com objetos novos, a cada passo de slider na mesa.
+  const slots = useMemo(
+    () => assignFormation(team.starters.map((entry) => ({ ...entry, position: entry.player.position }))),
+    [team.starters],
+  );
   const cardFor = (entry: BoardPlayer) => (
     <BoardCard entry={entry} mode={mode} rating={ratingOf(entry.player.id)} onRate={onRate} />
   );

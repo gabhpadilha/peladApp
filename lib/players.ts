@@ -53,16 +53,18 @@ export function buildPlayers(
       .filter((match) => upToRound === undefined || match.round <= upToRound)
       .map((match) => match.id),
   );
-  const countedEvaluations = evaluations.filter((evaluation) =>
-    countedMatchIds.has(evaluation.matchId),
-  );
+  // Performance: agrupa as notas por jogador numa passada só. Antes, cada perfil
+  // filtrava a lista inteira (O(jogadores × notas)); agora é O(jogadores + notas).
+  // A ordem das notas de cada um é a mesma, então médias e arredondamentos não mudam.
+  const receivedByPlayer = new Map<string, Evaluation[]>();
+  for (const evaluation of evaluations) {
+    if (!countedMatchIds.has(evaluation.matchId)) continue;
+    const received = receivedByPlayer.get(evaluation.playerId);
+    if (received) received.push(evaluation);
+    else receivedByPlayer.set(evaluation.playerId, [evaluation]);
+  }
 
-  return profiles.map((profile) =>
-    buildPlayer(
-      profile,
-      countedEvaluations.filter((evaluation) => evaluation.playerId === profile.id),
-    ),
-  );
+  return profiles.map((profile) => buildPlayer(profile, receivedByPlayer.get(profile.id) ?? []));
 }
 
 /** Variação do OVR causada pela última rodada fechada. */
@@ -76,10 +78,18 @@ export function getMatchPerformances(
   matches: readonly Match[],
   evaluations: readonly Evaluation[],
 ): MatchPerformance[] {
+  // Performance: notas do jogador agrupadas por rodada numa passada só, em vez de
+  // filtrar a lista inteira a cada rodada (O(rodadas × notas) → O(rodadas + notas)).
+  const receivedByMatch = new Map<string, Evaluation[]>();
+  for (const evaluation of evaluations) {
+    if (evaluation.playerId !== playerId) continue;
+    const received = receivedByMatch.get(evaluation.matchId);
+    if (received) received.push(evaluation);
+    else receivedByMatch.set(evaluation.matchId, [evaluation]);
+  }
+
   return getClosedMatches(matches).map((match) => {
-    const received = evaluations.filter(
-      (evaluation) => evaluation.matchId === match.id && evaluation.playerId === playerId,
-    );
+    const received = receivedByMatch.get(match.id) ?? [];
     return {
       match,
       wasPresent: match.presentPlayerIds.includes(playerId),

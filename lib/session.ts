@@ -1,4 +1,5 @@
 import "server-only";
+import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -25,12 +26,18 @@ export type ActiveMembership = {
   isOwner: boolean;
 };
 
-/** Id do usuário logado (validado pelo JWT), ou `null`. */
-export async function getUserId(): Promise<string | null> {
+/**
+ * Id do usuário logado (validado pelo JWT), ou `null`.
+ * Performance: `cache` do React deduplica por requisição. Uma página chama isso
+ * várias vezes (GroupGate + getLeague + a própria página); antes, cada chamada
+ * validava o JWT de novo. Fora de uma renderização (Server Actions), o `cache`
+ * não guarda nada e a função roda normalmente.
+ */
+export const getUserId = cache(async (): Promise<string | null> => {
   const supabase = await createClient();
   const { data } = await supabase.auth.getClaims();
   return data?.claims.sub ?? null;
-}
+});
 
 /**
  * Exige login; sem sessão, manda para /entrar voltando a `nextPath`. A senha
@@ -52,7 +59,9 @@ export const DEACTIVATED_PATH = "/conta-desativada";
  * senão o mais antigo. `null` se não participa de nenhum. Quem só tem
  * participações desativadas vai para `/conta-desativada`.
  */
-export async function getActiveMembership(userId: string): Promise<ActiveMembership | null> {
+// Performance: deduplicada por requisição (`cache`), como `getUserId`. Na revelação dos
+// vencedores eram 3 consultas iguais a `group_members` por carregamento; agora é 1.
+export const getActiveMembership = cache(async (userId: string): Promise<ActiveMembership | null> => {
   const supabase = await createClient();
   const { data: allRows, error } = await supabase
     .from("group_members")
@@ -82,7 +91,7 @@ export async function getActiveMembership(userId: string): Promise<ActiveMembers
     ownerUserId: row.groups.created_by,
     isOwner: row.groups.created_by === userId,
   };
-}
+});
 
 /** Exige login e grupo; sem grupo, manda para o onboarding. */
 export async function requireActiveMembership(nextPath = "/"): Promise<ActiveMembership> {

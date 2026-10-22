@@ -54,8 +54,27 @@ export async function getLeague(nextPath = "/") {
   const membership = await requireActiveMembership(nextPath);
   const supabase = await createClient();
 
+  // Performance: os nomes (profiles) dependem dos membros, mas não do resto. Antes eram
+  // buscados depois do Promise.all inteiro (uma ida e volta a mais ao banco no fim);
+  // agora a consulta sai assim que os membros chegam, em paralelo com as outras.
+  const membersWithProfiles = supabase
+    .from("group_members")
+    .select("id, user_id, nickname, position, deactivated_at, photo_path, photo_kind, card_skin")
+    .eq("group_id", membership.groupId)
+    .then(async (membersResult) => {
+      if (membersResult.error) return { membersResult, profilesResult: null };
+      const profilesResult = await supabase
+        .from("profiles")
+        .select("id, full_name")
+        .in(
+          "id",
+          membersResult.data.map((member) => member.user_id),
+        );
+      return { membersResult, profilesResult };
+    });
+
   const [
-    membersResult,
+    { membersResult, profilesResult },
     matchesResult,
     evaluations,
     givenResult,
@@ -63,10 +82,7 @@ export async function getLeague(nextPath = "/") {
     awardsResult,
     memberSubmissionsResult,
   ] = await Promise.all([
-      supabase
-        .from("group_members")
-        .select("id, user_id, nickname, position, deactivated_at, photo_path, photo_kind, card_skin")
-        .eq("group_id", membership.groupId),
+      membersWithProfiles,
       supabase
         .from("matches")
         .select("id, round, played_on, status, match_attendance(member_id)")
@@ -116,13 +132,8 @@ export async function getLeague(nextPath = "/") {
     ]),
   );
 
-  const { data: profiles, error: profilesError } = await supabase
-    .from("profiles")
-    .select("id, full_name")
-    .in(
-      "id",
-      membersResult.data.map((member) => member.user_id),
-    );
+  if (!profilesResult) throw new Error("profiles não carregados");
+  const { data: profiles, error: profilesError } = profilesResult;
   if (profilesError) throw profilesError;
   const fullNameByUser = new Map(profiles.map((profile) => [profile.id, profile.full_name]));
 
@@ -202,11 +213,12 @@ export async function getLeague(nextPath = "/") {
     ? buildPlayers(playerProfiles, matches, evaluations, { upToRound: latestClosedMatch.round - 1 })
     : [];
 
+  // Performance: índice por id. Antes, cada `getDelta` fazia `find` na lista inteira,
+  // e o ranking chama para todo mundo (O(jogadores²)); agora cada busca é O(1).
+  const previousById = new Map(previousPlayers.map((previous) => [previous.id, previous]));
+
   function getDelta(player: Player): number | null {
-    return getOvrDelta(
-      player,
-      previousPlayers.find((previous) => previous.id === player.id),
-    );
+    return getOvrDelta(player, previousById.get(player.id));
   }
 
   return {
