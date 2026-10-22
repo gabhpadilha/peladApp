@@ -96,6 +96,7 @@ Desenvolvimento no VS Code + WSL (Ubuntu), com Node 20 via nvm. Se o Claude roda
 - Copiar `.env.example` para `.env.local` ao configurar o ambiente (o `.gitignore` ignora `.env*`, exceto `.env.example`).
 
 ## 🔄 Workflow
+- **Versão (versionamento semântico, `package.json` + tag `vX.Y.Z` no Git):** lançamento oficial = **1.0.0** em 2026-10-22 (1ª rodada real). Correção sem novidade sobe o último número (1.0.1), função nova sobe o do meio (1.1.0, ex.: o evento de dezembro), mudança grande no jeito de usar sobe o primeiro (2.0.0). A cada push na `main` que mereça versão, perguntar ao dono do app qual número subir, atualizar com `npm version X.Y.Z --no-git-tag-version` e criar a tag.
 - ALWAYS run `npm run type-check && npm run lint` após uma série de mudanças.
 - Quando o Jest estiver configurado: rodar um teste por vez, não a suíte completa (`npm run test -- NomeDoArquivo`).
 - Branch naming: `feat/`, `fix/`, `chore/` + descrição em kebab-case.
