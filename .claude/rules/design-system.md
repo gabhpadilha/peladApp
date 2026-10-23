@@ -64,8 +64,9 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
 
 ## 🧮 OVR (`lib/ovr.ts`)
 
-- **OVR = soma das notas de todas as avaliações recebidas ÷ quantidade de avaliações**, sobre o histórico inteiro, para a média ser sempre a correta. A nota de uma avaliação é a média dos 6 atributos dela.
-- Cada atributo da carta = média daquele atributo em todas as avaliações.
+- **OVR = soma das notas de todas as avaliações que contam ÷ quantidade delas**, sobre o histórico inteiro, para a média ser sempre a correta. A nota de uma avaliação é a média dos 6 atributos dela.
+- **Média aparada, como na Street League (decisão do dono do app em 2026-10-23):** em cada rodada, quem recebeu 4 ou mais notas perde a avaliação mais alta e a mais baixa (inteiras); ficam as do meio. Assim, nota de quem "não gosta" ou "gosta demais" de alguém não puxa a média. Vale para OVR, atributos, nota da rodada e prêmios. O banco já entrega só as que contam (`counted_evaluations`).
+- Cada atributo da carta = média daquele atributo nas avaliações que contam.
 - Escala: notas 1–10 × 10 → carta 0–99 (teto 99).
 - Só rodadas **fechadas** contam; notas de rodada aberta não mexem no OVR.
 - Sem avaliações → OVR `null` (carta mostra "–").
@@ -111,15 +112,15 @@ A tela da partida, estilo squad builder do EA FC. **Abre sozinha depois de "Cria
 - **Cartas completas** (`PlayerCard size="fill"`) no esquema **1-2-1 do futsal**: pivô no topo, alas nas laterais, fixo e goleiro embaixo (`lib/formation.ts`, `assignFormation`: cada um vai para o slot da sua posição; sobras ocupam vagas vazias, o 5º jogador de um time sem goleiro cai no gol; vaga sem jogador = contorno tracejado).
 - **Reservas** numa fileira tracejada abaixo do campo ("Reservas · N"), cartas menores (4 por linha).
 - **Selo na base de cada carta:** "+ Avaliar" (nada dado) → "N/6" (parcial) → "✓ 7,5" (lima, completo). "Você" marca a própria carta (não se avalia). Em rodada fechada o selo mostra a nota que a rodada deu ("74 na rodada").
-- **Avaliar na mesa:** tocar na carta abre uma folha por baixo (`Sheet`) com a carta pequena e os 6 sliders (mesmo `AttributeSlider` da tela passo a passo); "Pronto" só libera com os 6 atributos, "Limpar" zera. Barra fixa embaixo: "Avaliados X de Y" + "Votar e enviar", que abre a folha de votos, **um prêmio por tela** (hoje só o Gol da Rodada; com mais de um, "Voto N de M" com barrinhas, "Próximo voto" e seta para voltar; pedido do dono do app em 2026-10-21), com "Enviar notas (N)" na última (mesma `submitEvaluations`). O link "Prefere um por vez?" leva à tela passo a passo (`/avaliar/[matchId]`), que continua existindo.
+- **Avaliar na mesa:** tocar na carta abre uma folha por baixo (`Sheet`) com a carta pequena e os 6 sliders (mesmo `AttributeSlider` da tela passo a passo); "Pronto" só libera com os 6 atributos, "Limpar" zera. Barra fixa embaixo: "Avaliados X de Y" (com "· nota para todos para enviar" enquanto falta alguém) + "Votar e enviar", **desativado até avaliar todos** (2026-10-23), que abre a folha de votos, **um prêmio por tela** (hoje só o Gol da Rodada; com mais de um, "Voto N de M" com barrinhas, "Próximo voto" e seta para voltar; pedido do dono do app em 2026-10-21), com "Enviar notas (N)" na última (mesma `submitEvaluations`). O link "Prefere um por vez?" leva à tela passo a passo (`/avaliar/[matchId]`), que continua existindo.
 - **Sem avaliação possível** (rodada fechada, não jogou, já enviou): as cartas viram links para o perfil do atleta, sem barra de envio e com o menu de baixo; aviso "Você já enviou suas notas" ou, para quem **não foi escalado** com a rodada aberta, "Você não jogou essa rodada: aqui é só para ver os times." (`isOutOfRound`, pedido do dono do app em 2026-10-22).
 
 ## 📱 Tela de notas (vestiário, mobile) — `/avaliar/[matchId]`
 
-Implementada em `app/avaliar/[matchId]/` (sem navbar). Aberta pelo botão "Avaliar" do aviso de pendência. Ordem: time a time, depois apelido. "—" + polegar cinza no meio (6) até o primeiro toque; tocar no polegar parado já conta como nota. Rodapé: anterior / Pular / Próximo (último vira "Revisar"). Revisão lista média (1 casa) ou "Pulado", toque para editar; "Enviar notas (N)" exige ao menos 1. Depois: "Notas enviadas!" e volta ao início. Estados sem formulário: rodada fechada, não jogou, já enviou.
+Implementada em `app/avaliar/[matchId]/` (sem navbar). Aberta pelo botão "Avaliar" do aviso de pendência. Ordem: time a time, depois apelido. "—" + polegar cinza no meio (6) até o primeiro toque; tocar no polegar parado já conta como nota. Rodapé: anterior / Próximo (último vira "Revisar"); "Pular" só nos votos (= "Ninguém"). Revisão lista média (1 casa) ou "Falta", toque para editar; "Enviar notas (N)" exige **nota para todos** (decisão do dono do app em 2026-10-23: envio incompleto não existe). Depois: "Notas enviadas!" e volta ao início. Estados sem formulário: rodada fechada, não jogou, já enviou.
 
 
-- **Um jogador por vez**, sem autoavaliação. Progresso fixo no topo ("3/8"), botão "Próximo" fixo no rodapé (zona do polegar), opção de **pular** jogador, **revisão final** e **envio em lote** numa única Server Action.
+- **Um jogador por vez**, sem autoavaliação. Progresso fixo no topo ("3/8"), botão "Próximo" fixo no rodapé (zona do polegar), **sem pular jogador** (todo mundo leva nota), **revisão final** e **envio em lote** numa única Server Action.
 - **Nota de 1 a 10 (inteiros)** por atributo, via **slider**:
   - largura total, área de toque alta, snap de 1 em 1, número grande acima;
   - começa **"apagado" mostrando "—"** até o primeiro toque; "Próximo" só libera com os 6 atributos tocados;
@@ -128,7 +129,7 @@ Implementada em `app/avaliar/[matchId]/` (sem navbar). Aberta pelo botão "Avali
 
 ## 🔄 Rodada e feedback de OVR
 
-- A rodada fecha quando **todos os presentes enviaram ou 24h após o jogo**; o organizador pode fechar antes. Antes de fechar: "Aguardando X de Y".
+- **O organizador só fecha com pelo menos 5 envios completos** (decisão do dono do app em 2026-10-23): até lá, "Fechar rodada" fica desativado com "Faltam N envios (mínimo 5)"; o banco (`close_match`) também recusa. Planejado: fechar sozinha 24h após o jogo (respeitando o mínimo). Antes de fechar: "N enviaram notas".
 - Ao fechar: o OVR anima do antigo ao novo (▲ `success` / ▼ `destructive`); se a faixa mudar, a carta vira com animação de revelação (Framer Motion).
 
 ## 🎲 Draft (`draftMatch` em `lib/draft.ts`)

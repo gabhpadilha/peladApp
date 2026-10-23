@@ -18,8 +18,8 @@ export type SubmitEvaluationsResult =
 /**
  * Envia as notas e o voto no Gol da Rodada (VOTE_AWARD_KINDS) que o jogador
  * logado deu na rodada. Tudo é conferido de novo aqui (rodada aberta, presença,
- * papel de cada avaliado); o banco ainda garante notas 1–10, sem autoavaliação
- * e só entre presentes.
+ * nota para todos, papel de cada avaliado); o banco ainda garante notas 1–10, sem
+ * autoavaliação e só entre presentes.
  */
 export async function submitEvaluations(input: SubmitEvaluationsInput): Promise<SubmitEvaluationsResult> {
   const membership = await requireActiveMembership(`/avaliar/${input.matchId}`);
@@ -37,6 +37,13 @@ export async function submitEvaluations(input: SubmitEvaluationsInput): Promise<
   }
   if (session.status !== "open") {
     return { success: false, message: "Essa rodada não está aceitando notas." };
+  }
+
+  // Envio só completo: nota para todos os outros presentes (o banco só fecha a
+  // rodada com envios completos).
+  const ratedIds = new Set(evaluations.map((evaluation) => evaluation.playerId));
+  if (session.targets.some((target) => !ratedIds.has(target.player.id))) {
+    return { success: false, message: "Dê nota para todos os jogadores da rodada antes de enviar." };
   }
 
   const roleByTarget = new Map(session.targets.map((target) => [target.player.id, target.player.role]));

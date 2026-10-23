@@ -471,6 +471,30 @@ export type Database = {
         Args: { target_match: string; theme_key: string }
         Returns: number
       }
+      counted_evaluations: {
+        Args: { target_group: string }
+        Returns: {
+          chu: number
+          counted: boolean
+          def: number
+          dri: number
+          ela: number
+          evaluation_id: string
+          fis: number
+          match_id: string
+          pas: number
+          pes: number
+          played_on: string
+          player_id: string
+          pos: number
+          received: number
+          ref: number
+          rep: number
+          sai: number
+          score: number
+          vel: number
+        }[]
+      }
       create_group: {
         Args: {
           group_name: string

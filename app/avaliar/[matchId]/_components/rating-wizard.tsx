@@ -29,7 +29,6 @@ import { AttributeSlider } from "./attribute-slider";
 import { VoteStep } from "./vote-step";
 
 type Draft = {
-  skipped: boolean;
   scores: Partial<Record<PlayerAttribute, number>>;
 };
 
@@ -63,8 +62,8 @@ function averageScore(draft: Draft): number {
 }
 
 /**
- * Notas da rodada, um jogador por vez (mobile, no vestiário): 6 sliders,
- * "Próximo" só com os 6 tocados, "Pular" para quem você não viu jogar.
+ * Notas da rodada, um jogador por vez (mobile, no vestiário): 6 sliders e
+ * "Próximo" só com os 6 tocados. Todo mundo leva nota (o envio só vale completo).
  * Depois, um voto por prêmio (só o Gol da Rodada; o resto sai das notas), revisão
  * e envio de tudo de uma vez.
  */
@@ -88,14 +87,13 @@ export function RatingWizard({ match, targets }: RatingWizardProps) {
   const step = steps[index];
   const currentDraft = step.type === "player" ? drafts[step.target.player.id] : undefined;
   const canAdvance = step.type === "player" ? isComplete(step.target.player, currentDraft) : true;
-  const ratedTargets = targets.filter(
-    (target) => !drafts[target.player.id]?.skipped && isComplete(target.player, drafts[target.player.id]),
-  );
+  const ratedTargets = targets.filter((target) => isComplete(target.player, drafts[target.player.id]));
+  const isAllRated = ratedTargets.length === targets.length;
   const nameById = new Map(targets.map((target) => [target.player.id, target.player.nickname]));
 
   function setScore(playerId: string, key: PlayerAttribute, value: number) {
-    const draft = form.getValues(`drafts.${playerId}`) ?? { skipped: false, scores: {} };
-    form.setValue(`drafts.${playerId}`, { skipped: false, scores: { ...draft.scores, [key]: value } });
+    const draft = form.getValues(`drafts.${playerId}`) ?? { scores: {} };
+    form.setValue(`drafts.${playerId}`, { scores: { ...draft.scores, [key]: value } });
   }
 
   function setVote(kind: VoteAwardKind, playerId: string | undefined) {
@@ -108,23 +106,21 @@ export function RatingWizard({ match, targets }: RatingWizardProps) {
   }
 
   function handleNext() {
-    if (step.type === "player") form.setValue(`drafts.${step.target.player.id}.skipped`, false);
     goTo(index + 1);
   }
 
-  function handleSkip() {
-    if (step.type === "player") {
-      const playerId = step.target.player.id;
-      const draft = form.getValues(`drafts.${playerId}`) ?? { skipped: true, scores: {} };
-      form.setValue(`drafts.${playerId}`, { ...draft, skipped: true });
-    } else if (step.type === "vote") {
-      setVote(step.kind, undefined);
-    }
+  /** Só nos votos: "Pular" = não votar em ninguém. Jogador não se pula. */
+  function handleSkipVote() {
+    if (step.type === "vote") setVote(step.kind, undefined);
     goTo(index + 1);
   }
 
   function handleSubmit() {
     setSubmitError(null);
+    if (!isAllRated) {
+      setSubmitError("Dê nota para todos os jogadores antes de enviar.");
+      return;
+    }
     const evaluations: PlayerEvaluationInput[] = ratedTargets.map(({ player }) => {
       const scores = drafts[player.id].scores;
       return player.role === "goalkeeper"
@@ -134,7 +130,7 @@ export function RatingWizard({ match, targets }: RatingWizardProps) {
 
     const validation = submitEvaluationsSchema.safeParse({ matchId: match.id, evaluations, votes });
     if (!validation.success) {
-      setSubmitError("Avalie pelo menos um jogador antes de enviar.");
+      setSubmitError("Dê nota para todos os jogadores antes de enviar.");
       return;
     }
 
@@ -266,7 +262,7 @@ export function RatingWizard({ match, targets }: RatingWizardProps) {
               <Button
                 size="lg"
                 className="h-12 flex-1 text-base"
-                disabled={isPending || ratedTargets.length === 0}
+                disabled={isPending || !isAllRated}
                 onClick={handleSubmit}
               >
                 {isPending ? "Enviando…" : `Enviar notas (${ratedTargets.length})`}
@@ -284,16 +280,18 @@ export function RatingWizard({ match, targets }: RatingWizardProps) {
               >
                 <ChevronLeftIcon />
               </Button>
-              <Button variant="secondary" size="lg" className="h-12" onClick={handleSkip}>
-                Pular
-              </Button>
+              {step.type === "vote" && (
+                <Button variant="secondary" size="lg" className="h-12" onClick={handleSkipVote}>
+                  Pular
+                </Button>
+              )}
               <Button size="lg" className="h-12 flex-1 text-base" disabled={!canAdvance} onClick={handleNext}>
                 {index === reviewIndex - 1 ? "Revisar" : "Próximo"}
               </Button>
             </div>
           )}
           {step.type === "player" && !canAdvance && (
-            <p className="text-center text-xs text-muted-foreground">Dê nota nos 6 atributos ou toque em Pular.</p>
+            <p className="text-center text-xs text-muted-foreground">Dê nota nos 6 atributos para seguir: todo mundo leva a sua nota.</p>
           )}
         </div>
       </footer>
@@ -350,7 +348,7 @@ function ReviewList({ targets, drafts, votes, nameById, ratedCount, firstVoteInd
         <ul className="flex flex-col">
           {targets.map(({ player, team, isReserve }, targetIndex) => {
             const draft = drafts[player.id];
-            const isRated = draft !== undefined && !draft.skipped && isComplete(player, draft);
+            const isRated = draft !== undefined && isComplete(player, draft);
             return (
               <li key={player.id} className="border-t first:border-t-0">
                 <button
@@ -371,7 +369,7 @@ function ReviewList({ targets, drafts, votes, nameById, ratedCount, firstVoteInd
                       !isRated && "text-sm font-medium text-muted-foreground",
                     )}
                   >
-                    {isRated ? averageScore(draft).toFixed(1).replace(".", ",") : "Pulado"}
+                    {isRated ? averageScore(draft).toFixed(1).replace(".", ",") : "Falta"}
                   </span>
                   <PencilIcon aria-hidden className="size-4 text-muted-foreground" />
                 </button>

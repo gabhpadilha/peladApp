@@ -3,8 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getThemeForDate } from "@/lib/card-themes";
+import { MIN_SUBMISSIONS_TO_CLOSE } from "@/lib/round-rules";
 import { requireActiveMembership } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
+
+/** Erro próprio de `close_match`: ainda não há envios completos suficientes. */
+const NOT_ENOUGH_SUBMISSIONS = "PA005";
 
 export type CloseMatchResult =
   | { success: true; awardCount: number }
@@ -42,7 +46,13 @@ export async function closeMatch(matchId: string): Promise<CloseMatchResult> {
     theme_key: getThemeForDate(match.played_on),
   });
   if (error) {
-    return { success: false, message: "Não foi possível fechar a rodada." };
+    return {
+      success: false,
+      message:
+        error.code === NOT_ENOUGH_SUBMISSIONS
+          ? `Para fechar, pelo menos ${MIN_SUBMISSIONS_TO_CLOSE} jogadores precisam enviar as notas de todos.`
+          : "Não foi possível fechar a rodada.",
+    };
   }
 
   revalidatePath("/", "layout");

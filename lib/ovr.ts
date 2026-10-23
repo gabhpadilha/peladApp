@@ -34,8 +34,9 @@ export function averageEvaluations(evaluations: readonly Evaluation[]): number |
 }
 
 /**
- * OVR = soma das notas de todas as avaliações recebidas ÷ quantidade de avaliações.
+ * OVR = soma das notas de todas as avaliações que contam ÷ quantidade delas.
  * Sempre sobre o histórico inteiro (só rodadas fechadas), para a média nunca distorcer.
+ * As avaliações chegam já sem a maior e a menor de cada rodada (`getGroupEvaluations`).
  */
 export function computeOvr(evaluations: readonly Evaluation[]): number | null {
   return averageEvaluations(evaluations);

@@ -10,8 +10,10 @@ const SCORE_COLUMNS = [
 ] as const satisfies readonly PlayerAttribute[];
 
 /**
- * Avaliações das rodadas fechadas da pelada, sem o avaliador (anônimas),
- * no formato usado por `lib/ovr.ts`.
+ * Avaliações das rodadas fechadas da pelada que contam na média, sem o avaliador
+ * (anônimas), no formato usado por `lib/ovr.ts`. O banco já tira a maior e a
+ * menor de cada jogador em cada rodada (`counted_evaluations`, a partir de
+ * `TRIMMED_MEAN_MIN_RATINGS` notas), então tudo o que sai daqui usa a média aparada.
  */
 export async function getGroupEvaluations(groupId: string): Promise<Evaluation[]> {
   const supabase = await createClient();

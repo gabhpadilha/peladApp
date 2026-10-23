@@ -73,8 +73,7 @@ function VoteSteps({
           </div>
         )}
         <SheetDescription>
-          Você avaliou {ratedCount} de {targets.length}. Os votos são opcionais e anônimos; quem você não avaliar fica
-          sem nota sua.
+          Você avaliou {ratedCount} de {targets.length}. Os votos são opcionais e anônimos.
         </SheetDescription>
       </SheetHeader>
 
@@ -106,7 +105,7 @@ function VoteSteps({
               type="button"
               size="lg"
               className="h-12 flex-1 text-base"
-              disabled={isPending || ratedCount === 0}
+              disabled={isPending || ratedCount < targets.length}
               onClick={onSubmit}
             >
               {isPending ? "Enviando…" : `Enviar notas (${ratedCount})`}

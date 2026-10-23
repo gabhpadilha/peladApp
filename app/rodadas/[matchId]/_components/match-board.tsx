@@ -42,6 +42,8 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
   const ratable = everyone.filter((entry) => !entry.isSelf);
   const canRate = board.canRate && sent === null;
   const rated = ratable.filter((entry) => isDraftComplete(entry.player, drafts[entry.player.id]));
+  // O envio só vale completo: nota para todos os outros presentes.
+  const isAllRated = rated.length === ratable.length;
   const ratingEntry = everyone.find((entry) => entry.player.id === ratingId) ?? null;
   const targets: RatingTarget[] = ratable.map((entry) => ({
     player: entry.player,
@@ -72,6 +74,10 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
 
   function handleSubmit() {
     setError(null);
+    if (!isAllRated) {
+      setError("Dê nota para todos os jogadores antes de enviar.");
+      return;
+    }
     const evaluations: PlayerEvaluationInput[] = rated.map(({ player }) => {
       const scores = drafts[player.id];
       return player.role === "goalkeeper"
@@ -95,7 +101,7 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
 
     const validation = submitEvaluationsSchema.safeParse({ matchId: board.match.id, evaluations, votes });
     if (!validation.success) {
-      setError("Avalie pelo menos um jogador antes de enviar.");
+      setError("Dê nota para todos os jogadores antes de enviar.");
       return;
     }
 
@@ -151,6 +157,9 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium tabular-nums">
                   Avaliados {rated.length} de {ratable.length}
+                  {!isAllRated && (
+                    <span className="font-normal text-muted-foreground"> · nota para todos para enviar</span>
+                  )}
                 </p>
                 <progress
                   value={rated.length}
@@ -159,7 +168,12 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
                   className="mt-1 h-1 w-full overflow-hidden rounded-full [&::-moz-progress-bar]:bg-primary [&::-webkit-progress-bar]:bg-muted [&::-webkit-progress-value]:bg-primary"
                 />
               </div>
-              <Button size="lg" className="h-12 px-5 text-base" onClick={() => setIsSendOpen(true)}>
+              <Button
+                size="lg"
+                className="h-12 px-5 text-base"
+                disabled={!isAllRated}
+                onClick={() => setIsSendOpen(true)}
+              >
                 Votar e enviar
               </Button>
             </div>
