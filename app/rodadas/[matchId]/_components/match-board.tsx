@@ -42,6 +42,9 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
   const ratable = everyone.filter((entry) => !entry.isSelf);
   const canRate = board.canRate && sent === null;
   const rated = ratable.filter((entry) => isDraftComplete(entry.player, drafts[entry.player.id]));
+  // Só envia depois de avaliar todo mundo da mesa (pedido do dono do app em 2026-10-23).
+  const nextUnrated = ratable.find((entry) => !isDraftComplete(entry.player, drafts[entry.player.id])) ?? null;
+  const missingCount = ratable.length - rated.length;
   const ratingEntry = everyone.find((entry) => entry.player.id === ratingId) ?? null;
   const targets: RatingTarget[] = ratable.map((entry) => ({
     player: entry.player,
@@ -72,6 +75,10 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
 
   function handleSubmit() {
     setError(null);
+    if (missingCount > 0) {
+      setError(`Avalie todos os jogadores antes de enviar (faltam ${missingCount}).`);
+      return;
+    }
     const evaluations: PlayerEvaluationInput[] = rated.map(({ player }) => {
       const scores = drafts[player.id];
       return player.role === "goalkeeper"
@@ -159,14 +166,26 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
                   className="mt-1 h-1 w-full overflow-hidden rounded-full [&::-moz-progress-bar]:bg-primary [&::-webkit-progress-bar]:bg-muted [&::-webkit-progress-value]:bg-primary"
                 />
               </div>
-              <Button size="lg" className="h-12 px-5 text-base" onClick={() => setIsSendOpen(true)}>
-                Votar e enviar
-              </Button>
+              {nextUnrated ? (
+                // Ainda falta alguém: o botão leva ao próximo sem nota, em vez de abrir o envio.
+                <Button
+                  size="lg"
+                  variant="secondary"
+                  className="h-12 px-5 text-base"
+                  onClick={() => setRatingId(nextUnrated.player.id)}
+                >
+                  Faltam {missingCount}
+                </Button>
+              ) : (
+                <Button size="lg" className="h-12 px-5 text-base" onClick={() => setIsSendOpen(true)}>
+                  Votar e enviar
+                </Button>
+              )}
             </div>
           </div>
 
           <p className="text-center text-xs text-muted-foreground">
-            Toque numa carta para dar as notas.{" "}
+            Toque numa carta para dar as notas. O envio libera quando você avaliar todos.{" "}
             <Link href={`/avaliar/${board.match.id}`} className="underline underline-offset-2">
               Prefere um por vez?
             </Link>
