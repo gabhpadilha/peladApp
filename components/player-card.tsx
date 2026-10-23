@@ -575,6 +575,51 @@ const GOLD_STOPS: readonly (readonly [string, string])[] = [
   ["100%", "#e8cf95"],
 ];
 
+/**
+ * Metal da faixa do jogador (Bronze/Prata/Ouro/Ouro Raro) na borda de fora das
+ * cartas da Loja: a skin veste a face, a borda mostra o elo. Pedido do dono do app.
+ */
+const TIER_STOPS: Record<CardTier, readonly (readonly [string, string])[]> = {
+  bronze: [
+    ["0%", "#ffe0c2"],
+    ["16%", "#b06a3a"],
+    ["30%", "#f0b98a"],
+    ["48%", "#6b3417"],
+    ["64%", "#d18d5c"],
+    ["82%", "#4d230e"],
+    ["100%", "#e8a878"],
+  ],
+  silver: CLUB_SILVER,
+  gold: [
+    ["0%", "#fff8c9"],
+    ["16%", "#e2b52c"],
+    ["30%", "#fff0a0"],
+    ["48%", "#9a6a07"],
+    ["64%", "#f1cc4b"],
+    ["82%", "#7a5104"],
+    ["100%", "#ffe27a"],
+  ],
+  rare: [
+    ["0%", "#ffffff"],
+    ["14%", "#ffd23f"],
+    ["28%", "#fff6b8"],
+    ["46%", "#b17800"],
+    ["62%", "#ffe066"],
+    ["80%", "#8a5a00"],
+    ["100%", "#fff1a1"],
+  ],
+};
+
+/** Mesmo metal da faixa como fundo CSS (literais, para o Tailwind gerar as classes). */
+const TIER_FRAME_FILL: Record<CardTier, string> = {
+  bronze:
+    "[background:linear-gradient(155deg,#ffe0c2_0%,#b06a3a_16%,#f0b98a_30%,#6b3417_48%,#d18d5c_64%,#4d230e_82%,#e8a878_100%)]",
+  silver:
+    "[background:linear-gradient(155deg,#ffffff_0%,#b8bcc2_16%,#f3f4f6_30%,#5c6066_48%,#d6d9dd_64%,#3f4247_82%,#e5e7ea_100%)]",
+  gold: "[background:linear-gradient(155deg,#fff8c9_0%,#e2b52c_16%,#fff0a0_30%,#9a6a07_48%,#f1cc4b_64%,#7a5104_82%,#ffe27a_100%)]",
+  rare: "[background:linear-gradient(155deg,#ffffff_0%,#ffd23f_14%,#fff6b8_28%,#b17800_46%,#ffe066_62%,#8a5a00_80%,#fff1a1_100%)]",
+};
+
 /** Id do degradê do metal dentro dos SVGs (um por carta, para não misturar metais). */
 const metalId = (skin: CardSkinKey) => (METAL_STOPS[skin] ? `card-metal-${skin}` : "card-gold");
 
@@ -604,9 +649,13 @@ const BLADES = [
 const BAT_WING =
   "M11,7.2 Q4,2.6 -7,5.6 Q-4.6,7 -5.4,9.2 Q-2.6,8.2 -1.8,10.6 Q0.6,9.4 1.8,11.8 Q3.6,9.4 6,10 Q7.6,8.2 11,7.2 Z";
 
-/** Lâminas finas de metal por fora das laterais e da ponta, com fio de luz. */
-function PremiumBlades({ skin }: { skin: CardSkinKey }) {
+/**
+ * Lâminas finas de metal por fora das laterais e da ponta, com fio de luz. Com
+ * `tier`, no metal da faixa do jogador (fazem parte da borda); sem OVR, no da skin.
+ */
+function PremiumBlades({ skin, tier }: { skin: CardSkinKey; tier: CardTier | null }) {
   const blades = skin === "vampiro" ? [...BLADES, BAT_WING] : BLADES;
+  const fillId = tier ? `card-tier-${tier}` : metalId(skin);
   return (
     <svg
       aria-hidden
@@ -614,13 +663,21 @@ function PremiumBlades({ skin }: { skin: CardSkinKey }) {
       className="pointer-events-none absolute top-[-17.57%] left-[-36%] h-[135.1%] w-[172%] overflow-visible"
     >
       <defs>
-        <MetalGradient skin={skin} />
+        {tier ? (
+          <linearGradient id={fillId} x1="0" y1="0" x2="0.55" y2="1">
+            {TIER_STOPS[tier].map(([offset, color]) => (
+              <stop key={offset} offset={offset} stopColor={color} />
+            ))}
+          </linearGradient>
+        ) : (
+          <MetalGradient skin={skin} />
+        )}
       </defs>
       {[undefined, MIRROR].map((transform) => (
         <g key={transform ?? "left"} transform={transform}>
           {blades.map((d) => (
             <g key={d}>
-              <path d={d} fill={`url(#${metalId(skin)})`} />
+              <path d={d} fill={`url(#${fillId})`} />
               <path d={d} fill="none" stroke="#fff7de" strokeOpacity={0.55} strokeWidth={0.18} />
             </g>
           ))}
@@ -788,6 +845,8 @@ function PremiumPlayerCard({
   const attributeValues: Partial<Record<PlayerAttribute, number | null>> = player.attributes;
   const skinInfo = getCardSkin(skin);
   const crest = "crest" in skinInfo ? skinInfo.crest : null;
+  // Borda no metal da faixa (elo) do jogador; sem OVR ainda, fica o metal da skin.
+  const tier = player.ovr === null ? null : getCardTier(player.ovr);
 
   return (
     <div
@@ -803,10 +862,10 @@ function PremiumPlayerCard({
         aria-hidden
         className="pointer-events-none absolute -inset-x-[12%] -top-[4%] -bottom-[8%] [background:radial-gradient(closest-side,color-mix(in_oklab,var(--skin-light)_16%,transparent),rgb(0_0_0/0.35)_70%,transparent)]"
       />
-      <PremiumBlades skin={skin} />
+      <PremiumBlades skin={skin} tier={tier} />
       <article
-        aria-label={`${player.nickname}, ${player.position}, OVR ${player.ovr ?? "sem avaliação"}, carta ${skin}`}
-        className={cn("relative size-full text-[var(--skin-text)]", SHAPE_CLIP, GOLD_FILL)}
+        aria-label={`${player.nickname}, ${player.position}, OVR ${player.ovr ?? "sem avaliação"}, carta ${skin}${tier ? `, borda ${CARD_TIER_LABELS[tier]}` : ""}`}
+        className={cn("relative size-full text-[var(--skin-text)]", SHAPE_CLIP, tier ? TIER_FRAME_FILL[tier] : GOLD_FILL)}
       >
         <div
           className={cn(
