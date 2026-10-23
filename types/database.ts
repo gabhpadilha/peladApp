@@ -517,6 +517,7 @@ export type Database = {
         }
         Returns: string
       }
+      drop_lowest_average: { Args: { vals: number[] }; Returns: number }
       get_group_scores: {
         Args: { target_group: string }
         Returns: {

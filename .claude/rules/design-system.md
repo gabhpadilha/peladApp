@@ -65,7 +65,7 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
 
 ## 🧮 OVR (`lib/ovr.ts`)
 
-- **OVR = soma das notas de todas as avaliações que contam ÷ quantidade delas**, sobre o histórico inteiro, para a média ser sempre a correta. A nota de uma avaliação é a média dos 6 atributos dela.
+- **OVR = média dos 5 melhores atributos da carta** (o mais fraco sai; decisão do dono do app em 2026-10-23: no futsal todo mundo ataca e defende, e um atributo muito baixo não deve derrubar a carta). Cada atributo é a média dele em todas as avaliações que contam, sobre o histórico inteiro. `OVR_DROPPED_ATTRIBUTES` em `lib/ovr.ts`, espelhado em `drop_lowest_average` no banco (cartas de prêmio). A **nota da rodada** (prêmios, Time da Semana, XP) continua sendo a média dos 6 atributos de cada avaliação.
 - **Média aparada, como na Street League (decisão do dono do app em 2026-10-23):** em cada rodada, quem recebeu 4 ou mais notas perde a avaliação mais alta e a mais baixa (inteiras); ficam as do meio. Assim, nota de quem "não gosta" ou "gosta demais" de alguém não puxa a média. Vale para OVR, atributos, nota da rodada e prêmios. O banco já entrega só as que contam (`counted_evaluations`).
 - Cada atributo da carta = média daquele atributo nas avaliações que contam.
 - Escala: notas 1–10 × 10 → carta 0–99 (teto 99).

@@ -1,4 +1,4 @@
-import { averageEvaluations, getEvaluationScore, toCardScale } from "@/lib/ovr";
+import { addToOvrTotals, averageEvaluations, ovrFromTotals, type OvrTotals } from "@/lib/ovr";
 import { getClosedMatches } from "@/lib/players";
 import { AWARD_LABELS, type AwardKind } from "@/types/award";
 import { isOvrEvaluation, type Evaluation, type Match } from "@/types/match";
@@ -161,11 +161,10 @@ function indexByPlayerAndMatch<Item>(
 /** Rodada a rodada (só as fechadas), na ordem: o que cada uma deu ao jogador. */
 function* walkRounds({ playerId, matches, evaluations, awards, submissions }: ProgressionInput) {
   let previousOvr: number | null = null;
-  // Performance: OVR acumulado com soma e contagem correntes. Antes, `computeOvr`
-  // recalculava todo o histórico a cada rodada (O(rodadas²) por jogador). A soma é
-  // feita na mesma ordem de antes, então o resultado é exatamente o mesmo.
-  let scoreSum = 0;
-  let scoreCount = 0;
+  // Performance: OVR acumulado com somas correntes por atributo. Antes, `computeOvr`
+  // recalculava todo o histórico a cada rodada (O(rodadas²) por jogador). Os totais
+  // são os mesmos de `computeOvr`, então o resultado é exatamente o mesmo.
+  const ovrTotals: OvrTotals = new Map();
   const evaluationsByMatch = indexByPlayerAndMatch(evaluations, evaluationIndexes, (evaluation) => evaluation).get(playerId);
   const awardsByMatch = indexByPlayerAndMatch(awards, awardIndexes, (award) => ({
     playerId: award.memberId,
@@ -177,11 +176,9 @@ function* walkRounds({ playerId, matches, evaluations, awards, submissions }: Pr
     const playerAwards = awardsByMatch?.get(match.id) ?? NO_AWARDS;
     // OVR só com as notas na posição do cadastro; a nota da rodada (XP e moedas) usa todas.
     for (const evaluation of received) {
-      if (!isOvrEvaluation(evaluation)) continue;
-      scoreSum += getEvaluationScore(evaluation);
-      scoreCount += 1;
+      if (isOvrEvaluation(evaluation)) addToOvrTotals(ovrTotals, evaluation);
     }
-    const ovr = scoreCount === 0 ? null : toCardScale(scoreSum / scoreCount);
+    const ovr = ovrFromTotals(ovrTotals);
     const gains: RoundGain[] = [];
 
     if (match.presentPlayerIds.includes(playerId)) {
