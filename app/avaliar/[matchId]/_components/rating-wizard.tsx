@@ -7,6 +7,7 @@ import { CheckCircle2Icon, ChevronLeftIcon, PencilIcon, XIcon } from "lucide-rea
 import { PlayerCard } from "@/components/player-card";
 import { Button } from "@/components/ui/button";
 import { formatWeekdayDate } from "@/lib/format-date";
+import { getAttributeKeys } from "@/lib/rating-drafts";
 import { teamRoleLabel } from "@/lib/teams";
 import { cn } from "@/lib/utils";
 import { AWARD_LABELS, VOTE_AWARD_KINDS, type VoteAwardKind } from "@/types/award";
@@ -15,9 +16,9 @@ import {
   GOALKEEPER_ATTRIBUTES,
   OUTFIELD_ATTRIBUTES,
   POSITION_LABELS,
-  type Player,
   type PlayerAttribute,
 } from "@/types/player";
+import { OffPositionBadge } from "@/components/off-position-badge";
 import { submitEvaluations } from "../_actions/submit-evaluations";
 import type { RatingTarget } from "../_data-access/get-rating-session";
 import {
@@ -48,12 +49,9 @@ type Step =
   | { type: "vote"; kind: VoteAwardKind }
   | { type: "review" };
 
-function getAttributeKeys(player: Player): readonly PlayerAttribute[] {
-  return player.role === "goalkeeper" ? GOALKEEPER_ATTRIBUTES : OUTFIELD_ATTRIBUTES;
-}
-
-function isComplete(player: Player, draft: Draft | undefined): boolean {
-  return getAttributeKeys(player).every((key) => draft?.scores[key] !== undefined);
+/** Completo nos 6 atributos do papel da rodada (quem jogou no gol, nos de goleiro). */
+function isComplete(target: RatingTarget, draft: Draft | undefined): boolean {
+  return getAttributeKeys(target.role).every((key) => draft?.scores[key] !== undefined);
 }
 
 function averageScore(draft: Draft): number {
@@ -86,8 +84,8 @@ export function RatingWizard({ match, targets }: RatingWizardProps) {
 
   const step = steps[index];
   const currentDraft = step.type === "player" ? drafts[step.target.player.id] : undefined;
-  const canAdvance = step.type === "player" ? isComplete(step.target.player, currentDraft) : true;
-  const ratedTargets = targets.filter((target) => isComplete(target.player, drafts[target.player.id]));
+  const canAdvance = step.type === "player" ? isComplete(step.target, currentDraft) : true;
+  const ratedTargets = targets.filter((target) => isComplete(target, drafts[target.player.id]));
   const isAllRated = ratedTargets.length === targets.length;
   const nameById = new Map(targets.map((target) => [target.player.id, target.player.nickname]));
 
@@ -121,9 +119,9 @@ export function RatingWizard({ match, targets }: RatingWizardProps) {
       setSubmitError("Dê nota para todos os jogadores antes de enviar.");
       return;
     }
-    const evaluations: PlayerEvaluationInput[] = ratedTargets.map(({ player }) => {
+    const evaluations: PlayerEvaluationInput[] = ratedTargets.map(({ player, role }) => {
       const scores = drafts[player.id].scores;
-      return player.role === "goalkeeper"
+      return role === "goalkeeper"
         ? { playerId: player.id, role: "goalkeeper", scores: Object.fromEntries(GOALKEEPER_ATTRIBUTES.map((key) => [key, scores[key]])) as Extract<PlayerEvaluationInput, { role: "goalkeeper" }>["scores"] }
         : { playerId: player.id, role: "outfield", scores: Object.fromEntries(OUTFIELD_ATTRIBUTES.map((key) => [key, scores[key]])) as Extract<PlayerEvaluationInput, { role: "outfield" }>["scores"] };
     });
@@ -210,11 +208,12 @@ export function RatingWizard({ match, targets }: RatingWizardProps) {
                 </p>
                 <h1 className="truncate font-display text-3xl font-bold">{step.target.player.nickname}</h1>
                 <p className="truncate text-sm text-muted-foreground">{step.target.player.fullName}</p>
+                {step.target.isOffPosition && <OffPositionBadge role={step.target.role} withHint className="mt-1" />}
               </div>
             </div>
 
             <div className="flex flex-col gap-5">
-              {getAttributeKeys(step.target.player).map((key) => (
+              {getAttributeKeys(step.target.role).map((key) => (
                 <AttributeSlider
                   key={`${step.target.player.id}-${key}`}
                   id={`score-${step.target.player.id}-${key}`}
@@ -346,9 +345,10 @@ function ReviewList({ targets, drafts, votes, nameById, ratedCount, firstVoteInd
       <div className="flex flex-col gap-1">
         <h2 className="text-xs font-medium text-muted-foreground uppercase">Suas notas</h2>
         <ul className="flex flex-col">
-          {targets.map(({ player, team, isReserve }, targetIndex) => {
+          {targets.map((target, targetIndex) => {
+            const { player, team, isReserve } = target;
             const draft = drafts[player.id];
-            const isRated = draft !== undefined && isComplete(player, draft);
+            const isRated = draft !== undefined && isComplete(target, draft);
             return (
               <li key={player.id} className="border-t first:border-t-0">
                 <button
@@ -360,7 +360,7 @@ function ReviewList({ targets, drafts, votes, nameById, ratedCount, firstVoteInd
                     <span className="truncate font-medium">{player.nickname}</span>
                     <span className="text-xs text-muted-foreground">
                       {team !== null && `${teamRoleLabel(team, isReserve)} · `}
-                      {POSITION_LABELS[player.position]}
+                      {target.isOffPosition && target.role === "goalkeeper" ? "No gol" : POSITION_LABELS[player.position]}
                     </span>
                   </span>
                   <span

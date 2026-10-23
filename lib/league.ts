@@ -7,6 +7,7 @@ import {
   getLatestClosedMatch,
   getOvrDelta,
   getPendingEvaluations,
+  ratedKey,
 } from "@/lib/players";
 import {
   computeProgression,
@@ -159,6 +160,11 @@ export async function getLeague(nextPath = "/") {
     playerId: evaluation.player_id,
     scores: {},
   }));
+  const ratedByMe = new Set(
+    givenEvaluations
+      .filter((evaluation) => evaluation.evaluatorId === membership.memberId)
+      .map((evaluation) => ratedKey(evaluation.matchId, evaluation.playerId)),
+  );
 
   const awards: Award[] = awardsResult.data
     .flatMap((award) => {
@@ -234,6 +240,8 @@ export async function getLeague(nextPath = "/") {
     awards,
     latestClosedMatch,
     pending: getPendingEvaluations(membership.memberId, matches, givenEvaluations),
+    /** O logado já deu nota a esse jogador nessa rodada? */
+    hasRated: (matchId: string, playerId: string) => ratedByMe.has(ratedKey(matchId, playerId)),
     submittedByMatch: new Map(
       submissionsResult.data.map((row) => [row.match_id, Number(row.submitted)]),
     ),

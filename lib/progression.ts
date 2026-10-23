@@ -1,7 +1,7 @@
 import { averageEvaluations, getEvaluationScore, toCardScale } from "@/lib/ovr";
 import { getClosedMatches } from "@/lib/players";
 import { AWARD_LABELS, type AwardKind } from "@/types/award";
-import type { Evaluation, Match } from "@/types/match";
+import { isOvrEvaluation, type Evaluation, type Match } from "@/types/match";
 
 /*
  * XP, nível e PeladaCoins, sempre calculados do histórico (rodadas fechadas),
@@ -175,8 +175,12 @@ function* walkRounds({ playerId, matches, evaluations, awards, submissions }: Pr
   for (const match of getClosedMatches(matches)) {
     const received = evaluationsByMatch?.get(match.id) ?? NO_EVALUATIONS;
     const playerAwards = awardsByMatch?.get(match.id) ?? NO_AWARDS;
-    for (const evaluation of received) scoreSum += getEvaluationScore(evaluation);
-    scoreCount += received.length;
+    // OVR só com as notas na posição do cadastro; a nota da rodada (XP e moedas) usa todas.
+    for (const evaluation of received) {
+      if (!isOvrEvaluation(evaluation)) continue;
+      scoreSum += getEvaluationScore(evaluation);
+      scoreCount += 1;
+    }
     const ovr = scoreCount === 0 ? null : toCardScale(scoreSum / scoreCount);
     const gains: RoundGain[] = [];
 

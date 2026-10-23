@@ -46,7 +46,8 @@ export async function submitEvaluations(input: SubmitEvaluationsInput): Promise<
     return { success: false, message: "Dê nota para todos os jogadores da rodada antes de enviar." };
   }
 
-  const roleByTarget = new Map(session.targets.map((target) => [target.player.id, target.player.role]));
+  // Papel da rodada (quem jogou no gol é avaliado como goleiro), não o do cadastro.
+  const roleByTarget = new Map(session.targets.map((target) => [target.player.id, target.role]));
 
   const evaluationRows: TablesInsert<"evaluations">[] = [];
   for (const evaluation of evaluations) {

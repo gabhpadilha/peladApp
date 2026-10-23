@@ -17,6 +17,7 @@ import { GOALKEEPER_ATTRIBUTES, OUTFIELD_ATTRIBUTES, type PlayerAttribute } from
 import type { BoardPlayer, MatchBoard } from "../_data-access/get-match-board";
 import type { RatingState } from "./board-card";
 import { RatePlayerSheet } from "./rate-player-sheet";
+import { RoundPositions } from "./round-positions";
 import { SendRatingsSheet } from "./send-ratings-sheet";
 import { TeamPitch } from "./team-pitch";
 
@@ -39,9 +40,10 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
   const [isPending, startTransition] = useTransition();
 
   const everyone: BoardPlayer[] = board.teams.flatMap((team) => [...team.starters, ...team.reserves]);
-  const ratable = everyone.filter((entry) => !entry.isSelf);
+  // Quem ainda falta: a troca de posição pelo organizador devolve uma nota já enviada.
+  const ratable = everyone.filter((entry) => !entry.isSelf && !entry.isRatedByMe);
   const canRate = board.canRate && sent === null;
-  const rated = ratable.filter((entry) => isDraftComplete(entry.player, drafts[entry.player.id]));
+  const rated = ratable.filter((entry) => isDraftComplete(entry.role, drafts[entry.player.id]));
   // O envio só vale completo: nota para todos os outros presentes.
   const isAllRated = rated.length === ratable.length;
   const ratingEntry = everyone.find((entry) => entry.player.id === ratingId) ?? null;
@@ -49,14 +51,16 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
     player: entry.player,
     team: entry.team,
     isReserve: entry.isReserve,
+    role: entry.role,
+    isOffPosition: entry.playsInGoal !== null,
   }));
 
   function ratingOf(playerId: string): RatingState {
     const entry = everyone.find((candidate) => candidate.player.id === playerId);
     const draft = drafts[playerId];
     if (!entry || !draft) return { kind: "idle" };
-    if (isDraftComplete(entry.player, draft)) return { kind: "done", average: draftAverage(draft) ?? 0 };
-    const filled = countFilled(entry.player, draft);
+    if (isDraftComplete(entry.role, draft)) return { kind: "done", average: draftAverage(draft) ?? 0 };
+    const filled = countFilled(entry.role, draft);
     return filled > 0 ? { kind: "partial", filled } : { kind: "idle" };
   }
 
@@ -78,9 +82,9 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
       setError("Dê nota para todos os jogadores antes de enviar.");
       return;
     }
-    const evaluations: PlayerEvaluationInput[] = rated.map(({ player }) => {
+    const evaluations: PlayerEvaluationInput[] = rated.map(({ player, role }) => {
       const scores = drafts[player.id];
-      return player.role === "goalkeeper"
+      return role === "goalkeeper"
         ? {
             playerId: player.id,
             role: "goalkeeper",
@@ -142,6 +146,8 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
           Você já enviou suas notas dessa rodada. Elas entram no OVR quando o organizador fechar a rodada.
         </p>
       )}
+
+      {board.canEditPositions && <RoundPositions matchId={board.match.id} teams={board.teams} />}
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-6">
         {board.teams.map((team) => (

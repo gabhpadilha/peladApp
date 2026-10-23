@@ -32,6 +32,9 @@ export function MatchHistory({ performances }: MatchHistoryProps) {
                   <span className="font-normal text-muted-foreground">
                     · {formatShortDate(performance.match.date)}
                   </span>
+                  {performance.offPosition && (
+                    <span className="block text-xs font-normal text-amber-400">Fora da posição · não entra no OVR</span>
+                  )}
                 </th>
                 <td className="py-2.5 text-right text-muted-foreground tabular-nums">
                   {performance.wasPresent ? performance.evaluationCount : "–"}

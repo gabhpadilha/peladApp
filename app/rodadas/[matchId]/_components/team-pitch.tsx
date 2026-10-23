@@ -57,7 +57,8 @@ export function TeamPitch({ team, mode, ratingOf, onRate }: TeamPitchProps): Rea
   // Performance: a formação só depende dos titulares (vindos da página, estáveis);
   // antes era recalculada, com objetos novos, a cada passo de slider na mesa.
   const slots = useMemo(
-    () => assignFormation(team.starters.map((entry) => ({ ...entry, position: entry.player.position }))),
+    // Posição da rodada: quem jogou no gol vai para o gol.
+    () => assignFormation(team.starters.map((entry) => ({ ...entry, position: entry.slotPosition }))),
     [team.starters],
   );
   const cardFor = (entry: BoardPlayer) => (

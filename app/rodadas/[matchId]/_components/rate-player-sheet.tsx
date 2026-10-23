@@ -1,6 +1,7 @@
 "use client";
 
 import { AttributeSlider } from "@/app/avaliar/[matchId]/_components/attribute-slider";
+import { OffPositionBadge } from "@/components/off-position-badge";
 import { PlayerCard } from "@/components/player-card";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -20,8 +21,9 @@ type RatePlayerSheetProps = {
 /** Notas de um jogador (6 sliders), aberta ao tocar na carta da mesa tática. */
 export function RatePlayerSheet({ entry, draft, onScore, onClear, onClose }: RatePlayerSheetProps) {
   const player = entry?.player;
-  const filled = player ? countFilled(player, draft) : 0;
-  const isComplete = player ? isDraftComplete(player, draft) : false;
+  // Papel da rodada: quem jogou no gol recebe notas de goleiro.
+  const filled = entry ? countFilled(entry.role, draft) : 0;
+  const isComplete = entry ? isDraftComplete(entry.role, draft) : false;
 
   return (
     <Sheet open={entry !== null} onOpenChange={(open) => !open && onClose()}>
@@ -38,11 +40,12 @@ export function RatePlayerSheet({ entry, draft, onScore, onClear, onClose }: Rat
                 </SheetDescription>
                 <SheetTitle className="truncate font-display text-3xl font-bold">{player.nickname}</SheetTitle>
                 <p className="text-sm text-muted-foreground tabular-nums">{filled}/6 atributos</p>
+                {entry.playsInGoal !== null && <OffPositionBadge role={entry.role} withHint className="mt-1" />}
               </div>
             </SheetHeader>
 
             <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-4 py-5">
-              {getAttributeKeys(player).map((key) => (
+              {getAttributeKeys(entry.role).map((key) => (
                 <AttributeSlider
                   key={`${player.id}-${key}`}
                   id={`board-score-${player.id}-${key}`}

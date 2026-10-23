@@ -1,5 +1,5 @@
 import { averageEvaluations, computeAttributes, computeOvr } from "@/lib/ovr";
-import type { Evaluation, Match } from "@/types/match";
+import { isOvrEvaluation, type Evaluation, type Match } from "@/types/match";
 import {
   GOALKEEPER_ATTRIBUTES,
   OUTFIELD_ATTRIBUTES,
@@ -13,12 +13,19 @@ export type MatchPerformance = {
   /** Média das notas recebidas na rodada, escala 0–99; `null` se ausente ou sem notas. */
   score: number | null;
   evaluationCount: number;
+  /** Jogou fora da posição do cadastro ("Jogou no gol"): a nota não entrou no OVR. */
+  offPosition: boolean;
 };
 
 export type PendingEvaluation = {
   match: Match;
   playersToRate: number;
 };
+
+/** Chave "rodada:jogador" das notas que o logado já deu. */
+export function ratedKey(matchId: string, playerId: string): string {
+  return `${matchId}:${playerId}`;
+}
 
 export function getClosedMatches(matches: readonly Match[]): Match[] {
   return matches
@@ -58,7 +65,7 @@ export function buildPlayers(
   // A ordem das notas de cada um é a mesma, então médias e arredondamentos não mudam.
   const receivedByPlayer = new Map<string, Evaluation[]>();
   for (const evaluation of evaluations) {
-    if (!countedMatchIds.has(evaluation.matchId)) continue;
+    if (!countedMatchIds.has(evaluation.matchId) || !isOvrEvaluation(evaluation)) continue;
     const received = receivedByPlayer.get(evaluation.playerId);
     if (received) received.push(evaluation);
     else receivedByPlayer.set(evaluation.playerId, [evaluation]);
@@ -95,26 +102,33 @@ export function getMatchPerformances(
       wasPresent: match.presentPlayerIds.includes(playerId),
       score: averageEvaluations(received),
       evaluationCount: received.length,
+      offPosition: received.some((evaluation) => evaluation.offPosition),
     };
   });
 }
 
-/** Rodadas abertas em que o jogador esteve presente e ainda não enviou notas. */
+/**
+ * Rodadas abertas em que o jogador esteve presente e ainda falta dar nota para
+ * alguém: nunca enviou, ou o organizador trocou a posição de quem ele já tinha
+ * avaliado (a nota no tipo errado sai e volta a faltar).
+ */
 export function getPendingEvaluations(
   playerId: string,
   matches: readonly Match[],
-  evaluations: readonly Evaluation[],
+  givenEvaluations: readonly Evaluation[],
 ): PendingEvaluation[] {
+  const given = new Set(
+    givenEvaluations
+      .filter((evaluation) => evaluation.evaluatorId === playerId)
+      .map((evaluation) => ratedKey(evaluation.matchId, evaluation.playerId)),
+  );
   return matches
-    .filter(
-      (match) =>
-        match.status === "open" &&
-        match.presentPlayerIds.includes(playerId) &&
-        !evaluations.some(
-          (evaluation) => evaluation.matchId === match.id && evaluation.evaluatorId === playerId,
-        ),
-    )
-    .map((match) => ({ match, playersToRate: match.presentPlayerIds.length - 1 }));
+    .filter((match) => match.status === "open" && match.presentPlayerIds.includes(playerId))
+    .map((match) => ({
+      match,
+      playersToRate: match.presentPlayerIds.filter((id) => id !== playerId && !given.has(ratedKey(match.id, id))).length,
+    }))
+    .filter((pending) => pending.playersToRate > 0);
 }
 
 /** Quantos presentes já enviaram notas numa rodada. */

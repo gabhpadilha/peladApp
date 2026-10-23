@@ -3,6 +3,7 @@
 import { memo } from "react";
 import Link from "next/link";
 import { CheckIcon, PlusIcon } from "lucide-react";
+import { OffPositionBadge } from "@/components/off-position-badge";
 import { PlayerCard } from "@/components/player-card";
 import { cn } from "@/lib/utils";
 import type { BoardPlayer } from "../_data-access/get-match-board";
@@ -35,6 +36,16 @@ function Badge({ entry, mode, rating }: Pick<BoardCardProps, "entry" | "mode" | 
     );
   }
   if (mode !== "rate" || entry.isSelf) return null;
+
+  // Já tem a nota do logado (enviada antes): só falta avaliar os outros.
+  if (entry.isRatedByMe) {
+    return (
+      <span className={cn(base, "border-border bg-background/90 text-muted-foreground")}>
+        <CheckIcon aria-hidden className="size-3" />
+        Enviada
+      </span>
+    );
+  }
 
   if (rating.kind === "done") {
     return (
@@ -74,19 +85,25 @@ function isSameRating(a: RatingState, b: RatingState): boolean {
  */
 export const BoardCard = memo(function BoardCard({ entry, mode, rating, onRate }: BoardCardProps) {
   const { player, isSelf } = entry;
+  const isOffPosition = entry.playsInGoal !== null;
   const content = (
     <span className="relative block w-full">
       <PlayerCard player={player} size="fill" />
-      {isSelf && (
-        <span className="absolute -top-1.5 left-1/2 -translate-x-1/2 rounded-full bg-primary px-1.5 py-px text-[10px] font-semibold text-primary-foreground">
-          Você
+      {(isSelf || isOffPosition) && (
+        <span className="absolute -top-2 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1">
+          {isSelf && (
+            <span className="rounded-full bg-primary px-1.5 py-px text-[10px] font-semibold text-primary-foreground">
+              Você
+            </span>
+          )}
+          {isOffPosition && <OffPositionBadge role={entry.role} />}
         </span>
       )}
       <Badge entry={entry} mode={mode} rating={rating} />
     </span>
   );
 
-  if (mode === "rate" && !isSelf) {
+  if (mode === "rate" && !isSelf && !entry.isRatedByMe) {
     return (
       <button
         type="button"

@@ -42,8 +42,8 @@ export const TEAM_OF_THE_WEEK_MIN_RATINGS = 3;
 
 /**
  * Prêmios que saem das notas da rodada (`compute_match_awards`) e o que decide:
- * a nota média (Melhor Jogador na linha, Melhor Goleiro no gol) ou a média de
- * um atributo da linha. `score` da carta guarda essa média (1–10).
+ * a nota média (Melhor Jogador entre todos, Melhor Goleiro no gol) ou a média de
+ * um atributo da linha, pela posição em que a pessoa jogou na rodada. `score` da carta guarda essa média (1–10).
  */
 export const STAT_AWARD_SOURCES: Partial<Record<AwardKind, { label: string; short: string }>> = {
   craque: { label: "Nota da rodada", short: "nota" },
@@ -114,7 +114,7 @@ export const AWARD_LABELS: Record<
   craque: {
     title: "Melhor Jogador",
     question: "",
-    hint: "A maior nota da rodada na linha. Sem voto. A carta vem com +1 em cada atributo.",
+    hint: "A maior nota da rodada, na linha ou no gol. Sem voto. A carta vem com +1 em cada atributo.",
     eligibility: "outfield",
   },
   gol: {

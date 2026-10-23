@@ -1,10 +1,11 @@
 import { z } from "zod";
 import { getLeague } from "@/lib/league";
 import { averageEvaluations } from "@/lib/ovr";
+import { getRoundRole, getRoundSlotPosition, type PlayerRole, type PlaysInGoal } from "@/lib/round-position";
 import { createClient } from "@/lib/supabase/server";
 import { teamName } from "@/lib/teams";
 import type { Evaluation, Match } from "@/types/match";
-import type { Player } from "@/types/player";
+import type { Player, PlayerPosition } from "@/types/player";
 
 export type BoardPlayer = {
   player: Player;
@@ -15,6 +16,14 @@ export type BoardPlayer = {
   isSelf: boolean;
   /** Nota que a rodada deu ao jogador (0–99); só em rodada fechada com notas. */
   roundScore: number | null;
+  /** Papel na rodada (decide os atributos das notas). */
+  role: PlayerRole;
+  /** `match_attendance.plays_in_goal`: fora da posição do cadastro quando não é `null`. */
+  playsInGoal: PlaysInGoal;
+  /** Posição no campo da mesa (quem jogou no gol vai para o gol). */
+  slotPosition: PlayerPosition;
+  /** O logado já deu nota a ele nessa rodada. */
+  isRatedByMe: boolean;
 };
 
 export type BoardTeam = {
@@ -32,13 +41,15 @@ export type MatchBoard = {
   currentPlayer: Player | undefined;
   teams: BoardTeam[];
   isOrganizer: boolean;
-  /** Rodada aberta, o logado jogou e ainda não enviou as notas. */
+  /** Rodada aberta, o logado jogou e ainda falta dar nota para alguém. */
   canRate: boolean;
+  /** Organizador com a rodada aberta: pode marcar quem jogou fora da posição. */
+  canEditPositions: boolean;
   /** O logado já enviou as notas dessa rodada. */
   hasSubmitted: boolean;
   /** Rodada aberta e o logado não foi escalado: só vê os times. */
   isOutOfRound: boolean;
-  /** Quantos jogadores o logado pode avaliar (todos menos ele). */
+  /** Quantos jogadores ainda faltam para o logado avaliar (todos menos ele e quem já tem nota dele). */
   ratableCount: number;
 };
 
@@ -52,7 +63,7 @@ export async function getMatchBoard(matchId: string): Promise<MatchBoard | null>
   const supabase = await createClient();
   const [league, attendanceResult] = await Promise.all([
     getLeague(`/rodadas/${matchId}`),
-    supabase.from("match_attendance").select("member_id, team, reserve").eq("match_id", matchId),
+    supabase.from("match_attendance").select("member_id, team, reserve, plays_in_goal").eq("match_id", matchId),
   ]);
   const match = league.matches.find((candidate) => candidate.id === matchId);
   if (!match) return null;
@@ -88,6 +99,10 @@ export async function getMatchBoard(matchId: string): Promise<MatchBoard | null>
         isReserve: row.reserve,
         isSelf: player.id === league.currentMemberId,
         roundScore: match.status === "closed" ? (scoreByPlayer.get(player.id) ?? null) : null,
+        role: getRoundRole(player, row.plays_in_goal),
+        playsInGoal: row.plays_in_goal,
+        slotPosition: getRoundSlotPosition(player, row.plays_in_goal),
+        isRatedByMe: league.hasRated(matchId, player.id),
       },
     ];
   });
@@ -116,8 +131,9 @@ export async function getMatchBoard(matchId: string): Promise<MatchBoard | null>
     teams,
     isOrganizer: league.membership.role === "organizer",
     canRate: match.status === "open" && isPresent && isPending,
+    canEditPositions: match.status === "open" && league.membership.role === "organizer",
     hasSubmitted: match.status === "open" && isPresent && !isPending,
     isOutOfRound: match.status === "open" && !isPresent,
-    ratableCount: onBoard.filter((entry) => !entry.isSelf).length,
+    ratableCount: onBoard.filter((entry) => !entry.isSelf && !entry.isRatedByMe).length,
   };
 }

@@ -30,4 +30,14 @@ export type Evaluation = {
   evaluatorId: string;
   playerId: string;
   scores: Partial<Record<PlayerAttribute, Score>>;
+  /**
+   * O avaliado jogou fora da posição do cadastro nessa rodada ("Jogou no gol"):
+   * a nota vale para a nota da rodada e os prêmios, nunca para o OVR.
+   */
+  offPosition?: boolean;
 };
+
+/** Só as notas que contam no OVR e nos atributos da carta (na posição do cadastro). */
+export function isOvrEvaluation(evaluation: Evaluation): boolean {
+  return !evaluation.offPosition;
+}

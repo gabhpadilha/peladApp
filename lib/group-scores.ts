@@ -1,7 +1,7 @@
 import "server-only";
 import { computeOvr } from "@/lib/ovr";
 import { createClient } from "@/lib/supabase/server";
-import type { Evaluation } from "@/types/match";
+import { isOvrEvaluation, type Evaluation } from "@/types/match";
 import type { PlayerAttribute } from "@/types/player";
 
 const SCORE_COLUMNS = [
@@ -14,6 +14,8 @@ const SCORE_COLUMNS = [
  * (anônimas), no formato usado por `lib/ovr.ts`. O banco já tira a maior e a
  * menor de cada jogador em cada rodada (`counted_evaluations`, a partir de
  * `TRIMMED_MEAN_MIN_RATINGS` notas), então tudo o que sai daqui usa a média aparada.
+ * Notas de quem jogou fora da posição vêm com `offPosition`: contam na nota da
+ * rodada, mas o OVR e os atributos as ignoram (`isOvrEvaluation`).
  */
 export async function getGroupEvaluations(groupId: string): Promise<Evaluation[]> {
   const supabase = await createClient();
@@ -32,6 +34,7 @@ export async function getGroupEvaluations(groupId: string): Promise<Evaluation[]
       evaluatorId: "",
       playerId: row.player_id,
       scores,
+      offPosition: row.off_position,
     };
   });
 }
@@ -41,6 +44,7 @@ export function getOvrByMember(evaluations: readonly Evaluation[]): Map<string, 
   // Map.groupBy só existe a partir do Node 21; o projeto roda no 20.
   const byPlayer = new Map<string, Evaluation[]>();
   for (const evaluation of evaluations) {
+    if (!isOvrEvaluation(evaluation)) continue;
     const received = byPlayer.get(evaluation.playerId) ?? [];
     received.push(evaluation);
     byPlayer.set(evaluation.playerId, received);

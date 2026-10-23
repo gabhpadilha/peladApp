@@ -313,6 +313,7 @@ export type Database = {
           group_id: string
           match_id: string
           member_id: string
+          plays_in_goal: boolean | null
           reserve: boolean
           team: number
         }
@@ -320,6 +321,7 @@ export type Database = {
           group_id: string
           match_id: string
           member_id: string
+          plays_in_goal?: boolean | null
           reserve?: boolean
           team: number
         }
@@ -327,6 +329,7 @@ export type Database = {
           group_id?: string
           match_id?: string
           member_id?: string
+          plays_in_goal?: boolean | null
           reserve?: boolean
           team?: number
         }
@@ -482,6 +485,7 @@ export type Database = {
           evaluation_id: string
           fis: number
           match_id: string
+          off_position: boolean
           pas: number
           pes: number
           played_on: string
@@ -523,6 +527,7 @@ export type Database = {
           evaluation_id: string
           fis: number
           match_id: string
+          off_position: boolean
           pas: number
           pes: number
           player_id: string
@@ -575,6 +580,10 @@ export type Database = {
           target_member: string
         }
         Returns: undefined
+      }
+      set_round_position: {
+        Args: { in_goal: boolean; target_match: string; target_member: string }
+        Returns: number
       }
     }
     Enums: {
