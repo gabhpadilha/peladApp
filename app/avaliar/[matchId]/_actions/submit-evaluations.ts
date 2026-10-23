@@ -18,7 +18,7 @@ export type SubmitEvaluationsResult =
 /**
  * Envia as notas e o voto no Gol da Rodada (VOTE_AWARD_KINDS) que o jogador
  * logado deu na rodada. Tudo é conferido de novo aqui (rodada aberta, presença,
- * papel de cada avaliado); o banco ainda garante notas 1–10, sem autoavaliação
+ * papel de cada avaliado, nota para todos); o banco ainda garante notas 1–10, sem autoavaliação
  * e só entre presentes.
  */
 export async function submitEvaluations(input: SubmitEvaluationsInput): Promise<SubmitEvaluationsResult> {
@@ -53,6 +53,11 @@ export async function submitEvaluations(input: SubmitEvaluationsInput): Promise<
       player_id: evaluation.playerId,
       ...evaluation.scores,
     });
+  }
+
+  // Todo mundo da rodada precisa de nota (os ids já vêm sem repetição do schema).
+  if (evaluationRows.length !== session.targets.length) {
+    return { success: false, message: "Avalie todos os jogadores da rodada antes de enviar." };
   }
 
   const voteRows: TablesInsert<"round_votes">[] = [];

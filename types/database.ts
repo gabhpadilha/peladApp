@@ -519,6 +519,7 @@ export type Database = {
       get_match_submissions: {
         Args: { target_group: string }
         Returns: {
+          complete: number
           match_id: string
           submitted: number
         }[]

@@ -7,9 +7,11 @@ import { closeMatch } from "../_actions/close-match";
 type CloseMatchButtonProps = {
   matchId: string;
   round: number;
+  /** Avaliações completas que ainda faltam para poder fechar. */
+  missingCount: number;
 };
 
-export function CloseMatchButton({ matchId, round }: CloseMatchButtonProps) {
+export function CloseMatchButton({ matchId, round, missingCount }: CloseMatchButtonProps) {
   const [isConfirming, setIsConfirming] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -20,6 +22,21 @@ export function CloseMatchButton({ matchId, round }: CloseMatchButtonProps) {
       if (!result.success) setError(result.message);
       setIsConfirming(false);
     });
+  }
+
+  if (missingCount > 0) {
+    return (
+      // O quanto falta já aparece na linha "Avaliaram todos" da rodada.
+      <Button
+        size="sm"
+        variant="outline"
+        className="shrink-0"
+        disabled
+        aria-label={`Fechar a rodada ${round}: ${missingCount === 1 ? "falta 1 pessoa" : `faltam ${missingCount} pessoas`} avaliar todos`}
+      >
+        Fechar rodada
+      </Button>
+    );
   }
 
   if (!isConfirming) {
@@ -40,7 +57,8 @@ export function CloseMatchButton({ matchId, round }: CloseMatchButtonProps) {
       className="flex basis-full flex-col gap-2 rounded-lg border bg-muted/40 p-3 sm:flex-row sm:items-center sm:justify-between"
     >
       <p className="text-sm text-muted-foreground">
-        Fechar a rodada {round}? As notas passam a contar no OVR, ninguém mais envia e saem as cartas
+        Fechar a rodada {round}? As notas passam a contar no OVR (em cada jogador, a maior e a menor nota saem
+        da conta), ninguém mais envia e saem as cartas
         especiais: os prêmios das notas (Melhor Jogador, um por atributo, Goleiro e Bola Murcha), o Gol da Rodada
         (por voto) e o Time da Semana. Todo mundo vê o aviso na home para abrir o pacote.
       </p>

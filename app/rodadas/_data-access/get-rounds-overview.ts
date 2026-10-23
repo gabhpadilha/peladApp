@@ -1,4 +1,5 @@
 import { getGroupEvaluations, getOvrByMember } from "@/lib/group-scores";
+import { getRequiredCompleteRaters } from "@/lib/round-closing";
 import { requireActiveMembership, type ActiveMembership, type PlayerPositionCode } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 import { AWARD_KINDS, type AwardKind } from "@/types/award";
@@ -25,6 +26,10 @@ export type MatchSummary = {
   starterCount: number;
   reserveCount: number;
   submittedCount: number;
+  /** Quantos avaliaram todos os outros presentes. */
+  completeCount: number;
+  /** Avaliações completas que a rodada precisa para fechar. */
+  requiredCompleteCount: number;
   /** Ganhadores das cartas especiais (só em rodadas fechadas). */
   winners: { kind: AwardKind; nickname: string }[];
 };
@@ -67,9 +72,7 @@ export async function getRoundsOverview(): Promise<RoundsOverview> {
 
   // Ganhadores antigos podem estar desativados: o apelido vem de todos.
   const nicknameByMember = new Map(membersResult.data.map((member) => [member.id, member.nickname]));
-  const submittedByMatch = new Map(
-    submissionsResult.data.map((row) => [row.match_id, Number(row.submitted)]),
-  );
+  const submissionsByMatch = new Map(submissionsResult.data.map((row) => [row.match_id, row]));
   const ovrByMember = getOvrByMember(evaluations);
   const kindOrder: readonly AwardKind[] = AWARD_KINDS;
 
@@ -92,7 +95,9 @@ export async function getRoundsOverview(): Promise<RoundsOverview> {
       presentCount: match.match_attendance.length,
       starterCount: match.match_attendance.filter((attendance) => !attendance.reserve).length,
       reserveCount: match.match_attendance.filter((attendance) => attendance.reserve).length,
-      submittedCount: submittedByMatch.get(match.id) ?? 0,
+      submittedCount: Number(submissionsByMatch.get(match.id)?.submitted ?? 0),
+      completeCount: Number(submissionsByMatch.get(match.id)?.complete ?? 0),
+      requiredCompleteCount: getRequiredCompleteRaters(match.match_attendance.length),
       winners: awardsResult.data
         .filter((award) => award.match_id === match.id)
         .toSorted((a, b) => kindOrder.indexOf(a.kind) - kindOrder.indexOf(b.kind))

@@ -64,7 +64,7 @@ function averageScore(draft: Draft): number {
 
 /**
  * Notas da rodada, um jogador por vez (mobile, no vestiário): 6 sliders,
- * "Próximo" só com os 6 tocados, "Pular" para quem você não viu jogar.
+ * "Próximo" só com os 6 tocados; o envio só libera com todos avaliados (como na mesa tática).
  * Depois, um voto por prêmio (só o Gol da Rodada; o resto sai das notas), revisão
  * e envio de tudo de uma vez.
  */
@@ -112,19 +112,19 @@ export function RatingWizard({ match, targets }: RatingWizardProps) {
     goTo(index + 1);
   }
 
+  /** Só nos votos (opcionais): jogador não se pula, todos precisam de nota. */
   function handleSkip() {
-    if (step.type === "player") {
-      const playerId = step.target.player.id;
-      const draft = form.getValues(`drafts.${playerId}`) ?? { skipped: true, scores: {} };
-      form.setValue(`drafts.${playerId}`, { ...draft, skipped: true });
-    } else if (step.type === "vote") {
-      setVote(step.kind, undefined);
-    }
+    if (step.type === "vote") setVote(step.kind, undefined);
     goTo(index + 1);
   }
 
   function handleSubmit() {
     setSubmitError(null);
+    const missingCount = targets.length - ratedTargets.length;
+    if (missingCount > 0) {
+      setSubmitError(`Avalie todos os jogadores antes de enviar (faltam ${missingCount}).`);
+      return;
+    }
     const evaluations: PlayerEvaluationInput[] = ratedTargets.map(({ player }) => {
       const scores = drafts[player.id].scores;
       return player.role === "goalkeeper"
@@ -266,7 +266,7 @@ export function RatingWizard({ match, targets }: RatingWizardProps) {
               <Button
                 size="lg"
                 className="h-12 flex-1 text-base"
-                disabled={isPending || ratedTargets.length === 0}
+                disabled={isPending || ratedTargets.length < targets.length}
                 onClick={handleSubmit}
               >
                 {isPending ? "Enviando…" : `Enviar notas (${ratedTargets.length})`}
@@ -284,16 +284,18 @@ export function RatingWizard({ match, targets }: RatingWizardProps) {
               >
                 <ChevronLeftIcon />
               </Button>
-              <Button variant="secondary" size="lg" className="h-12" onClick={handleSkip}>
-                Pular
-              </Button>
+              {step.type === "vote" && (
+                <Button variant="secondary" size="lg" className="h-12" onClick={handleSkip}>
+                  Pular
+                </Button>
+              )}
               <Button size="lg" className="h-12 flex-1 text-base" disabled={!canAdvance} onClick={handleNext}>
                 {index === reviewIndex - 1 ? "Revisar" : "Próximo"}
               </Button>
             </div>
           )}
           {step.type === "player" && !canAdvance && (
-            <p className="text-center text-xs text-muted-foreground">Dê nota nos 6 atributos ou toque em Pular.</p>
+            <p className="text-center text-xs text-muted-foreground">Dê nota nos 6 atributos para seguir.</p>
           )}
         </div>
       </footer>
@@ -317,7 +319,8 @@ function ReviewList({ targets, drafts, votes, nameById, ratedCount, firstVoteInd
       <div>
         <h1 id="review-title" className="font-display text-3xl font-bold">Revisão</h1>
         <p className="text-sm text-muted-foreground">
-          Você avaliou {ratedCount} de {targets.length}. Toque em um item para mudar.
+          Você avaliou {ratedCount} de {targets.length}.{" "}
+          {ratedCount < targets.length ? "Avalie todos para enviar." : "Toque em um item para mudar."}
         </p>
       </div>
 
@@ -371,7 +374,7 @@ function ReviewList({ targets, drafts, votes, nameById, ratedCount, firstVoteInd
                       !isRated && "text-sm font-medium text-muted-foreground",
                     )}
                   >
-                    {isRated ? averageScore(draft).toFixed(1).replace(".", ",") : "Pulado"}
+                    {isRated ? averageScore(draft).toFixed(1).replace(".", ",") : "Falta"}
                   </span>
                   <PencilIcon aria-hidden className="size-4 text-muted-foreground" />
                 </button>

@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getThemeForDate } from "@/lib/card-themes";
+import { MIN_COMPLETE_RATERS } from "@/lib/round-closing";
 import { requireActiveMembership } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 
@@ -11,8 +12,10 @@ export type CloseMatchResult =
   | { success: false; message: string };
 
 /**
- * Fecha a rodada: as notas passam a contar no OVR, ninguém mais envia, e as
- * cartas especiais saem das notas e do voto no Gol (com o tema sazonal da data do jogo).
+ * Fecha a rodada: as notas passam a contar no OVR (sem a maior e a menor de cada
+ * jogador), ninguém mais envia, e as cartas especiais saem das notas e do voto no
+ * Gol (com o tema sazonal da data do jogo). O banco só fecha com o mínimo de
+ * avaliações completas (`MIN_COMPLETE_RATERS`).
  */
 export async function closeMatch(matchId: string): Promise<CloseMatchResult> {
   const membership = await requireActiveMembership("/rodadas");
@@ -41,6 +44,12 @@ export async function closeMatch(matchId: string): Promise<CloseMatchResult> {
     target_match: parsedMatchId.data,
     theme_key: getThemeForDate(match.played_on),
   });
+  if (error?.hint === "min_complete_raters") {
+    return {
+      success: false,
+      message: `Para fechar, pelo menos ${MIN_COMPLETE_RATERS} pessoas precisam ter avaliado todos os jogadores.`,
+    };
+  }
   if (error) {
     return { success: false, message: "Não foi possível fechar a rodada." };
   }

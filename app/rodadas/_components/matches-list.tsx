@@ -63,6 +63,24 @@ export function MatchesList({ matches, isOrganizer }: MatchesListProps) {
                     {match.reserveCount > 0 && ` + ${match.reserveCount} reservas`} · {match.submittedCount} enviaram
                     notas
                   </p>
+                  {isOpen && (
+                    <p className="text-xs text-muted-foreground tabular-nums">
+                      {match.completeCount >= match.requiredCompleteCount ? (
+                        <>
+                          <span className="font-medium text-primary">{match.completeCount} avaliaram todos</span> · já
+                          dá para fechar
+                        </>
+                      ) : (
+                        <>
+                          Avaliaram todos:{" "}
+                          <span className="font-medium text-foreground">
+                            {match.completeCount} de {match.requiredCompleteCount}
+                          </span>{" "}
+                          para fechar
+                        </>
+                      )}
+                    </p>
+                  )}
                   {match.winners.length > 0 && (
                     <ul aria-label="Cartas especiais da rodada" className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs">
                       {groupWinners(match.winners).map((winner) => {
@@ -95,7 +113,13 @@ export function MatchesList({ matches, isOrganizer }: MatchesListProps) {
                     </Link>
                   </Button>
                 )}
-                {isOrganizer && isOpen && <CloseMatchButton matchId={match.id} round={match.round} />}
+                {isOrganizer && isOpen && (
+                  <CloseMatchButton
+                    matchId={match.id}
+                    round={match.round}
+                    missingCount={Math.max(0, match.requiredCompleteCount - match.completeCount)}
+                  />
+                )}
                 {isOrganizer && <DeleteMatchButton matchId={match.id} round={match.round} isClosed={!isOpen} />}
               </li>
             );
