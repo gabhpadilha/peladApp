@@ -4,7 +4,7 @@ import { CreateGroupForm } from "./_components/create-group-form";
 import { getOnboardingData } from "./_data-access/get-onboarding-data";
 
 export const metadata: Metadata = {
-  title: "Criar pelada · PeladApp",
+  title: "Criar pelada · Cancha Club",
 };
 
 /**
@@ -16,7 +16,7 @@ export default function WelcomePage() {
     <main className="mx-auto flex w-full max-w-md flex-col gap-8 px-4 py-10">
       <div className="flex flex-col gap-2">
         <p className="font-display text-3xl font-extrabold tracking-wide uppercase">
-          Pelad<span className="text-primary">App</span>
+          Cancha<span className="text-primary">Club</span>
         </p>
         <h1 className="text-xl font-medium">Crie a sua pelada</h1>
         <p className="text-sm text-muted-foreground">

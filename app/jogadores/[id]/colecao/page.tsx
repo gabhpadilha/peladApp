@@ -13,7 +13,7 @@ import { LatestAwardSpotlight } from "../_components/latest-award-spotlight";
 import { getAthleteProfile } from "../_data-access/get-athlete-profile";
 
 export const metadata: Metadata = {
-  title: "Coleção · PeladApp",
+  title: "Coleção · Cancha Club",
 };
 
 /** Galeria das cartas especiais do atleta, separada das estatísticas (vai crescer com o tempo). */

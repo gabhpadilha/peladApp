@@ -19,7 +19,7 @@ const inputSchema = z.object({
 });
 
 /**
- * Compra uma carta da Loja com PeladaCoins. O servidor recalcula o nível e o
+ * Compra uma carta da Loja com CanchaCoins. O servidor recalcula o nível e o
  * saldo (nada vem do aparelho) e só então grava a compra pela chave secreta.
  */
 export async function buyCardSkin(input: { skin: string; equip: boolean }): Promise<ShopActionResult> {
@@ -59,7 +59,7 @@ export async function buyCardSkin(input: { skin: string; equip: boolean }): Prom
   // Promoção (ex.: Black Friday) calculada aqui, nunca vinda do aparelho; a compra grava o preço pago.
   const price = getSalePrice(skin.price, getActiveSale(today));
   if (balance < price) {
-    return { success: false, message: `Faltam ${price - balance} PeladaCoins para a ${skin.name}.` };
+    return { success: false, message: `Faltam ${price - balance} CanchaCoins para a ${skin.name}.` };
   }
 
   const { error: insertError } = await admin.from("card_skin_purchases").insert({

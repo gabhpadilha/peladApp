@@ -11,7 +11,7 @@ import { MatchBoardView } from "./_components/match-board";
 import { getMatchBoard } from "./_data-access/get-match-board";
 
 export const metadata: Metadata = {
-  title: "Mesa tática · PeladApp",
+  title: "Mesa tática · Cancha Club",
 };
 
 /** Mesa tática da rodada: Branco x Preto em campo, com as cartas dos jogadores. */

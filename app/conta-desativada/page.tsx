@@ -4,7 +4,7 @@ import { signOut } from "@/app/_actions/sign-out";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Conta desativada · PeladApp",
+  title: "Conta desativada · Cancha Club",
 };
 
 /** Quem foi desativado pelo organizador cai aqui até a sessão acabar. */
@@ -13,7 +13,7 @@ export default function DeactivatedAccountPage() {
     <main className="flex flex-1 items-center justify-center px-4 py-12">
       <div className="flex w-full max-w-sm flex-col gap-6 text-center">
         <p className="font-display text-4xl font-extrabold tracking-wide uppercase">
-          Pelad<span className="text-primary">App</span>
+          Cancha<span className="text-primary">Club</span>
         </p>
         <div className="flex flex-col gap-2 rounded-xl border bg-card p-6">
           <h1 className="font-display text-xl font-bold tracking-wide uppercase">Conta desativada</h1>

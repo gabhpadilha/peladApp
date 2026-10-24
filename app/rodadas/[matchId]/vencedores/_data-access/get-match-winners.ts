@@ -33,7 +33,7 @@ export type MatchWinners = {
   revealed: Award[];
   /** Time da Semana (pode passar de 5 com empate). */
   team: Award[];
-  /** O que a rodada deu a quem abriu o pacote (XP e PeladaCoins), com o saldo e a carta de hoje. */
+  /** O que a rodada deu a quem abriu o pacote (XP e CanchaCoins), com o saldo e a carta de hoje. */
   rewards?: (RoundRewards & { balance: number; card: Player | null }) | null;
 };
 

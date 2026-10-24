@@ -34,7 +34,7 @@ export type Shop = {
   me: Player;
   groupName: string;
   progression: Progression;
-  /** PeladaCoins ganhas − o que já gastou. */
+  /** CanchaCoins ganhas − o que já gastou. */
   balance: number;
   /** Cartas à venda que o jogador ainda não tem: evento do mês primeiro. */
   sections: ShopSection[];

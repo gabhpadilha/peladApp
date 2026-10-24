@@ -82,7 +82,7 @@ export function AwardStory({ award, groupName, ref }: AwardStoryProps) {
       <p className="relative mt-5 font-display text-3xl font-bold text-white">{award.card.nickname}</p>
       <p className="relative text-sm text-white/70">{storySubtitle(award)}</p>
 
-      <p className="relative mt-auto text-[11px] tracking-[0.25em] text-white/40 uppercase">Carta especial · PeladApp</p>
+      <p className="relative mt-auto text-[11px] tracking-[0.25em] text-white/40 uppercase">Carta especial · Cancha Club</p>
     </div>
   );
 }

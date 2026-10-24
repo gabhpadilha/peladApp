@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Link inválido · PeladApp",
+  title: "Link inválido · Cancha Club",
 };
 
 export default function AuthErrorPage() {

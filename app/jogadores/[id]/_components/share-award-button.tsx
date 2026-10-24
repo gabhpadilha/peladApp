@@ -72,7 +72,7 @@ export function ShareAwardButton({ award, groupName, variant = "full" }: ShareAw
   useEffect(() => {
     if (!isOpen || image || hasError || !storyRef.current) return;
     let isCancelled = false;
-    renderStory(storyRef.current, `peladapp-${award.kind.replaceAll("_", "-")}-r${award.round}.png`)
+    renderStory(storyRef.current, `canchaclub-${award.kind.replaceAll("_", "-")}-r${award.round}.png`)
       .then((file) => {
         if (isCancelled) return;
         const canShare = typeof navigator.canShare === "function" && navigator.canShare({ files: [file] });

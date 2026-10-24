@@ -118,7 +118,7 @@ export function ShopContent({ sections, balance, sale }: ShopContentProps) {
               )}
               {isLocked && (
                 <span className="flex h-10 w-full items-center justify-center rounded-md bg-muted/50 px-1 text-center text-xs text-muted-foreground">
-                  Nível {item.level} · {formatCoins(item.price)} PC{item.originalPrice !== null && ` (era ${formatCoins(item.originalPrice)})`}
+                  Nível {item.level} · {formatCoins(item.price)} CC{item.originalPrice !== null && ` (era ${formatCoins(item.originalPrice)})`}
                 </span>
               )}
             </CardSkinTile>
@@ -178,7 +178,7 @@ export function ShopContent({ sections, balance, sale }: ShopContentProps) {
                 )}
                 {balance < selected.price ? (
                   <p className="text-center text-sm text-muted-foreground">
-                    Faltam {formatCoins(selected.price - balance)} PeladaCoins. Jogue, avalie e ganhe prêmios para juntar.
+                    Faltam {formatCoins(selected.price - balance)} CanchaCoins. Jogue, avalie e ganhe prêmios para juntar.
                   </p>
                 ) : (
                   <Button

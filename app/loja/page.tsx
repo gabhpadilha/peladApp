@@ -12,10 +12,10 @@ import { ShopContent } from "./_components/shop-content";
 import { getShop } from "./_data-access/get-shop";
 
 export const metadata: Metadata = {
-  title: "Loja · PeladApp",
+  title: "Loja · Cancha Club",
 };
 
-/** Loja de personalizações de carta, paga com PeladaCoins e liberada por nível. */
+/** Loja de personalizações de carta, paga com CanchaCoins e liberada por nível. */
 export default function ShopPage() {
   return (
     // A loja depende da sessão: faz streaming atrás do Suspense.
@@ -40,7 +40,7 @@ async function ShopPageContent() {
             <p className="text-sm text-muted-foreground">{shop.groupName}</p>
             <h1 className="font-display text-4xl leading-none font-extrabold uppercase">Loja</h1>
             <p className="text-sm text-muted-foreground">
-              Personalize a sua carta com PeladaCoins. As que você já tem ficam em{" "}
+              Personalize a sua carta com CanchaCoins. As que você já tem ficam em{" "}
               <Link href="/eu#minhas-cartas" className="text-primary underline-offset-2 hover:underline">
                 Eu → Minhas cartas
               </Link>
@@ -60,7 +60,7 @@ async function ShopPageContent() {
         <section className="flex flex-col gap-2 rounded-xl border bg-card p-4">
           <h2 className="flex items-center gap-2 font-display text-lg font-bold tracking-wide uppercase">
             <CoinsIcon aria-hidden className="size-5 text-amber-300" />
-            Como ganhar PeladaCoins
+            Como ganhar CanchaCoins
           </h2>
           <ul className="flex flex-col divide-y">
             {COIN_RULES.map((rule) => (

@@ -49,7 +49,7 @@ function Tile({ value, unit, label, className }: { value: number; unit: string; 
 
 /**
  * "Sua rodada", o fim do pacote (aprovado pelo dono do app em 2026-10-21): a sua
- * carta de hoje, a nota da rodada, o OVR antes → depois, o XP e as PeladaCoins
+ * carta de hoje, a nota da rodada, o OVR antes → depois, o XP e as CanchaCoins
  * que a rodada deu, com a barra de nível andando e o detalhe recolhido.
  */
 export function RevealRewards({ round, rewards, onDone }: RevealRewardsProps) {
@@ -118,7 +118,7 @@ export function RevealRewards({ round, rewards, onDone }: RevealRewardsProps) {
 
         <div className="flex animate-[reveal-pop_0.45s_ease-out_0.3s_both] gap-3">
           <Tile value={Math.round(rewards.xp)} unit="XP" label="Experiência" className="border-primary/40 bg-primary/10 text-primary" />
-          <Tile value={rewards.coins} unit="PC" label="PeladaCoins" className="border-amber-300/40 bg-amber-300/10 text-amber-200" />
+          <Tile value={rewards.coins} unit="CC" label="CanchaCoins" className="border-amber-300/40 bg-amber-300/10 text-amber-200" />
         </div>
 
         {hasLeveledUp && (
@@ -128,7 +128,7 @@ export function RevealRewards({ round, rewards, onDone }: RevealRewardsProps) {
             </span>
             <div className="flex flex-col">
               <p className="font-display text-xl leading-tight font-bold uppercase">Subiu para o nível {after.level}!</p>
-              <p className="text-sm text-muted-foreground">+{levelUpCoins} PC de bônus por nível</p>
+              <p className="text-sm text-muted-foreground">+{levelUpCoins} CC de bônus por nível</p>
             </div>
           </div>
         )}
@@ -156,7 +156,7 @@ export function RevealRewards({ round, rewards, onDone }: RevealRewardsProps) {
         {/* Detalhe recolhido: a tela fica enxuta; quem quiser abre. */}
         <details className="group animate-[reveal-fade_0.4s_ease-out_0.7s_both] rounded-xl border bg-card/80">
           <summary className="flex h-11 cursor-pointer list-none items-center justify-between px-3 text-sm font-medium [&::-webkit-details-marker]:hidden">
-            De onde veio o XP e as PeladaCoins
+            De onde veio o XP e as CanchaCoins
             <ChevronDownIcon aria-hidden className="size-4 text-muted-foreground transition-transform group-open:rotate-180" />
           </summary>
         <ul className="flex flex-col divide-y border-t">
@@ -171,7 +171,7 @@ export function RevealRewards({ round, rewards, onDone }: RevealRewardsProps) {
                 </span>
                 <span className="flex shrink-0 flex-col items-end text-sm font-semibold tabular-nums">
                   {gain.xp > 0 && <span className="text-primary">+{Math.round(gain.xp)} XP</span>}
-                  {gain.coins > 0 && <span className="text-amber-200">+{gain.coins} PC</span>}
+                  {gain.coins > 0 && <span className="text-amber-200">+{gain.coins} CC</span>}
                 </span>
               </li>
             );
@@ -183,7 +183,7 @@ export function RevealRewards({ round, rewards, onDone }: RevealRewardsProps) {
           <span className="flex items-center gap-2 text-sm text-amber-200/80">
             <CoinsIcon aria-hidden className="size-4" /> Seu saldo
           </span>
-          <span className="font-display text-2xl font-extrabold text-amber-200 tabular-nums">{balance} PC</span>
+          <span className="font-display text-2xl font-extrabold text-amber-200 tabular-nums">{balance} CC</span>
         </div>
 
         <div className="flex animate-[reveal-fade_0.4s_ease-out_1.1s_both] flex-col gap-2.5 pt-1">

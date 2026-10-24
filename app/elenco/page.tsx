@@ -6,7 +6,7 @@ import { MembersList } from "./_components/members-list";
 import { getRoster } from "./_data-access/get-roster";
 
 export const metadata: Metadata = {
-  title: "Elenco · PeladApp",
+  title: "Elenco · Cancha Club",
 };
 
 /** Gestão de cadastro, só do Administrador. A própria conta (foto, nome, senha) fica em /eu. */

@@ -1,7 +1,7 @@
 import { getThemeForDate } from "@/lib/card-themes";
 
 /**
- * Personalizações de carta vendidas na Loja (PeladaCoins). Cada uma aparece a
+ * Personalizações de carta vendidas na Loja (CanchaCoins). Cada uma aparece a
  * partir de um nível e custa um preço; comprada, é do jogador para sempre.
  * Sem personalização, a carta é a padrão (Bronze, Prata ou Ouro pelo OVR).
  * Carta nova: entre aqui + tokens `card-skin-<chave>` no `app/globals.css` +

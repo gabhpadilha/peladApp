@@ -11,7 +11,7 @@ export type Me = {
   me: Player;
   groupName: string;
   progression: Progression;
-  /** PeladaCoins ganhas − o que já gastou. */
+  /** CanchaCoins ganhas − o que já gastou. */
   balance: number;
   /** "Minhas cartas": a padrão e as compradas. */
   cards: ShopItem[];

@@ -21,10 +21,10 @@ const barlowCondensed = Barlow_Condensed({
 });
 
 export const metadata: Metadata = {
-  title: "PeladApp",
+  title: "Cancha Club",
   description: "Avaliações pós-jogo, cartinhas e sorteio equilibrado para a pelada semanal.",
   // iPhone: "Adicionar à Tela de Início" abre em tela cheia, com o nome curto embaixo do ícone.
-  appleWebApp: { capable: true, title: "PeladApp", statusBarStyle: "black" },
+  appleWebApp: { capable: true, title: "Cancha Club", statusBarStyle: "black" },
 };
 
 export const viewport: Viewport = {

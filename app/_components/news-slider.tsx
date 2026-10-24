@@ -148,7 +148,7 @@ function describeEventSkins(skins: ReturnType<typeof getEventSkins>): string {
 }
 /**
  * Novidades do app na home: Time do Mês (a mais nova), evento do mês, Time da
- * Semana, Loja (com as cartas do evento), XP e PeladaCoins.
+ * Semana, Loja (com as cartas do evento), XP e CanchaCoins.
  */
 export function NewsSlider({ event, today, shopSale, player, progress, balance }: NewsSliderProps) {
   const eventCopy = EVENT_COPY[event.theme];
@@ -303,12 +303,12 @@ export function NewsSlider({ event, today, shopSale, player, progress, balance }
     },
     {
       key: "coins",
-      title: "PeladaCoins",
+      title: "CanchaCoins",
       content: (
         <Slide
           icon={CoinsIcon}
           eyebrow="Moeda do app"
-          title="PeladaCoins"
+          title="CanchaCoins"
           text="Ganhe jogando e gaste na Loja. O que você compra é seu para sempre."
           visual={
             <div className="flex w-full flex-col gap-3">
@@ -318,7 +318,7 @@ export function NewsSlider({ event, today, shopSale, player, progress, balance }
                   <span className="font-display text-3xl leading-none font-extrabold text-amber-200 tabular-nums">
                     {formatCoins(balance)}
                   </span>
-                  <span className="text-sm text-amber-200/70">PC</span>
+                  <span className="text-sm text-amber-200/70">CC</span>
                 </span>
               </div>
               <Chips items={COIN_CHIPS} isCoin />

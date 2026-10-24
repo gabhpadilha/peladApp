@@ -108,7 +108,7 @@ export function RoundPositions({ matchId, teams }: RoundPositionsProps) {
             <SheetTitle className="font-display text-2xl font-bold">Posições da rodada</SheetTitle>
             <SheetDescription>
               Marque quem jogou fora da posição. Vale só para esta rodada: a pessoa é avaliada na posição em que
-              jogou, concorre aos prêmios dela e ganha XP e PeladaCoins, mas a carta e o OVR não mudam.
+              jogou, concorre aos prêmios dela e ganha XP e CanchaCoins, mas a carta e o OVR não mudam.
             </SheetDescription>
           </SheetHeader>
 

@@ -7,7 +7,7 @@ import { RatingWizard } from "./_components/rating-wizard";
 import { getRatingSession } from "./_data-access/get-rating-session";
 
 export const metadata: Metadata = {
-  title: "Avaliar rodada · PeladApp",
+  title: "Avaliar rodada · Cancha Club",
 };
 
 /** Tela de notas do vestiário: sem navbar, para caber tudo no celular. */

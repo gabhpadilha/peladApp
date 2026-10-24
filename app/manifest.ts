@@ -3,8 +3,8 @@ import type { MetadataRoute } from "next";
 /** Manifesto do PWA: instalar na tela de início, abrir em tela cheia, ícone do escudo. */
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "PeladApp",
-    short_name: "PeladApp",
+    name: "Cancha Club",
+    short_name: "Cancha Club",
     description: "Avaliações pós-jogo, cartinhas e sorteio equilibrado para a pelada semanal.",
     lang: "pt-BR",
     id: "/",

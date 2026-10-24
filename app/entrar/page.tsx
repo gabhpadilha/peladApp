@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import { SignInForm } from "./_components/sign-in-form";
 
 export const metadata: Metadata = {
-  title: "Entrar · PeladApp",
+  title: "Entrar · Cancha Club",
 };
 
 export default function SignInPage({ searchParams }: PageProps<"/entrar">) {
@@ -12,7 +12,7 @@ export default function SignInPage({ searchParams }: PageProps<"/entrar">) {
       <div className="flex w-full max-w-sm flex-col gap-8">
         <div className="flex flex-col gap-2 text-center">
           <p className="font-display text-4xl font-extrabold tracking-wide uppercase">
-            Pelad<span className="text-primary">App</span>
+            Cancha<span className="text-primary">Club</span>
           </p>
           <h1 className="text-lg font-medium">Entrar</h1>
         </div>

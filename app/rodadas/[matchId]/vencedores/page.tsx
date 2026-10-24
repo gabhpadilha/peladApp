@@ -9,7 +9,7 @@ import { WinnersReveal } from "./_components/winners-reveal";
 import { getMatchWinners } from "./_data-access/get-match-winners";
 
 export const metadata: Metadata = {
-  title: "Vencedores · PeladApp",
+  title: "Vencedores · Cancha Club",
 };
 
 /** Revelação das cartas especiais de uma rodada fechada, como abrir um pacote do FIFA. */

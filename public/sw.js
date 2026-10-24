@@ -1,4 +1,4 @@
-// Service worker do PeladApp. Sem cache de páginas de propósito: o app depende da
+// Service worker do Cancha Club. Sem cache de páginas de propósito: o app depende da
 // sessão e de dados ao vivo, e um cache velho mostraria OVR e rodadas antigos.
 // Hoje só deixa o app instalável e pronto para receber notificações (push).
 
@@ -17,10 +17,10 @@ self.addEventListener("push", (event) => {
   try {
     data = event.data.json();
   } catch {
-    data = { title: "PeladApp", body: event.data.text() };
+    data = { title: "Cancha Club", body: event.data.text() };
   }
   event.waitUntil(
-    self.registration.showNotification(data.title || "PeladApp", {
+    self.registration.showNotification(data.title || "Cancha Club", {
       body: data.body,
       icon: "/icons/icon-192.png",
       badge: "/icons/icon-192.png",

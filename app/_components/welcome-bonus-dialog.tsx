@@ -17,7 +17,7 @@ type WelcomeBonusDialogProps = {
 
 const FEATURED_SKIN = getCardSkin("esmeralda");
 
-/** Aviso do prêmio de primeiro login (150 PC + Esmeralda grátis): aparece uma vez e some ao fechar. */
+/** Aviso do prêmio de primeiro login (150 CC + Esmeralda grátis): aparece uma vez e some ao fechar. */
 export function WelcomeBonusDialog({ coins }: WelcomeBonusDialogProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
@@ -44,10 +44,10 @@ export function WelcomeBonusDialog({ coins }: WelcomeBonusDialogProps) {
           </DialogTitle>
           <p className="font-display text-5xl leading-none font-extrabold text-amber-200 tabular-nums">
             +{formatCoins(coins)}
-            <span className="ml-1.5 text-xl text-amber-200/70">PC</span>
+            <span className="ml-1.5 text-xl text-amber-200/70">CC</span>
           </p>
           <DialogDescription>
-            Você recebeu {formatCoins(coins)} PeladaCoins na sua conta e a carta {FEATURED_SKIN.name} de graça: ela está na
+            Você recebeu {formatCoins(coins)} CanchaCoins na sua conta e a carta {FEATURED_SKIN.name} de graça: ela está na
             Loja esperando por você.
           </DialogDescription>
         </DialogHeader>

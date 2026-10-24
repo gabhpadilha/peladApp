@@ -18,7 +18,7 @@ export function getActiveSale(today: string): ShopSale | null {
   return SHOP_SALES.find((sale) => today >= sale.start && today <= sale.end) ?? null;
 }
 
-/** Preço com o desconto da promoção (arredondado para PeladaCoins inteiras). */
+/** Preço com o desconto da promoção (arredondado para CanchaCoins inteiras). */
 export function getSalePrice(price: number, sale: ShopSale | null): number {
   return sale ? Math.round((price * (100 - sale.percent)) / 100) : price;
 }

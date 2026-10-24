@@ -9,7 +9,7 @@ type AccessMessageInput = {
 /** Mensagem pronta para o organizador mandar no WhatsApp com o acesso do jogador. */
 export function buildAccessMessage({ nickname, login, tempPassword, loginUrl }: AccessMessageInput): string {
   return [
-    `Fala, ${nickname}! Seu acesso ao PeladApp:`,
+    `Fala, ${nickname}! Seu acesso ao Cancha Club:`,
     loginUrl,
     `${login.includes("@") ? "E-mail" : "Usuário"}: ${login}`,
     `Senha: ${tempPassword}`,

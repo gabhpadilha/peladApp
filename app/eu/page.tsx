@@ -17,7 +17,7 @@ import { PasswordCard } from "./_components/password-card";
 import { getMe } from "./_data-access/get-me";
 
 export const metadata: Metadata = {
-  title: "Eu · PeladApp",
+  title: "Eu · Cancha Club",
 };
 
 /** A própria conta: carta, Minhas cartas, foto, nome e apelido, senha e sair. */

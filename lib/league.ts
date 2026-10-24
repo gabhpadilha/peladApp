@@ -97,7 +97,7 @@ export async function getLeague(nextPath = "/") {
         .from("awards")
         .select("id, match_id, member_id, kind, theme, votes, score, position, ovr, attributes")
         .eq("group_id", membership.groupId),
-      // Quem enviou notas em cada rodada fechada (para o XP e as PeladaCoins).
+      // Quem enviou notas em cada rodada fechada (para o XP e as CanchaCoins).
       supabase.rpc("get_member_submissions", { target_group: membership.groupId }),
     ]);
 
@@ -117,7 +117,7 @@ export async function getLeague(nextPath = "/") {
   }));
   const matchById = new Map(matches.map((match) => [match.id, match]));
 
-  // XP, nível e PeladaCoins de cada um, do histórico (rodadas fechadas).
+  // XP, nível e CanchaCoins de cada um, do histórico (rodadas fechadas).
   const submissions = new Set(
     memberSubmissionsResult.data.map((row) => submissionKey(row.match_id, row.member_id)),
   );
@@ -246,7 +246,7 @@ export async function getLeague(nextPath = "/") {
       submissionsResult.data.map((row) => [row.match_id, Number(row.submitted)]),
     ),
     getDelta,
-    /** XP, nível e PeladaCoins ganhas de cada membro. */
+    /** XP, nível e CanchaCoins ganhas de cada membro. */
     getProgression: (memberId: string): Progression =>
       progressionById.get(memberId) ?? { level: 0, xpIntoLevel: 0, xpNeeded: 60, xp: 0, coinsEarned: WELCOME_BONUS_COINS },
     /** O que uma rodada fechada deu ao membro (tela "Você ganhou" do pacote). */

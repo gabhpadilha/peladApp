@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- Ícone do app (aprovado pelo dono do app, "B · P na carta"): o escudo da carta em lima e o "P" da
-       Barlow Condensed ExtraBold, a fonte do logo, em contorno (não depende da fonte instalada).
+  <!-- Ícone do app (aprovado pelo dono do app, "1 · C no escudo" do Cancha Club): o escudo da carta em lima e
+       o "C" da Barlow Condensed ExtraBold, a fonte do logo, em contorno (não depende da fonte instalada).
        Fonte dos PNGs do PWA: depois de mudar, rode `node scripts/generate-pwa-icons.mjs`. -->
   <rect width="512" height="512" fill="#0b130f"/>
   <path d="M150 84H362L392 120V330Q392 384 256 440Q120 384 120 330V120Z" fill="none" stroke="#c6f24e" stroke-width="20" stroke-linejoin="round"/>
-  <g transform="translate(256 250) scale(0.62) translate(-256 -256) translate(149.4 408) scale(0.434)">
-    <path fill="#f3f7f1" fill-rule="evenodd" d="M261-700Q319-700 363.50-672.50Q408-645 433-595Q458-545 458-481L458-481Q458-418 434.50-370.50Q411-323 368-297Q325-271 269-271L269-271L204-271Q199-271 199-266L199-266L199-12Q199-7 195.50-3.50Q192 0 187 0L187 0L45 0Q40 0 36.50-3.50Q33-7 33-12L33-12L33-688Q33-693 36.50-696.50Q40-700 45-700L45-700L261-700ZM232-399Q259-399 275.50-419.50Q292-440 292-477L292-477Q292-516 275.50-537Q259-558 232-558L232-558L204-558Q199-558 199-553L199-553L199-404Q199-399 204-399L204-399L232-399Z"/>
+  <g transform="translate(256 250) scale(0.62) translate(-256 -256) translate(155.6 404.6) scale(0.4246)">
+    <path fill="#f3f7f1" d="M236 8Q141 8 84-48Q27-104 27-197L27-197L27-504Q27-598 84-653Q141-708 236-708L236-708Q331-708 388.50-653Q446-598 446-504L446-504L446-495Q446-490 442.50-486.50Q439-483 434-483L434-483L292-477Q280-477 280-489L280-489L280-516Q280-539 268-552.50Q256-566 236-566L236-566Q217-566 205-552.50Q193-539 193-516L193-516L193-183Q193-161 205-147.50Q217-134 236-134L236-134Q256-134 268-147.50Q280-161 280-183L280-183L280-212Q280-217 283.50-220.50Q287-224 292-224L292-224L434-218Q439-218 442.50-214.50Q446-211 446-206L446-206L446-197Q446-104 388.50-48Q331 8 236 8L236 8Z"/>
   </g>
 </svg>

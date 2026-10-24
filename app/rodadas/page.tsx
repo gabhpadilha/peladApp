@@ -6,7 +6,7 @@ import { NewMatchForm } from "./_components/new-match-form";
 import { getRoundsOverview } from "./_data-access/get-rounds-overview";
 
 export const metadata: Metadata = {
-  title: "Rodadas · PeladApp",
+  title: "Rodadas · Cancha Club",
 };
 
 /** A atração principal: nova rodada (confirmados + sorteio pelo OVR) e as rodadas da pelada. */

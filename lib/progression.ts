@@ -4,7 +4,7 @@ import { AWARD_LABELS, type AwardKind } from "@/types/award";
 import { isOvrEvaluation, type Evaluation, type Match } from "@/types/match";
 
 /*
- * XP, nível e PeladaCoins, sempre calculados do histórico (rodadas fechadas),
+ * XP, nível e CanchaCoins, sempre calculados do histórico (rodadas fechadas),
  * como o OVR: quem já jogou começa com o nível certo e as regras podem mudar
  * sem perder nada. O XP nunca cai. Valores aprovados pelo dono do app (2026-10-21).
  */
@@ -15,7 +15,7 @@ const XP_SUBMITTED = 10;
 const XP_BEST_PLAYER = 100;
 const XP_OTHER_POSITIVE_AWARD = 60;
 
-/** PeladaCoins de uma rodada. */
+/** CanchaCoins de uma rodada. */
 const COINS_PLAYED = 20;
 const COINS_SUBMITTED = 10;
 const COINS_SCORE_BONUS = { 90: 30, 80: 20, 70: 10 } as const;
@@ -76,7 +76,7 @@ export function getLevelProgress(xp: number): LevelProgress {
 
 export type Progression = LevelProgress & {
   xp: number;
-  /** PeladaCoins ganhas no total (o saldo desconta as compras). */
+  /** CanchaCoins ganhas no total (o saldo desconta as compras). */
   coinsEarned: number;
 };
 
@@ -250,12 +250,12 @@ export function computeProgression(input: ProgressionInput): Progression {
 
 export type RoundRewards = {
   gains: RoundGain[];
-  /** XP e PeladaCoins da rodada (as moedas já com o bônus de nível). */
+  /** XP e CanchaCoins da rodada (as moedas já com o bônus de nível). */
   xp: number;
   coins: number;
   before: LevelProgress;
   after: LevelProgress;
-  /** PeladaCoins do bônus por nível que a rodada fez subir. */
+  /** CanchaCoins do bônus por nível que a rodada fez subir. */
   levelUpCoins: number;
   /** Nota recebida na rodada (0–99, ex.: 7,8 → 78) e de quantas avaliações; `null` sem notas. */
   score: number | null;

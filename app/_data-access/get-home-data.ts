@@ -43,7 +43,7 @@ export type HomeData = {
   winnersAlert: WinnersAlert | null;
   /** Aviso do bônus de boas-vindas, enquanto o jogador não o fechar. */
   showWelcomeBonus: boolean;
-  /** Nível e saldo de PeladaCoins (slides de novidades). */
+  /** Nível e saldo de CanchaCoins (slides de novidades). */
   levelProgress: LevelProgress;
   balance: number;
 };
