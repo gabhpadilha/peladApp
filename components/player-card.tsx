@@ -466,7 +466,7 @@ function LevelSeal({ level, rimClass, innerClass }: { level: number; rimClass: s
  * lima conforme o XP do nível atual, com o número no meio. Igual para todos,
  * qualquer que seja a carta em uso.
  */
-export function LevelBadge({ player }: { player: Player }) {
+export function LevelBadge({ player, className }: { player: Player; className?: string }) {
   const level = player.level ?? 0;
   const progress = Math.min(Math.max(player.levelProgress ?? 0, 0), 1);
   // O id do React traz caracteres que quebram o `url(#...)`.
@@ -475,7 +475,7 @@ export function LevelBadge({ player }: { player: Player }) {
   return (
     <span
       title={`Nível ${level} · ${Math.round(progress * 100)}% para o próximo`}
-      className="relative inline-flex h-8 w-[22px] shrink-0 items-center justify-center text-primary"
+      className={cn("relative inline-flex h-8 w-[22px] shrink-0 items-center justify-center text-primary", className)}
     >
       <svg viewBox="-4 -4 108 156" className="absolute inset-0 size-full" aria-hidden>
         <defs>

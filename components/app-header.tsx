@@ -2,11 +2,12 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
 import { MainNav, MainNavPlaceholder, type MainNavProps } from "@/components/main-nav";
+import { LevelBadge } from "@/components/player-card";
 import { getActiveMembership, getUserId } from "@/lib/session";
 import type { Player } from "@/types/player";
 
 type AppHeaderProps = {
-  /** Jogador logado (selo de nível no "Eu" do computador). Omitido onde ainda não há carta para mostrar. */
+  /** Jogador logado (selo de nível no "Eu" do computador e no canto do cabeçalho do celular). Omitido onde ainda não há carta para mostrar. */
   currentPlayer?: Player;
 };
 
@@ -32,6 +33,16 @@ export function AppHeader({ currentPlayer }: AppHeaderProps) {
           <Suspense fallback={<MainNavPlaceholder variant="top" currentPlayer={currentPlayer} />}>
             <NavWithAccess variant="top" currentPlayer={currentPlayer} />
           </Suspense>
+          {/* Celular: só o selo de nível no canto, levando à própria conta (o "Eu" fica na barra de baixo). */}
+          {currentPlayer && (
+            <Link
+              href="/eu"
+              aria-label={`Eu · Nível ${currentPlayer.level ?? 0}`}
+              className="-mr-1 flex size-11 items-center justify-center sm:hidden"
+            >
+              <LevelBadge player={currentPlayer} className="h-9 w-[25px]" />
+            </Link>
+          )}
         </div>
       </header>
       {/* Fora do header: o backdrop-blur dele prenderia o `fixed` dentro do cabeçalho. */}
