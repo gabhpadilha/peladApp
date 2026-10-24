@@ -7,7 +7,8 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Tudo, menos arquivos estáticos, imagens e o recorte de fundo (WASM + modelo do MediaPipe em public/mediapipe).
-    "/((?!_next/static|_next/image|favicon.ico|mediapipe/|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    // Tudo, menos arquivos estáticos, imagens, o recorte de fundo (WASM + modelo do MediaPipe em public/mediapipe)
+    // e o PWA (manifesto e service worker: o navegador os busca sem login).
+    "/((?!_next/static|_next/image|favicon.ico|mediapipe/|manifest.webmanifest|sw.js|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };

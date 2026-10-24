@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Ícone do app (aprovado pelo dono do app, "B · P na carta"): o escudo da carta em lima e o "P" da
+       Barlow Condensed ExtraBold, a fonte do logo, em contorno (não depende da fonte instalada).
+       Fonte dos PNGs do PWA: depois de mudar, rode `node scripts/generate-pwa-icons.mjs`. -->
+  <rect width="512" height="512" fill="#0b130f"/>
+  <path d="M150 84H362L392 120V330Q392 384 256 440Q120 384 120 330V120Z" fill="none" stroke="#c6f24e" stroke-width="20" stroke-linejoin="round"/>
+  <g transform="translate(256 250) scale(0.62) translate(-256 -256) translate(149.4 408) scale(0.434)">
+    <path fill="#f3f7f1" fill-rule="evenodd" d="M261-700Q319-700 363.50-672.50Q408-645 433-595Q458-545 458-481L458-481Q458-418 434.50-370.50Q411-323 368-297Q325-271 269-271L269-271L204-271Q199-271 199-266L199-266L199-12Q199-7 195.50-3.50Q192 0 187 0L187 0L45 0Q40 0 36.50-3.50Q33-7 33-12L33-12L33-688Q33-693 36.50-696.50Q40-700 45-700L45-700L261-700ZM232-399Q259-399 275.50-419.50Q292-440 292-477L292-477Q292-516 275.50-537Q259-558 232-558L232-558L204-558Q199-558 199-553L199-553L199-404Q199-399 204-399L204-399L232-399Z"/>
+  </g>
+</svg>

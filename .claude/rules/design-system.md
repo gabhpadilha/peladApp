@@ -10,6 +10,10 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
 - **Cores de raridade são o único elemento "brilhante/metálico" da UI.** Fora das cartas, a interface é neutra + lima.
 - `--success` (▲ OVR subiu) e `--destructive` (▼ OVR caiu).
 
+## 📲 Ícone do app (PWA)
+
+- **Aprovado pelo dono do app em 2026-10-24 ("B · P na carta"):** fundo `#0b130f`, o escudo da carta em contorno lima (`#c6f24e`) e o "P" claro (`#f3f7f1`) dentro. O "P" é o contorno exato da **Barlow Condensed ExtraBold**, a mesma letra do logo (pedido do dono: a primeira versão desenhada à mão "estava em outra fonte"). Fonte única: `app/icon.svg`; mudou, rode `node scripts/generate-pwa-icons.mjs`. O "maskable" do Android leva o desenho nos 80% do meio.
+
 ## 🔤 Tipografia
 
 - `font-display` (Barlow Condensed 600/700/800): OVR, apelidos, siglas de atributo, títulos curtos, números grandes.
