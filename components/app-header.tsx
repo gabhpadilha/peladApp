@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
+import { BrandLogo } from "@/components/brand-logo";
 import { MainNav, MainNavPlaceholder, type MainNavProps } from "@/components/main-nav";
 import { getActiveMembership, getUserId } from "@/lib/session";
 import type { Player } from "@/types/player";
@@ -25,8 +26,8 @@ export function AppHeader({ currentPlayer }: AppHeaderProps) {
     <>
       <header className="sticky top-0 z-20 border-b bg-background/85 backdrop-blur">
         <div className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between gap-2 px-4">
-          <Link href="/" className="font-display text-2xl font-extrabold tracking-wide uppercase">
-            Cancha<span className="text-primary">Club</span>
+          <Link href="/">
+            <BrandLogo />
           </Link>
           <Suspense fallback={<MainNavPlaceholder variant="top" currentPlayer={currentPlayer} />}>
             <NavWithAccess variant="top" currentPlayer={currentPlayer} />

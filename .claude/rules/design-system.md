@@ -10,10 +10,12 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
 - **Cores de raridade são o único elemento "brilhante/metálico" da UI.** Fora das cartas, a interface é neutra + lima.
 - `--success` (▲ OVR subiu) e `--destructive` (▼ OVR caiu).
 
-## 📲 Ícone do app (PWA)
+## 📲 Marca, logo e ícone do app
 
-- **Aprovado pelo dono do app em 2026-10-24 ("C no escudo", com o nome Cancha Club; antes era o "P" do PeladApp):** fundo `#0b130f`, o escudo da carta em contorno lima (`#c6f24e`) e o "C" claro (`#f3f7f1`) dentro. A letra é o contorno exato da **Barlow Condensed ExtraBold**, a mesma do logo (pedido do dono: a primeira versão desenhada à mão "estava em outra fonte").
-- **Logo (aprovado no mesmo dia, "A · junto"):** "CANCHA" claro + "CLUB" em lima, junto, em `font-display` extrabold caixa alta, como era "PELAD" + "APP". Moeda: **CanchaCoins**, sigla **CC**. Fonte única: `app/icon.svg`; mudou, rode `node scripts/generate-pwa-icons.mjs`. O "maskable" do Android leva o desenho nos 80% do meio.
+- **Marca "Quadra vazada" (aprovada pelo dono do app em 2026-10-24, depois de várias rodadas de conceitos no estilo Paul Rand e de referências de marcas esportivas):** a **carta do app** (o mesmo formato das cartinhas) cheia em lima **é a quadra** vista de cima; as linhas são **recortadas** (vazadas: mostram o fundo): as duas áreas, a linha do meio entrando pela esquerda e o **círculo central aberto à direita, que vira o "c"**, com a marca do centro no miolo. Componente `BrandMark` (máscara real, cor = `currentColor`, lima por padrão) e `BrandLogo` (marca + "cancha club" em minúsculas, Geist bold, `layout` "row" no cabeçalho e "stack" nas telas de entrar/conta desativada) em `components/brand-logo.tsx`. Em fundo lima (cartaz), a versão invertida: carta escura com as linhas em lima.
+- **Descartados no caminho** (para não repetir): o "P"/"C" de fonte no escudo, o logotipo só em texto "CANCHACLUB", os conceitos Bola/ABC, Bloco/Rb, Carta inclinada/NeXT, Escudo e quadra da UPS (fino ou grosso), Prancheta, Chute. O **Brasão** (carta com "cc" e faixa lima "CLUB" + estrela) ficou como segunda opção do dono, boa para selo em camisa e prêmios, mas não está em uso.
+- **Ícone do PWA:** `app/icon.svg` (fundo `#0b130f` e a marca no centro), a fonte dos PNGs; mudou, rode `node scripts/generate-pwa-icons.mjs`. O "maskable" do Android leva o desenho nos 80% do meio.
+- **Moeda:** **CanchaCoins**, sigla **CC**.
 
 ## 🔤 Tipografia
 
