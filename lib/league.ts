@@ -139,13 +139,15 @@ export async function getLeague(nextPath = "/") {
   const fullNameByUser = new Map(profiles.map((profile) => [profile.id, profile.full_name]));
 
   const playerProfiles: PlayerProfile[] = membersResult.data.map((member) => {
+    const progression = progressionById.get(member.id);
     const base = {
       id: member.id,
       nickname: member.nickname,
       fullName: fullNameByUser.get(member.user_id) ?? member.nickname,
       photo: toPlayerPhoto(member.photo_path, member.photo_kind),
       cardSkin: isCardSkinKey(member.card_skin) ? member.card_skin : null,
-      level: progressionById.get(member.id)?.level ?? 0,
+      level: progression?.level ?? 0,
+      levelProgress: progression ? progression.xpIntoLevel / progression.xpNeeded : 0,
     };
     return member.position === "GOL"
       ? { ...base, role: "goalkeeper", position: "GOL" }

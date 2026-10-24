@@ -51,6 +51,8 @@ type ProfileBase = {
   cardSkin?: CardSkinKey | null;
   /** Nível (XP), mostrado no selo da ponta da carta. */
   level?: number | null;
+  /** Quanto do XP do nível atual já foi feito (0 a 1): enche o selo de nível do cabeçalho. */
+  levelProgress?: number | null;
 };
 
 /** Dados cadastrais, sem nada derivado das avaliações. */

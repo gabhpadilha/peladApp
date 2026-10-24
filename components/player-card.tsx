@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import { useId, type CSSProperties } from "react";
 import Image from "next/image";
 import { cva, type VariantProps } from "class-variance-authority";
 import { GhostIcon, TrophyIcon } from "lucide-react";
@@ -461,31 +461,39 @@ function LevelSeal({ level, rimClass, innerClass }: { level: number; rimClass: s
 }
 
 /**
- * Nível do jogador no cabeçalho (aprovado pelo dono do app em 2026-10-21): o
- * mesmo selo hexagonal da ponta da carta, no estilo da carta em uso. Carta
- * padrão: borda na cor da faixa e fundo escuro; carta da Loja: borda no metal
- * dela e fundo na cor da face.
+ * Nível do jogador no cabeçalho ("Carta com XP", aprovada pelo dono do app em
+ * 2026-10-24, no estilo da marca): o contorno da carta em lima, que enche de
+ * lima conforme o XP do nível atual, com o número no meio. Igual para todos,
+ * qualquer que seja a carta em uso.
  */
 export function LevelBadge({ player }: { player: Player }) {
   const level = player.level ?? 0;
-  const skin = player.cardSkin ?? null;
-  const rim = skin ? GOLD_FILL : DESIGNS[getCardTier(player.ovr ?? 0)].frame;
-  const face = skin
-    ? "[background:radial-gradient(circle_at_50%_30%,var(--skin-mid),var(--skin-deep))] text-[var(--skin-text)]"
-    : "bg-black/75 text-white";
+  const progress = Math.min(Math.max(player.levelProgress ?? 0, 0), 1);
+  // O id do React traz caracteres que quebram o `url(#...)`.
+  const clipId = `level-badge-${useId().replace(/[^a-zA-Z0-9_-]/g, "")}`;
 
   return (
     <span
-      title={`Nível ${level}`}
-      className={cn("relative inline-block aspect-[1/1.15] w-8 shrink-0", HEXAGON, rim, skin && SKIN_CLASSES[skin])}
+      title={`Nível ${level} · ${Math.round(progress * 100)}% para o próximo`}
+      className="relative inline-flex h-8 w-[22px] shrink-0 items-center justify-center text-primary"
     >
-      <span
-        className={cn(
-          "absolute inset-[2px] flex items-center justify-center font-display text-sm leading-none font-bold tabular-nums",
-          HEXAGON,
-          face,
-        )}
-      >
+      <svg viewBox="-4 -4 108 156" className="absolute inset-0 size-full" aria-hidden>
+        <defs>
+          <clipPath id={clipId}>
+            <path d={SHIELD_PATH} />
+          </clipPath>
+        </defs>
+        <rect
+          y={148 * (1 - progress)}
+          width="100"
+          height="148"
+          fill="currentColor"
+          opacity="0.35"
+          clipPath={`url(#${clipId})`}
+        />
+        <path d={SHIELD_PATH} fill="none" stroke="currentColor" strokeWidth="9" />
+      </svg>
+      <span className="relative font-display text-sm leading-none font-extrabold text-foreground tabular-nums">
         {level}
       </span>
     </span>
