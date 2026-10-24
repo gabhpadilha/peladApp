@@ -16,7 +16,7 @@ export default function WelcomePage() {
   return (
     <main className="mx-auto flex w-full max-w-md flex-col gap-8 px-4 py-10">
       <div className="flex flex-col gap-2">
-        <BrandLogo className="self-start" markClassName="h-10" textClassName="text-2xl" />
+        <BrandLogo className="self-start" markClassName="h-10" textClassName="text-3xl" />
         <h1 className="text-xl font-medium">Crie a sua pelada</h1>
         <p className="text-sm text-muted-foreground">
           Depois você recebe o link de cadastro para mandar no grupo do WhatsApp.

@@ -12,7 +12,7 @@ export default function SignInPage({ searchParams }: PageProps<"/entrar">) {
     <main className="flex flex-1 items-center justify-center px-4 py-12">
       <div className="flex w-full max-w-sm flex-col gap-8">
         <div className="flex flex-col items-center gap-2 text-center">
-          <BrandLogo layout="stack" markClassName="h-20" textClassName="text-3xl" />
+          <BrandLogo layout="stack" markClassName="h-20" textClassName="text-4xl" />
           <h1 className="text-lg font-medium">Entrar</h1>
         </div>
         <div className="flex flex-col gap-4 rounded-xl border bg-card p-6">

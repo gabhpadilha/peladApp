@@ -43,7 +43,7 @@ type BrandLogoProps = {
   textClassName?: string;
 };
 
-/** Logo completo: a marca e o nome "cancha club" em minúsculas. */
+/** Logo completo: a marca e o nome "CANCHA" + "CLUB" em lima, em `font-display` caixa alta. */
 export function BrandLogo({ layout = "row", className, markClassName, textClassName }: BrandLogoProps) {
   return (
     <span
@@ -51,8 +51,11 @@ export function BrandLogo({ layout = "row", className, markClassName, textClassN
       aria-label="Cancha Club"
     >
       <BrandMark className={cn("h-8 w-auto", markClassName)} />
-      <span aria-hidden="true" className={cn("text-lg font-bold tracking-tight lowercase", textClassName)}>
-        cancha club
+      <span
+        aria-hidden="true"
+        className={cn("font-display text-2xl font-extrabold tracking-wide uppercase", textClassName)}
+      >
+        Cancha<span className="text-primary">Club</span>
       </span>
     </span>
   );
