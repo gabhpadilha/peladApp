@@ -14,7 +14,7 @@ type LatestRoundCardProps = {
 
 /** Cartas do leque ao lado do Melhor Jogador (as primeiras ficam por cima). */
 const FAN_SIZE = 4;
-const FAN_LAYERS = ["z-40", "z-30", "z-20", "z-10"];
+const FAN_LAYERS = ["z-[4]", "z-[3]", "z-[2]", "z-[1]"];
 
 const awardHref = (award: Award) => `/jogadores/${award.memberId}/colecao`;
 const awardLabel = (award: Award) => `${AWARD_LABELS[award.kind].title}: ${award.card.nickname}`;
@@ -33,7 +33,8 @@ function FeaturedAward({ award, others }: { award: Award; others: Award[] }) {
         <p className="truncate font-display text-2xl font-bold uppercase">{award.card.nickname}</p>
         <p className="text-sm text-muted-foreground">{formatAwardResult(award)}</p>
         {others.length > 0 && (
-          <div className="mt-2 flex items-center" aria-hidden>
+          // `isolate`: as camadas do leque ficam só aqui dentro; sem isso, passavam por cima da barra de baixo (z-30).
+          <div className="isolate mt-2 flex items-center" aria-hidden>
             {others.slice(0, FAN_SIZE).map((other, index) => (
               <div key={other.id} className={`relative -ml-3 w-9 first:ml-0 ${FAN_LAYERS.at(index)}`}>
                 <PlayerCard player={other.card} award={other} size="fill" />
