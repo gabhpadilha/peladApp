@@ -19,7 +19,7 @@ Design mobile-first é inegociável: a interação principal (dar notas no vesti
 **Design system:** todas as decisões visuais e de UX (tema, paleta, raridade, anatomia da carta, atributos de linha/goleiro, foto, tela de notas, Draft) estão em `.claude/rules/design-system.md` (carregado automaticamente). Leia antes de criar UI.
 
 ## 🛠️ Tech Stack
-- **Instalado:** Next.js 16.4 (App Router, Turbopack), React 19.3, TypeScript 5 (`strict`), Tailwind CSS 4, ESLint 9 (flat config), shadcn/ui (base Radix, preset `nova`, ícones Lucide; config em `components.json`), React Hook Form + Zod 4 + `@hookform/resolvers`, `modern-screenshot` (story das cartas especiais).
+- **Instalado:** Next.js 16.4.3 (App Router, Turbopack; versão fixa, sem `^`: a 16.4.0 tinha falhas críticas de segurança, atualizada em 2026-10-28), React 19.3, TypeScript 5 (`strict`), Tailwind CSS 4, ESLint 9 (flat config), shadcn/ui (base Radix, preset `nova`, ícones Lucide; config em `components.json`), React Hook Form + Zod 4 + `@hookform/resolvers`, `modern-screenshot` (story das cartas especiais).
 - **Supabase** (`@supabase/ssr` + `@supabase/supabase-js`, CLI `supabase` como devDependency): projeto remoto "gabhpadilha's Project" (ref `kmpdmbowtkzxmsanddio`, região us-east-1), já linkado. A conta também tem o projeto `vitrine-guaratuba`, que **não** é deste app: nunca rode comandos nele.
 - **Planejado** (confira o `package.json` antes de importar): Framer Motion (animação das cartas), Jest + React Testing Library.
 
@@ -119,7 +119,6 @@ Desenvolvimento no VS Code + WSL (Ubuntu), com Node 20 via nvm. Se o Claude roda
 
 ## 🗺️ Próximos passos (combinados com o dono do app)
 - **Calendário de eventos e cartas futuras:** `docs/calendario-eventos.md` é a memória desse planejamento (eventos dos próximos meses, ideias de cartas, cartas animadas, decisões e perguntas em aberto). Leia antes de criar evento ou carta nova e atualize-o a cada decisão.
-- **Atualizar o Next.js** (combinado para 2026-10-23): a 16.4.0 tem falha de segurança conhecida (o próprio `next build` avisa quando roda por um agente e para na 1ª tentativa; na Vercel não trava). Fazer numa branch, testar tudo e só depois mandar para a `main`.
 - Fechamento automático da rodada 24h depois do jogo.
 - Notificações push (o `sw.js` já recebe): falta guardar a inscrição de cada aparelho (tabela nova), as chaves VAPID e o envio (ex.: "a rodada fechou, abra seu pacote", "falta sua nota"). No iPhone só funciona com o app instalado na tela de início (iOS 16.4+).
 - Animação de revelação do OVR ao fechar a rodada: em parte feita na "Sua rodada" do pacote (OVR antes → depois e aviso de troca de faixa); falta a carta virando.
