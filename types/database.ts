@@ -466,6 +466,7 @@ export type Database = {
         Args: { average: number; bonus: number }
         Returns: number
       }
+      card_ovr: { Args: { vals: number[] }; Returns: number }
       close_match: {
         Args: { target_match: string; theme_key?: string }
         Returns: number
@@ -517,7 +518,6 @@ export type Database = {
         }
         Returns: string
       }
-      drop_lowest_average: { Args: { vals: number[] }; Returns: number }
       get_group_scores: {
         Args: { target_group: string }
         Returns: {
@@ -603,6 +603,7 @@ export type Database = {
         | "foguete"
         | "garcom"
         | "motor"
+        | "criativo"
       match_status: "open" | "closed"
       member_role: "organizer" | "player"
       player_position: "FIX" | "ALA" | "PIV" | "GOL"
@@ -748,6 +749,7 @@ export const Constants = {
         "foguete",
         "garcom",
         "motor",
+        "criativo",
       ],
       match_status: ["open", "closed"],
       member_role: ["organizer", "player"],

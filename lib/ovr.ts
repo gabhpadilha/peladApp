@@ -1,5 +1,6 @@
 import type { Evaluation } from "@/types/match";
-import type { PlayerAttribute } from "@/types/player";
+import { getOvrFromStats, getStatsFromAttributes } from "@/lib/card-stats";
+import { GOALKEEPER_ATTRIBUTES, type PlayerAttribute } from "@/types/player";
 
 export const SCORE_MIN = 1;
 export const SCORE_MAX = 10;
@@ -33,13 +34,6 @@ export function averageEvaluations(evaluations: readonly Evaluation[]): number |
   return evaluationAverage === null ? null : toCardScale(evaluationAverage);
 }
 
-/**
- * Quantos atributos mais fracos saem do OVR (decisão do dono do app em
- * 2026-10-23: no futsal todo mundo ataca e defende, então um atributo muito
- * baixo não deve derrubar a carta). Espelha `drop_lowest_average` no banco.
- */
-export const OVR_DROPPED_ATTRIBUTES = 1;
-
 /** Soma e quantidade de notas de cada atributo, para o OVR acumulado. */
 export type OvrTotals = Map<PlayerAttribute, { sum: number; count: number }>;
 
@@ -57,17 +51,21 @@ export function addToOvrTotals(totals: OvrTotals, evaluation: Evaluation): void 
   }
 }
 
-/** OVR dos totais: média de cada atributo, sem o(s) mais fraco(s), na escala da carta. */
+/** OVR dos totais: cada atributo na escala da carta, as 3 estatísticas e a média delas. */
 export function ovrFromTotals(totals: OvrTotals): number | null {
-  const averages = [...totals.values()].map((total) => total.sum / total.count).toSorted((a, b) => b - a);
-  if (averages.length === 0) return null;
-  const kept = averages.length > OVR_DROPPED_ATTRIBUTES ? averages.slice(0, -OVR_DROPPED_ATTRIBUTES) : averages;
-  return toCardScale(average(kept) ?? 0);
+  if (totals.size === 0) return null;
+  const attributes = Object.fromEntries(
+    [...totals].map(([key, total]) => [key, toCardScale(total.sum / total.count)]),
+  ) as Partial<Record<PlayerAttribute, number>>;
+  const role = GOALKEEPER_ATTRIBUTES.some((key) => totals.has(key)) ? "goalkeeper" : "outfield";
+  return getOvrFromStats(getStatsFromAttributes(role, attributes));
 }
 
 /**
- * OVR = média dos atributos da carta tirando o mais fraco (5 de 6), cada atributo
- * sendo a média dele em todas as avaliações que contam. Sempre sobre o histórico
+ * OVR = média das 3 estatísticas da carta (Ataque, Criação e Defesa; no goleiro,
+ * Paredão, Leitura e Saída), cada uma a média de um par de atributos, e cada atributo
+ * a média dele em todas as avaliações que contam (decisão do dono do app em
+ * 2026-10-29; antes era a média dos 5 melhores atributos). Sempre sobre o histórico
  * inteiro (só rodadas fechadas). As avaliações chegam já sem a maior e a menor de
  * cada rodada (`getGroupEvaluations`); quem chama tira as de fora da posição.
  * A nota da rodada (`averageEvaluations`) continua com os 6 atributos.

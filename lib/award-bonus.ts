@@ -1,4 +1,5 @@
 import type { AwardKind } from "@/types/award";
+import { getOvrFromStats, getStatsFromAttributes } from "@/lib/card-stats";
 import type { Player } from "@/types/player";
 
 const MAX_CARD_VALUE = 99;
@@ -32,11 +33,17 @@ function boost(value: number | null): number | null {
  */
 export function withAwardBonus(player: Player, kind: AwardKind): Player {
   if (!BOOSTED_AWARDS.includes(kind)) return player;
+  const boosted = boostAttributes(player);
+  // O OVR sai das 3 estatísticas já com o bônus (como `card_ovr` no banco).
+  const ovr = player.ovr === null ? null : getOvrFromStats(getStatsFromAttributes(boosted.role, boosted.attributes));
+  return { ...boosted, ovr };
+}
 
+/** +1 em cada atributo (teto 99). */
+function boostAttributes(player: Player): Player {
   if (player.role === "goalkeeper") {
     return {
       ...player,
-      ovr: boost(player.ovr),
       attributes: {
         ref: boost(player.attributes.ref),
         ela: boost(player.attributes.ela),
@@ -50,7 +57,6 @@ export function withAwardBonus(player: Player, kind: AwardKind): Player {
 
   return {
     ...player,
-    ovr: boost(player.ovr),
     attributes: {
       vel: boost(player.attributes.vel),
       chu: boost(player.attributes.chu),
