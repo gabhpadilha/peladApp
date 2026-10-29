@@ -81,7 +81,7 @@ type AwardColors = Omit<Roupa, "background" | "metal" | "matte" | "sparkles" | "
  * Melhor Jogador (aprovado pelo dono do app em 2026-10-29): a taça ao lado do jogador,
  * no metal de cada tema. Destaques (Atacante, Criativo, Defensor, Goleiro, Gol): o ícone
  * do prêmio no mesmo lugar. O tema do mês veste cor e marca d'água (fantasma, taça), como
- * antes (hoje só o Halloween). Moldura em tubo de neon na cor do prêmio, sem enfeite (no Halloween, uma teia discreta nos cantos de cima) (pedido
+ * antes (hoje só o Halloween). Moldura em tubo de neon na cor do prêmio, com um traço curto na base (no Halloween, mais uma abóbora acesa no topo) (pedido
  * do dono do app em 2026-10-29). Fundos `premio-<prêmio>-<tema>.webp`, gerados por `prototipos/premios.cjs` (docs).
  */
 const CRAQUE_COLORS: Record<CardThemeKey, AwardColors> = {
@@ -142,7 +142,7 @@ function awardRoupa(kind: AwardKind, theme: CardThemeKey): Roupa {
   if (design === "jogador_do_mes") return MONTH_ROUPA;
   if (design === "bola_murcha") return FLOP_ROUPA;
   const provisional = PROVISIONAL_AWARD_ROUPAS[design];
-  if (provisional) return { ...provisional, trim: theme === "halloween" ? "teia" : null };
+  if (provisional) return { ...provisional, trim: theme === "halloween" ? "abobora" : "destaque" };
   const isCraque = design === "craque";
   const colors = (isCraque ? CRAQUE_COLORS : HIGHLIGHT_COLORS)[theme];
   const art = isCraque ? "craque" : HIGHLIGHT_ART.has(kind) ? kind : "gol";
@@ -155,7 +155,7 @@ function awardRoupa(kind: AwardKind, theme: CardThemeKey): Roupa {
     muted: colors.muted,
     sparkles: false,
     neon: colors.neon,
-    trim: isCraque ? "craque" : theme === "halloween" ? "teia" : null,
+    trim: isCraque ? "craque" : theme === "halloween" ? "abobora" : "destaque",
   };
 }
 
@@ -253,7 +253,10 @@ const METAL_WINDOW = cn("inset-x-[2.6%] inset-y-[1.86%]", INNER_CORNERS);
  * - `lobisomem`: três arranhões de garra nas laterais e a base com presas.
  * - `craque` (Melhor Jogador, aprovado pelo dono do app em 2026-10-29): um fio só abraçando
  *   a base (dois ficaria igual às premium) e uma estrela acesa no topo, em qualquer tema.
- * - `teia` (prêmios no tema Halloween, pedido do dono do app em 2026-10-29): uma teia
+ * - `destaque` (os outros prêmios, aprovado pelo dono do app em 2026-10-29): um traço curto
+ *   no meio da base com a pontinha para baixo; `abobora`, no Halloween, o mesmo traço e
+ *   uma abóbora acesa no topo, no lugar da teia.
+ * - `teia` (sem uso desde a abóbora; fica para eventos futuros), pedido do dono do app em 2026-10-29): uma teia
  *   pequena em cada canto de cima, mais discreta (`subtle`) que os enfeites das skins.
  */
 const NEON_TRIM_INNER = "M104.6 80 V131 Q104.6 144.6 93 144.6";
@@ -290,6 +293,13 @@ const NEON_TRIMS = {
     ],
     center: "M50.00 -9.20 L51.06 -6.46 L53.99 -6.30 L51.71 -4.44 L52.47 -1.60 L50.00 -3.20 L47.53 -1.60 L48.29 -4.44 L46.01 -6.30 L48.94 -6.46 Z",
   },
+  destaque: {
+    side: [{ d: "M72 142.4 H57 L50 145.6", width: 0.55 }],
+  },
+  abobora: {
+    side: [{ d: "M72 142.4 H57 L50 145.6", width: 0.55 }],
+    center: "M45.4 -4.4 A4.6 3.6 0 1 0 54.6 -4.4 A4.6 3.6 0 1 0 45.4 -4.4 Z M47.5 -5.8 L49 -5.8 L48.25 -4.5 Z M51 -5.8 L52.5 -5.8 L51.75 -4.5 Z M47.4 -3.4 Q50 -1.6 52.6 -3.4 Q50 -2.5 47.4 -3.4 Z M49.4 -7.8 L50.6 -7.8 L51.3 -9.8 L50.2 -9.8 Z",
+  },
   teia: {
     subtle: true,
     side: [
@@ -306,12 +316,17 @@ type NeonTrimKind = keyof typeof NEON_TRIMS;
 function NeonLine({ d, width, subtle }: { d: string; width: number; subtle?: boolean }) {
   return (
     <>
-      <path d={d} strokeWidth={subtle ? 1.8 : 3.2} opacity={subtle ? 0.12 : 0.22} />
-      <path d={d} strokeWidth={subtle ? 0.9 : 1.6} opacity={subtle ? 0.25 : 0.4} />
-      <path d={d} strokeWidth={width} opacity={subtle ? 0.85 : 1} />
+      <path d={d} strokeWidth={subtle ? 2.4 : 4.4} opacity={subtle ? 0.14 : 0.18} />
+      <path d={d} strokeWidth={subtle ? 1.2 : 2.2} opacity={subtle ? 0.3 : 0.45} />
+      <path d={d} strokeWidth={width * 1.6} opacity={subtle ? 0.7 : 0.9} />
+      {/* Miolo quase branco, como o tubo de neon da moldura (pedido do dono do app em 2026-10-29). */}
+      <path d={d} strokeWidth={width * 0.6} stroke={NEON_CORE} />
     </>
   );
 }
+
+/** Cor do miolo aceso dos enfeites: a cor do neon puxada para o branco. */
+const NEON_CORE = "color-mix(in oklab, var(--cc-neon), white 65%)";
 
 function NeonTrim({ kind }: { kind: NeonTrimKind }) {
   const trim: NeonTrimShape = NEON_TRIMS[kind];
@@ -331,8 +346,9 @@ function NeonTrim({ kind }: { kind: NeonTrimKind }) {
       <g transform="translate(100 0) scale(-1 1)">{side}</g>
       {trim.center && (
         <>
-          <path d={trim.center} strokeWidth={3} opacity={0.22} />
-          <path d={trim.center} fill="var(--cc-neon)" strokeWidth={0.3} />
+          <path d={trim.center} strokeWidth={4} opacity={0.2} />
+          <path d={trim.center} strokeWidth={1.8} opacity={0.45} />
+          <path d={trim.center} fill={NEON_CORE} fillRule="evenodd" strokeWidth={0.5} />
         </>
       )}
     </svg>
