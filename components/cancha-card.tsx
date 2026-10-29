@@ -93,19 +93,20 @@ const HIGHLIGHT_COLORS: Record<CardThemeKey, AwardColors> = {
 const HIGHLIGHT_ART = new Set<AwardKind>(["atacante", "criativo", "defensor", "goleiro", "gol", "foguete", "garcom", "drible", "motor"]);
 
 /**
- * Time do Mês (aprovado pelo dono do app em 2026-10-29): roxo real, a coroa dourada ao lado
- * do jogador e moldura de ouro lisa. Não veste o tema do mês (`hasSeasonalTheme`).
- * Fundo `premio-time-do-mes.webp`, gerado por `prototipos/mes.cjs` (docs).
+ * Time do Mês (aprovado pelo dono do app em 2026-10-29): o cristal lapidado que ele mandou,
+ * em roxo, com a coroa dourada ao lado do jogador e o tubo de neon das premium em roxo.
+ * Não veste o tema do mês (`hasSeasonalTheme`). Fundo `premio-time-do-mes.webp`, gerado
+ * por `prototipos/mes-cristal.cjs` (docs).
  */
 const MONTH_ROUPA: Roupa = {
   background: "premio-time-do-mes",
   metal: ["#b8902f", "#b8902f", "#fff1c2"],
   accent: "#f3d27a",
-  light: "255 225 150",
+  light: "220 180 255",
   bar: "#0b0318",
   muted: "#f3d27a",
- 
   sparkles: false,
+  neon: "#b46bff",
 };
 
 /**
