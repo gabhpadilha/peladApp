@@ -76,7 +76,7 @@ function Slide({
 /** Três cartas em leque, a do meio maior (prêmios do evento ou cartas da Loja). */
 function CardFan({ cards }: { cards: [ReactNode, ReactNode, ReactNode] }) {
   return (
-    <div className="grid w-full max-w-60 grid-cols-[1fr_1.25fr_1fr] items-end gap-1.5">
+    <div className="grid w-full max-w-80 grid-cols-[1fr_1.25fr_1fr] items-end gap-1.5 sm:max-w-96">
       <div className="translate-y-[-6%] -rotate-6">{cards[0]}</div>
       <div className="z-10">{cards[1]}</div>
       <div className="translate-y-[-6%] rotate-6">{cards[2]}</div>
@@ -87,11 +87,12 @@ function CardFan({ cards }: { cards: [ReactNode, ReactNode, ReactNode] }) {
 type Chip = { label: string; value: string };
 
 /** Regras resumidas em chips (a lista completa fica na Loja). */
-function Chips({ items, isCoin = false }: { items: readonly Chip[]; isCoin?: boolean }) {
+function Chips({ items, isCoin = false, className }: { items: readonly Chip[]; isCoin?: boolean; className?: string }) {
   return (
-    <ul className="flex flex-wrap gap-1.5">
+    <ul className={cn("flex flex-wrap gap-1.5", className)}>
       {items.map((item) => (
-        <li key={item.label} className="flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs">
+        // Cada chip numa linha só: quebra a fileira, nunca o texto do chip.
+        <li key={item.label} className="flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs whitespace-nowrap">
           <span className="text-muted-foreground">{item.label}</span>
           <span className={cn("font-semibold tabular-nums", isCoin && "text-amber-200")}>{item.value}</span>
         </li>
@@ -161,15 +162,16 @@ export function NewsSlider({ event, today, shopSale, player, progress, balance }
           meta={`Próxima carta: ${formatShortDate(getNextPlayerOfTheMonthDate(today))}, ao fechar a rodada`}
           text="Na última quinta do mês, as 4 maiores médias de notas do mês na linha e a maior do gol levam a carta mais rara da pelada."
           visual={
-            <div className="flex w-full items-center gap-5 pr-3">
-              <div className="w-28 shrink-0">
+            // No celular, a carta em cima e os chips embaixo (lado a lado, os chips quebravam o texto).
+            <div className="flex w-full flex-col items-center gap-4 sm:flex-row sm:gap-5 sm:pr-3">
+              <div className="w-40 shrink-0 sm:w-48">
                 <PlayerCard
                   player={withAwardBonus(SAMPLE_PLAYER, "jogador_do_mes")}
                   award={{ kind: "jogador_do_mes", theme: "default" }}
                   size="fill"
                 />
               </div>
-              <Chips items={PLAYER_OF_THE_MONTH_CHIPS} />
+              <Chips items={PLAYER_OF_THE_MONTH_CHIPS} className="justify-center sm:justify-start" />
             </div>
           }
           href={`/jogadores/${player.id}/colecao`}

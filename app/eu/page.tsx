@@ -48,7 +48,7 @@ async function MeContent() {
         </div>
 
         <div className="flex items-center gap-4">
-          <PlayerCard player={me} size="sm" className="shrink-0" />
+          <PlayerCard player={me} size="fill" className="w-[46%] max-w-52 shrink-0 sm:w-60 sm:max-w-none" />
           <div className="flex min-w-0 flex-col items-start gap-1.5">
             <p className="truncate font-display text-3xl leading-none font-bold">{me.nickname}</p>
             <p className="text-sm text-muted-foreground">

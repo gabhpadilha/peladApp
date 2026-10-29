@@ -39,7 +39,7 @@ export function AthleteHero({ profile }: AthleteHeroProps) {
         {player.ovr ?? ""}
       </span>
 
-      <PlayerCard player={player} size="lg" className="md:shrink-0" />
+      <PlayerCard player={player} size="fill" className="w-64 md:w-72 md:shrink-0" />
 
       <div className="relative flex w-full flex-col gap-6">
         <div className="text-center md:text-left">

@@ -45,8 +45,8 @@ export function MyCardSummary({
   return (
     <section aria-labelledby="my-card-title" className="flex flex-col gap-4 rounded-xl border bg-card p-4">
       <div className="flex items-center gap-4">
-        {/* A carta escala pela largura do pai. Maior que antes: é a carta do próprio jogador. */}
-        <div className="w-36 shrink-0 sm:w-44">
+        {/* A carta escala pela largura do pai: é a carta do próprio jogador, o foco do jogo (maior desde 2026-10-29). */}
+        <div className="w-[52%] max-w-56 shrink-0 sm:w-60 sm:max-w-none">
           <PlayerCard player={player} size="fill" />
         </div>
 
@@ -56,7 +56,7 @@ export function MyCardSummary({
             <h2 id="my-card-title" className="truncate font-display text-3xl leading-tight font-bold">
               {player.nickname}
             </h2>
-            <p className="truncate text-sm text-muted-foreground">
+            <p className="text-sm leading-snug text-muted-foreground">
               {POSITION_LABELS[player.position]} · {tierLabel}
             </p>
           </div>
@@ -64,7 +64,7 @@ export function MyCardSummary({
           <div>
             <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">OVR</p>
             <p className="flex items-baseline gap-2">
-              <span className="font-display text-5xl leading-none font-extrabold tabular-nums">
+              <span className="font-display text-5xl leading-none font-extrabold tabular-nums sm:text-7xl">
                 {player.ovr ?? "–"}
               </span>
               <OvrDelta delta={delta} className="text-xs" />

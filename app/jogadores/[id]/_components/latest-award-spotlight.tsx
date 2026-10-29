@@ -32,7 +32,7 @@ export function LatestAwardSpotlight({ award, isShareable, groupName }: LatestAw
         aria-hidden
         className="pointer-events-none absolute -top-16 left-1/2 size-72 -translate-x-1/2 rounded-full bg-foreground/5 blur-3xl sm:left-28"
       />
-      <div className="relative w-48 shrink-0 sm:w-52">
+      <div className="relative w-56 shrink-0 sm:w-64">
         <PlayerCard player={award.card} award={award} size="fill" />
       </div>
 

@@ -23,7 +23,7 @@ const awardLabel = (award: Award) => `${AWARD_LABELS[award.kind].title}: ${award
 function FeaturedAward({ award, others }: { award: Award; others: Award[] }) {
   return (
     <div className="flex items-center gap-4">
-      <Link href={awardHref(award)} aria-label={awardLabel(award)} className="w-28 shrink-0">
+      <Link href={awardHref(award)} aria-label={awardLabel(award)} className="w-36 shrink-0 sm:w-48">
         <PlayerCard player={award.card} award={award} size="fill" />
       </Link>
       <div className="flex min-w-0 flex-col gap-1">
@@ -36,7 +36,7 @@ function FeaturedAward({ award, others }: { award: Award; others: Award[] }) {
           // `isolate`: as camadas do leque ficam só aqui dentro; sem isso, passavam por cima da barra de baixo (z-30).
           <div className="isolate mt-2 flex items-center" aria-hidden>
             {others.slice(0, FAN_SIZE).map((other, index) => (
-              <div key={other.id} className={`relative -ml-3 w-9 first:ml-0 ${FAN_LAYERS.at(index)}`}>
+              <div key={other.id} className={`relative -ml-3 w-11 first:ml-0 sm:w-14 ${FAN_LAYERS.at(index)}`}>
                 <PlayerCard player={other.card} award={other} size="fill" />
               </div>
             ))}

@@ -91,12 +91,12 @@ export function TeamPitch({ team, mode, ratingOf, onRate }: TeamPitchProps): Rea
             return (
               <li key={key} className={cn("flex justify-center", SLOT_CELLS[key])}>
                 {entry ? (
-                  <div className="w-[92%] max-w-36">{cardFor(entry)}</div>
+                  <div className="w-[92%] max-w-44">{cardFor(entry)}</div>
                 ) : (
                   // Vaga sem jogador (time incompleto): contorno tracejado no formato da carta.
                   <div
                     aria-hidden
-                    className="aspect-[5/7] w-[92%] max-w-36 rounded-xl border border-dashed border-foreground/15"
+                    className="aspect-[5/7] w-[92%] max-w-44 rounded-xl border border-dashed border-foreground/15"
                   />
                 )}
               </li>

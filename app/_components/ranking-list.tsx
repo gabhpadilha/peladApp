@@ -28,7 +28,7 @@ export function RankingList({ title, players, currentPlayerId }: RankingListProp
             >
               <span className="w-4 text-sm text-muted-foreground tabular-nums">{position}</span>
               {/* Miniatura da carta (com a foto, quando tem): a carta escala pela largura. */}
-              <div className="w-14 shrink-0">
+              <div className="w-16 shrink-0 sm:w-20">
                 <PlayerCard player={player} size="fill" />
               </div>
               <span className="flex min-w-0 flex-1 flex-col">
