@@ -76,7 +76,7 @@ function Slide({
 /** Três cartas em leque, a do meio maior (prêmios do evento ou cartas da Loja). */
 function CardFan({ cards }: { cards: [ReactNode, ReactNode, ReactNode] }) {
   return (
-    <div className="grid w-full max-w-80 grid-cols-[1fr_1.25fr_1fr] items-end gap-1.5 sm:max-w-96">
+    <div className="grid w-full max-w-64 grid-cols-[1fr_1.25fr_1fr] items-end gap-1.5 sm:max-w-96">
       <div className="translate-y-[-6%] -rotate-6">{cards[0]}</div>
       <div className="z-10">{cards[1]}</div>
       <div className="translate-y-[-6%] rotate-6">{cards[2]}</div>
@@ -162,16 +162,17 @@ export function NewsSlider({ event, today, shopSale, player, progress, balance }
           meta={`Próxima carta: ${formatShortDate(getNextPlayerOfTheMonthDate(today))}, ao fechar a rodada`}
           text="Na última quinta do mês, as 4 maiores médias de notas do mês na linha e a maior do gol levam a carta mais rara da pelada."
           visual={
-            // No celular, a carta em cima e os chips embaixo (lado a lado, os chips quebravam o texto).
-            <div className="flex w-full flex-col items-center gap-4 sm:flex-row sm:gap-5 sm:pr-3">
-              <div className="w-40 shrink-0 sm:w-48">
+            // Carta e chips lado a lado; no celular, carta menor e chips um por linha, para o
+            // slide caber na tela sem rolar (pedido do dono do app em 2026-10-29).
+            <div className="flex w-full items-center gap-3 sm:gap-5 sm:pr-3">
+              <div className="w-24 shrink-0 sm:w-48">
                 <PlayerCard
                   player={withAwardBonus(SAMPLE_PLAYER, "jogador_do_mes")}
                   award={{ kind: "jogador_do_mes", theme: "default" }}
                   size="fill"
                 />
               </div>
-              <Chips items={PLAYER_OF_THE_MONTH_CHIPS} className="justify-center sm:justify-start" />
+              <Chips items={PLAYER_OF_THE_MONTH_CHIPS} className="min-w-0 flex-col items-start sm:flex-row [&>li]:text-[0.6875rem] sm:[&>li]:text-xs" />
             </div>
           }
           href={`/jogadores/${player.id}/colecao`}
