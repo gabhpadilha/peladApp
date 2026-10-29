@@ -332,8 +332,10 @@ function NeonTrim({ kind }: { kind: NeonTrimKind }) {
 }
 
 /**
- * Carta com enfeite de neon (pedido do dono do app em 2026-10-29: o morcego encostava na
- * margem): a carta ocupa os 84% do meio da caixa e o enfeite, a sobra em volta.
+ * Carta de neon (pedido do dono do app em 2026-10-29: o morcego encostava na margem):
+ * a carta ocupa os 84% do meio da caixa e o enfeite e o brilho, a sobra em volta. Vale
+ * para toda carta de neon, com ou sem enfeite, para os prêmios terem o mesmo tamanho
+ * lado a lado (a Bola Murcha, sem enfeite, ficava maior que as outras).
  */
 const TRIMMED_CARD = "absolute inset-[8%]";
 
@@ -385,7 +387,7 @@ export function CanchaCard({ player, award, className, photoSizes }: CanchaCardP
       className={cn(
         "@container relative isolate aspect-[5/7] shrink-0 rounded-[9%/6.5%] font-display text-white select-none",
         isNeon ? (roupa.neonDim ? NEON_FRAME_DIM : NEON_FRAME) : METAL_FRAME,
-        hasTrim ? TRIMMED_CARD : className,
+        isNeon ? TRIMMED_CARD : className,
       )}
     >
       <div
@@ -500,7 +502,7 @@ export function CanchaCard({ player, award, className, photoSizes }: CanchaCardP
     </article>
   );
 
-  // Carta com enfeite: o enfeite cabe dentro da própria caixa (mesmo tamanho e proporção
-  // das outras), para não encostar em margem nem na carta do lado em nenhuma tela.
-  return hasTrim ? <div className={cn("relative aspect-[5/7] shrink-0", className)}>{card}</div> : card;
+  // Carta de neon: o enfeite e o brilho cabem dentro da própria caixa (mesmo tamanho e
+  // proporção das outras), para não encostar em margem nem na carta do lado em nenhuma tela.
+  return isNeon ? <div className={cn("relative aspect-[5/7] shrink-0", className)}>{card}</div> : card;
 }
