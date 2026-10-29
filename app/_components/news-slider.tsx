@@ -1,8 +1,11 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowRightIcon, CoinsIcon, CrownIcon, GhostIcon, SparklesIcon, StoreIcon, TrendingUpIcon, type LucideIcon } from "lucide-react";
+import { ArrowRightIcon, CoinsIcon, CrownIcon, GhostIcon, MedalIcon, SparklesIcon, StoreIcon, TrendingUpIcon, type LucideIcon } from "lucide-react";
 import { formatCoins } from "@/components/coin-pill";
+import { RankInsignia } from "@/components/cancha-card";
 import { PlayerCard } from "@/components/player-card";
+import { CARD_RANK_LABELS, getCardRank, RANK_FLAT_CLASSES, type CardRank } from "@/lib/card-rank";
+import { CARD_TIER_MIN_OVR, getTierProgress } from "@/lib/card-tier";
 import { SAMPLE_PLAYER } from "@/lib/sample-player";
 import { withAwardBonus } from "@/lib/award-bonus";
 import { CARD_THEME_LABELS, type CardThemeKey, type CurrentCardEvent } from "@/lib/card-themes";
@@ -98,6 +101,53 @@ function Chips({ items, isCoin = false, className }: { items: readonly Chip[]; i
         </li>
       ))}
     </ul>
+  );
+}
+
+/** As patentes em ordem, com a faixa de OVR de cada uma (mesmos cortes de `CARD_TIER_MIN_OVR`). */
+const RANK_LADDER: readonly { rank: CardRank; range: string }[] = [
+  { rank: "peneira", range: "sem OVR" },
+  { rank: "base", range: `até ${CARD_TIER_MIN_OVR.silver - 1}` },
+  { rank: "profissional", range: `${CARD_TIER_MIN_OVR.silver}–${CARD_TIER_MIN_OVR.gold - 1}` },
+  { rank: "selecao", range: `${CARD_TIER_MIN_OVR.gold}–${CARD_TIER_MIN_OVR.rare - 1}` },
+  { rank: "lenda", range: `${CARD_TIER_MIN_OVR.rare}+` },
+];
+
+const RANK_BY_TIER = { bronze: "base", silver: "profissional", gold: "selecao", rare: "lenda" } as const;
+
+/** Onde o jogador está e quanto falta para a próxima patente. */
+function rankStatus(ovr: number | null): string {
+  if (ovr === null) return "Você está na Peneira: receba notas numa rodada fechada para ganhar o seu OVR.";
+  const progress = getTierProgress(ovr);
+  const current = CARD_RANK_LABELS[getCardRank(ovr)];
+  if (!progress.next) return `Você é ${current}: a patente mais alta.`;
+  return `Você é ${current} · faltam ${progress.next.missing} de OVR para ${CARD_RANK_LABELS[RANK_BY_TIER[progress.next.tier]]}`;
+}
+
+/** A escada das patentes: selo com a insígnia, nome e faixa de OVR; a do jogador em destaque. */
+function RankLadder({ current }: { current: CardRank }) {
+  return (
+    <ol className="flex w-full justify-between gap-1 sm:mx-auto sm:max-w-xl">
+      {RANK_LADDER.map(({ rank, range }) => {
+        const isCurrent = rank === current;
+        return (
+          <li key={rank} className={cn("flex flex-col items-center gap-1 text-center", !isCurrent && "opacity-60")}>
+            <span
+              className={cn(
+                "flex h-11 w-9 flex-col items-center justify-center pb-1.5 sm:h-16 sm:w-13 sm:pb-2.5 [clip-path:polygon(0_0,100%_0,100%_76%,50%_100%,0_76%)]",
+                RANK_FLAT_CLASSES[rank],
+              )}
+            >
+              <RankInsignia rank={rank} className="h-3.5 w-6 sm:h-5 sm:w-9" />
+            </span>
+            <span className={cn("text-[0.6875rem] leading-tight font-semibold whitespace-nowrap sm:text-sm", isCurrent && "text-primary")}>
+              {CARD_RANK_LABELS[rank]}
+            </span>
+            <span className="text-[0.625rem] leading-none text-muted-foreground tabular-nums sm:text-xs">{range}</span>
+          </li>
+        );
+      })}
+    </ol>
   );
 }
 
@@ -235,6 +285,22 @@ export function NewsSlider({ event, today, shopSale, player, progress, balance }
           }
           href="/loja"
           cta="Ir para a Loja"
+        />
+      ),
+    },
+    {
+      key: "patentes",
+      title: "Patentes",
+      content: (
+        <Slide
+          icon={MedalIcon}
+          eyebrow="Novidade · sua carta"
+          title="Patentes"
+          meta={rankStatus(player.ovr)}
+          text="A patente sobe e desce com o seu OVR, a média de Ataque, Criação e Defesa da carta, a cada rodada fechada."
+          visual={<RankLadder current={getCardRank(player.ovr)} />}
+          href={`/jogadores/${player.id}`}
+          cta="Ver minha carreira"
         />
       ),
     },

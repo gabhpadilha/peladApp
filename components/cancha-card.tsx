@@ -186,9 +186,10 @@ const RANK_CREST: Record<CardRank, string> = {
   lenda: "bg-[linear-gradient(160deg,#ffffff,#f6b7ff_40%,#9fe7ff_75%,#fff4b0)]",
 };
 
-function RankInsignia({ rank }: { rank: CardRank }) {
+/** Insígnia da patente (divisas, estrela, coroa); também usada fora da carta (slide de patentes). */
+export function RankInsignia({ rank, className }: { rank: CardRank; className?: string }) {
   return (
-    <svg aria-hidden viewBox="0 0 30 18" className="mt-[0.6cqw] h-[5.6cqw] w-[9.5cqw]">
+    <svg aria-hidden viewBox="0 0 30 18" className={className ?? "mt-[0.6cqw] h-[5.6cqw] w-[9.5cqw]"}>
       {rank === "peneira" && <path d="M3 9 15 3l12 6" fill="none" stroke="currentColor" strokeWidth={2.4} strokeDasharray="3 2.4" />}
       {rank === "base" && <path d="M3 11 15 5l12 6" fill="none" stroke="currentColor" strokeWidth={3.2} />}
       {rank === "profissional" && <path d="M3 8 15 2l12 6M3 15 15 9l12 6" fill="none" stroke="currentColor" strokeWidth={3} />}
