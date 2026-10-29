@@ -81,7 +81,7 @@ type AwardColors = Omit<Roupa, "background" | "metal" | "matte" | "sparkles" | "
  * Melhor Jogador (aprovado pelo dono do app em 2026-10-29): a taça ao lado do jogador,
  * no metal de cada tema. Destaques (Atacante, Criativo, Defensor, Goleiro, Gol): o ícone
  * do prêmio no mesmo lugar. O tema do mês veste cor e marca d'água (fantasma, taça), como
- * antes (hoje só o Halloween). Moldura em tubo de neon na cor do prêmio, sem enfeite (pedido
+ * antes (hoje só o Halloween). Moldura em tubo de neon na cor do prêmio, sem enfeite (no Halloween, uma teia discreta nos cantos de cima) (pedido
  * do dono do app em 2026-10-29). Fundos `premio-<prêmio>-<tema>.webp`, gerados por `prototipos/premios.cjs` (docs).
  */
 const CRAQUE_COLORS: Record<CardThemeKey, AwardColors> = {
@@ -132,8 +132,9 @@ const FLOP_ROUPA: Roupa = {
 };
 
 /** Fora do jogo (só cartas antigas): roupas provisórias. */
-const PROVISIONAL_AWARD_ROUPAS: Partial<Record<AwardDesignKind, RoupaKey>> = {
-  time_da_semana: "estilhacos",
+const PROVISIONAL_AWARD_ROUPAS: Partial<Record<AwardDesignKind, Roupa>> = {
+  // Time da Semana (saiu do jogo em 2026-10-29): neon dourado, como os outros prêmios.
+  time_da_semana: { ...ROUPAS.estilhacos, neon: "#ffd24d", trim: null },
 };
 
 function awardRoupa(kind: AwardKind, theme: CardThemeKey): Roupa {
@@ -141,7 +142,7 @@ function awardRoupa(kind: AwardKind, theme: CardThemeKey): Roupa {
   if (design === "jogador_do_mes") return MONTH_ROUPA;
   if (design === "bola_murcha") return FLOP_ROUPA;
   const provisional = PROVISIONAL_AWARD_ROUPAS[design];
-  if (provisional) return ROUPAS[provisional];
+  if (provisional) return { ...provisional, trim: theme === "halloween" ? "teia" : null };
   const isCraque = design === "craque";
   const colors = (isCraque ? CRAQUE_COLORS : HIGHLIGHT_COLORS)[theme];
   const art = isCraque ? "craque" : HIGHLIGHT_ART.has(kind) ? kind : "gol";
@@ -154,7 +155,7 @@ function awardRoupa(kind: AwardKind, theme: CardThemeKey): Roupa {
     muted: colors.muted,
     sparkles: false,
     neon: colors.neon,
-    trim: null,
+    trim: theme === "halloween" ? "teia" : null,
   };
 }
 
@@ -250,8 +251,12 @@ const METAL_WINDOW = cn("inset-x-[2.6%] inset-y-[1.86%]", INNER_CORNERS);
  *   laterais, abraçam a base e fecham numa ponta no centro.
  * - `vampiro`: um morcego no topo e a base recortada como a borda de uma asa.
  * - `lobisomem`: três arranhões de garra nas laterais e a base com presas.
+ * - `teia` (prêmios no tema Halloween, pedido do dono do app em 2026-10-29): uma teia
+ *   pequena em cada canto de cima, mais discreta (`subtle`) que os enfeites das skins.
  */
 const NEON_TRIM_INNER = "M104.6 80 V131 Q104.6 144.6 93 144.6";
+
+type NeonTrimShape = { side: { d: string; width: number }[]; center?: string; subtle?: boolean };
 
 const NEON_TRIMS = {
   base: {
@@ -277,24 +282,32 @@ const NEON_TRIMS = {
       { d: NEON_TRIM_INNER, width: 0.7 },
     ],
   },
-} satisfies Record<string, { side: { d: string; width: number }[]; center?: string }>;
+  teia: {
+    subtle: true,
+    side: [
+      { d: "M104.0 -5.0 L89.0 -5.0 M104.1 -4.6 L90.2 1.1 M104.3 -4.3 L93.7 6.3 M104.6 -4.1 L98.9 9.8 M105.0 -4.0 L105.0 11.0", width: 0.3 },
+      { d: "M99.0 -5.0 Q99.9 -4.0 99.5 -2.7 Q100.7 -2.1 100.8 -0.8 Q102.1 -0.7 102.7 0.5 Q104.0 0.1 105.0 1.0", width: 0.3 },
+      { d: "M94.0 -5.0 Q95.7 -3.2 94.8 -0.8 Q97.1 0.3 97.2 2.8 Q99.7 2.9 100.8 5.2 Q103.2 4.3 105.0 6.0", width: 0.3 },
+    ],
+  },
+} satisfies Record<string, NeonTrimShape>;
 
 type NeonTrimKind = keyof typeof NEON_TRIMS;
 
-/** Fio de neon: halo largo, halo médio e o fio. */
-function NeonLine({ d, width }: { d: string; width: number }) {
+/** Fio de neon: halo largo, halo médio e o fio (no discreto, halo menor e mais fraco). */
+function NeonLine({ d, width, subtle }: { d: string; width: number; subtle?: boolean }) {
   return (
     <>
-      <path d={d} strokeWidth={3.2} opacity={0.22} />
-      <path d={d} strokeWidth={1.6} opacity={0.4} />
-      <path d={d} strokeWidth={width} />
+      <path d={d} strokeWidth={subtle ? 1.8 : 3.2} opacity={subtle ? 0.12 : 0.22} />
+      <path d={d} strokeWidth={subtle ? 0.9 : 1.6} opacity={subtle ? 0.25 : 0.4} />
+      <path d={d} strokeWidth={width} opacity={subtle ? 0.85 : 1} />
     </>
   );
 }
 
 function NeonTrim({ kind }: { kind: NeonTrimKind }) {
-  const trim: { side: { d: string; width: number }[]; center?: string } = NEON_TRIMS[kind];
-  const side = trim.side.map((line) => <NeonLine key={line.d} {...line} />);
+  const trim: NeonTrimShape = NEON_TRIMS[kind];
+  const side = trim.side.map((line) => <NeonLine key={line.d} {...line} subtle={trim.subtle} />);
   return (
     <svg
       aria-hidden
