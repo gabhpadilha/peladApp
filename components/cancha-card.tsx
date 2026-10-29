@@ -39,8 +39,10 @@ type Roupa = {
   sparkles?: boolean;
   /** Cor do neon: moldura fina em "tubo de neon" e o enfeite que abraça a base (skins premium e de evento). */
   neon?: string;
-  /** Enfeite de neon por fora da carta (padrão: o abraço da base, `NEON_TRIMS.base`). */
-  trim?: NeonTrimKind;
+  /** Enfeite de neon por fora da carta (padrão: o abraço da base, `NEON_TRIMS.base`; `null` = sem enfeite). */
+  trim?: NeonTrimKind | null;
+  /** Neon "apagado": cor sem centro branco e brilho fraco (a Bola Murcha). */
+  neonDim?: boolean;
 };
 
 const GOLD = ["#7a5512", "#e9c86a", "#fff4c8"] as const;
@@ -73,21 +75,22 @@ const ROUPAS = {
 type RoupaKey = keyof typeof ROUPAS;
 
 /** Cores de um prêmio num tema: moldura, fio interno, detalhes, luz, barras e texto secundário. */
-type AwardColors = Omit<Roupa, "background" | "metal" | "matte" | "sparkles"> & { frame: string; hairline: string };
+type AwardColors = Omit<Roupa, "background" | "metal" | "matte" | "sparkles" | "neon" | "trim"> & { frame: string; hairline: string; neon: string };
 
 /**
  * Melhor Jogador (aprovado pelo dono do app em 2026-10-29): a taça ao lado do jogador,
  * no metal de cada tema. Destaques (Atacante, Criativo, Defensor, Goleiro, Gol): o ícone
  * do prêmio no mesmo lugar. O tema do mês veste cor e marca d'água (fantasma, taça), como
- * antes (hoje só o Halloween). Fundos `premio-<prêmio>-<tema>.webp`, gerados por `prototipos/premios.cjs` (docs).
+ * antes (hoje só o Halloween). Moldura em tubo de neon na cor do prêmio, sem enfeite (pedido
+ * do dono do app em 2026-10-29). Fundos `premio-<prêmio>-<tema>.webp`, gerados por `prototipos/premios.cjs` (docs).
  */
 const CRAQUE_COLORS: Record<CardThemeKey, AwardColors> = {
-  default: { frame: "#b8902f", hairline: "#fff1c2", accent: "#e9c86a", light: "255 225 150", bar: "#070605", muted: "#e9c86a" },
-  halloween: { frame: "#c2560f", hairline: "#ffd29a", accent: "#ffb04a", light: "255 176 74", bar: "#0a0410", muted: "#ffc98a" },
+  default: { frame: "#b8902f", hairline: "#fff1c2", accent: "#e9c86a", light: "255 225 150", bar: "#070605", muted: "#e9c86a", neon: "#ffc83d" },
+  halloween: { frame: "#c2560f", hairline: "#ffd29a", accent: "#ffb04a", light: "255 176 74", bar: "#0a0410", muted: "#ffc98a", neon: "#ff8a1f" },
 };
 const HIGHLIGHT_COLORS: Record<CardThemeKey, AwardColors> = {
-  default: { frame: "#2f6fd6", hairline: "#cfe2ff", accent: "#8fc2ff", light: "190 220 255", bar: "#040c22", muted: "#a9cbff" },
-  halloween: { frame: "#6a2bb0", hairline: "#c9ff8a", accent: "#b6ff5c", light: "210 180 255", bar: "#0d0418", muted: "#c9ff8a" },
+  default: { frame: "#2f6fd6", hairline: "#cfe2ff", accent: "#8fc2ff", light: "190 220 255", bar: "#040c22", muted: "#a9cbff", neon: "#36a6ff" },
+  halloween: { frame: "#6a2bb0", hairline: "#c9ff8a", accent: "#b6ff5c", light: "210 180 255", bar: "#0d0418", muted: "#c9ff8a", neon: "#9dff3a" },
 };
 /** Prêmios com arte própria do ícone ao lado (cartas antigas de Fair Play vestem o Gol). */
 const HIGHLIGHT_ART = new Set<AwardKind>(["atacante", "criativo", "defensor", "goleiro", "gol", "foguete", "garcom", "drible", "motor"]);
@@ -111,7 +114,8 @@ const MONTH_ROUPA: Roupa = {
 
 /**
  * Bola Murcha (aprovada pelo dono do app em 2026-10-29): bronze oxidado, "mofado", fosco e
- * sem brilho, com a bola murcha ao lado do jogador. Igual o ano todo (não veste o tema).
+ * sem brilho, com a bola murcha ao lado do jogador. Moldura em neon apagado, sem enfeite
+ * (pedido do dono do app em 2026-10-29: a lâmpada que quase não acende). Igual o ano todo (não veste o tema).
  * Cartas antigas de Fominha vestem a mesma. Fundo `premio-bola-murcha.webp` (`prototipos/murcha.cjs`).
  */
 const FLOP_ROUPA: Roupa = {
@@ -122,6 +126,9 @@ const FLOP_ROUPA: Roupa = {
   bar: "#18110b",
   muted: "#a8b5a0",
   matte: true,
+  neon: "#8f9a78",
+  neonDim: true,
+  trim: null,
 };
 
 /** Fora do jogo (só cartas antigas): roupas provisórias. */
@@ -145,8 +152,9 @@ function awardRoupa(kind: AwardKind, theme: CardThemeKey): Roupa {
     light: colors.light,
     bar: colors.bar,
     muted: colors.muted,
-   
     sparkles: false,
+    neon: colors.neon,
+    trim: null,
   };
 }
 
@@ -225,6 +233,12 @@ const NEON_HALO =
   "shadow-[0_0_0.8cqw_var(--cc-neon),0_0_3.5cqw_color-mix(in_oklab,var(--cc-neon),transparent_30%),0_0_10cqw_color-mix(in_oklab,var(--cc-neon),transparent_65%)]";
 const NEON_INNER_GLOW =
   "shadow-[inset_0_0_0.8cqw_var(--cc-neon),inset_0_0_3.5cqw_color-mix(in_oklab,var(--cc-neon),transparent_40%)]";
+/** Neon apagado (Bola Murcha): o tubo sem o centro branco e um brilho fraco em volta. */
+const NEON_FRAME_DIM =
+  "bg-[linear-gradient(160deg,color-mix(in_oklab,var(--cc-neon),white_30%),var(--cc-neon)_30%,color-mix(in_oklab,var(--cc-neon),black_30%)_55%,var(--cc-neon)_80%,color-mix(in_oklab,var(--cc-neon),white_20%))]";
+const NEON_HALO_DIM =
+  "shadow-[0_0_0.6cqw_color-mix(in_oklab,var(--cc-neon),transparent_50%),0_0_3cqw_color-mix(in_oklab,var(--cc-neon),transparent_80%)]";
+const NEON_INNER_GLOW_DIM = "shadow-[inset_0_0_1.6cqw_color-mix(in_oklab,var(--cc-neon),transparent_70%)]";
 /** Janela das cartas de neon: a moldura é mais fina (1,7% da largura). */
 const NEON_WINDOW = "inset-x-[1.7%] inset-y-[1.21%] rounded-[7.3cqw]";
 const METAL_WINDOW = cn("inset-x-[2.6%] inset-y-[1.86%]", INNER_CORNERS);
@@ -350,7 +364,7 @@ export function CanchaCard({ player, award, className, photoSizes }: CanchaCardP
       style={vars}
       className={cn(
         "@container relative isolate aspect-[5/7] shrink-0 rounded-[9%/6.5%] font-display text-white select-none",
-        isNeon ? NEON_FRAME : METAL_FRAME,
+        isNeon ? (roupa.neonDim ? NEON_FRAME_DIM : NEON_FRAME) : METAL_FRAME,
         className,
       )}
     >
@@ -453,14 +467,14 @@ export function CanchaCard({ player, award, className, photoSizes }: CanchaCardP
         className={cn(
           "pointer-events-none absolute z-[9]",
           isNeon
-            ? cn(NEON_WINDOW, NEON_INNER_GLOW)
+            ? cn(NEON_WINDOW, roupa.neonDim ? NEON_INNER_GLOW_DIM : NEON_INNER_GLOW)
             : cn(METAL_WINDOW, "shadow-[inset_0_0_0_0.5cqw_var(--cc-m3),inset_0_0_0_0.9cqw_rgb(0_0_0/0.35)]"),
         )}
       />
       {isNeon && (
         <>
-          <div aria-hidden className={cn("pointer-events-none absolute inset-0 z-[10] rounded-[9%/6.5%]", NEON_HALO)} />
-          <NeonTrim kind={roupa.trim ?? "base"} />
+          <div aria-hidden className={cn("pointer-events-none absolute inset-0 z-[10] rounded-[9%/6.5%]", roupa.neonDim ? NEON_HALO_DIM : NEON_HALO)} />
+          {roupa.trim !== null && <NeonTrim kind={roupa.trim ?? "base"} />}
         </>
       )}
     </article>
