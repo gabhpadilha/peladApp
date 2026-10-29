@@ -155,7 +155,7 @@ function awardRoupa(kind: AwardKind, theme: CardThemeKey): Roupa {
     muted: colors.muted,
     sparkles: false,
     neon: colors.neon,
-    trim: theme === "halloween" ? "teia" : null,
+    trim: isCraque ? "craque" : theme === "halloween" ? "teia" : null,
   };
 }
 
@@ -251,6 +251,8 @@ const METAL_WINDOW = cn("inset-x-[2.6%] inset-y-[1.86%]", INNER_CORNERS);
  *   laterais, abraçam a base e fecham numa ponta no centro.
  * - `vampiro`: um morcego no topo e a base recortada como a borda de uma asa.
  * - `lobisomem`: três arranhões de garra nas laterais e a base com presas.
+ * - `craque` (Melhor Jogador, aprovado pelo dono do app em 2026-10-29): um fio só abraçando
+ *   a base (dois ficaria igual às premium) e uma estrela acesa no topo, em qualquer tema.
  * - `teia` (prêmios no tema Halloween, pedido do dono do app em 2026-10-29): uma teia
  *   pequena em cada canto de cima, mais discreta (`subtle`) que os enfeites das skins.
  */
@@ -281,6 +283,12 @@ const NEON_TRIMS = {
       { d: "M102.4 64 V133 Q102.4 142.4 93 142.4 H82 L79.5 146.6 L77 142.4 H68 L65.5 146 L63 142.4 H58 L50 146", width: 0.55 },
       { d: NEON_TRIM_INNER, width: 0.7 },
     ],
+  },
+  craque: {
+    side: [
+      { d: "M102.4 64 V133 Q102.4 142.4 93 142.4 H58 L50 146", width: 0.6 },
+    ],
+    center: "M50.00 -9.20 L51.06 -6.46 L53.99 -6.30 L51.71 -4.44 L52.47 -1.60 L50.00 -3.20 L47.53 -1.60 L48.29 -4.44 L46.01 -6.30 L48.94 -6.46 Z",
   },
   teia: {
     subtle: true,
