@@ -255,20 +255,6 @@
   --skin-light: #ff6b82;
   --skin-text: #ead49e;
 }
-@utility card-skin-turquesa {
-  --skin-mid: #075e68;
-  --skin-deep: #01161a;
-  --skin-end: #000000;
-  --skin-light: #4de9f5;
-  --skin-text: #ead49e;
-}
-@utility card-skin-onix {
-  --skin-mid: #1f2024;
-  --skin-deep: #030304;
-  --skin-end: #000000;
-  --skin-light: #b9bfc9;
-  --skin-text: #ead49e;
-}
 /* Ícone: a única clara (creme e dourado). */
 @utility card-skin-icone {
   --skin-mid: #fffdf7;

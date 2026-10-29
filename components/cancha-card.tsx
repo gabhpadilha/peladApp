@@ -23,7 +23,7 @@ import type { Player } from "@/types/player";
 type Roupa = {
   /** Fundo artístico em `public/cartas/fundos/`. */
   background: string;
-  /** Metal da moldura: escuro, médio e brilho. */
+  /** Metal da moldura: escuro, base dos reflexos (`METAL_FRAME`) e fio interno. */
   metal: readonly [string, string, string];
   /** Fios, faixa e linhas. */
   accent: string;
@@ -35,10 +35,12 @@ type Roupa = {
   muted: string;
   /** Carta fosca (a padrão, de começo de jogo): sem clarão, brilhos, feixe de luz nem selo brilhante. */
   matte?: boolean;
-  /** Moldura lisa, numa cor só (`metal[0]`), com o fio interno em `metal[2]`. */
-  flatFrame?: boolean;
   /** Estrelinhas piscando na frente do jogador (padrão: sim, menos na fosca). */
   sparkles?: boolean;
+  /** Cor do neon: moldura fina em "tubo de neon" e o enfeite que abraça a base (skins premium e de evento). */
+  neon?: string;
+  /** Enfeite de neon por fora da carta (padrão: o abraço da base, `NEON_TRIMS.base`). */
+  trim?: NeonTrimKind;
 };
 
 const GOLD = ["#7a5512", "#e9c86a", "#fff4c8"] as const;
@@ -48,17 +50,17 @@ const ROUPAS = {
   // Grafite fosco (aprovado pelo dono do app em 2026-10-29): menos premium que as skins, de propósito.
   padrao: { background: "fosco-grafite", metal: ["#2a312d", "#2a312d", "rgb(255 255 255 / 0.1)"], accent: "#8fa197", light: "255 255 255", bar: "#121714", muted: "#9fb0a4", matte: true },
   // Skins premium (aprovadas pelo dono do app em 2026-10-29): fundo lapidado na cor da pedra,
-  // moldura lisa e sem estrelinhas. Fundos gerados por `prototipos/gemas.cjs` (docs).
-  esmeralda: { background: "gema-esmeralda", metal: ["#0f6b45", "#0f6b45", "#5fd39a"], accent: "#5fd39a", light: "160 255 200", bar: "#03140c", muted: "#9fffc8", flatFrame: true, sparkles: false },
-  safira: { background: "gema-safira", metal: ["#1d4fa8", "#1d4fa8", "#7fb0ff"], accent: "#7fb0ff", light: "170 200 255", bar: "#040a1c", muted: "#a9c8ff", flatFrame: true, sparkles: false },
-  ametista: { background: "gema-ametista", metal: ["#5b2fa0", "#5b2fa0", "#b99bff"], accent: "#b99bff", light: "220 190 255", bar: "#0e0620", muted: "#d2bcff", flatFrame: true, sparkles: false },
-  rubi: { background: "gema-rubi", metal: ["#9b1530", "#9b1530", "#ff8fa3"], accent: "#ff8fa3", light: "255 190 200", bar: "#1a0309", muted: "#ffb3c0", flatFrame: true, sparkles: false },
-  turquesa: { background: "gema-turquesa", metal: ["#0e7d84", "#0e7d84", "#6ff0e8"], accent: "#6ff0e8", light: "170 255 245", bar: "#03161a", muted: "#9ff7f1", flatFrame: true, sparkles: false },
-  onix: { background: "gema-onix", metal: ["#1a1a1d", "#1a1a1d", "#8a8f99"], accent: "#b8bdc7", light: "220 225 235", bar: "#050506", muted: "#c3c8d1", flatFrame: true, sparkles: false },
-  icone: { background: "gema-icone", metal: ["#d9dde3", "#d9dde3", "#ffffff"], accent: "#ffffff", light: "255 255 255", bar: "#14171c", muted: "#e6eaf0", flatFrame: true, sparkles: false },
-  // Halloween 2026 (aprovadas pelo dono do app em 2026-10-29): fundo que conta o evento, moldura lisa, sem estrelinhas.
-  lobisomem: { background: "skin-lobisomem", metal: ["#5f6b78", "#5f6b78", "#e2e8ef"], accent: "#e2e8ef", light: "207 226 255", bar: "#03070d", muted: "#cfe2ff", flatFrame: true, sparkles: false },
-  vampiro: { background: "skin-vampiro", metal: ["#6e0f20", "#6e0f20", "#e3384e"], accent: "#e3384e", light: "255 120 140", bar: "#0d0105", muted: "#ffb3bd", flatFrame: true, sparkles: false },
+  // moldura em tubo de neon com o enfeite da base (`neon`) e sem estrelinhas. Fundos gerados por `prototipos/gemas.cjs` (docs).
+  esmeralda: { background: "gema-esmeralda", metal: ["#0f6b45", "#0f6b45", "#5fd39a"], accent: "#5fd39a", light: "160 255 200", bar: "#03140c", muted: "#9fffc8", sparkles: false, neon: "#2dffa0" },
+  safira: { background: "gema-safira", metal: ["#1d4fa8", "#1d4fa8", "#7fb0ff"], accent: "#7fb0ff", light: "170 200 255", bar: "#040a1c", muted: "#a9c8ff", sparkles: false, neon: "#36a6ff" },
+  ametista: { background: "gema-ametista", metal: ["#5b2fa0", "#5b2fa0", "#b99bff"], accent: "#b99bff", light: "220 190 255", bar: "#0e0620", muted: "#d2bcff", sparkles: false, neon: "#c46bff" },
+  rubi: { background: "gema-rubi", metal: ["#9b1530", "#9b1530", "#ff8fa3"], accent: "#ff8fa3", light: "255 190 200", bar: "#1a0309", muted: "#ffb3c0", sparkles: false, neon: "#ff2f66" },
+  // Ícone: branco creme com moldura de ouro claro, lembrando a carta Icon do FIFA (2026-10-29).
+  icone: { background: "gema-icone", metal: ["#c9a24e", "#c9a24e", "#fff4d6"], accent: "#e2c06e", light: "255 240 200", bar: "#1a140a", muted: "#f0dfb5", sparkles: false, neon: "#ffcf4d" },
+  // Halloween 2026 (aprovadas pelo dono do app em 2026-10-29): fundo que conta o evento, sem estrelinhas,
+  // e o tubo de neon das premium com enfeite do bicho (azul-luar com garras e presas; vermelho-sangue com morcego e asa).
+  lobisomem: { background: "skin-lobisomem", metal: ["#5f6b78", "#5f6b78", "#e2e8ef"], accent: "#e2e8ef", light: "207 226 255", bar: "#03070d", muted: "#cfe2ff", sparkles: false, neon: "#8fd0ff", trim: "lobisomem" },
+  vampiro: { background: "skin-vampiro", metal: ["#6e0f20", "#6e0f20", "#e3384e"], accent: "#e3384e", light: "255 120 140", bar: "#0d0105", muted: "#ffb3bd", sparkles: false, neon: "#ff1f3d", trim: "vampiro" },
   marmore: { background: "marmore", metal: GOLD, accent: "#e9c86a", light: "233 200 106", bar: "#070707", muted: "#e9c86a" },
   estilhacos: { background: "estilhacos", metal: GOLD, accent: "#f2c94c", light: "140 180 255", bar: "#050b20", muted: "#8fb8ff" },
   cristais: { background: "cristais", metal: ["#3b2a7a", "#c9b8ff", "#ffffff"], accent: "#c9b8ff", light: "200 170 255", bar: "#120a2a", muted: "#c9b8ff" },
@@ -71,7 +73,7 @@ const ROUPAS = {
 type RoupaKey = keyof typeof ROUPAS;
 
 /** Cores de um prêmio num tema: moldura, fio interno, detalhes, luz, barras e texto secundário. */
-type AwardColors = Omit<Roupa, "background" | "metal" | "matte" | "flatFrame" | "sparkles"> & { frame: string; hairline: string };
+type AwardColors = Omit<Roupa, "background" | "metal" | "matte" | "sparkles"> & { frame: string; hairline: string };
 
 /**
  * Melhor Jogador (aprovado pelo dono do app em 2026-10-29): a taça ao lado do jogador,
@@ -102,7 +104,7 @@ const MONTH_ROUPA: Roupa = {
   light: "255 225 150",
   bar: "#0b0318",
   muted: "#f3d27a",
-  flatFrame: true,
+ 
   sparkles: false,
 };
 
@@ -142,7 +144,7 @@ function awardRoupa(kind: AwardKind, theme: CardThemeKey): Roupa {
     light: colors.light,
     bar: colors.bar,
     muted: colors.muted,
-    flatFrame: true,
+   
     sparkles: false,
   };
 }
@@ -156,8 +158,6 @@ function skinRoupa(skin: CardSkinKey): RoupaKey {
     case "safira": return "safira";
     case "ametista": return "ametista";
     case "rubi": return "rubi";
-    case "turquesa": return "turquesa";
-    case "onix": return "onix";
     case "icone": return "icone";
     case "lobisomem": return "lobisomem";
     case "vampiro": return "vampiro";
@@ -199,8 +199,109 @@ const SPARKS = [
   { left: "86%", top: "50%", delay: "0.3s" },
 ] as const;
 
-const CHAMFER =
-  "[clip-path:polygon(4cqw_0,calc(100%_-_4cqw)_0,100%_4cqw,100%_calc(100%_-_4cqw),calc(100%_-_4cqw)_100%,4cqw_100%,0_calc(100%_-_4cqw),0_4cqw)]";
+/**
+ * Cantos da janela de dentro: arredondados como os de fora (pedido do dono do app em
+ * 2026-10-29; os chanfrados destoavam). Raio de fora (9cqw) menos a moldura (2,6cqw).
+ */
+const INNER_CORNERS = "rounded-[6.4cqw]";
+
+/**
+ * Moldura fina em metal polido (pedido do dono do app em 2026-10-29), em todas as cartas:
+ * faixas de reflexo na diagonal, tiradas da cor da moldura da roupa (`--cc-m2`) misturada
+ * com preto e branco. Só degradê, sem `filter` (iPhone).
+ */
+const METAL_FRAME =
+  "shadow-[inset_0_0_0_0.3cqw_rgb(0_0_0/0.45)] bg-[linear-gradient(145deg,color-mix(in_oklab,var(--cc-m2),black_45%),var(--cc-m2)_14%,color-mix(in_oklab,var(--cc-m2),white_60%)_28%,var(--cc-m2)_40%,color-mix(in_oklab,var(--cc-m2),black_40%)_54%,var(--cc-m2)_68%,color-mix(in_oklab,var(--cc-m2),white_70%)_82%,color-mix(in_oklab,var(--cc-m2),black_50%))]";
+
+/**
+ * Tubo de neon das skins premium (aprovado pelo dono do app em 2026-10-29): moldura mais
+ * fina, centro quase branco e a cor do neon (`--cc-neon`) só no brilho em volta, por fora
+ * (`NEON_HALO`) e por dentro (`NEON_INNER_GLOW`). Só degradê e sombra, sem `filter` (iPhone).
+ */
+const NEON_FRAME =
+  "bg-[linear-gradient(160deg,#fff,color-mix(in_oklab,var(--cc-neon),white_55%)_30%,color-mix(in_oklab,var(--cc-neon),white_25%)_55%,color-mix(in_oklab,var(--cc-neon),white_60%)_80%,#fff)]";
+const NEON_HALO =
+  "shadow-[0_0_0.8cqw_var(--cc-neon),0_0_3.5cqw_color-mix(in_oklab,var(--cc-neon),transparent_30%),0_0_10cqw_color-mix(in_oklab,var(--cc-neon),transparent_65%)]";
+const NEON_INNER_GLOW =
+  "shadow-[inset_0_0_0.8cqw_var(--cc-neon),inset_0_0_3.5cqw_color-mix(in_oklab,var(--cc-neon),transparent_40%)]";
+/** Janela das cartas de neon: a moldura é mais fina (1,7% da largura). */
+const NEON_WINDOW = "inset-x-[1.7%] inset-y-[1.21%] rounded-[7.3cqw]";
+const METAL_WINDOW = cn("inset-x-[2.6%] inset-y-[1.86%]", INNER_CORNERS);
+
+/**
+ * Enfeites de neon por fora da carta (aprovados pelo dono do app em 2026-10-29). Coordenadas
+ * da carta (100 × 140); `side` é o lado direito, espelhado para a esquerda, e `center` fica no meio.
+ * - `base` (skins premium, o "C · Abraço da base"): dois fios que começam no meio das
+ *   laterais, abraçam a base e fecham numa ponta no centro.
+ * - `vampiro`: um morcego no topo e a base recortada como a borda de uma asa.
+ * - `lobisomem`: três arranhões de garra nas laterais e a base com presas.
+ */
+const NEON_TRIM_INNER = "M104.6 80 V131 Q104.6 144.6 93 144.6";
+
+const NEON_TRIMS = {
+  base: {
+    side: [
+      { d: "M102.4 64 V133 Q102.4 142.4 93 142.4 H58 L50 146", width: 0.55 },
+      { d: `${NEON_TRIM_INNER} H64`, width: 0.7 },
+    ],
+  },
+  vampiro: {
+    side: [
+      { d: "M102.4 64 V133 Q102.4 142.4 93 142.4 Q88.5 146 84 142.4 Q79.5 146 75 142.4 Q70.5 146 66 142.4 H58 L50 146", width: 0.55 },
+      { d: NEON_TRIM_INNER, width: 0.7 },
+    ],
+    center:
+      "M41 -7 Q45 -10 47.6 -7 L49 -9.4 L50 -8 L51 -9.4 L52.4 -7 Q55 -10 59 -7 Q56.2 -6 56.4 -3.4 Q53.6 -4.6 52 -3 Q51 -2 50 -1.4 Q49 -2 48 -3 Q46.4 -4.6 43.6 -3.4 Q43.8 -6 41 -7 Z",
+  },
+  lobisomem: {
+    side: [
+      { d: "M99 26 L109 38", width: 0.7 },
+      { d: "M99 32.5 L108.4 43.4", width: 0.58 },
+      { d: "M99 39 L107.6 48.6", width: 0.46 },
+      { d: "M102.4 64 V133 Q102.4 142.4 93 142.4 H82 L79.5 146.6 L77 142.4 H68 L65.5 146 L63 142.4 H58 L50 146", width: 0.55 },
+      { d: NEON_TRIM_INNER, width: 0.7 },
+    ],
+  },
+} satisfies Record<string, { side: { d: string; width: number }[]; center?: string }>;
+
+type NeonTrimKind = keyof typeof NEON_TRIMS;
+
+/** Fio de neon: halo largo, halo médio e o fio. */
+function NeonLine({ d, width }: { d: string; width: number }) {
+  return (
+    <>
+      <path d={d} strokeWidth={3.2} opacity={0.22} />
+      <path d={d} strokeWidth={1.6} opacity={0.4} />
+      <path d={d} strokeWidth={width} />
+    </>
+  );
+}
+
+function NeonTrim({ kind }: { kind: NeonTrimKind }) {
+  const trim: { side: { d: string; width: number }[]; center?: string } = NEON_TRIMS[kind];
+  const side = trim.side.map((line) => <NeonLine key={line.d} {...line} />);
+  return (
+    <svg
+      aria-hidden
+      viewBox="-8 -8 116 156"
+      preserveAspectRatio="none"
+      fill="none"
+      stroke="var(--cc-neon)"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="pointer-events-none absolute top-[-5.714%] left-[-8%] z-[10] h-[111.43%] w-[116%] overflow-visible"
+    >
+      <g>{side}</g>
+      <g transform="translate(100 0) scale(-1 1)">{side}</g>
+      {trim.center && (
+        <>
+          <path d={trim.center} strokeWidth={3} opacity={0.22} />
+          <path d={trim.center} fill="var(--cc-neon)" strokeWidth={0.3} />
+        </>
+      )}
+    </svg>
+  );
+}
 
 const EMPTY_VALUE = "–";
 
@@ -238,7 +339,9 @@ export function CanchaCard({ player, award, className, photoSizes }: CanchaCardP
     "--cc-light": roupa.light,
     "--cc-bar": roupa.bar,
     "--cc-muted": roupa.muted,
+    "--cc-neon": roupa.neon,
   } as CSSProperties;
+  const isNeon = roupa.neon !== undefined;
 
   return (
     <article
@@ -246,14 +349,12 @@ export function CanchaCard({ player, award, className, photoSizes }: CanchaCardP
       style={vars}
       className={cn(
         "@container relative isolate aspect-[5/7] shrink-0 rounded-[9%/6.5%] font-display text-white select-none",
-        roupa.matte || roupa.flatFrame
-          ? "bg-(--cc-m1)"
-          : "bg-[linear-gradient(145deg,var(--cc-m1),var(--cc-m2)_30%,var(--cc-m3)_52%,var(--cc-m2)_74%,var(--cc-m1))]",
+        isNeon ? NEON_FRAME : METAL_FRAME,
         className,
       )}
     >
       <div
-        className={cn("absolute inset-x-[3.6%] inset-y-[2.57%] overflow-hidden bg-cover bg-center", CHAMFER)}
+        className={cn("absolute overflow-hidden bg-cover bg-center", isNeon ? NEON_WINDOW : METAL_WINDOW)}
         style={{ backgroundImage: `url(/cartas/fundos/${roupa.background}.webp)` }}
       >
         {/* Clarão atrás da cabeça, na cor da luz da roupa. */}
@@ -345,14 +446,22 @@ export function CanchaCard({ player, award, className, photoSizes }: CanchaCardP
         </dl>
       </div>
 
-      {/* Fio de metal claro por dentro da moldura (inset em % da própria carta: 3,6% da largura nos dois eixos). */}
+      {/* Por dentro da moldura: fio claro no metal (inset em % da própria carta: 2,6% da largura nos dois eixos) ou o brilho do neon. */}
       <div
         aria-hidden
         className={cn(
-          "pointer-events-none absolute inset-x-[3.6%] inset-y-[2.57%] z-[9] shadow-[inset_0_0_0_0.7cqw_var(--cc-m3),inset_0_0_0_1.2cqw_rgb(0_0_0/0.35)]",
-          CHAMFER,
+          "pointer-events-none absolute z-[9]",
+          isNeon
+            ? cn(NEON_WINDOW, NEON_INNER_GLOW)
+            : cn(METAL_WINDOW, "shadow-[inset_0_0_0_0.5cqw_var(--cc-m3),inset_0_0_0_0.9cqw_rgb(0_0_0/0.35)]"),
         )}
       />
+      {isNeon && (
+        <>
+          <div aria-hidden className={cn("pointer-events-none absolute inset-0 z-[10] rounded-[9%/6.5%]", NEON_HALO)} />
+          <NeonTrim kind={roupa.trim ?? "base"} />
+        </>
+      )}
     </article>
   );
 }

@@ -497,8 +497,6 @@ const SKIN_CLASSES: Record<CardSkinKey, string> = {
   safira: "card-skin-safira",
   ametista: "card-skin-ametista",
   rubi: "card-skin-rubi",
-  turquesa: "card-skin-turquesa",
-  onix: "card-skin-onix",
   icone: "card-skin-icone",
   lobisomem: "card-skin-lobisomem",
   vampiro: "card-skin-vampiro",

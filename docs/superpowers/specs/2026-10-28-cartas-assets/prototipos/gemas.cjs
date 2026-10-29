@@ -1,4 +1,4 @@
-// Fundo lapidado (aprovado na Esmeralda) nas cores das 7 skins premium.
+// Fundo lapidado (aprovado na Esmeralda) nas cores das 5 skins premium (Turquesa e Ônix saíram em 2026-10-29).
 const path = require("path");
 const sharp = require(path.resolve(process.argv[3], "node_modules/sharp"));
 const OUT = process.argv[2];
@@ -9,9 +9,8 @@ const GEMS = {
   safira: { hue: 220, sat: 72, light: 40, base: "#040a1c", glow: "#cfe0ff" },
   ametista: { hue: 275, sat: 60, light: 40, base: "#0e0620", glow: "#ead8ff" },
   rubi: { hue: 350, sat: 72, light: 38, base: "#1a0309", glow: "#ffd6dd" },
-  turquesa: { hue: 180, sat: 70, light: 38, base: "#03161a", glow: "#c8fff8" },
-  onix: { hue: 220, sat: 6, light: 20, base: "#050506", glow: "#d9dde6" },
-  icone: { hue: 210, sat: 18, light: 82, base: "#b8c0cc", glow: "#ffffff" },
+  // Ícone: branco creme puxado para o amarelo, como a carta Icon do FIFA (pedido do dono do app em 2026-10-29).
+  icone: { hue: 44, sat: 48, light: 85, base: "#d6c290", glow: "#fffaf0" },
 };
 function gem(g) {
   let seed = 23; const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
