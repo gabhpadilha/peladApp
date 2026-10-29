@@ -385,6 +385,13 @@ function NeonTrim({ kind }: { kind: NeonTrimKind }) {
  */
 const TRIMMED_CARD = "absolute inset-[8%]";
 
+/**
+ * Sombra atrás da foto ("A · Halo escuro", aprovada pelo dono do app em 2026-10-29): escura,
+ * logo atrás da cabeça e dos ombros. Só degradês radiais, sem `filter` (iPhone).
+ */
+const PHOTO_SHADOW =
+  "bg-[radial-gradient(46%_30%_at_50%_40%,rgb(0_0_0/0.85),rgb(0_0_0/0.45)_55%,transparent_80%),radial-gradient(70%_30%_at_50%_82%,rgb(0_0_0/0.8),transparent_80%)]";
+
 const EMPTY_VALUE = "–";
 
 export type CanchaCardAward = {
@@ -454,6 +461,9 @@ export function CanchaCard({ player, award, className, photoSizes }: CanchaCardP
           <span className="truncate text-[10.5cqw] font-extrabold">{player.nickname}</span>
           <span className="mt-[1cqw] truncate text-[3.8cqw] font-bold tracking-[0.2em] text-(--cc-muted) uppercase">{subtitle}</span>
         </div>
+
+        {/* Sombra atrás da pessoa: ela se descola do fundo e parece estar na carta. */}
+        {player.photo && <div aria-hidden className={cn("absolute inset-0 z-[4]", PHOTO_SHADOW)} />}
 
         {/* Foto grande, presa embaixo: o peito some no degradê antes do rodapé. */}
         <div className="absolute -inset-x-[20%] bottom-[12%] z-[5] h-[85%]">
