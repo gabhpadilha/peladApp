@@ -78,25 +78,25 @@ export function TeamPitch({ team, mode, ratingOf, onRate }: TeamPitchProps): Rea
         </p>
       </div>
 
-      <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-b from-card to-background/40 p-3 pt-6 pb-6">
+      <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-b from-card to-background/40 px-[5%] py-[6%]">
         <PitchLines />
         {/* Listras do gramado, bem sutis */}
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(to_bottom,transparent_0_56px,rgb(255_255_255/0.025)_56px_112px)]"
         />
-        <ul className="relative grid grid-cols-3 gap-x-2 gap-y-6">
+        <ul className="relative grid grid-cols-3 gap-x-[4%] gap-y-[clamp(1rem,5vw,2rem)]">
           {(Object.keys(SLOT_CELLS) as FormationSlotKey[]).map((key) => {
             const entry = slots[key];
             return (
               <li key={key} className={cn("flex justify-center", SLOT_CELLS[key])}>
                 {entry ? (
-                  <div className="w-full max-w-36">{cardFor(entry)}</div>
+                  <div className="w-[92%] max-w-36">{cardFor(entry)}</div>
                 ) : (
                   // Vaga sem jogador (time incompleto): contorno tracejado no formato da carta.
                   <div
                     aria-hidden
-                    className="aspect-[5/7.4] w-full max-w-36 rounded-xl border border-dashed border-foreground/15"
+                    className="aspect-[5/7] w-[92%] max-w-36 rounded-xl border border-dashed border-foreground/15"
                   />
                 )}
               </li>
@@ -111,7 +111,7 @@ export function TeamPitch({ team, mode, ratingOf, onRate }: TeamPitchProps): Rea
             <ArmchairIcon aria-hidden className="size-4" />
             Reservas · {team.reserves.length}
           </p>
-          <ul className="grid grid-cols-4 gap-x-2 gap-y-5">
+          <ul className="grid grid-cols-4 gap-x-[3%] gap-y-5">
             {team.reserves.map((entry) => (
               <li key={entry.player.id}>{cardFor(entry)}</li>
             ))}

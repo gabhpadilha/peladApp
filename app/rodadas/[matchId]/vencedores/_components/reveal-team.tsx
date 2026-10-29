@@ -15,18 +15,22 @@ type RevealTeamProps = {
   onDone: () => void;
 };
 
-/** Onde cada vaga fica no campo e quando a carta entra: do gol para o ataque. */
+/**
+ * Onde cada vaga fica no campo e quando a carta entra: do gol para o ataque. Posições em %
+ * do campo (que tem proporção fixa), para o 1-2-1 escalar com a largura da tela sem
+ * espremer as cartas (pedido do dono do app em 2026-10-29).
+ */
 const SLOT_LAYOUT: Record<FormationSlotKey, { place: string; enter: string }> = {
-  pivo: { place: "top-1.5 left-1/2 -translate-x-1/2", enter: "animate-[reveal-pop_0.45s_cubic-bezier(0.2,0.9,0.3,1.3)_2.6s_both]" },
-  "ala-esquerda": { place: "top-26 left-3", enter: "animate-[reveal-pop_0.45s_cubic-bezier(0.2,0.9,0.3,1.3)_1.8s_both]" },
-  "ala-direita": { place: "top-26 right-3", enter: "animate-[reveal-pop_0.45s_cubic-bezier(0.2,0.9,0.3,1.3)_2.2s_both]" },
-  fixo: { place: "top-50 left-1/2 -translate-x-1/2", enter: "animate-[reveal-pop_0.45s_cubic-bezier(0.2,0.9,0.3,1.3)_1.4s_both]" },
-  gol: { place: "top-86 left-1/2 -translate-x-1/2", enter: "animate-[reveal-pop_0.45s_cubic-bezier(0.2,0.9,0.3,1.3)_1s_both]" },
+  pivo: { place: "top-[2%] left-1/2 -translate-x-1/2", enter: "animate-[reveal-pop_0.45s_cubic-bezier(0.2,0.9,0.3,1.3)_2.6s_both]" },
+  "ala-esquerda": { place: "top-[18%] left-[5%]", enter: "animate-[reveal-pop_0.45s_cubic-bezier(0.2,0.9,0.3,1.3)_1.8s_both]" },
+  "ala-direita": { place: "top-[18%] right-[5%]", enter: "animate-[reveal-pop_0.45s_cubic-bezier(0.2,0.9,0.3,1.3)_2.2s_both]" },
+  fixo: { place: "top-[35%] left-1/2 -translate-x-1/2", enter: "animate-[reveal-pop_0.45s_cubic-bezier(0.2,0.9,0.3,1.3)_1.4s_both]" },
+  gol: { place: "top-[69%] left-1/2 -translate-x-1/2", enter: "animate-[reveal-pop_0.45s_cubic-bezier(0.2,0.9,0.3,1.3)_1s_both]" },
 };
 
 function TeamCard({ award }: { award: Award }) {
   return (
-    <div className="flex w-19 flex-col items-center gap-1">
+    <div className="flex w-full flex-col items-center gap-1">
       <PlayerCard player={award.card} award={award} size="fill" />
       {award.score !== null && (
         <span className="rounded-full bg-primary px-2 text-xs font-semibold text-primary-foreground tabular-nums">
@@ -68,14 +72,14 @@ export function RevealTeam({ team, subtitle, doneLabel, onDone }: RevealTeamProp
         <p className="text-sm text-muted-foreground">{subtitle}</p>
       </div>
 
-      <div className="relative h-124 w-full max-w-sm shrink-0 animate-[reveal-fade_0.5s_ease-out_0.6s_both] overflow-hidden rounded-2xl border border-white/8 bg-[repeating-linear-gradient(0deg,rgb(255_255_255/0.015)_0_40px,transparent_40px_80px)] bg-card">
+      <div className="relative aspect-[3/4] w-full max-w-sm shrink-0 animate-[reveal-fade_0.5s_ease-out_0.6s_both] overflow-hidden rounded-2xl border border-white/8 bg-[repeating-linear-gradient(0deg,rgb(255_255_255/0.015)_0_40px,transparent_40px_80px)] bg-card">
         <span aria-hidden className="absolute -top-17.5 left-1/2 size-35 -translate-x-1/2 rounded-full border border-white/8" />
         <span aria-hidden className="absolute inset-x-[25%] bottom-0 h-20 rounded-t-[5rem] border border-b-0 border-white/8" />
         {(Object.keys(SLOT_LAYOUT) as FormationSlotKey[]).map((key) => {
           const slot = slots[key];
           if (!slot) return null;
           return (
-            <div key={key} className={cn("absolute", SLOT_LAYOUT[key].place)}>
+            <div key={key} className={cn("absolute w-[22%]", SLOT_LAYOUT[key].place)}>
               <div className={SLOT_LAYOUT[key].enter}>
                 <TeamCard award={slot.award} />
               </div>
@@ -87,9 +91,11 @@ export function RevealTeam({ team, subtitle, doneLabel, onDone }: RevealTeamProp
       {extras.length > 0 && (
         <div className="relative flex animate-[reveal-fade_0.4s_ease-out_3s_both] flex-col items-center gap-2">
           <p className="text-xs text-muted-foreground uppercase">Empate: também no time</p>
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex flex-wrap justify-center gap-4">
             {extras.map((award) => (
-              <TeamCard key={award.id} award={award} />
+              <div key={award.id} className="w-[clamp(5rem,24vw,6rem)]">
+                <TeamCard award={award} />
+              </div>
             ))}
           </div>
         </div>

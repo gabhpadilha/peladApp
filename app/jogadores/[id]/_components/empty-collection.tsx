@@ -29,7 +29,7 @@ export function EmptyCollection({ player, isOwnProfile, theme }: EmptyCollection
         </p>
       </div>
 
-      <ul aria-label="Cartas que dá para ganhar" className="grid grid-cols-3 gap-2 sm:gap-4">
+      <ul aria-label="Cartas que dá para ganhar" className="grid grid-cols-3 gap-[clamp(0.75rem,4vw,1.25rem)]">
         {AWARD_KINDS.map((kind) => (
           <li key={kind} className="mx-auto flex w-full max-w-40 min-w-0 flex-col items-center gap-1.5 text-center">
             <div className="relative w-full">

@@ -83,7 +83,7 @@ export function LatestRoundCard({ match, topPerformers, awards }: LatestRoundCar
             <ChevronDownIcon aria-hidden className="size-4 transition-transform group-open:rotate-180" />
           </summary>
           {/* Grade de 3 colunas (empates quebram linha): cabe no celular sem rolagem lateral. */}
-          <ul aria-label="Outros prêmios da rodada" className="grid grid-cols-3 gap-x-2 gap-y-4 pt-4 sm:gap-x-4">
+          <ul aria-label="Outros prêmios da rodada" className="grid grid-cols-3 gap-x-[clamp(0.75rem,4vw,1.25rem)] gap-y-5 pt-4">
             {others.map((award) => (
               <li key={award.id} className="mx-auto flex w-full max-w-40 min-w-0 flex-col items-center gap-1.5 text-center">
                 <Link href={awardHref(award)} aria-label={awardLabel(award)} className="w-full">

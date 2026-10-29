@@ -318,6 +318,12 @@ function NeonTrim({ kind }: { kind: NeonTrimKind }) {
   );
 }
 
+/**
+ * Carta com enfeite de neon (pedido do dono do app em 2026-10-29: o morcego encostava na
+ * margem): a carta ocupa os 84% do meio da caixa e o enfeite, a sobra em volta.
+ */
+const TRIMMED_CARD = "absolute inset-[8%]";
+
 const EMPTY_VALUE = "–";
 
 export type CanchaCardAward = {
@@ -357,15 +363,16 @@ export function CanchaCard({ player, award, className, photoSizes }: CanchaCardP
     "--cc-neon": roupa.neon,
   } as CSSProperties;
   const isNeon = roupa.neon !== undefined;
+  const hasTrim = isNeon && roupa.trim !== null;
 
-  return (
+  const card = (
     <article
       aria-label={`${player.nickname}, ${player.position}, OVR ${player.ovr ?? "sem avaliação"}, ${band}`}
       style={vars}
       className={cn(
         "@container relative isolate aspect-[5/7] shrink-0 rounded-[9%/6.5%] font-display text-white select-none",
         isNeon ? (roupa.neonDim ? NEON_FRAME_DIM : NEON_FRAME) : METAL_FRAME,
-        className,
+        hasTrim ? TRIMMED_CARD : className,
       )}
     >
       <div
@@ -474,9 +481,13 @@ export function CanchaCard({ player, award, className, photoSizes }: CanchaCardP
       {isNeon && (
         <>
           <div aria-hidden className={cn("pointer-events-none absolute inset-0 z-[10] rounded-[9%/6.5%]", roupa.neonDim ? NEON_HALO_DIM : NEON_HALO)} />
-          {roupa.trim !== null && <NeonTrim kind={roupa.trim ?? "base"} />}
+          {hasTrim && <NeonTrim kind={roupa.trim ?? "base"} />}
         </>
       )}
     </article>
   );
+
+  // Carta com enfeite: o enfeite cabe dentro da própria caixa (mesmo tamanho e proporção
+  // das outras), para não encostar em margem nem na carta do lado em nenhuma tela.
+  return hasTrim ? <div className={cn("relative aspect-[5/7] shrink-0", className)}>{card}</div> : card;
 }

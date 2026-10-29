@@ -14,13 +14,15 @@ type RevealHighlightsProps = {
 
 /**
  * Onde cada prêmio fica no quadro: ataque e gol em cima, criação no meio, defesa e goleiro
- * embaixo. A última fileira guarda os prêmios por atributo das rodadas antigas (até 2026-10-29).
+ * embaixo. As duas últimas fileiras guardam os prêmios por atributo das rodadas antigas (até
+ * 2026-10-29), dois por fileira para as cartas não ficarem espremidas no celular.
  */
 const ROWS: readonly (readonly AwardKind[])[] = [
   ["atacante", "gol"],
   ["criativo"],
   ["defensor", "goleiro"],
-  ["foguete", "garcom", "drible", "motor"],
+  ["foguete", "garcom"],
+  ["drible", "motor"],
 ];
 
 // Atraso de entrada de cada carta, na ordem do quadro (classes literais para o Tailwind).
@@ -40,7 +42,7 @@ function HighlightCard({ award, order }: { award: Award; order: number }) {
     <div
       style={revealColorStyle(award.kind, award.theme)}
       className={cn(
-        "flex w-[5.4rem] animate-[reveal-pop_0.45s_cubic-bezier(0.2,0.9,0.3,1.3)_both] flex-col items-center gap-1",
+        "flex w-[clamp(5rem,26vw,6.5rem)] animate-[reveal-pop_0.45s_cubic-bezier(0.2,0.9,0.3,1.3)_both] flex-col items-center gap-1",
         POP_DELAYS[order % POP_DELAYS.length],
       )}
     >
@@ -86,18 +88,18 @@ export function RevealHighlights({ awards, nextLabel, onNext }: RevealHighlights
         <p className="text-sm text-muted-foreground">O melhor no ataque, na criação e na defesa, o goleiro e o gol mais bonito</p>
       </div>
 
-      <div className="relative flex w-full max-w-sm shrink-0 animate-[reveal-fade_0.5s_ease-out_0.3s_both] flex-col gap-4 overflow-hidden rounded-2xl border border-white/8 bg-[repeating-linear-gradient(0deg,rgb(255_255_255/0.015)_0_40px,transparent_40px_80px)] bg-card px-2 py-4">
+      <div className="relative flex w-full max-w-sm shrink-0 animate-[reveal-fade_0.5s_ease-out_0.3s_both] flex-col gap-5 overflow-hidden rounded-2xl border border-white/8 bg-[repeating-linear-gradient(0deg,rgb(255_255_255/0.015)_0_40px,transparent_40px_80px)] bg-card px-3 py-5">
         <span aria-hidden className="absolute top-1/2 inset-x-0 h-px bg-white/8" />
         <span aria-hidden className="absolute top-1/2 left-1/2 size-28 -translate-1/2 rounded-full border border-white/8" />
         {ROWS.map((row) => (
-          <div key={row.join("-")} className="relative flex justify-center gap-3">
+          <div key={row.join("-")} className="relative flex justify-center gap-[clamp(1rem,6vw,2rem)]">
             {row.map((kind) => {
               const award = byKind.get(kind)?.[0];
               if (!award) return null;
               return (
-                <div key={kind} className="flex flex-col items-center gap-1">
+                <div key={kind} className="flex w-[clamp(5rem,26vw,6.5rem)] flex-col items-center gap-1">
                   <HighlightCard award={award} order={order++} />
-                  <span className="text-[0.6875rem] leading-tight text-muted-foreground">{AWARD_LABELS[kind].title}</span>
+                  <span className="text-center text-[0.6875rem] leading-tight text-balance text-muted-foreground">{AWARD_LABELS[kind].title}</span>
                 </div>
               );
             })}
@@ -108,11 +110,11 @@ export function RevealHighlights({ awards, nextLabel, onNext }: RevealHighlights
       {extras.length > 0 && (
         <div className="relative flex animate-[reveal-fade_0.4s_ease-out_2.6s_both] flex-col items-center gap-2">
           <p className="text-xs text-muted-foreground uppercase">Empates e outros destaques</p>
-          <div className="flex flex-wrap justify-center gap-3">
+          <div className="flex flex-wrap justify-center gap-[clamp(1rem,6vw,2rem)]">
             {extras.map((award) => (
-              <div key={award.id} className="flex flex-col items-center gap-1">
+              <div key={award.id} className="flex w-[clamp(5rem,26vw,6.5rem)] flex-col items-center gap-1">
                 <HighlightCard award={award} order={0} />
-                <span className="text-[0.6875rem] leading-tight text-muted-foreground">{AWARD_LABELS[award.kind].title}</span>
+                <span className="text-center text-[0.6875rem] leading-tight text-balance text-muted-foreground">{AWARD_LABELS[award.kind].title}</span>
               </div>
             ))}
           </div>

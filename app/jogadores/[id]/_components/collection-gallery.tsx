@@ -92,7 +92,7 @@ export function CollectionGallery({ awards, shareableIds, groupName }: Collectio
                 {group.awards.length} {group.awards.length === 1 ? "carta" : "cartas"}
               </span>
             </h3>
-            <ul className="grid grid-cols-2 gap-x-3 gap-y-5 sm:grid-cols-3 lg:grid-cols-4">
+            <ul className="grid grid-cols-2 gap-x-[clamp(1rem,6vw,1.75rem)] gap-y-6 sm:grid-cols-3 lg:grid-cols-4">
               {group.awards.map((award) => (
                 <li key={award.id} className="mx-auto flex w-full max-w-44 min-w-0 flex-col items-center gap-1.5 text-center">
                   <PlayerCard player={award.card} award={award} size="fill" />
