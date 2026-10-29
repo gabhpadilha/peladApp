@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowRightIcon, CoinsIcon, CrownIcon, GhostIcon, SparklesIcon, StarIcon, StoreIcon, TrendingUpIcon, TrophyIcon, type LucideIcon } from "lucide-react";
+import { ArrowRightIcon, CoinsIcon, CrownIcon, GhostIcon, SparklesIcon, StoreIcon, TrendingUpIcon, type LucideIcon } from "lucide-react";
 import { formatCoins } from "@/components/coin-pill";
 import { PlayerCard } from "@/components/player-card";
 import { SAMPLE_PLAYER } from "@/lib/sample-player";
@@ -9,7 +9,7 @@ import { CARD_THEME_LABELS, type CardThemeKey, type CurrentCardEvent } from "@/l
 import { formatShortDate } from "@/lib/format-date";
 import { COIN_RULES, XP_RULES, type LevelProgress } from "@/lib/progression";
 import { getNextPlayerOfTheMonthDate } from "@/lib/player-of-the-month";
-import { PLAYER_OF_THE_MONTH_MIN_RATINGS, TEAM_OF_THE_WEEK_MIN_RATINGS, type AwardKind } from "@/types/award";
+import { PLAYER_OF_THE_MONTH_MIN_RATINGS, type AwardKind } from "@/types/award";
 import { CARD_SKINS, isCardSkinOnSale, type CardSkinKey } from "@/types/card-skin";
 import type { ShopSale } from "@/lib/shop-sale";
 import type { Player } from "@/types/player";
@@ -104,14 +104,6 @@ const pickRules = (rules: readonly Chip[], labels: readonly string[]) =>
   rules.filter((rule) => labels.includes(rule.label));
 
 const XP_CHIPS = pickRules(XP_RULES, ["Nota da rodada × 10", "Enviar as suas notas", "Melhor Jogador"]);
-/** Como entrar no Time da Semana (espelha `compute_match_awards`). */
-const TEAM_OF_THE_WEEK_CHIPS: readonly Chip[] = [
-  { label: "Linha", value: "4 maiores notas" },
-  { label: "Gol", value: "maior nota" },
-  { label: "Mínimo", value: `${TEAM_OF_THE_WEEK_MIN_RATINGS} notas` },
-  { label: "Bônus", value: "+1 em tudo" },
-];
-
 /** Como ganhar o Time do Mês (espelha `compute_match_awards`). */
 const PLAYER_OF_THE_MONTH_CHIPS: readonly Chip[] = [
   { label: "Linha", value: "4 maiores médias" },
@@ -126,7 +118,6 @@ const COIN_CHIPS = pickRules(COIN_RULES, ["Jogar uma rodada", "Enviar as suas no
 /** Texto do 1º slide por tema do mês. Tema novo: entre aqui (e em `CARD_THEMES`). */
 const EVENT_COPY: Record<CardThemeKey, { eyebrow: string; title: string; icon: LucideIcon }> = {
   halloween: { eyebrow: "Evento de outubro", title: "Halloween na pelada", icon: GhostIcon },
-  brasileirao: { eyebrow: "Evento de novembro", title: "Brasileirão na pelada", icon: TrophyIcon },
   default: { eyebrow: "Coleção", title: "Cartas especiais", icon: SparklesIcon },
 };
 
@@ -140,7 +131,7 @@ function getEventSkins(today: string) {
   return CARD_SKINS.filter((skin) => "event" in skin && isCardSkinOnSale(skin, today));
 }
 
-/** Texto do slide da Loja: com poucas cartas de evento, os nomes; com muitas (clubes), a quantidade. */
+/** Texto do slide da Loja: com poucas cartas de evento, os nomes; com muitas, a quantidade. */
 function describeEventSkins(skins: ReturnType<typeof getEventSkins>): string {
   const level = Math.min(...skins.map((skin) => skin.level));
   const what = skins.length <= 3 ? listFormatter.format(skins.map((skin) => skin.name)) : `${skins.length} personalizações do evento`;
@@ -199,39 +190,13 @@ export function NewsSlider({ event, today, shopSale, player, progress, balance }
               ? `Até ${formatShortDate(event.endDate)} · ${formatDaysLeft(event.daysLeft)}`
               : undefined
           }
-          text="As notas da rodada decidem Melhor Jogador, um prêmio por atributo, Goleiro e a Bola Murcha; só o Gol é no voto. A carta vem com o visual do evento e fica na coleção para sempre."
+          text="As notas da rodada decidem Melhor Jogador, Melhor Atacante, Mais Criativo, Melhor Defensor, Goleiro e a Bola Murcha; só o Gol é no voto. A carta vem com o visual do evento e fica na coleção para sempre."
           visual={
             <CardFan
               cards={EVENT_FAN.map((kind) => (
                 <PlayerCard key={kind} player={withAwardBonus(SAMPLE_PLAYER, kind)} award={{ kind, theme: event.theme }} size="fill" />
               )) as [ReactNode, ReactNode, ReactNode]}
             />
-          }
-          href={`/jogadores/${player.id}/colecao`}
-          cta="Ver a coleção"
-        />
-      ),
-    },
-    {
-      key: "time-da-semana",
-      title: "Time da Semana",
-      content: (
-        <Slide
-          icon={StarIcon}
-          eyebrow="Sem votação"
-          title="Time da Semana"
-          text="Sai das notas da rodada: os melhores da linha e do gol entram no time e levam a carta especial."
-          visual={
-            <div className="flex w-full items-center gap-4">
-              <div className="w-28 shrink-0">
-                <PlayerCard
-                  player={withAwardBonus(SAMPLE_PLAYER, "time_da_semana")}
-                  award={{ kind: "time_da_semana", theme: event.theme }}
-                  size="fill"
-                />
-              </div>
-              <Chips items={TEAM_OF_THE_WEEK_CHIPS} />
-            </div>
           }
           href={`/jogadores/${player.id}/colecao`}
           cta="Ver a coleção"

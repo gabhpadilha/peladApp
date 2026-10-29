@@ -21,27 +21,6 @@ export const CARD_SKINS = [
   // Evento de Halloween de 2026: à venda só em outubro de 2026.
   { key: "lobisomem", name: "Lobisomem", level: 3, price: 200, event: { theme: "halloween", year: 2026 } },
   { key: "vampiro", name: "Vampiro", level: 3, price: 200, event: { theme: "halloween", year: 2026 } },
-  // Evento Brasileirão de 2026 (novembro): um por clube da Série A, com o escudo em public/clubes/.
-  { key: "clube-athletico-pr", name: "Athletico-PR", level: 3, price: 150, event: { theme: "brasileirao", year: 2026 }, crest: "/clubes/athletico-pr.png" },
-  { key: "clube-atletico-mg", name: "Atlético-MG", level: 3, price: 150, event: { theme: "brasileirao", year: 2026 }, crest: "/clubes/atletico-mg.png" },
-  { key: "clube-bahia", name: "Bahia", level: 3, price: 150, event: { theme: "brasileirao", year: 2026 }, crest: "/clubes/bahia.png" },
-  { key: "clube-botafogo", name: "Botafogo", level: 3, price: 150, event: { theme: "brasileirao", year: 2026 }, crest: "/clubes/botafogo.png" },
-  { key: "clube-chapecoense", name: "Chapecoense", level: 3, price: 150, event: { theme: "brasileirao", year: 2026 }, crest: "/clubes/chapecoense.png" },
-  { key: "clube-corinthians", name: "Corinthians", level: 3, price: 150, event: { theme: "brasileirao", year: 2026 }, crest: "/clubes/corinthians.png" },
-  { key: "clube-coritiba", name: "Coritiba", level: 3, price: 150, event: { theme: "brasileirao", year: 2026 }, crest: "/clubes/coritiba.png" },
-  { key: "clube-cruzeiro", name: "Cruzeiro", level: 3, price: 150, event: { theme: "brasileirao", year: 2026 }, crest: "/clubes/cruzeiro.png" },
-  { key: "clube-flamengo", name: "Flamengo", level: 3, price: 150, event: { theme: "brasileirao", year: 2026 }, crest: "/clubes/flamengo.png" },
-  { key: "clube-fluminense", name: "Fluminense", level: 3, price: 150, event: { theme: "brasileirao", year: 2026 }, crest: "/clubes/fluminense.png" },
-  { key: "clube-gremio", name: "Grêmio", level: 3, price: 150, event: { theme: "brasileirao", year: 2026 }, crest: "/clubes/gremio.png" },
-  { key: "clube-internacional", name: "Internacional", level: 3, price: 150, event: { theme: "brasileirao", year: 2026 }, crest: "/clubes/internacional.png" },
-  { key: "clube-mirassol", name: "Mirassol", level: 3, price: 150, event: { theme: "brasileirao", year: 2026 }, crest: "/clubes/mirassol.png" },
-  { key: "clube-palmeiras", name: "Palmeiras", level: 3, price: 150, event: { theme: "brasileirao", year: 2026 }, crest: "/clubes/palmeiras.png" },
-  { key: "clube-bragantino", name: "Bragantino", level: 3, price: 150, event: { theme: "brasileirao", year: 2026 }, crest: "/clubes/bragantino.png" },
-  { key: "clube-remo", name: "Remo", level: 3, price: 150, event: { theme: "brasileirao", year: 2026 }, crest: "/clubes/remo.png" },
-  { key: "clube-santos", name: "Santos", level: 3, price: 150, event: { theme: "brasileirao", year: 2026 }, crest: "/clubes/santos.png" },
-  { key: "clube-sao-paulo", name: "São Paulo", level: 3, price: 150, event: { theme: "brasileirao", year: 2026 }, crest: "/clubes/sao-paulo.png" },
-  { key: "clube-vasco", name: "Vasco", level: 3, price: 150, event: { theme: "brasileirao", year: 2026 }, crest: "/clubes/vasco.png" },
-  { key: "clube-vitoria", name: "Vitória", level: 3, price: 150, event: { theme: "brasileirao", year: 2026 }, crest: "/clubes/vitoria.png" },
 ] as const;
 
 export type CardSkin = (typeof CARD_SKINS)[number];

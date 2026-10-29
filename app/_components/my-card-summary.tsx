@@ -30,7 +30,7 @@ export function MyCardSummary({
   awardCount,
 }: MyCardSummaryProps) {
   const hasOvr = player.ovr !== null;
-  const tierLabel = hasOvr ? `Carta ${CARD_TIER_LABELS[getCardTier(player.ovr ?? 0)]}` : "Sem OVR ainda";
+  const tierLabel = hasOvr ? `Patente ${CARD_TIER_LABELS[getCardTier(player.ovr ?? 0)]}` : "Sem OVR ainda";
 
   const stats = [
     {
@@ -45,8 +45,8 @@ export function MyCardSummary({
   return (
     <section aria-labelledby="my-card-title" className="flex flex-col gap-4 rounded-xl border bg-card p-4">
       <div className="flex items-center gap-4">
-        {/* A carta escala pela largura do pai: menor no celular para o texto respirar. */}
-        <div className="w-28 shrink-0 sm:w-36">
+        {/* A carta escala pela largura do pai. Maior que antes: é a carta do próprio jogador. */}
+        <div className="w-36 shrink-0 sm:w-44">
           <PlayerCard player={player} size="fill" />
         </div>
 

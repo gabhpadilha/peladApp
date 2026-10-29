@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GhostIcon, TrophyIcon } from "lucide-react";
+import { GhostIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { CardThemeKey } from "@/lib/card-themes";
 import { cn } from "@/lib/utils";
@@ -31,16 +31,6 @@ const BANNER_THEMES: Record<CardThemeKey, { box: string; eyebrow: string; cards:
       "from-award-craque-halloween-from to-award-craque-halloween-to text-award-craque-halloween-foreground",
     ],
   },
-  brasileirao: {
-    box: "border-award-craque-brasileirao-from/50 bg-[radial-gradient(circle_at_85%_30%,oklch(0.45_0.12_262/0.55),transparent_55%),linear-gradient(160deg,oklch(0.26_0.09_262),oklch(0.11_0.04_262))]",
-    eyebrow: "text-award-craque-brasileirao-from",
-    cards: [
-      "from-award-gol-brasileirao-from to-award-gol-brasileirao-to",
-      "from-award-time-da-semana-brasileirao-from to-award-time-da-semana-brasileirao-to",
-      "bg-award-craque-brasileirao-frame",
-      "from-award-craque-brasileirao-from to-award-craque-brasileirao-to text-award-craque-brasileirao-foreground",
-    ],
-  },
 };
 
 const CARD_SHAPE = "[clip-path:url(#player-card-shape)]";
@@ -68,9 +58,6 @@ export function WinnersBanner({ alert }: WinnersBannerProps) {
       />
       {alert.theme === "halloween" && (
         <GhostIcon aria-hidden className="absolute -bottom-6 -left-5 size-28 text-white/6" />
-      )}
-      {alert.theme === "brasileirao" && (
-        <TrophyIcon aria-hidden strokeWidth={1.2} className="absolute -bottom-6 -left-5 size-28 text-white/6" />
       )}
 
       {/* Três cartas viradas em leque (a do meio com "?"), flutuando. */}

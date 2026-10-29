@@ -20,7 +20,7 @@ export function TierProgress({ ovr }: TierProgressProps) {
     <section aria-labelledby="tier-progress-title" className="flex flex-col gap-3 rounded-xl border bg-card p-4">
       <div className="flex items-baseline justify-between gap-3">
         <h2 id="tier-progress-title" className="font-display text-lg font-bold tracking-wide uppercase">
-          {progress.next ? "Próxima faixa" : "Faixa máxima"}
+          {progress.next ? "Próxima patente" : "Patente máxima"}
         </h2>
         <p className="text-sm text-muted-foreground">
           {progress.next ? (

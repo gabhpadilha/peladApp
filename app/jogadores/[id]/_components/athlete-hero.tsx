@@ -44,7 +44,7 @@ export function AthleteHero({ profile }: AthleteHeroProps) {
       <div className="relative flex w-full flex-col gap-6">
         <div className="text-center md:text-left">
           <p className="text-sm text-muted-foreground">
-            {POSITION_LABELS[player.position]} · Carta {CARD_TIER_LABELS[tier]}
+            {POSITION_LABELS[player.position]} · {CARD_TIER_LABELS[tier]}
             {!profile.isActive && " · Desativado"}
           </p>
           <h1 id="athlete-name" className="font-display text-5xl font-extrabold">

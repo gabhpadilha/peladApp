@@ -37,12 +37,4 @@ export const PACK_THEMES: Record<
     border: "border-award-craque-halloween-frame/60",
     label: "Halloween",
   },
-  brasileirao: {
-    screen: "bg-[radial-gradient(circle_at_50%_40%,oklch(0.3_0.1_262),oklch(0.1_0.04_262)_70%)]",
-    cap: "bg-linear-to-b from-award-craque-brasileirao-from to-award-craque-brasileirao-to",
-    body: "bg-linear-160 from-award-craque-brasileirao-frame to-award-time-da-semana-brasileirao-to",
-    text: "text-award-time-da-semana-brasileirao-foreground",
-    border: "border-award-craque-brasileirao-from/60",
-    label: "Brasileirão",
-  },
 };

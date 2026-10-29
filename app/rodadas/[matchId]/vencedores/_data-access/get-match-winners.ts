@@ -16,7 +16,11 @@ import type { Player } from "@/types/player";
 const REVEAL_ORDER: readonly AwardKind[] = [
   "bola_murcha",
   "fominha",
+  "foguete",
+  "garcom",
   "drible",
+  "motor",
+  "criativo",
   "defensor",
   "goleiro",
   "atacante",

@@ -8,11 +8,12 @@ export const CARD_TIER_MIN_OVR = {
   rare: 85,
 } as const;
 
+/** Nome de cada faixa na UI: as patentes da carta nova (`lib/card-rank.ts`). */
 export const CARD_TIER_LABELS: Record<CardTier, string> = {
-  bronze: "Bronze",
-  silver: "Prata",
-  gold: "Ouro",
-  rare: "Ouro Raro",
+  bronze: "Base",
+  silver: "Profissional",
+  gold: "Seleção",
+  rare: "Lenda",
 };
 
 const TIER_ORDER: readonly CardTier[] = ["bronze", "silver", "gold", "rare"];

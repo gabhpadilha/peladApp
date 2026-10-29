@@ -50,8 +50,8 @@ export function CloseMatchButton({ matchId, round, submittedCount }: CloseMatchB
     >
       <p className="text-sm text-muted-foreground">
         Fechar a rodada {round}? As notas passam a contar no OVR (sem a maior e a menor de cada jogador), ninguém mais
-        envia e saem as cartas especiais: os prêmios das notas (Melhor Jogador, um por atributo, Goleiro e Bola
-        Murcha), o Gol da Rodada (por voto) e o Time da Semana. Todo mundo vê o aviso na home para abrir o pacote.
+        envia e saem as cartas especiais: os prêmios das notas (Melhor Jogador, Atacante, Criativo, Defensor, Goleiro e Bola
+        Murcha), o Gol da Rodada (por voto) e, na última quinta do mês, o Time do Mês. Todo mundo vê o aviso na home para abrir o pacote.
       </p>
       <div className="flex shrink-0 justify-end gap-2">
         <Button size="sm" variant="ghost" onClick={() => setIsConfirming(false)} disabled={isPending}>

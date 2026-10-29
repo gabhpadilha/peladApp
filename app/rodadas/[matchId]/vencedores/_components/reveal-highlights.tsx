@@ -12,11 +12,15 @@ type RevealHighlightsProps = {
   onNext: () => void;
 };
 
-/** Onde cada prêmio fica no quadro: ataque em cima, meio no centro, defesa e gol embaixo. */
+/**
+ * Onde cada prêmio fica no quadro: ataque e gol em cima, criação no meio, defesa e goleiro
+ * embaixo. A última fileira guarda os prêmios por atributo das rodadas antigas (até 2026-10-29).
+ */
 const ROWS: readonly (readonly AwardKind[])[] = [
-  ["foguete", "atacante", "gol"],
-  ["garcom", "drible", "motor"],
+  ["atacante", "gol"],
+  ["criativo"],
   ["defensor", "goleiro"],
+  ["foguete", "garcom", "drible", "motor"],
 ];
 
 // Atraso de entrada de cada carta, na ordem do quadro (classes literais para o Tailwind).
@@ -79,7 +83,7 @@ export function RevealHighlights({ awards, nextLabel, onNext }: RevealHighlights
           <SparklesIcon aria-hidden className="size-6" />
         </span>
         <h2 className="font-display text-4xl leading-none font-extrabold uppercase">Destaques da rodada</h2>
-        <p className="text-sm text-muted-foreground">A maior nota em cada atributo, o goleiro e o gol mais bonito</p>
+        <p className="text-sm text-muted-foreground">O melhor no ataque, na criação e na defesa, o goleiro e o gol mais bonito</p>
       </div>
 
       <div className="relative flex w-full max-w-sm shrink-0 animate-[reveal-fade_0.5s_ease-out_0.3s_both] flex-col gap-4 overflow-hidden rounded-2xl border border-white/8 bg-[repeating-linear-gradient(0deg,rgb(255_255_255/0.015)_0_40px,transparent_40px_80px)] bg-card px-2 py-4">

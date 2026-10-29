@@ -10,20 +10,21 @@ type PlayerRole = Player["role"];
 export const AWARD_KINDS = [
   "craque",
   "gol",
-  "foguete",
   "atacante",
-  "garcom",
-  "drible",
+  "criativo",
   "defensor",
-  "motor",
   "goleiro",
   "bola_murcha",
-  "time_da_semana",
   "jogador_do_mes",
 ] as const;
 
-/** Prêmios que saíram do jogo (decisão do dono do app em 2026-10-21): o tipo ainda aceita, ninguém ganha mais. */
-type RetiredAwardKind = "fair_play" | "fominha";
+/**
+ * Prêmios que saíram do jogo: o tipo ainda aceita (cartas já ganhas), ninguém ganha mais.
+ * Fair Play e Fominha em 2026-10-21; Foguete, Garçom, Drible e Motor em 2026-10-29, quando os
+ * prêmios das estatísticas passaram a seguir as 3 da carta (Ataque, Criação, Defesa); o Time
+ * da Semana no mesmo dia (com um prêmio por função, perdeu o sentido).
+ */
+type RetiredAwardKind = "fair_play" | "fominha" | "foguete" | "garcom" | "drible" | "motor" | "time_da_semana";
 
 export type AwardKind = (typeof AWARD_KINDS)[number] | RetiredAwardKind;
 
@@ -37,22 +38,25 @@ export function awardOrder(kind: AwardKind): number {
 export const VOTE_AWARD_KINDS = ["gol"] as const;
 export type VoteAwardKind = (typeof VOTE_AWARD_KINDS)[number];
 
-/** Notas mínimas recebidas na rodada para entrar no Time da Semana e nos prêmios das notas (igual ao banco). */
+/** Notas mínimas recebidas na rodada para concorrer aos prêmios das notas (igual ao banco; o nome vem do antigo Time da Semana). */
 export const TEAM_OF_THE_WEEK_MIN_RATINGS = 3;
 
 /**
  * Prêmios que saem das notas da rodada (`compute_match_awards`) e o que decide:
- * a nota média (Melhor Jogador entre todos, Melhor Goleiro no gol) ou a média de
- * um atributo da linha, pela posição em que a pessoa jogou na rodada. `score` da carta guarda essa média (1–10).
+ * a nota média (Melhor Jogador entre todos, Melhor Goleiro no gol) ou a média de uma
+ * das 3 estatísticas da carta (só linha), pela posição em que a pessoa jogou na rodada.
+ * `score` da carta guarda essa média (1–10).
  */
 export const STAT_AWARD_SOURCES: Partial<Record<AwardKind, { label: string; short: string }>> = {
   craque: { label: "Nota da rodada", short: "nota" },
   goleiro: { label: "Nota da rodada", short: "nota" },
   foguete: { label: "Velocidade na rodada", short: "VEL" },
-  atacante: { label: "Chute na rodada", short: "CHU" },
+  atacante: { label: "Ataque na rodada", short: "ATQ" },
+  criativo: { label: "Criação na rodada", short: "CRI" },
   garcom: { label: "Passe na rodada", short: "PAS" },
   drible: { label: "Drible na rodada", short: "DRI" },
   defensor: { label: "Defesa na rodada", short: "DEF" },
+  // Cartas antigas (prêmios por atributo, até 2026-10-29).
   motor: { label: "Físico na rodada", short: "FIS" },
   bola_murcha: { label: "Nota da rodada", short: "nota" },
 };
@@ -90,18 +94,18 @@ export const AWARD_ATTRIBUTES: Partial<Record<AwardKind, string>> = {
   motor: "fis",
 };
 
-/** Prêmios dos atributos da linha: os "Destaques da rodada" no quadro tático da revelação (+ Goleiro e Gol). */
-export const ATTRIBUTE_AWARD_KINDS = ["foguete", "atacante", "garcom", "drible", "defensor", "motor"] as const;
+/** Prêmios das estatísticas da linha: os "Destaques da rodada" na revelação (+ Goleiro e Gol). */
+export const ATTRIBUTE_AWARD_KINDS = ["atacante", "criativo", "defensor"] as const;
 
 /** Notas mínimas recebidas no mês para concorrer ao Time do Mês (igual ao banco). */
 export const PLAYER_OF_THE_MONTH_MIN_RATINGS = 5;
 
 /**
- * O Time do Mês tem visual próprio (arte do dono do app) e não veste o tema
+ * O Time do Mês e a Bola Murcha (2026-10-29) têm visual próprio e não vestem o tema
  * sazonal; os outros prêmios vestem o tema do mês.
  */
 export function hasSeasonalTheme(kind: AwardKind): boolean {
-  return kind !== "jogador_do_mes";
+  return kind !== "jogador_do_mes" && awardDesignKind(kind) !== "bola_murcha";
 }
 
 /** Quem pode receber o voto: o banco confere de novo (`guard_round_vote`). */
@@ -123,24 +127,28 @@ export const AWARD_LABELS: Record<
     hint: "O golaço da rodada. A carta vem com +1 em cada atributo.",
     eligibility: "all",
   },
+  // Saiu do jogo (2026-10-29): fica só para cartas antigas.
   foguete: {
     title: "Foguete da Rodada",
     question: "",
     hint: "A maior nota de velocidade (VEL) da rodada na linha. Sem voto. A carta vem com +1 em cada atributo.",
     eligibility: "outfield",
   },
+  // Saiu do jogo (2026-10-29): fica só para cartas antigas.
   garcom: {
     title: "Garçom da Rodada",
     question: "",
     hint: "A maior nota de passe (PAS) da rodada na linha. Sem voto. A carta vem com +1 em cada atributo.",
     eligibility: "outfield",
   },
+  // Saiu do jogo (2026-10-29): fica só para cartas antigas.
   motor: {
     title: "Motor da Rodada",
     question: "",
     hint: "A maior nota de físico (FIS) da rodada na linha. Sem voto. A carta vem com +1 em cada atributo.",
     eligibility: "outfield",
   },
+  // Saiu do jogo (2026-10-29): fica só para cartas antigas.
   drible: {
     title: "Drible da Rodada",
     question: "",
@@ -150,13 +158,19 @@ export const AWARD_LABELS: Record<
   atacante: {
     title: "Melhor Atacante",
     question: "",
-    hint: "A maior nota de chute (CHU) da rodada na linha. Sem voto. A carta vem com +1 em cada atributo.",
+    hint: "A maior média de Ataque (velocidade + chute) da rodada na linha. Sem voto. A carta vem com +1 em cada atributo.",
     eligibility: "outfield",
   },
   defensor: {
     title: "Melhor Defensor",
     question: "",
-    hint: "A maior nota de defesa (DEF) da rodada na linha. Sem voto. A carta vem com +1 em cada atributo.",
+    hint: "A maior média de Defesa (defesa + físico) da rodada na linha. Sem voto. A carta vem com +1 em cada atributo.",
+    eligibility: "outfield",
+  },
+  criativo: {
+    title: "Mais Criativo",
+    question: "",
+    hint: "A maior média de Criação (passe + drible) da rodada na linha. Sem voto. A carta vem com +1 em cada atributo.",
     eligibility: "outfield",
   },
   goleiro: {
@@ -185,6 +199,7 @@ export const AWARD_LABELS: Record<
     hint: "A menor nota da rodada na linha. Sem voto. Vale a zoeira (a carta não tem bônus).",
     eligibility: "outfield",
   },
+  // Saiu do jogo (2026-10-29): fica só para cartas antigas.
   time_da_semana: {
     title: "Time da Semana",
     question: "",

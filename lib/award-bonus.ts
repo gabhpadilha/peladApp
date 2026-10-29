@@ -15,6 +15,7 @@ export const BOOSTED_AWARDS: readonly AwardKind[] = [
   "motor",
   "drible",
   "atacante",
+  "criativo",
   "defensor",
   "goleiro",
   "time_da_semana",

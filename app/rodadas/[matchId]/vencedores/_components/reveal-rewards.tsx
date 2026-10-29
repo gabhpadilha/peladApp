@@ -110,7 +110,7 @@ export function RevealRewards({ round, rewards, onDone }: RevealRewardsProps) {
                 )}
               </dd>
               {tierChanged && ovrAfter !== null && (
-                <p className="mt-1 text-xs font-medium text-primary">Agora sua carta é {CARD_TIER_LABELS[getCardTier(ovrAfter)]}!</p>
+                <p className="mt-1 text-xs font-medium text-primary">Você subiu para {CARD_TIER_LABELS[getCardTier(ovrAfter)]}!</p>
               )}
             </div>
           </dl>

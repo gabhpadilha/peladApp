@@ -22,10 +22,13 @@ type BoardCardProps = {
 const CARD_CLASS =
   "block w-full rounded-xl outline-none transition-transform focus-visible:ring-3 focus-visible:ring-ring/60 active:scale-[0.97]";
 
-/** Selo sobre a base da carta: nota dada, andamento ou convite para avaliar. */
+/**
+ * Selo logo abaixo da carta: nota dada, andamento ou convite para avaliar. Fica fora da
+ * carta (antes cobria o rodapé com Ataque, Criação e Defesa nas cartas pequenas).
+ */
 function Badge({ entry, mode, rating }: Pick<BoardCardProps, "entry" | "mode" | "rating">) {
   const base =
-    "absolute -bottom-2.5 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap shadow-sm tabular-nums";
+    "relative z-10 mx-auto -mt-1 flex w-fit items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium whitespace-nowrap shadow-sm tabular-nums";
 
   if (entry.roundScore !== null) {
     return (

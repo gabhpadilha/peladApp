@@ -1,4 +1,4 @@
-import { GhostIcon, TrophyIcon } from "lucide-react";
+import { GhostIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { CardThemeKey } from "@/lib/card-themes";
 import { cn } from "@/lib/utils";
@@ -49,9 +49,6 @@ export function RevealPack({ round, theme, contents, isOpening, onOpen }: Reveal
           {theme === "halloween" && (
             <GhostIcon className="absolute -right-8 -bottom-5 size-40 text-white/7" />
           )}
-          {theme === "brasileirao" && (
-            <TrophyIcon strokeWidth={1.2} className="absolute -right-8 -bottom-5 size-40 text-white/7" />
-          )}
           <span className="absolute inset-y-0 left-0 w-[30%] animate-[reveal-shine_2.8s_ease-in-out_infinite] bg-linear-to-r from-transparent via-white/18 to-transparent" />
           <span className={cn("relative flex h-full flex-col items-center justify-center gap-2.5 font-display", look.text)}>
             <span className="text-xl font-extrabold tracking-[0.3em]">PELADAPP</span>
@@ -59,7 +56,7 @@ export function RevealPack({ round, theme, contents, isOpening, onOpen }: Reveal
               <span
                 className={cn(
                   "text-sm font-bold tracking-[0.2em] uppercase",
-                  theme === "brasileirao" ? "text-award-craque-brasileirao-from" : "text-award-gol-halloween-frame",
+                  "text-award-gol-halloween-frame",
                 )}
               >
                 {look.label}

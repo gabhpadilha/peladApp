@@ -1,8 +1,9 @@
 import { useId, type CSSProperties } from "react";
 import Image from "next/image";
 import { cva, type VariantProps } from "class-variance-authority";
-import { GhostIcon, TrophyIcon } from "lucide-react";
+import { GhostIcon } from "lucide-react";
 import { AWARD_ICONS } from "@/components/award-icons";
+import { CanchaCard } from "@/components/cancha-card";
 import { cn } from "@/lib/utils";
 import { CARD_TIER_LABELS, getCardTier, type CardTier } from "@/lib/card-tier";
 import type { CardThemeKey } from "@/lib/card-themes";
@@ -16,7 +17,7 @@ import {
   type AwardDesignKind,
   type AwardKind,
 } from "@/types/award";
-import { getCardSkin, type CardSkinKey } from "@/types/card-skin";
+import type { CardSkinKey } from "@/types/card-skin";
 import {
   ATTRIBUTE_LABELS,
   GOALKEEPER_ATTRIBUTES,
@@ -58,7 +59,7 @@ export function PlayerCardDefs() {
  * sazonal; o Time do Mês não veste tema). Ver `awardDesignKind`.
  */
 type ThemedAwardKind = Exclude<AwardDesignKind, "jogador_do_mes">;
-type AwardDesign = AwardDesignKind | `${ThemedAwardKind}-halloween` | `${ThemedAwardKind}-brasileirao`;
+type AwardDesign = AwardDesignKind | `${ThemedAwardKind}-halloween`;
 type CardDesign = CardTier | AwardDesign;
 
 type Design = {
@@ -120,22 +121,6 @@ const DESIGNS: Record<CardDesign, Design> = {
     frame: "bg-award-time-da-semana-halloween-frame",
     face: "from-award-time-da-semana-halloween-from to-award-time-da-semana-halloween-to text-award-time-da-semana-halloween-foreground",
   },
-  "craque-brasileirao": {
-    frame: "bg-award-craque-brasileirao-frame",
-    face: "from-award-craque-brasileirao-from to-award-craque-brasileirao-to text-award-craque-brasileirao-foreground",
-  },
-  "gol-brasileirao": {
-    frame: "bg-award-gol-brasileirao-frame",
-    face: "from-award-gol-brasileirao-from to-award-gol-brasileirao-to text-award-gol-brasileirao-foreground",
-  },
-  "bola_murcha-brasileirao": {
-    frame: "bg-award-bola-murcha-brasileirao-frame",
-    face: "from-award-bola-murcha-brasileirao-from to-award-bola-murcha-brasileirao-to text-award-bola-murcha-brasileirao-foreground",
-  },
-  "time_da_semana-brasileirao": {
-    frame: "bg-award-time-da-semana-brasileirao-frame",
-    face: "from-award-time-da-semana-brasileirao-from to-award-time-da-semana-brasileirao-to text-award-time-da-semana-brasileirao-foreground",
-  },
   // Arte do dono do app (aprovada em 2026-10-21), alinhada à direita: os raios
   // de dentro encostam na borda de onde saem os de fora (`MonthCardOverflow`).
   jogador_do_mes: {
@@ -164,6 +149,7 @@ const AWARD_FOOTER: Record<AwardKind, string> = {
   garcom: "Garçom",
   motor: "Motor",
   atacante: "Melhor atacante",
+  criativo: "Mais criativo",
   defensor: "Melhor defensor",
   goleiro: "Melhor goleiro",
   fair_play: "Fair play",
@@ -296,12 +282,24 @@ function MonthCardOverflow() {
   );
 }
 
+/** Largura de cada tamanho na carta nova (a altura sai da proporção 5:7 dela). */
+const CANCHA_WIDTHS: Record<CardSize, string> = { sm: "w-28", md: "w-40", lg: "w-56", xl: "w-72", fill: "w-full" };
+
 /**
- * Carta do jogador. Sem `award`, é a carta base (faixa pelo OVR); com `award`,
- * é a carta especial colecionável. Escala pela largura (`size`): todo o conteúdo
- * interno usa unidades `cqw`, então não ajuste fontes por breakpoint.
+ * Carta do jogador. Na branch de testes `feat/card-identity-redesign`, todas as
+ * cartas (base, Loja e prêmios) usam a carta com identidade própria (`CanchaCard`).
+ * O desenho anterior continua em `LegacyPlayerCard`, para comparar.
  */
 export function PlayerCard({ player, size = "md", award, className }: PlayerCardProps) {
+  return <CanchaCard player={player} award={award} photoSizes={PHOTO_SIZES[size]} className={cn(CANCHA_WIDTHS[size], className)} />;
+}
+
+/**
+ * Carta do jogador (desenho anterior, estilo FUT). Sem `award`, é a carta base
+ * (faixa pelo OVR); com `award`, é a carta especial colecionável. Escala pela
+ * largura (`size`): todo o conteúdo interno usa unidades `cqw`.
+ */
+export function LegacyPlayerCard({ player, size = "md", award, className }: PlayerCardProps) {
   // Carta comprada na Loja substitui a carta padrão; as cartas de prêmio mantêm o visual delas.
   if (!award && player.cardSkin) {
     return <PremiumPlayerCard player={player} skin={player.cardSkin} size={size} className={className} />;
@@ -354,13 +352,6 @@ export function PlayerCard({ player, size = "md", award, className }: PlayerCard
           <GhostIcon
             aria-hidden
             className="absolute top-[18%] right-[-6%] size-[62cqw] rotate-12 opacity-[0.12]"
-          />
-        )}
-        {award && hasSeasonalTheme(award.kind) && award.theme === "brasileirao" && (
-          <TrophyIcon
-            aria-hidden
-            strokeWidth={1.2}
-            className="absolute top-[14%] right-[6%] size-[50cqw] opacity-[0.14]"
           />
         )}
 
@@ -511,40 +502,9 @@ const SKIN_CLASSES: Record<CardSkinKey, string> = {
   icone: "card-skin-icone",
   lobisomem: "card-skin-lobisomem",
   vampiro: "card-skin-vampiro",
-  "clube-athletico-pr": "card-skin-clube-athletico-pr",
-  "clube-atletico-mg": "card-skin-clube-atletico-mg",
-  "clube-bahia": "card-skin-clube-bahia",
-  "clube-botafogo": "card-skin-clube-botafogo",
-  "clube-chapecoense": "card-skin-clube-chapecoense",
-  "clube-corinthians": "card-skin-clube-corinthians",
-  "clube-coritiba": "card-skin-clube-coritiba",
-  "clube-cruzeiro": "card-skin-clube-cruzeiro",
-  "clube-flamengo": "card-skin-clube-flamengo",
-  "clube-fluminense": "card-skin-clube-fluminense",
-  "clube-gremio": "card-skin-clube-gremio",
-  "clube-internacional": "card-skin-clube-internacional",
-  "clube-mirassol": "card-skin-clube-mirassol",
-  "clube-palmeiras": "card-skin-clube-palmeiras",
-  "clube-bragantino": "card-skin-clube-bragantino",
-  "clube-remo": "card-skin-clube-remo",
-  "clube-santos": "card-skin-clube-santos",
-  "clube-sao-paulo": "card-skin-clube-sao-paulo",
-  "clube-vasco": "card-skin-clube-vasco",
-  "clube-vitoria": "card-skin-clube-vitoria",
 };
 
 const GOLD_FILL = "[background:var(--card-gold)]";
-
-/** Prata dos clubes alvinegros (o mesmo `--card-gold` das utilities deles). */
-const CLUB_SILVER: readonly (readonly [string, string])[] = [
-    ["0%", "#ffffff"],
-    ["16%", "#b8bcc2"],
-    ["30%", "#f3f4f6"],
-    ["48%", "#5c6066"],
-    ["64%", "#d6d9dd"],
-    ["82%", "#3f4247"],
-    ["100%", "#e5e7ea"],
-  ];
 
 /** Paradas do metal da moldura (as mesmas do `--card-gold` de cada carta, para os SVGs). */
 const METAL_STOPS: Partial<Record<CardSkinKey, readonly (readonly [string, string])[]>> = {
@@ -557,10 +517,6 @@ const METAL_STOPS: Partial<Record<CardSkinKey, readonly (readonly [string, strin
     ["82%", "#434c56"],
     ["100%", "#e2e8ef"],
   ],
-  "clube-atletico-mg": CLUB_SILVER,
-  "clube-botafogo": CLUB_SILVER,
-  "clube-corinthians": CLUB_SILVER,
-  "clube-vasco": CLUB_SILVER,
   vampiro: [
     ["0%", "#f1d9db"],
     ["16%", "#8a1626"],
@@ -597,7 +553,15 @@ const TIER_STOPS: Record<CardTier, readonly (readonly [string, string])[]> = {
     ["82%", "#4d230e"],
     ["100%", "#e8a878"],
   ],
-  silver: CLUB_SILVER,
+  silver: [
+    ["0%", "#ffffff"],
+    ["16%", "#b8bcc2"],
+    ["30%", "#f3f4f6"],
+    ["48%", "#5c6066"],
+    ["64%", "#d6d9dd"],
+    ["82%", "#3f4247"],
+    ["100%", "#e5e7ea"],
+  ],
   gold: [
     ["0%", "#fff8c9"],
     ["16%", "#e2b52c"],
@@ -851,8 +815,6 @@ function PremiumPlayerCard({
   const attributeKeys: readonly PlayerAttribute[] =
     player.role === "goalkeeper" ? GOALKEEPER_ATTRIBUTES : OUTFIELD_ATTRIBUTES;
   const attributeValues: Partial<Record<PlayerAttribute, number | null>> = player.attributes;
-  const skinInfo = getCardSkin(skin);
-  const crest = "crest" in skinInfo ? skinInfo.crest : null;
   // Borda no metal da faixa (elo) do jogador; sem OVR ainda, fica o metal da skin.
   const tier = player.ovr === null ? null : getCardTier(player.ovr);
 
@@ -882,8 +844,6 @@ function PremiumPlayerCard({
             SHAPE_CLIP,
           )}
         >
-          {/* Camisa do clube (cartas de clube), por baixo do vidro. */}
-          <div className="absolute inset-0 [background:var(--skin-pattern,none)]" />
           <PremiumFaceArt skin={skin} />
 
           <div className="absolute top-[12%] left-[10%] z-10 flex flex-col items-center font-display leading-none">
@@ -891,13 +851,6 @@ function PremiumPlayerCard({
             <span className="text-[8.5cqw] font-medium tracking-wide">{player.position}</span>
             <span className={cn("mt-[2.5cqw] h-px w-[12cqw]", GOLD_FILL)} />
           </div>
-
-          {crest && (
-            // Escudo do clube sob o OVR, como nas cartas do EA FC (aprovado pelo dono do app).
-            <div className="absolute top-[34.5%] left-[9.5%] z-10 h-[13%] w-[19%]">
-              <Image src={crest} alt="" fill sizes="64px" className="object-contain" />
-            </div>
-          )}
 
           <div className="absolute top-[2%] -right-[4%] -left-[4%] z-0 h-[62%]">
             {/* Na carta da Loja, o tom vem da face (a moldura é sempre o metal). */}

@@ -1,17 +1,23 @@
 import { AWARD_ICONS } from "@/components/award-icons";
 import { cn } from "@/lib/utils";
-import { AWARD_KINDS, AWARD_LABELS, type Award, type AwardKind } from "@/types/award";
+import { AWARD_KINDS, AWARD_LABELS, awardOrder, type Award, type AwardKind } from "@/types/award";
 
 type CollectionSummaryProps = {
   awards: Award[];
   title: string;
 };
 
-/** Cabeçalho da coleção: total e quantas cartas de cada prêmio em jogo. */
+/**
+ * Cabeçalho da coleção: total e quantas cartas de cada prêmio em jogo, mais os prêmios
+ * que saíram do jogo que a pessoa ganhou (para a soma bater com o total).
+ */
 export function CollectionSummary({ awards, title }: CollectionSummaryProps) {
-  const countByKind = Object.fromEntries(
-    AWARD_KINDS.map((kind) => [kind, awards.filter((award) => award.kind === kind).length]),
-  ) as Record<AwardKind, number>;
+  const countByKind = new Map<AwardKind, number>();
+  for (const award of awards) countByKind.set(award.kind, (countByKind.get(award.kind) ?? 0) + 1);
+  const retiredOwned = [...countByKind.keys()]
+    .filter((kind) => !(AWARD_KINDS as readonly AwardKind[]).includes(kind))
+    .toSorted((a, b) => awardOrder(a) - awardOrder(b));
+  const kinds: readonly AwardKind[] = [...AWARD_KINDS, ...retiredOwned];
 
   return (
     <section aria-labelledby="collection-title" className="flex flex-col gap-4 rounded-xl border bg-card p-4">
@@ -30,9 +36,9 @@ export function CollectionSummary({ awards, title }: CollectionSummaryProps) {
 
       {/* 5 colunas, ícone em cima e nome com quebra: cabe no celular sem cortar "Bola Murcha". */}
       <dl className="grid grid-cols-5 gap-x-1 gap-y-3">
-        {AWARD_KINDS.map((kind) => {
+        {kinds.map((kind) => {
           const Icon = AWARD_ICONS[kind];
-          const count = countByKind[kind];
+          const count = countByKind.get(kind) ?? 0;
           return (
             <div
               key={kind}

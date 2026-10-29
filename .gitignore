@@ -43,3 +43,6 @@ next-env.d.ts
 
 # WASM do MediaPipe (copiado do node_modules no postinstall)
 /public/mediapipe/wasm/
+
+# Rascunhos do brainstorming visual (skill brainstorming)
+.superpowers/

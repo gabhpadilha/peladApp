@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CoinsIcon, GhostIcon, SparklesIcon, TrophyIcon, type LucideIcon } from "lucide-react";
+import { CoinsIcon, GhostIcon, SparklesIcon, type LucideIcon } from "lucide-react";
 import { CardSkinTile } from "@/components/card-skin-tile";
 import type { CardThemeKey } from "@/lib/card-themes";
 import { PlayerCard } from "@/components/player-card";
@@ -27,7 +27,6 @@ type ShopContentProps = {
 const EVENT_ICONS: Record<CardThemeKey, LucideIcon> = {
   default: SparklesIcon,
   halloween: GhostIcon,
-  brasileirao: TrophyIcon,
 };
 
 /** Preço com o de tabela riscado ao lado quando há promoção. */

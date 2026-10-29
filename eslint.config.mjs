@@ -17,6 +17,8 @@ const eslintConfig = defineConfig([
     ".claude/**",
     // WASM do MediaPipe copiado do node_modules (código gerado de terceiros).
     "public/mediapipe/**",
+    // Protótipos de referência dos documentos de design (não são código do app).
+    "docs/**",
   ]),
 ]);
 
