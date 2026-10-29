@@ -97,7 +97,8 @@ const HIGHLIGHT_ART = new Set<AwardKind>(["atacante", "criativo", "defensor", "g
 
 /**
  * Time do Mês (aprovado pelo dono do app em 2026-10-29): o cristal lapidado que ele mandou,
- * em roxo, com a coroa dourada ao lado do jogador e o tubo de neon das premium em roxo.
+ * em roxo, com o tubo de neon das premium em roxo e a coroa em neon roxo no topo, como
+ * enfeite (`NEON_TRIMS.mes`; até 2026-10-29 a coroa ficava no fundo, ao lado do jogador).
  * Não veste o tema do mês (`hasSeasonalTheme`). Fundo `premio-time-do-mes.webp`, gerado
  * por `prototipos/mes-cristal.cjs` (docs).
  */
@@ -110,6 +111,7 @@ const MONTH_ROUPA: Roupa = {
   muted: "#f3d27a",
   sparkles: false,
   neon: "#b46bff",
+  trim: "mes",
 };
 
 /**
@@ -261,7 +263,13 @@ const METAL_WINDOW = cn("inset-x-[2.6%] inset-y-[1.86%]", INNER_CORNERS);
  */
 const NEON_TRIM_INNER = "M104.6 80 V131 Q104.6 144.6 93 144.6";
 
-type NeonTrimShape = { side: { d: string; width: number }[]; center?: string; subtle?: boolean };
+type NeonTrimShape = {
+  side: { d: string; width: number }[];
+  center?: string;
+  /** Fios do enfeite do meio (sem preencher), no mesmo neon dos outros fios. */
+  centerLines?: string;
+  subtle?: boolean;
+};
 
 const NEON_TRIMS = {
   base: {
@@ -292,6 +300,18 @@ const NEON_TRIMS = {
       { d: "M102.4 64 V133 Q102.4 142.4 93 142.4 H58 L50 146", width: 0.6 },
     ],
     center: "M50.00 -9.20 L51.06 -6.46 L53.99 -6.30 L51.71 -4.44 L52.47 -1.60 L50.00 -3.20 L47.53 -1.60 L48.29 -4.44 L46.01 -6.30 L48.94 -6.46 Z",
+  },
+  // Time do Mês (pedido do dono do app em 2026-10-29): o abraço da base das premium e a
+  // coroa no topo, em neon (saiu do fundo da carta).
+  mes: {
+    side: [
+      { d: "M102.4 64 V133 Q102.4 142.4 93 142.4 H58 L50 146", width: 0.55 },
+      { d: `${NEON_TRIM_INNER} H64`, width: 0.7 },
+    ],
+    // Coroa no traço do ícone que o dono do app mandou: zigue-zague cruzado, bolinhas nas
+    // pontas e o losango em cima, no mesmo neon roxo da carta.
+    centerLines: "M42.06 -8.44 L44.38 -1.78 L46.73 -6.82 L48.41 -1.78 L50.09 -10.42 L51.77 -1.78 L53.53 -6.82 L55.81 -1.78 L58.13 -8.44 M42.06 -8.44 L48.41 -1.78 M58.13 -8.44 L51.77 -1.78",
+    center: "M50.09 -14.13 L50.95 -12.51 L50.09 -10.96 L49.23 -12.51 Z M41.43 -9.34 A0.64 0.64 0 1 0 42.70 -9.34 A0.64 0.64 0 1 0 41.43 -9.34 Z M46.28 -7.43 A0.45 0.45 0 1 0 47.18 -7.43 A0.45 0.45 0 1 0 46.28 -7.43 Z M53.08 -7.43 A0.45 0.45 0 1 0 53.98 -7.43 A0.45 0.45 0 1 0 53.08 -7.43 Z M57.42 -9.34 A0.64 0.64 0 1 0 58.69 -9.34 A0.64 0.64 0 1 0 57.42 -9.34 Z",
   },
   destaque: {
     side: [{ d: "M72 142.4 H57 L50 145.6", width: 0.55 }],
@@ -344,6 +364,7 @@ function NeonTrim({ kind }: { kind: NeonTrimKind }) {
     >
       <g>{side}</g>
       <g transform="translate(100 0) scale(-1 1)">{side}</g>
+      {trim.centerLines && <NeonLine d={trim.centerLines} width={0.5} />}
       {trim.center && (
         <>
           <path d={trim.center} strokeWidth={4} opacity={0.2} />
