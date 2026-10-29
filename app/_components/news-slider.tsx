@@ -297,7 +297,7 @@ export function NewsSlider({ event, today, shopSale, player, progress, balance }
           eyebrow="Novidade · sua carta"
           title="Patentes"
           meta={rankStatus(player.ovr)}
-          text="A patente sobe e desce com o seu OVR, a média de Ataque, Criação e Defesa da carta, a cada rodada fechada."
+          text="A patente sobe e desce com o seu OVR, a média das 2 melhores estatísticas da carta (Ataque, Criação, Defesa), a cada rodada fechada."
           visual={<RankLadder current={getCardRank(player.ovr)} />}
           href={`/jogadores/${player.id}`}
           cta="Ver minha carreira"

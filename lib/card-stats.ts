@@ -38,10 +38,19 @@ export function getCardStats(player: Player): CardStat[] {
   return getStatsFromAttributes(player.role, player.attributes);
 }
 
+/** Quantas estatísticas, das maiores para as menores, entram no OVR. */
+export const OVR_COUNTED_STATS = 2;
+
 /**
- * OVR da carta = média das 3 estatísticas que ela mostra (decisão do dono do app em
- * 2026-10-29), para o número grande bater com os de baixo. Espelha `card_ovr` no banco.
+ * OVR da carta = média das 2 maiores das 3 estatísticas que ela mostra (decisão do dono
+ * do app em 2026-10-29: a mais fraca sai, como no futsal todo mundo faz de tudo um pouco;
+ * antes, no mesmo dia, era a média das 3). Espelha `card_ovr` no banco.
  */
 export function getOvrFromStats(stats: readonly CardStat[]): number | null {
-  return averageOf(stats.map((stat) => stat.value));
+  const best = stats
+    .map((stat) => stat.value)
+    .filter((value): value is number => value !== null)
+    .toSorted((a, b) => b - a)
+    .slice(0, OVR_COUNTED_STATS);
+  return averageOf(best);
 }

@@ -51,7 +51,7 @@ export function addToOvrTotals(totals: OvrTotals, evaluation: Evaluation): void 
   }
 }
 
-/** OVR dos totais: cada atributo na escala da carta, as 3 estatísticas e a média delas. */
+/** OVR dos totais: cada atributo na escala da carta, as 3 estatísticas e a média das 2 maiores. */
 export function ovrFromTotals(totals: OvrTotals): number | null {
   if (totals.size === 0) return null;
   const attributes = Object.fromEntries(
@@ -62,10 +62,10 @@ export function ovrFromTotals(totals: OvrTotals): number | null {
 }
 
 /**
- * OVR = média das 3 estatísticas da carta (Ataque, Criação e Defesa; no goleiro,
+ * OVR = média das 2 maiores das 3 estatísticas da carta (Ataque, Criação e Defesa; no goleiro,
  * Paredão, Leitura e Saída), cada uma a média de um par de atributos, e cada atributo
  * a média dele em todas as avaliações que contam (decisão do dono do app em
- * 2026-10-29; antes era a média dos 5 melhores atributos). Sempre sobre o histórico
+ * 2026-10-29; antes era a média dos 5 melhores atributos e, no mesmo dia, a das 3). Sempre sobre o histórico
  * inteiro (só rodadas fechadas). As avaliações chegam já sem a maior e a menor de
  * cada rodada (`getGroupEvaluations`); quem chama tira as de fora da posição.
  * A nota da rodada (`averageEvaluations`) continua com os 6 atributos.
