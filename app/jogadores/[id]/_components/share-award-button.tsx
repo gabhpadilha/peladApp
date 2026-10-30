@@ -66,24 +66,43 @@ async function toDataUrl(url: string): Promise<string> {
 }
 
 /**
- * Troca os fundos em imagem (o fundo de cada carta) por data URLs já decodificadas: no
- * iPhone, o fundo da carta saía preto no story (a captura não esperava a imagem carregar).
+ * No iPhone, o fundo da carta (CSS `background-image` numa caixa com cantos arredondados)
+ * saía preto no story, enquanto as fotos (`<img>`) saíam certas. Aqui cada fundo vira um
+ * `<img>` por baixo do conteúdo da caixa, já carregado e decodificado.
  */
 async function bakeBackgrounds(node: HTMLElement) {
   const elements = node.querySelectorAll<HTMLElement>("[style*='background-image']");
   await Promise.all(
     Array.from(elements).map(async (element) => {
       const match = /url\(["']?([^"')]+)["']?\)/.exec(element.style.backgroundImage);
-      if (!match || match[1].startsWith("data:")) return;
-      element.style.backgroundImage = `url("${await toDataUrl(match[1])}")`;
+      if (!match) return;
+      const image = document.createElement("img");
+      image.src = match[1].startsWith("data:") ? match[1] : await toDataUrl(match[1]);
+      image.alt = "";
+      Object.assign(image.style, { position: "absolute", inset: "0", width: "100%", height: "100%", objectFit: "cover", zIndex: "0" });
+      await image.decode();
+      element.style.backgroundImage = "none";
+      element.prepend(image);
     }),
   );
+}
+
+/**
+ * Textos cortados com reticências (`truncate`) dentro de caixas flex sumiam no story do
+ * iPhone (o nome da carta). Na captura, o texto não é cortado (os nomes já cabem).
+ */
+function unclipTexts(node: HTMLElement) {
+  for (const element of node.querySelectorAll<HTMLElement>(".truncate")) {
+    element.style.textOverflow = "clip";
+    element.style.overflow = "visible";
+  }
 }
 
 /** Transforma a arte do story numa imagem PNG, no próprio aparelho. */
 async function renderStory(node: HTMLElement, fileName: string): Promise<File> {
   await document.fonts.ready;
   await Promise.all([bakePhotos(node), bakeBackgrounds(node)]);
+  unclipTexts(node);
   const options = { width: STORY_WIDTH, height: STORY_HEIGHT, scale: STORY_SCALE, type: "image/png" } as const;
   // O Safari do iPhone às vezes desenha a primeira captura antes de terminar de montar as
   // imagens e as fontes dela; a segunda sai completa.
