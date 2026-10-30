@@ -233,15 +233,11 @@ const METAL_FRAME =
  */
 const NEON_FRAME =
   "bg-[linear-gradient(160deg,#fff,color-mix(in_oklab,var(--cc-neon),white_55%)_30%,color-mix(in_oklab,var(--cc-neon),white_25%)_55%,color-mix(in_oklab,var(--cc-neon),white_60%)_80%,#fff)]";
-const NEON_HALO =
-  "shadow-[0_0_0.8cqw_var(--cc-neon),0_0_3.5cqw_color-mix(in_oklab,var(--cc-neon),transparent_30%),0_0_10cqw_color-mix(in_oklab,var(--cc-neon),transparent_65%)]";
 const NEON_INNER_GLOW =
   "shadow-[inset_0_0_0.8cqw_var(--cc-neon),inset_0_0_3.5cqw_color-mix(in_oklab,var(--cc-neon),transparent_40%)]";
 /** Neon apagado (Bola Murcha): o tubo sem o centro branco e um brilho fraco em volta. */
 const NEON_FRAME_DIM =
   "bg-[linear-gradient(160deg,color-mix(in_oklab,var(--cc-neon),white_30%),var(--cc-neon)_30%,color-mix(in_oklab,var(--cc-neon),black_30%)_55%,var(--cc-neon)_80%,color-mix(in_oklab,var(--cc-neon),white_20%))]";
-const NEON_HALO_DIM =
-  "shadow-[0_0_0.6cqw_color-mix(in_oklab,var(--cc-neon),transparent_50%),0_0_3cqw_color-mix(in_oklab,var(--cc-neon),transparent_80%)]";
 const NEON_INNER_GLOW_DIM = "shadow-[inset_0_0_1.6cqw_color-mix(in_oklab,var(--cc-neon),transparent_70%)]";
 /** Janela das cartas de neon: a moldura é mais fina (1,7% da largura). */
 const NEON_WINDOW = "inset-x-[1.7%] inset-y-[1.21%] rounded-[7.3cqw]";
@@ -349,33 +345,121 @@ function NeonLine({ d, width, subtle }: { d: string; width: number; subtle?: boo
 /** Cor do miolo aceso dos enfeites: a cor do neon puxada para o branco. */
 const NEON_CORE = "color-mix(in oklab, var(--cc-neon), white 65%)";
 
-function NeonTrim({ kind }: { kind: NeonTrimKind }) {
-  const trim: NeonTrimShape = NEON_TRIMS[kind];
-  const side = trim.side.map((line) => <NeonLine key={line.d} {...line} subtle={trim.subtle} />);
+/**
+ * Espelha um traço (comandos absolutos M, L, H, V, Q, A, Z) na vertical do meio da carta
+ * (x → 100 − x). Sem `transform` no SVG: a captura do story no iPhone (`modern-screenshot`)
+ * desenhava o lado espelhado como um bloco de cor ao lado da carta.
+ */
+function mirrorPath(d: string): string {
+  const tokens = d.match(/[A-Za-z]|-?\d*\.?\d+/g) ?? [];
+  const out: string[] = [];
+  let command = "";
+  let index = 0;
+  while (index < tokens.length) {
+    const token = tokens[index];
+    if (/[A-Za-z]/.test(token)) {
+      command = token;
+      out.push(token);
+      index += 1;
+      if (command === "Z" || command === "z") continue;
+    }
+    const take = (count: number) => tokens.slice(index, index + count).map(Number);
+    if (command === "H") {
+      out.push(String(100 - take(1)[0]));
+      index += 1;
+    } else if (command === "V") {
+      out.push(String(take(1)[0]));
+      index += 1;
+    } else if (command === "M" || command === "L") {
+      const [x, y] = take(2);
+      out.push(`${100 - x} ${y}`);
+      index += 2;
+    } else if (command === "Q") {
+      const [x1, y1, x, y] = take(4);
+      out.push(`${100 - x1} ${y1} ${100 - x} ${y}`);
+      index += 4;
+    } else if (command === "A") {
+      const [rx, ry, rotation, large, sweep, x, y] = take(7);
+      out.push(`${rx} ${ry} ${-rotation} ${large} ${sweep ? 0 : 1} ${100 - x} ${y}`);
+      index += 7;
+    } else {
+      index += 1;
+    }
+  }
+  return out.join(" ");
+}
+
+/** Contorno da carta (100 × 140, cantos de 9 × 9,1, como `rounded-[9%/6.5%]`). */
+const CARD_OUTLINE = { x: 0, y: 0, width: 100, height: 140, rx: 9, ry: 9.1 } as const;
+
+/**
+ * Brilho e enfeite das cartas de neon, num SVG ao lado da carta (na caixa dela, com a
+ * sobra de `TRIMMED_CARD`). Brilho em traços do contorno, não `box-shadow`: na captura do
+ * story no iPhone (`modern-screenshot`), a sombra virava um bloco de cor ao lado da carta e
+ * o que passava da carta era cortado (pedido do dono do app em 2026-10-29).
+ */
+function NeonOverlay({ kind, isDim }: { kind: NeonTrimKind | null; isDim: boolean }) {
+  const trim: NeonTrimShape | null = kind ? NEON_TRIMS[kind] : null;
   return (
     <svg
       aria-hidden
-      viewBox="-8 -8 116 156"
+      // A carta ocupa os 84% do meio da caixa: em unidades da carta, a caixa vai de
+      // −9,52 a 109,52 na largura e de −13,33 a 153,33 na altura.
+      viewBox="-9.524 -13.333 119.048 166.667"
       preserveAspectRatio="none"
       fill="none"
       stroke="var(--cc-neon)"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="pointer-events-none absolute top-[-5.714%] left-[-8%] z-[10] h-[111.43%] w-[116%] overflow-visible"
+      className="pointer-events-none absolute inset-0 z-[10] size-full"
     >
-      <g>{side}</g>
-      <g transform="translate(100 0) scale(-1 1)">{side}</g>
-      {trim.centerLines && <NeonLine d={trim.centerLines} width={0.5} />}
-      {trim.center && (
+      <g>
+        {(isDim ? NEON_HALO_DIM_STROKES : NEON_HALO_STROKES).map((stroke) => (
+          <rect key={stroke.width} {...CARD_OUTLINE} strokeWidth={stroke.width} opacity={stroke.opacity} />
+        ))}
+      </g>
+      {trim && (
         <>
-          <path d={trim.center} strokeWidth={4} opacity={0.2} />
-          <path d={trim.center} strokeWidth={1.8} opacity={0.45} />
-          <path d={trim.center} fill={NEON_CORE} fillRule="evenodd" strokeWidth={0.5} />
+          <g>
+            {trim.side.map((line) => (
+              <NeonLine key={line.d} {...line} subtle={trim.subtle} />
+            ))}
+          </g>
+          <g>
+            {trim.side.map((line) => (
+              <NeonLine key={`espelho-${line.d}`} {...line} d={mirrorPath(line.d)} subtle={trim.subtle} />
+            ))}
+          </g>
+          {trim.centerLines && <NeonLine d={trim.centerLines} width={0.5} />}
+          {trim.center && (
+            <>
+              <path d={trim.center} strokeWidth={4} opacity={0.2} />
+              <path d={trim.center} strokeWidth={1.8} opacity={0.45} />
+              <path d={trim.center} fill={NEON_CORE} fillRule="evenodd" strokeWidth={0.5} />
+            </>
+          )}
         </>
       )}
     </svg>
   );
 }
+
+/** Brilho em volta da carta: traços do contorno, do mais largo e fraco ao mais justo. */
+const NEON_HALO_STROKES = [
+  { width: 22, opacity: 0.03 },
+  { width: 18, opacity: 0.03 },
+  { width: 14, opacity: 0.04 },
+  { width: 10, opacity: 0.06 },
+  { width: 7, opacity: 0.08 },
+  { width: 4.5, opacity: 0.12 },
+  { width: 2.4, opacity: 0.25 },
+  { width: 1, opacity: 0.6 },
+] as const;
+const NEON_HALO_DIM_STROKES = [
+  { width: 8, opacity: 0.05 },
+  { width: 3, opacity: 0.12 },
+  { width: 1, opacity: 0.35 },
+] as const;
 
 /**
  * Carta de neon (pedido do dono do app em 2026-10-29: o morcego encostava na margem):
@@ -392,6 +476,22 @@ const TRIMMED_CARD = "absolute inset-[8%]";
 const PHOTO_SHADOW =
   "bg-[radial-gradient(46%_30%_at_50%_40%,rgb(0_0_0/0.85),rgb(0_0_0/0.45)_55%,transparent_80%),radial-gradient(70%_30%_at_50%_82%,rgb(0_0_0/0.8),transparent_80%)]";
 
+/**
+ * Enquadramento da foto (prévia):
+ * - `atual`: inteira, presa acima do rodapé, as laterais somem nas bordas.
+ * - `largura`: maior, com as laterais apagadas do recorte para fora da carta, e desce por
+ *   baixo das estatísticas.
+ * - `perto`: igual, mais perto (começa logo abaixo do nome).
+ * - `fadeCurto`: largura toda e o peito aparece até quase as estatísticas.
+ */
+export type PhotoFrame = "atual" | "largura" | "perto" | "fadeCurto";
+const PHOTO_FRAMES: Record<PhotoFrame, { box: string; image: string; fade: string }> = {
+  atual: { box: "-inset-x-[20%] bottom-[12%] h-[85%]", image: "object-contain object-bottom", fade: "h-[20%]" },
+  largura: { box: "-inset-x-[25%] top-[12%] -bottom-[5%]", image: "object-cover object-top", fade: "h-[20%]" },
+  perto: { box: "-inset-x-[38%] top-[9%] -bottom-[18%]", image: "object-cover object-top", fade: "h-[20%]" },
+  fadeCurto: { box: "-inset-x-[25%] top-[12%] -bottom-[5%]", image: "object-cover object-top", fade: "h-[9%]" },
+};
+
 const EMPTY_VALUE = "–";
 
 export type CanchaCardAward = {
@@ -407,9 +507,12 @@ type CanchaCardProps = {
   className?: string;
   /** `sizes` da foto. */
   photoSizes: string;
+  /** Prévia (temporária): enquadramento da foto. */
+  photoFrame?: PhotoFrame;
 };
 
-export function CanchaCard({ player, award, className, photoSizes }: CanchaCardProps) {
+export function CanchaCard({ player, award, className, photoSizes, photoFrame = "atual" }: CanchaCardProps) {
+  const frame = PHOTO_FRAMES[photoFrame];
   const roupa: Roupa = award
     ? awardRoupa(award.kind, award.theme)
     : ROUPAS[player.cardSkin ? skinRoupa(player.cardSkin) : "padrao"];
@@ -466,7 +569,7 @@ export function CanchaCard({ player, award, className, photoSizes }: CanchaCardP
         {player.photo && <div aria-hidden className={cn("absolute inset-0 z-[4]", PHOTO_SHADOW)} />}
 
         {/* Foto grande, presa embaixo: o peito some no degradê antes do rodapé. */}
-        <div className="absolute -inset-x-[20%] bottom-[12%] z-[5] h-[85%]">
+        <div className={cn("absolute z-[5]", frame.box)}>
           {player.photo ? (
             <Image
               src={player.photo.url}
@@ -474,7 +577,7 @@ export function CanchaCard({ player, award, className, photoSizes }: CanchaCardP
               fill
               sizes={photoSizes}
               unoptimized={player.photo.url.startsWith("blob:")}
-              className="object-contain object-bottom"
+              className={frame.image}
             />
           ) : (
             <div className="flex size-full items-end justify-center pb-[6cqw]">
@@ -510,7 +613,7 @@ export function CanchaCard({ player, award, className, photoSizes }: CanchaCardP
             className="absolute z-[7] size-[5cqw] animate-[cc-twinkle_2.2s_ease-in-out_infinite] bg-[radial-gradient(circle,#fff_0_18%,rgb(var(--cc-light)/0.9)_40%,transparent_70%)] [clip-path:polygon(50%_0,58%_42%,100%_50%,58%_58%,50%_100%,42%_58%,0_50%,42%_42%)] motion-reduce:animate-none"
           />
         ))}
-        <div aria-hidden className="absolute inset-x-0 bottom-[12%] z-[7] h-[20%] bg-linear-to-b from-transparent to-(--cc-bar)" />
+        <div aria-hidden className={cn("absolute inset-x-0 bottom-[12%] z-[7] bg-linear-to-b from-transparent to-(--cc-bar)", frame.fade)} />
 
         <div
           className={cn(
@@ -549,16 +652,17 @@ export function CanchaCard({ player, award, className, photoSizes }: CanchaCardP
             : cn(METAL_WINDOW, "shadow-[inset_0_0_0_0.5cqw_var(--cc-m3),inset_0_0_0_0.9cqw_rgb(0_0_0/0.35)]"),
         )}
       />
-      {isNeon && (
-        <>
-          <div aria-hidden className={cn("pointer-events-none absolute inset-0 z-[10] rounded-[9%/6.5%]", roupa.neonDim ? NEON_HALO_DIM : NEON_HALO)} />
-          {hasTrim && <NeonTrim kind={roupa.trim ?? "base"} />}
-        </>
-      )}
     </article>
   );
 
   // Carta de neon: o enfeite e o brilho cabem dentro da própria caixa (mesmo tamanho e
   // proporção das outras), para não encostar em margem nem na carta do lado em nenhuma tela.
-  return isNeon ? <div className={cn("relative aspect-[5/7] shrink-0", className)}>{card}</div> : card;
+  return isNeon ? (
+    <div style={vars} className={cn("relative aspect-[5/7] shrink-0", className)}>
+      {card}
+      <NeonOverlay kind={hasTrim ? (roupa.trim ?? "base") : null} isDim={roupa.neonDim === true} />
+    </div>
+  ) : (
+    card
+  );
 }

@@ -62,7 +62,10 @@ export function AwardStory({ award, groupName, ref }: AwardStoryProps) {
         className="pointer-events-none absolute top-1/2 left-1/2 size-[560px] -translate-x-1/2 -translate-y-1/2 bg-[repeating-conic-gradient(from_0deg,color-mix(in_oklch,var(--reveal-color)_14%,transparent)_0deg_6deg,transparent_6deg_18deg)] mask-[radial-gradient(circle,black_20%,transparent_62%)]"
       />
 
-      <p className="relative font-display text-xl font-extrabold tracking-wide text-primary">PELADAPP</p>
+      <p className="relative font-display text-xl font-extrabold tracking-wide uppercase">
+        <span className="text-white">Cancha</span>
+        <span className="text-primary">Club</span>
+      </p>
       <p className="relative mt-1 max-w-full truncate text-xs tracking-[0.14em] text-white/60 uppercase">
         {groupName} · {hasSeasonalTheme(award.kind) ? CARD_THEME_LABELS[award.theme] : formatMonth(award.date)} {year}
       </p>
