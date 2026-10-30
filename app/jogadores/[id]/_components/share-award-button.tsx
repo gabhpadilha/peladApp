@@ -2,15 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { DownloadIcon, Loader2Icon, Share2Icon } from "lucide-react";
-import { domToBlob } from "modern-screenshot";
-import { bakePhotoFades } from "@/lib/photo-fades";
+import { AWARD_ICONS } from "@/components/award-icons";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { renderStoryPng } from "@/lib/story-canvas";
 import { AWARD_LABELS, type Award } from "@/types/award";
 import { cn } from "@/lib/utils";
-import { AwardStory, STORY_HEIGHT, STORY_WIDTH } from "./award-story";
-
-/** 360 × 640 em 3x = 1080 × 1920, o tamanho do story do Instagram. */
-const STORY_SCALE = 3;
 
 type ShareAwardButtonProps = {
   award: Award;
@@ -21,108 +17,21 @@ type ShareAwardButtonProps = {
 
 type StoryImage = { file: File; url: string; canShare: boolean };
 
-/**
- * Troca cada foto da arte pela versão com os degradês já nos pixels: o Safari
- * do iPhone ignora a máscara ao gerar a imagem (o fundo da foto saía preto).
- */
-async function bakePhotos(node: HTMLElement) {
-  const photos = node.querySelectorAll<HTMLImageElement>("img[data-photo-kind]");
-  await Promise.all(
-    Array.from(photos).map(async (photo) => {
-      const kind = photo.dataset.photoKind;
-      if (kind !== "cutout" && kind !== "original") return;
-      const box = photo.getBoundingClientRect();
-      const baked = await bakePhotoFades(photo.currentSrc || photo.src, kind, box.width * STORY_SCALE, box.height * STORY_SCALE);
-      photo.removeAttribute("srcset");
-      photo.removeAttribute("sizes");
-      photo.src = baked;
-      photo.style.removeProperty("mask-image");
-      photo.style.removeProperty("-webkit-mask-image");
-      photo.style.removeProperty("mask-size");
-      photo.style.removeProperty("-webkit-mask-size");
-      photo.style.removeProperty("mask-repeat");
-      photo.style.removeProperty("-webkit-mask-repeat");
-      photo.style.removeProperty("mask-composite");
-      photo.style.removeProperty("-webkit-mask-composite");
-      await photo.decode();
-    }),
-  );
-}
-
-/** Lê uma imagem do próprio app como data URL (já decodificada antes da captura). */
-async function toDataUrl(url: string): Promise<string> {
-  const response = await fetch(url);
-  const blob = await response.blob();
-  const dataUrl = await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(blob);
-  });
-  const image = new Image();
-  image.src = dataUrl;
-  await image.decode();
-  return dataUrl;
-}
-
-/**
- * No iPhone, o fundo da carta (CSS `background-image` numa caixa com cantos arredondados)
- * saía preto no story, enquanto as fotos (`<img>`) saíam certas. Aqui cada fundo vira um
- * `<img>` por baixo do conteúdo da caixa, já carregado e decodificado.
- */
-async function bakeBackgrounds(node: HTMLElement) {
-  const elements = node.querySelectorAll<HTMLElement>("[style*='background-image']");
-  await Promise.all(
-    Array.from(elements).map(async (element) => {
-      const match = /url\(["']?([^"')]+)["']?\)/.exec(element.style.backgroundImage);
-      if (!match) return;
-      const image = document.createElement("img");
-      image.src = match[1].startsWith("data:") ? match[1] : await toDataUrl(match[1]);
-      image.alt = "";
-      Object.assign(image.style, { position: "absolute", inset: "0", width: "100%", height: "100%", objectFit: "cover", zIndex: "0" });
-      await image.decode();
-      element.style.backgroundImage = "none";
-      element.prepend(image);
-    }),
-  );
-}
-
-/**
- * Textos cortados com reticências (`truncate`) dentro de caixas flex sumiam no story do
- * iPhone (o nome da carta). Na captura, o texto não é cortado (os nomes já cabem).
- */
-function unclipTexts(node: HTMLElement) {
-  for (const element of node.querySelectorAll<HTMLElement>(".truncate")) {
-    element.style.textOverflow = "clip";
-    element.style.overflow = "visible";
-  }
-}
-
-/** Transforma a arte do story numa imagem PNG, no próprio aparelho. */
-async function renderStory(node: HTMLElement, fileName: string): Promise<File> {
-  await document.fonts.ready;
-  await Promise.all([bakePhotos(node), bakeBackgrounds(node)]);
-  unclipTexts(node);
-  const options = { width: STORY_WIDTH, height: STORY_HEIGHT, scale: STORY_SCALE, type: "image/png" } as const;
-  // O Safari do iPhone às vezes desenha a primeira captura antes de terminar de montar as
-  // imagens e as fontes dela; a segunda sai completa.
-  await domToBlob(node, options);
-  const blob = await domToBlob(node, options);
-  return new File([blob], fileName, { type: "image/png" });
-}
-
 /** Botão "Compartilhar": monta o story da carta e abre o compartilhar do celular. */
 export function ShareAwardButton({ award, groupName, variant = "full" }: ShareAwardButtonProps) {
-  const storyRef = useRef<HTMLDivElement>(null);
+  // Só para pegar o SVG do ícone do prêmio e desenhar no story.
+  const iconRef = useRef<HTMLSpanElement>(null);
   const [isOpen, setIsOpen] = useState(false);
   const [image, setImage] = useState<StoryImage | null>(null);
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
-    if (!isOpen || image || hasError || !storyRef.current) return;
+    if (!isOpen || image || hasError) return;
     let isCancelled = false;
-    renderStory(storyRef.current, `canchaclub-${award.kind.replaceAll("_", "-")}-r${award.round}.png`)
-      .then((file) => {
+    const fileName = `canchaclub-${award.kind.replaceAll("_", "-")}-r${award.round}.png`;
+    renderStoryPng({ award, groupName, iconSvg: iconRef.current?.innerHTML ?? null })
+      .then((blob) => {
+        const file = new File([blob], fileName, { type: "image/png" });
         if (isCancelled) return;
         const canShare = typeof navigator.canShare === "function" && navigator.canShare({ files: [file] });
         setImage({ file, url: URL.createObjectURL(file), canShare });
@@ -134,7 +43,7 @@ export function ShareAwardButton({ award, groupName, variant = "full" }: ShareAw
     return () => {
       isCancelled = true;
     };
-  }, [isOpen, image, hasError, award.kind, award.round]);
+  }, [isOpen, image, hasError, award, groupName]);
 
   useEffect(() => () => {
     if (image) URL.revokeObjectURL(image.url);
@@ -157,6 +66,7 @@ export function ShareAwardButton({ award, groupName, variant = "full" }: ShareAw
   }
 
   const title = AWARD_LABELS[award.kind].title;
+  const Icon = AWARD_ICONS[award.kind];
 
   return (
     <>
@@ -172,13 +82,9 @@ export function ShareAwardButton({ award, groupName, variant = "full" }: ShareAw
         {variant === "full" ? "Compartilhar nos stories" : "Compartilhar"}
       </button>
 
-      {/* A arte fica invisível atrás da folha, no tamanho real, só enquanto ela está aberta.
-          Dentro da tela (e não fora dela): senão a foto com carregamento "lazy" nunca carrega. */}
-      {isOpen && !image && (
-        <div aria-hidden className="pointer-events-none fixed top-0 left-0 -z-50 opacity-0">
-          <AwardStory ref={storyRef} award={award} groupName={groupName} />
-        </div>
-      )}
+      <span ref={iconRef} aria-hidden className="hidden">
+        <Icon />
+      </span>
 
       <Sheet open={isOpen} onOpenChange={handleOpenChange}>
         <SheetContent side="bottom" className="mx-auto max-h-[92dvh] w-full max-w-md gap-0 overflow-y-auto rounded-t-2xl">

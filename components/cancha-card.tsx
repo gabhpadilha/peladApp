@@ -21,7 +21,7 @@ import type { Player } from "@/types/player";
  * camadas de degradê empilhadas.
  */
 
-type Roupa = {
+export type Roupa = {
   /** Fundo artístico em `public/cartas/fundos/`. */
   background: string;
   /** Metal da moldura: escuro, base dos reflexos (`METAL_FRAME`) e fio interno. */
@@ -261,7 +261,7 @@ const METAL_WINDOW = cn("inset-x-[2.6%] inset-y-[1.86%]", INNER_CORNERS);
  */
 const NEON_TRIM_INNER = "M104.6 80 V131 Q104.6 144.6 93 144.6";
 
-type NeonTrimShape = {
+export type NeonTrimShape = {
   side: { d: string; width: number }[];
   center?: string;
   /** Fios do enfeite do meio (sem preencher), no mesmo neon dos outros fios. */
@@ -328,7 +328,12 @@ const NEON_TRIMS = {
   },
 } satisfies Record<string, NeonTrimShape>;
 
-type NeonTrimKind = keyof typeof NEON_TRIMS;
+export type NeonTrimKind = keyof typeof NEON_TRIMS;
+
+/** Desenho do enfeite (para o story em canvas, `lib/story-canvas.ts`). */
+export function getNeonTrimShape(kind: NeonTrimKind): NeonTrimShape {
+  return NEON_TRIMS[kind];
+}
 
 /** Fio de neon: halo largo, halo médio e o fio (no discreto, halo menor e mais fraco). */
 function NeonLine({ d, width, subtle }: { d: string; width: number; subtle?: boolean }) {
@@ -351,7 +356,7 @@ const NEON_CORE = "color-mix(in oklab, var(--cc-neon), white 65%)";
  * (x → 100 − x). Sem `transform` no SVG: a captura do story no iPhone (`modern-screenshot`)
  * desenhava o lado espelhado como um bloco de cor ao lado da carta.
  */
-function mirrorPath(d: string): string {
+export function mirrorPath(d: string): string {
   const tokens = d.match(/[A-Za-z]|-?\d*\.?\d+/g) ?? [];
   const out: string[] = [];
   let command = "";
@@ -446,7 +451,7 @@ function NeonOverlay({ kind, isDim }: { kind: NeonTrimKind | null; isDim: boolea
 }
 
 /** Brilho em volta da carta: traços do contorno, do mais largo e fraco ao mais justo. */
-const NEON_HALO_STROKES = [
+export const NEON_HALO_STROKES = [
   { width: 22, opacity: 0.03 },
   { width: 18, opacity: 0.03 },
   { width: 14, opacity: 0.04 },
@@ -456,7 +461,7 @@ const NEON_HALO_STROKES = [
   { width: 2.4, opacity: 0.25 },
   { width: 1, opacity: 0.6 },
 ] as const;
-const NEON_HALO_DIM_STROKES = [
+export const NEON_HALO_DIM_STROKES = [
   { width: 8, opacity: 0.05 },
   { width: 3, opacity: 0.12 },
   { width: 1, opacity: 0.35 },
@@ -521,8 +526,11 @@ type CanchaCardProps = {
   photoFrame?: PhotoFrame;
 };
 
-export function CanchaCard({ player, award, className, photoSizes, photoFrame = "atual" }: CanchaCardProps) {
-  const frame = PHOTO_FRAMES[photoFrame];
+/**
+ * Tudo o que a carta mostra, calculado num lugar só: a `CanchaCard` e o story em canvas
+ * (`lib/story-canvas.ts`) usam a mesma conta.
+ */
+export function getCanchaCardLook(player: Player, award?: CanchaCardAward) {
   const roupa: Roupa = award
     ? awardRoupa(award.kind, award.theme)
     : ROUPAS[player.cardSkin ? skinRoupa(player.cardSkin) : "padrao"];
@@ -532,6 +540,13 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
     ? `${AWARD_LABELS[award.kind].title}${award.round === undefined ? "" : ` · R${award.round}`}`
     : CARD_RANK_LABELS[rank];
   const subtitle = !award && typeof player.level === "number" ? `${player.position} · Nível ${player.level}` : player.position;
+  const trim: NeonTrimKind | null = roupa.neon !== undefined && roupa.trim !== null ? (roupa.trim ?? "base") : null;
+  return { roupa, rank, stats, band, subtitle, trim };
+}
+
+export function CanchaCard({ player, award, className, photoSizes, photoFrame = "atual" }: CanchaCardProps) {
+  const frame = PHOTO_FRAMES[photoFrame];
+  const { roupa, rank, stats, band, subtitle } = getCanchaCardLook(player, award);
 
   const vars = {
     "--cc-m1": roupa.metal[0],
