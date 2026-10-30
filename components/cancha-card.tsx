@@ -1,6 +1,7 @@
 import Image from "next/image";
 import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
+import { PHOTO_SHADOW_GRADIENT_ID } from "@/lib/card-svg-ids";
 import { getCardRank, CARD_RANK_LABELS, RANK_FLAT_CLASSES, type CardRank } from "@/lib/card-rank";
 import { getCardStats } from "@/lib/card-stats";
 import { getInitials } from "@/lib/get-initials";
@@ -471,10 +472,19 @@ const TRIMMED_CARD = "absolute inset-[8%]";
 
 /**
  * Sombra atrás da foto ("A · Halo escuro", aprovada pelo dono do app em 2026-10-29): escura,
- * logo atrás da cabeça e dos ombros. Só degradês radiais, sem `filter` (iPhone).
+ * logo atrás da cabeça e dos ombros. Em SVG (degradê `PHOTO_SHADOW_GRADIENT_ID` de
+ * `PlayerCardDefs`), não em `radial-gradient` do CSS: na captura do story no iPhone, o CSS
+ * virava uma camada preta por cima do fundo e do nome. Coordenadas da carta (100 × 140).
  */
-const PHOTO_SHADOW =
-  "bg-[radial-gradient(46%_30%_at_50%_40%,rgb(0_0_0/0.85),rgb(0_0_0/0.45)_55%,transparent_80%),radial-gradient(70%_30%_at_50%_82%,rgb(0_0_0/0.8),transparent_80%)]";
+function PhotoShadow() {
+  const fill = `url(#${PHOTO_SHADOW_GRADIENT_ID})`;
+  return (
+    <svg aria-hidden viewBox="0 0 100 140" preserveAspectRatio="none" className="absolute inset-0 z-[2] size-full">
+      <ellipse cx={50} cy={56} rx={46} ry={42} fill={fill} />
+      <ellipse cx={50} cy={115} rx={70} ry={42} fill={fill} />
+    </svg>
+  );
+}
 
 /**
  * Enquadramento da foto (prévia):
@@ -541,7 +551,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
       aria-label={`${player.nickname}, ${player.position}, OVR ${player.ovr ?? "sem avaliação"}, ${band}`}
       style={vars}
       className={cn(
-        "@container relative isolate aspect-[5/7] shrink-0 rounded-[9%/6.5%] font-display text-white select-none",
+        "@container relative isolate aspect-[5/7] shrink-0 rounded-[9%/6.5%] text-left font-display text-white select-none",
         isNeon ? (roupa.neonDim ? NEON_FRAME_DIM : NEON_FRAME) : METAL_FRAME,
         isNeon ? TRIMMED_CARD : className,
       )}
@@ -566,7 +576,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
         </div>
 
         {/* Sombra atrás da pessoa: ela se descola do fundo e parece estar na carta. */}
-        {player.photo && <div aria-hidden className={cn("absolute inset-0 z-[4]", PHOTO_SHADOW)} />}
+        {player.photo && <PhotoShadow />}
 
         {/* Foto grande, presa embaixo: o peito some no degradê antes do rodapé. */}
         <div className={cn("absolute z-[5]", frame.box)}>

@@ -4,6 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { GhostIcon } from "lucide-react";
 import { AWARD_ICONS } from "@/components/award-icons";
 import { CanchaCard } from "@/components/cancha-card";
+import { PHOTO_SHADOW_GRADIENT_ID } from "@/lib/card-svg-ids";
 import { cn } from "@/lib/utils";
 import { CARD_TIER_LABELS, getCardTier, type CardTier } from "@/lib/card-tier";
 import type { CardThemeKey } from "@/lib/card-themes";
@@ -42,6 +43,12 @@ export function PlayerCardDefs() {
       <clipPath id={CARD_SHAPE_ID} clipPathUnits="objectBoundingBox">
         <path d="M0.16,0.035 Q0.5,0 0.84,0.035 Q0.88,0.09 1,0.085 L1,0.84 Q1,0.88 0.94,0.9 L0.56,0.985 Q0.5,1 0.44,0.985 L0.06,0.9 Q0,0.88 0,0.84 L0,0.085 Q0.12,0.09 0.16,0.035 Z" />
       </clipPath>
+      {/* Sombra atrás da foto da carta nova (`PhotoShadow` em cancha-card.tsx). */}
+      <radialGradient id={PHOTO_SHADOW_GRADIENT_ID}>
+        <stop offset="0" stopColor="#000" stopOpacity={0.85} />
+        <stop offset="0.6" stopColor="#000" stopOpacity={0.45} />
+        <stop offset="1" stopColor="#000" stopOpacity={0} />
+      </radialGradient>
       <linearGradient id={MONTH_SHARD_ID} x1="0" y1="1" x2="1" y2="0">
         <stop offset="0" stopColor="#5a1fb8" />
         <stop offset="0.55" stopColor="#a63ee6" />
