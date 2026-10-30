@@ -49,16 +49,46 @@ async function bakePhotos(node: HTMLElement) {
   );
 }
 
+/** Lê uma imagem do próprio app como data URL (já decodificada antes da captura). */
+async function toDataUrl(url: string): Promise<string> {
+  const response = await fetch(url);
+  const blob = await response.blob();
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+  const image = new Image();
+  image.src = dataUrl;
+  await image.decode();
+  return dataUrl;
+}
+
+/**
+ * Troca os fundos em imagem (o fundo de cada carta) por data URLs já decodificadas: no
+ * iPhone, o fundo da carta saía preto no story (a captura não esperava a imagem carregar).
+ */
+async function bakeBackgrounds(node: HTMLElement) {
+  const elements = node.querySelectorAll<HTMLElement>("[style*='background-image']");
+  await Promise.all(
+    Array.from(elements).map(async (element) => {
+      const match = /url\(["']?([^"')]+)["']?\)/.exec(element.style.backgroundImage);
+      if (!match || match[1].startsWith("data:")) return;
+      element.style.backgroundImage = `url("${await toDataUrl(match[1])}")`;
+    }),
+  );
+}
+
 /** Transforma a arte do story numa imagem PNG, no próprio aparelho. */
 async function renderStory(node: HTMLElement, fileName: string): Promise<File> {
   await document.fonts.ready;
-  await bakePhotos(node);
-  const blob = await domToBlob(node, {
-    width: STORY_WIDTH,
-    height: STORY_HEIGHT,
-    scale: STORY_SCALE,
-    type: "image/png",
-  });
+  await Promise.all([bakePhotos(node), bakeBackgrounds(node)]);
+  const options = { width: STORY_WIDTH, height: STORY_HEIGHT, scale: STORY_SCALE, type: "image/png" } as const;
+  // O Safari do iPhone às vezes desenha a primeira captura antes de terminar de montar as
+  // imagens e as fontes dela; a segunda sai completa.
+  await domToBlob(node, options);
+  const blob = await domToBlob(node, options);
   return new File([blob], fileName, { type: "image/png" });
 }
 
