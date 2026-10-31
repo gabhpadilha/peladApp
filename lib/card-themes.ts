@@ -5,8 +5,10 @@
  * em app/globals.css e as classes em components/player-card.tsx.
  */
 export const CARD_THEMES = [
-  { key: "halloween", label: "Halloween", startMonthDay: "10-01", endMonthDay: "10-31" },
-  { key: "temporal", label: "Temporal", startMonthDay: "11-01", endMonthDay: "11-30" },
+  { key: "halloween", label: "Halloween", startMonthDay: "10-01", endMonthDay: "10-30" },
+  // O evento de novembro (chave `temporal`, o nome do começo; na tela "Toró") foi ligado um dia
+  // antes, em 31/10, a pedido do dono do app. As cartas já ganhas guardam o tema delas.
+  { key: "temporal", label: "Toró", startMonthDay: "10-31", endMonthDay: "11-30" },
 ] as const;
 
 export type CardThemeKey = "default" | (typeof CARD_THEMES)[number]["key"];

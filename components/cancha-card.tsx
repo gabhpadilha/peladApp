@@ -171,18 +171,19 @@ function awardRoupa(kind: AwardKind, theme: CardThemeKey): Roupa {
   const provisional = PROVISIONAL_AWARD_ROUPAS[design];
   if (provisional) return { ...provisional, trim: theme === "halloween" ? "abobora" : "destaque" };
   const isCraque = design === "craque";
-  const colors = (isCraque ? CRAQUE_COLORS : HIGHLIGHT_COLORS)[theme];
+  // No Toró, Melhor Jogador e destaques usam as cartas novas dos prêmios (o sol art déco e a água
+  // com a nuvem chovendo, as mesmas de fora de evento), no lugar da taça e dos raios dourados
+  // (pedido do dono do app em 2026-10-31).
+  const designTheme: CardThemeKey = theme === "temporal" ? "default" : theme;
+  const colors = (isCraque ? CRAQUE_COLORS : HIGHLIGHT_COLORS)[designTheme];
   const art = isCraque ? "craque" : HIGHLIGHT_ART.has(kind) ? kind : "gol";
   return {
-    // Destaques: um fundo só, sem o ícone do prêmio. No Temporal, os raios (aprovado pelo dono
-    // do app em 2026-10-30); fora de evento, o mármore líquido da água (2026-10-31).
+    // Destaques: um fundo só, sem o ícone do prêmio: o mármore líquido da água (2026-10-31).
     background: isCraque
-      ? `premio-${art}-${theme}`
-      : theme === "temporal"
-        ? "premio-destaque-temporal"
-        : theme === "default"
-          ? "premio-destaque-agua"
-          : `premio-${art}-${theme}`,
+      ? `premio-${art}-${designTheme}`
+      : designTheme === "default"
+        ? "premio-destaque-agua"
+        : `premio-${art}-${designTheme}`,
     metal: [colors.frame, colors.frame, colors.hairline],
     accent: colors.accent,
     light: colors.light,
@@ -190,7 +191,7 @@ function awardRoupa(kind: AwardKind, theme: CardThemeKey): Roupa {
     muted: colors.muted,
     sparkles: false,
     neon: colors.neon,
-    trim: isCraque ? "craque" : theme === "halloween" ? "abobora" : theme === "default" ? "chuva" : "destaque",
+    trim: isCraque ? "craque" : designTheme === "halloween" ? "abobora" : designTheme === "default" ? "chuva" : "destaque",
   };
 }
 

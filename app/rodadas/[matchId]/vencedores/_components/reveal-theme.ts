@@ -43,6 +43,6 @@ export const PACK_THEMES: Record<
     body: "bg-linear-160 from-[oklch(0.3_0.06_250)] to-award-craque-temporal-to",
     text: "text-award-craque-temporal-foreground",
     border: "border-award-craque-temporal-frame/60",
-    label: "Temporal",
+    label: "Toró",
   },
 };

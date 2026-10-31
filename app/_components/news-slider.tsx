@@ -169,7 +169,7 @@ const COIN_CHIPS = pickRules(COIN_RULES, ["Jogar uma rodada", "Enviar as suas no
 /** Texto do 1º slide por tema do mês. Tema novo: entre aqui (e em `CARD_THEMES`). */
 const EVENT_COPY: Record<CardThemeKey, { eyebrow: string; title: string; icon: LucideIcon }> = {
   halloween: { eyebrow: "Evento de outubro", title: "Halloween na pelada", icon: GhostIcon },
-  temporal: { eyebrow: "Evento de novembro", title: "Temporal na pelada", icon: CloudLightningIcon },
+  temporal: { eyebrow: "Evento de novembro", title: "Toró na pelada", icon: CloudLightningIcon },
   default: { eyebrow: "Coleção", title: "Cartas especiais", icon: SparklesIcon },
 };
 

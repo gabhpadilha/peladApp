@@ -1,5 +1,8 @@
-// Cenário Temporal da mesa tática (novembro de 2026): quadra molhada à noite, poças refletindo
-// os refletores dos cantos, chuva e raios no alto. Gera public/mesa/temporal.webp.
+// Cenário do evento de novembro (Toró) na mesa tática: QUADRA ALAGADA, renderizada pixel a pixel
+// (pedido do dono do app em 2026-10-31: textura de verdade, não desenho chapado). Uma lâmina de
+// água cobre a quadra: o piso e as linhas aparecem por baixo, tremidos pela refração; as ondas
+// dos pingos e um marulho leve formam o relevo da água, que reflete os refletores dos cantos.
+// O meio fica escuro para as cartas lerem bem; sem linhas (cada campo da mesa desenha as suas). Gera public/mesa/temporal.webp (800 × 1480).
 // Uso: node docs/superpowers/specs/2026-10-28-cartas-assets/prototipos/mesa-temporal.cjs
 const path = require("node:path");
 const sharp = require("sharp");
@@ -8,140 +11,91 @@ const W = 800;
 const H = 1480;
 const OUT = path.join(__dirname, "../../../../../public/mesa/temporal.webp");
 
-// Gerador pseudoaleatório fixo: a arte sai igual a cada execução.
-let seed = 5;
-const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+let seed = 9;
+const rnd = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+const clamp = (v) => Math.max(0, Math.min(1, v));
+const smooth = (a, b, t) => { t = clamp((t - a) / (b - a)); return t * t * (3 - 2 * t); };
 
-function rain(count, opacity) {
-  return Array.from({ length: count }, () => {
-    const x = rand() * (W + 300) - 150;
-    const y = rand() * H;
-    const l = 26 + rand() * 46;
-    return `<line x1="${x.toFixed(0)}" y1="${y.toFixed(0)}" x2="${(x - l * 0.25).toFixed(0)}" y2="${(y + l).toFixed(0)}" stroke="#d8ecff" stroke-opacity="${(opacity * (0.35 + rand() * 0.65)).toFixed(2)}" stroke-width="${(0.8 + rand() * 1.1).toFixed(1)}" stroke-linecap="round"/>`;
-  }).join("");
+// Ruído de gradiente (marulho).
+const perm = new Uint8Array(512);
+{
+  const p = Array.from({ length: 256 }, (_, i) => i);
+  for (let i = 255; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [p[i], p[j]] = [p[j], p[i]]; }
+  for (let i = 0; i < 512; i++) perm[i] = p[i & 255];
+}
+const fade = (t) => t * t * t * (t * (t * 6 - 15) + 10);
+const grad = (h, x, y) => { const a = (h / 256) * Math.PI * 2; return Math.cos(a) * x + Math.sin(a) * y; };
+function noise(x, y) {
+  const xi = Math.floor(x), yi = Math.floor(y), xf = x - xi, yf = y - yi, X = xi & 255, Y = yi & 255;
+  const aa = perm[X + perm[Y]], ab = perm[X + perm[Y + 1]], ba = perm[X + 1 + perm[Y]], bb = perm[X + 1 + perm[Y + 1]];
+  const u = fade(xf), v = fade(yf);
+  const x1 = grad(aa, xf, yf) + u * (grad(ba, xf - 1, yf) - grad(aa, xf, yf));
+  const x2 = grad(ab, xf, yf - 1) + u * (grad(bb, xf - 1, yf - 1) - grad(ab, xf, yf - 1));
+  return x1 + v * (x2 - x1);
 }
 
-// Pingos batendo no chão: anéis achatados.
-function splashes(count) {
-  return Array.from({ length: count }, () => {
-    const x = rand() * W;
-    const y = rand() * H;
-    const r = 4 + rand() * 9;
-    return `<ellipse cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" rx="${r.toFixed(1)}" ry="${(r * 0.38).toFixed(1)}" fill="none" stroke="#cfe6ff" stroke-opacity="${(0.08 + rand() * 0.12).toFixed(2)}" stroke-width="1"/>`;
-  }).join("");
+// Relevo da água: marulho + anéis dos pingos (somados só na área de cada anel).
+const height = new Float32Array(W * H);
+for (let y = 0; y < H; y++) {
+  for (let x = 0; x < W; x++) {
+    height[y * W + x] = 0.6 * noise(x / 140, y / 90) + 0.25 * noise(x / 45, y / 30);
+  }
 }
-
-// Poças: manchas escuras com o reflexo azulado dos refletores.
-function puddle(cx, cy, rx, ry) {
-  return `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="url(#puddle)" opacity=".9"/>
-    <ellipse cx="${cx - rx * 0.2}" cy="${cy - ry * 0.15}" rx="${rx * 0.5}" ry="${ry * 0.25}" fill="#bfe0ff" opacity=".07"/>`;
-}
-
-function boltPath(x, y, len, spread) {
-  let d = `M${x} ${y}`;
-  const branches = [];
-  let cx = x;
-  let cy = y;
-  const steps = 9;
-  for (let i = 0; i < steps; i++) {
-    cx += (rand() - 0.5) * spread;
-    cy += len / steps;
-    d += ` L${cx.toFixed(1)} ${cy.toFixed(1)}`;
-    if (i > 0 && i < steps - 2 && rand() < 0.4) {
-      let bx = cx;
-      let by = cy;
-      let bd = `M${bx.toFixed(1)} ${by.toFixed(1)}`;
-      const dir = rand() < 0.5 ? -1 : 1;
-      for (let k = 0; k < 3; k++) {
-        bx += dir * (10 + rand() * spread * 0.6);
-        by += (len / steps) * 0.7;
-        bd += ` L${bx.toFixed(1)} ${by.toFixed(1)}`;
-      }
-      branches.push(bd);
+for (let n = 0; n < 260; n++) {
+  const cx = rnd() * W, cy = rnd() * H, r0 = 6 + rnd() * 34, k = 0.45 + rnd() * 0.5;
+  const R = r0 * 2.2;
+  for (let y = Math.max(0, Math.floor(cy - R)); y < Math.min(H, cy + R); y++) {
+    for (let x = Math.max(0, Math.floor(cx - R)); x < Math.min(W, cx + R); x++) {
+      // Anéis achatados (a quadra é vista meio de cima): distância com o eixo y esticado.
+      const d = Math.hypot(x - cx, (y - cy) * 1.25);
+      if (d > R) continue;
+      const wave = Math.sin((d - r0) * 0.55) * Math.exp(-Math.abs(d - r0) / (r0 * 0.45)) * (1 - d / R);
+      height[y * W + x] += wave * k;
     }
   }
-  return [d, ...branches];
-}
-function bolt(x, y, len, spread, strength) {
-  return boltPath(x, y, len, spread)
-    .map((d, i) => {
-      const w = i === 0 ? 1 : 0.55;
-      return `<path d="${d}" fill="none" stroke="#9fd2ff" stroke-width="${16 * w}" stroke-opacity="${0.14 * strength}" stroke-linejoin="round" filter="url(#bl)"/>
-        <path d="${d}" fill="none" stroke="#9fd2ff" stroke-width="${5 * w}" stroke-opacity="${0.4 * strength}" stroke-linejoin="round"/>
-        <path d="${d}" fill="none" stroke="#ffffff" stroke-width="${1.8 * w}" stroke-opacity="${0.9 * strength}" stroke-linejoin="round"/>`;
-    })
-    .join("");
 }
 
-// Refletor do canto: luz fria que derrama na quadra.
-function floodlight(cx, cy, r, opacity) {
-  return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="url(#flood)" opacity="${opacity}"/>`;
+// Piso da quadra (sob a água): azul-petróleo escuro com as faixas do piso. Sem linhas: cada campo
+// da mesa já desenha as suas (`PitchLines`), e a arte estica sobre cada time.
+function floor(x, y) {
+  const stripe = Math.floor(y / 92) % 2 ? 0.03 : 0;
+  const grain = 4 * noise(x / 6, y / 60);
+  return [10 + stripe * 255 + grain, 22 + stripe * 255 + grain, 27 + stripe * 255 + grain];
 }
 
-const stripes = Array.from({ length: Math.ceil(H / 92) }, (_, i) =>
-  i % 2 ? `<rect x="0" y="${i * 92}" width="${W}" height="92" fill="#ffffff" opacity=".03"/>` : "",
-).join("");
+// Refletores nos cantos (posição na "parede", para o reflexo especular).
+const LIGHTS = [[-60, -80], [W + 60, -80], [-60, H + 80], [W + 60, H + 80]];
 
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
-  <defs>
-    <radialGradient id="court" cx="50%" cy="50%" r="72%">
-      <stop offset="0" stop-color="#1a2a2c"/>
-      <stop offset=".6" stop-color="#0e1820"/>
-      <stop offset="1" stop-color="#05080e"/>
-    </radialGradient>
-    <radialGradient id="flood">
-      <stop offset="0" stop-color="#cfe8ff" stop-opacity=".9"/>
-      <stop offset=".3" stop-color="#6aa8e8" stop-opacity=".35"/>
-      <stop offset="1" stop-color="#6aa8e8" stop-opacity="0"/>
-    </radialGradient>
-    <radialGradient id="puddle">
-      <stop offset="0" stop-color="#0a1626"/>
-      <stop offset=".7" stop-color="#0d1c2e" stop-opacity=".8"/>
-      <stop offset="1" stop-color="#0d1c2e" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="storm" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#2a3a66" stop-opacity=".85"/>
-      <stop offset="1" stop-color="#2a3a66" stop-opacity="0"/>
-    </linearGradient>
-    <radialGradient id="vignette" cx="50%" cy="50%" r="75%">
-      <stop offset=".55" stop-color="#000" stop-opacity="0"/>
-      <stop offset="1" stop-color="#000" stop-opacity=".7"/>
-    </radialGradient>
-    <filter id="bl" x="-50%" y="-20%" width="200%" height="140%"><feGaussianBlur stdDeviation="7"/></filter>
-    <filter id="cl" x="-50%" y="-100%" width="200%" height="300%"><feGaussianBlur stdDeviation="26"/></filter>
-    <filter id="noise">
-      <feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="4"/>
-      <feColorMatrix values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .5 0"/>
-    </filter>
-  </defs>
+const buf = Buffer.alloc(W * H * 3);
+for (let y = 1; y < H - 1; y++) {
+  for (let x = 1; x < W - 1; x++) {
+    const hx = height[y * W + x + 1] - height[y * W + x - 1];
+    const hy = height[(y + 1) * W + x] - height[(y - 1) * W + x];
+    // Refração: o piso aparece deslocado pela inclinação da água.
+    const [fr, fg, fb] = floor(x + hx * 26, y + hy * 26);
+    let nx = -hx * 3.2, ny = -hy * 3.2, nz = 1;
+    const nl = Math.hypot(nx, ny, nz); nx /= nl; ny /= nl; nz /= nl;
+    // Reflexo do céu de tempestade (fresnel simples: mais reflexo onde a água inclina).
+    const fresnel = 0.12 + 0.6 * (1 - nz);
+    let r = fr * (1 - fresnel) + 26 * fresnel, g = fg * (1 - fresnel) + 40 * fresnel, b = fb * (1 - fresnel) + 64 * fresnel;
+    // Brilho dos refletores: especular na direção de cada luz, mais forte perto do canto.
+    for (const [lx, ly] of LIGHTS) {
+      const dx = lx - x, dy = ly - y, dist = Math.hypot(dx, dy);
+      const lxn = dx / dist, lyn = dy / dist;
+      const hxn = lxn * 0.55, hyn = lyn * 0.55, hzn = 0.83; // meio do caminho entre luz e olho
+      const spec = Math.pow(Math.max(0, nx * hxn + ny * hyn + nz * hzn), 28);
+      const fall = Math.exp(-dist / 420);
+      r += 230 * spec * fall + 14 * fall; g += 240 * spec * fall + 24 * fall; b += 255 * spec * fall + 42 * fall;
+    }
+    // Vinheta: o centro (onde ficam as cartas) mais escuro.
+    const vx = (x / W - 0.5) * 2, vy = (y / H - 0.5) * 2;
+    const vig = 0.45 + 0.55 * smooth(0.25, 1.15, Math.hypot(vx * 0.9, vy));
+    const i = (y * W + x) * 3;
+    buf[i] = Math.min(255, r * vig); buf[i + 1] = Math.min(255, g * vig); buf[i + 2] = Math.min(255, b * vig);
+  }
+}
 
-  <rect width="${W}" height="${H}" fill="url(#court)"/>
-  ${stripes}
-  <rect width="${W}" height="${H}" filter="url(#noise)" opacity=".3"/>
-
-  <!-- poças nos cantos e nas laterais, onde o 1-2-1 não põe carta -->
-  ${puddle(110, 300, 120, 46)}${puddle(W - 120, 360, 110, 40)}
-  ${puddle(60, H * 0.5, 70, 30)}${puddle(W - 60, H * 0.55, 80, 30)}
-  ${puddle(130, H - 260, 150, 54)}${puddle(W - 140, H - 220, 160, 56)}
-  ${splashes(70)}
-
-  <!-- refletores nos quatro cantos -->
-  ${floodlight(0, 0, 440, 0.45)}${floodlight(W, 0, 440, 0.45)}
-  ${floodlight(0, H, 480, 0.35)}${floodlight(W, H, 480, 0.35)}
-
-  <!-- nuvens carregadas e raios no alto -->
-  <rect width="${W}" height="260" fill="url(#storm)"/>
-  <g filter="url(#cl)">
-    ${Array.from({ length: 8 }, (_, i) => `<ellipse cx="${(i / 7) * W}" cy="${10 + rand() * 50}" rx="${120 + rand() * 60}" ry="${60 + rand() * 30}" fill="#3a4c80" opacity=".8"/>`).join("")}
-  </g>
-  ${bolt(170, -10, 260, 40, 1)}
-  ${bolt(W - 150, -10, 200, 36, 0.8)}
-
-  ${rain(260, 0.28)}
-  <rect width="${W}" height="${H}" fill="url(#vignette)"/>
-</svg>`;
-
-sharp(Buffer.from(svg))
-  .webp({ quality: 82 })
+sharp(buf, { raw: { width: W, height: H, channels: 3 } })
+  .webp({ quality: 84 })
   .toFile(OUT)
   .then((info) => console.log("ok", OUT, info.size));
