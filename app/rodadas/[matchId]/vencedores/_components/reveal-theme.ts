@@ -37,4 +37,12 @@ export const PACK_THEMES: Record<
     border: "border-award-craque-halloween-frame/60",
     label: "Halloween",
   },
+  temporal: {
+    screen: "bg-[radial-gradient(circle_at_50%_40%,oklch(0.22_0.04_255),oklch(0.08_0.02_260)_70%)]",
+    cap: "bg-linear-to-b from-award-craque-temporal-frame to-[oklch(0.66_0.13_85)]",
+    body: "bg-linear-160 from-[oklch(0.3_0.06_250)] to-award-craque-temporal-to",
+    text: "text-award-craque-temporal-foreground",
+    border: "border-award-craque-temporal-frame/60",
+    label: "Temporal",
+  },
 };

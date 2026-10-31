@@ -63,6 +63,8 @@ const ROUPAS = {
   // Halloween 2026 (aprovadas pelo dono do app em 2026-10-29): fundo que conta o evento, sem estrelinhas,
   // e o tubo de neon das premium com enfeite do bicho (azul-luar com garras e presas; vermelho-sangue com morcego e asa).
   lobisomem: { background: "skin-lobisomem", metal: ["#5f6b78", "#5f6b78", "#e2e8ef"], accent: "#e2e8ef", light: "207 226 255", bar: "#03070d", muted: "#cfe2ff", sparkles: false, neon: "#8fd0ff", trim: "lobisomem" },
+  trovao: { background: "skin-trovao", metal: ["#3a2a7a", "#3a2a7a", "#c9b8ff"], accent: "#c9b8ff", light: "200 190 255", bar: "#07051a", muted: "#d6ccff", sparkles: false, neon: "#9a86ff", trim: "trovao" },
+  relampago: { background: "skin-relampago", metal: ["#8a6a00", "#8a6a00", "#fff2a0"], accent: "#ffe14d", light: "255 235 140", bar: "#0a0800", muted: "#fff0a0", sparkles: false, neon: "#ffe62e", trim: "relampago" },
   vampiro: { background: "skin-vampiro", metal: ["#6e0f20", "#6e0f20", "#e3384e"], accent: "#e3384e", light: "255 120 140", bar: "#0d0105", muted: "#ffb3bd", sparkles: false, neon: "#ff1f3d", trim: "vampiro" },
   marmore: { background: "marmore", metal: GOLD, accent: "#e9c86a", light: "233 200 106", bar: "#070707", muted: "#e9c86a" },
   estilhacos: { background: "estilhacos", metal: GOLD, accent: "#f2c94c", light: "140 180 255", bar: "#050b20", muted: "#8fb8ff" },
@@ -80,7 +82,8 @@ type AwardColors = Omit<Roupa, "background" | "metal" | "matte" | "sparkles" | "
 
 /**
  * Melhor Jogador (aprovado pelo dono do app em 2026-10-29): a taça ao lado do jogador,
- * no metal de cada tema. Destaques (Atacante, Criativo, Defensor, Goleiro, Gol): o ícone
+ * no metal de cada tema; fora de evento, desde 2026-10-31, o sol art déco gravado em metal
+ * escuro atrás da cabeça (`prototipos/craque-sol.cjs`). Destaques (Atacante, Criativo, Defensor, Goleiro, Gol): o ícone
  * do prêmio no mesmo lugar. O tema do mês veste cor e marca d'água (fantasma, taça), como
  * antes (hoje só o Halloween). Moldura em tubo de neon na cor do prêmio, com um traço curto na base (no Halloween, mais uma abóbora acesa no topo) (pedido
  * do dono do app em 2026-10-29). Fundos `premio-<prêmio>-<tema>.webp`, gerados por `prototipos/premios.cjs` (docs).
@@ -88,20 +91,22 @@ type AwardColors = Omit<Roupa, "background" | "metal" | "matte" | "sparkles" | "
 const CRAQUE_COLORS: Record<CardThemeKey, AwardColors> = {
   default: { frame: "#b8902f", hairline: "#fff1c2", accent: "#e9c86a", light: "255 225 150", bar: "#070605", muted: "#e9c86a", neon: "#ffc83d" },
   halloween: { frame: "#c2560f", hairline: "#ffd29a", accent: "#ffb04a", light: "255 176 74", bar: "#0a0410", muted: "#ffc98a", neon: "#ff8a1f" },
+  temporal: { frame: "#d9a400", hairline: "#fff6c8", accent: "#ffe066", light: "190 225 255", bar: "#03040a", muted: "#ffe9a0", neon: "#ffd84a" },
 };
 const HIGHLIGHT_COLORS: Record<CardThemeKey, AwardColors> = {
   default: { frame: "#2f6fd6", hairline: "#cfe2ff", accent: "#8fc2ff", light: "190 220 255", bar: "#040c22", muted: "#a9cbff", neon: "#36a6ff" },
   halloween: { frame: "#6a2bb0", hairline: "#c9ff8a", accent: "#b6ff5c", light: "210 180 255", bar: "#0d0418", muted: "#c9ff8a", neon: "#9dff3a" },
+  temporal: { frame: "#b8902f", hairline: "#fff1c2", accent: "#f3d27a", light: "255 225 150", bar: "#01030a", muted: "#f3d27a", neon: "#ffc83d" },
 };
 /** Prêmios com arte própria do ícone ao lado (cartas antigas de Fair Play vestem o Gol). */
 const HIGHLIGHT_ART = new Set<AwardKind>(["atacante", "criativo", "defensor", "goleiro", "gol", "foguete", "garcom", "drible", "motor"]);
 
 /**
- * Time do Mês (aprovado pelo dono do app em 2026-10-29): o cristal lapidado que ele mandou,
- * em roxo, com o tubo de neon das premium em roxo e a coroa em neon roxo no topo, como
- * enfeite (`NEON_TRIMS.mes`; até 2026-10-29 a coroa ficava no fundo, ao lado do jogador).
- * Não veste o tema do mês (`hasSeasonalTheme`). Fundo `premio-time-do-mes.webp`, gerado
- * por `prototipos/mes-cristal.cjs` (docs).
+ * Time do Mês (aprovado pelo dono do app em 2026-10-31, no lugar do cristal roxo): o trovão em
+ * roxo bem aceso, um raio grande desenhado em contornos de neon concêntricos ao lado do jogador,
+ * e um raio em contorno de neon no topo, no lugar da coroa (`NEON_TRIMS.mesRaio`), com o abraço
+ * da base das premium. Não veste o tema do mês (`hasSeasonalTheme`). Fundo
+ * `premio-time-do-mes.webp`, gerado por `prototipos/mes-trovao.cjs` (docs).
  */
 const MONTH_ROUPA: Roupa = {
   background: "premio-time-do-mes",
@@ -112,12 +117,13 @@ const MONTH_ROUPA: Roupa = {
   muted: "#f3d27a",
   sparkles: false,
   neon: "#b46bff",
-  trim: "mes",
+  trim: "mesRaio",
 };
 
 /**
- * Bola Murcha (aprovada pelo dono do app em 2026-10-29): bronze oxidado, "mofado", fosco e
- * sem brilho, com a bola murcha ao lado do jogador. Moldura em neon apagado, sem enfeite
+ * Bola Murcha (aprovada pelo dono do app em 2026-10-29): fosca e sem brilho, com a bola murcha
+ * ao lado do jogador. Desde 2026-10-31, o alagamento: parede escura escorrendo e água barrenta
+ * subindo até a metade, com a bola boiando na linha da água (`prototipos/murcha-alagamento.cjs`). Moldura em neon apagado, sem enfeite
  * (pedido do dono do app em 2026-10-29: a lâmpada que quase não acende). Igual o ano todo (não veste o tema).
  * Cartas antigas de Fominha vestem a mesma. Fundo `premio-bola-murcha.webp` (`prototipos/murcha.cjs`).
  */
@@ -150,7 +156,15 @@ function awardRoupa(kind: AwardKind, theme: CardThemeKey): Roupa {
   const colors = (isCraque ? CRAQUE_COLORS : HIGHLIGHT_COLORS)[theme];
   const art = isCraque ? "craque" : HIGHLIGHT_ART.has(kind) ? kind : "gol";
   return {
-    background: `premio-${art}-${theme}`,
+    // Destaques: um fundo só, sem o ícone do prêmio. No Temporal, os raios (aprovado pelo dono
+    // do app em 2026-10-30); fora de evento, o mármore líquido da água (2026-10-31).
+    background: isCraque
+      ? `premio-${art}-${theme}`
+      : theme === "temporal"
+        ? "premio-destaque-temporal"
+        : theme === "default"
+          ? "premio-destaque-agua"
+          : `premio-${art}-${theme}`,
     metal: [colors.frame, colors.frame, colors.hairline],
     accent: colors.accent,
     light: colors.light,
@@ -158,7 +172,7 @@ function awardRoupa(kind: AwardKind, theme: CardThemeKey): Roupa {
     muted: colors.muted,
     sparkles: false,
     neon: colors.neon,
-    trim: isCraque ? "craque" : theme === "halloween" ? "abobora" : "destaque",
+    trim: isCraque ? "craque" : theme === "halloween" ? "abobora" : theme === "default" ? "chuva" : "destaque",
   };
 }
 
@@ -173,6 +187,8 @@ function skinRoupa(skin: CardSkinKey): RoupaKey {
     case "rubi": return "rubi";
     case "icone": return "icone";
     case "lobisomem": return "lobisomem";
+    case "trovao": return "trovao";
+    case "relampago": return "relampago";
     case "vampiro": return "vampiro";
     default: return "padrao";
   }
@@ -299,8 +315,8 @@ const NEON_TRIMS = {
     ],
     center: "M50.00 -9.20 L51.06 -6.46 L53.99 -6.30 L51.71 -4.44 L52.47 -1.60 L50.00 -3.20 L47.53 -1.60 L48.29 -4.44 L46.01 -6.30 L48.94 -6.46 Z",
   },
-  // Time do Mês (pedido do dono do app em 2026-10-29): o abraço da base das premium e a
-  // coroa no topo, em neon (saiu do fundo da carta).
+  // Time do Mês de 2026-10-29 a 2026-10-31 (sem uso desde o trovão, `mesRaio`; fica para eventos
+  // futuros): o abraço da base das premium e a coroa no topo, em neon.
   mes: {
     side: [
       { d: "M102.4 64 V133 Q102.4 142.4 93 142.4 H58 L50 146", width: 0.55 },
@@ -311,12 +327,46 @@ const NEON_TRIMS = {
     centerLines: "M42.06 -8.44 L44.38 -1.78 L46.73 -6.82 L48.41 -1.78 L50.09 -10.42 L51.77 -1.78 L53.53 -6.82 L55.81 -1.78 L58.13 -8.44 M42.06 -8.44 L48.41 -1.78 M58.13 -8.44 L51.77 -1.78",
     center: "M50.09 -14.13 L50.95 -12.51 L50.09 -10.96 L49.23 -12.51 Z M41.43 -9.34 A0.64 0.64 0 1 0 42.70 -9.34 A0.64 0.64 0 1 0 41.43 -9.34 Z M46.28 -7.43 A0.45 0.45 0 1 0 47.18 -7.43 A0.45 0.45 0 1 0 46.28 -7.43 Z M53.08 -7.43 A0.45 0.45 0 1 0 53.98 -7.43 A0.45 0.45 0 1 0 53.08 -7.43 Z M57.42 -9.34 A0.64 0.64 0 1 0 58.69 -9.34 A0.64 0.64 0 1 0 57.42 -9.34 Z",
   },
+  // Time do Mês no trovão (pedido do dono do app em 2026-10-31): o mesmo abraço da base e um
+  // raio em contorno de neon no topo, no lugar da coroa (o Trovão da Loja tem o raio cheio).
+  mesRaio: {
+    side: [
+      { d: "M102.4 64 V133 Q102.4 142.4 93 142.4 H58 L50 146", width: 0.55 },
+      { d: `${NEON_TRIM_INNER} H64`, width: 0.7 },
+    ],
+    centerLines: "M45.6 -5.3 L50.55 -11.63 L49.45 -7.5 L54.4 -7.5 L49.45 -1.18 L50.55 -5.3 Z",
+  },
   destaque: {
     side: [{ d: "M72 142.4 H57 L50 145.6", width: 0.55 }],
   },
   abobora: {
     side: [{ d: "M72 142.4 H57 L50 145.6", width: 0.55 }],
     center: "M45.4 -4.4 A4.6 3.6 0 1 0 54.6 -4.4 A4.6 3.6 0 1 0 45.4 -4.4 Z M47.5 -5.8 L49 -5.8 L48.25 -4.5 Z M51 -5.8 L52.5 -5.8 L51.75 -4.5 Z M47.4 -3.4 Q50 -1.6 52.6 -3.4 Q50 -2.5 47.4 -3.4 Z M49.4 -7.8 L50.6 -7.8 L51.3 -9.8 L50.2 -9.8 Z",
+  },
+  // Destaques na água (aprovados pelo dono do app em 2026-10-31): o traço curto na base e a
+  // nuvem chovendo no topo, no traço do ícone que ele mandou (nuvem fechada, quatro pingos
+  // inclinados, curto e longo alternados).
+  chuva: {
+    side: [{ d: "M72 142.4 H57 L50 145.6", width: 0.55 }],
+    centerLines:
+      "M52.75 -4.5 H48.5 A3.5 3.5 0 1 1 51.855 -9 H52.75 A2.25 2.25 0 1 1 52.75 -4.5 Z M47.75 -4.25 L46.9 -3 M49.5 -4.25 L48.3 -2.4 M51.25 -4.25 L50.4 -3 M53 -4.5 L51.8 -2.4",
+  },
+
+  // Trovão: o abraço da base e um raio no topo.
+  trovao: {
+    side: [
+      { d: "M102.4 64 V133 Q102.4 142.4 93 142.4 H58 L50 146", width: 0.55 },
+      { d: `${NEON_TRIM_INNER} H64`, width: 0.7 },
+    ],
+    center: "M51.8 -12 L46.2 -4.6 L49.6 -4.6 L48 0.6 L54 -7 L50.6 -7 Z",
+  },
+  // Relâmpago: faíscas em zigue-zague descendo as laterais e a base em raio.
+  relampago: {
+    side: [
+      { d: "M103.2 18 L106.4 27 L103.6 31 L107 41 L104 45 L106.6 53", width: 0.6 },
+      { d: "M102.4 70 V133 Q102.4 142.4 93 142.4 H74 L70 146 L66 142.4 H58 L50 146", width: 0.55 },
+    ],
+    center: "M51.6 -11 L46.6 -4.4 L49.6 -4.4 L48.2 0.2 L53.6 -6.6 L50.6 -6.6 Z",
   },
   teia: {
     subtle: true,

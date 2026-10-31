@@ -2,6 +2,7 @@
 
 import { useMemo, type ReactNode } from "react";
 import { ArmchairIcon } from "lucide-react";
+import type { CardThemeKey } from "@/lib/card-themes";
 import { assignFormation, type FormationSlotKey } from "@/lib/formation";
 import { cn } from "@/lib/utils";
 import type { BoardPlayer, BoardTeam } from "../_data-access/get-match-board";
@@ -12,6 +13,19 @@ type TeamPitchProps = {
   mode: "rate" | "view";
   ratingOf: (playerId: string) => RatingState;
   onRate: (playerId: string) => void;
+  /** Tema do evento na data da rodada: veste o campo com o cenário dele. */
+  theme: CardThemeKey;
+};
+
+/**
+ * Cenário de cada evento em volta do campo (pedido do dono do app em 2026-10-30): a arte
+ * fica nos cantos e nas bordas, onde o 1-2-1 não põe carta. Imagens em `public/mesa/`,
+ * geradas por `prototipos/mesa-<tema>.cjs` (docs). Tema novo: arte nova e uma linha aqui.
+ */
+const PITCH_SCENES: Record<CardThemeKey, string | null> = {
+  default: null,
+  halloween: "border-orange-500/30 bg-[#0b0f07] bg-[url(/mesa/halloween.webp)] bg-[length:100%_100%]",
+  temporal: "border-sky-300/25 bg-[#060a12] bg-[url(/mesa/temporal.webp)] bg-[length:100%_100%]",
 };
 
 /** Linhas do campo (meio de campo em cima, área do goleiro embaixo), só de fundo. */
@@ -53,7 +67,7 @@ function Swatch({ team }: { team: number }) {
 }
 
 /** Um time na mesa tática: título, campo com os titulares nas posições e a fileira de reservas. */
-export function TeamPitch({ team, mode, ratingOf, onRate }: TeamPitchProps): ReactNode {
+export function TeamPitch({ team, mode, ratingOf, onRate, theme }: TeamPitchProps): ReactNode {
   // Performance: a formação só depende dos titulares (vindos da página, estáveis);
   // antes era recalculada, com objetos novos, a cada passo de slider na mesa.
   const slots = useMemo(
@@ -61,6 +75,7 @@ export function TeamPitch({ team, mode, ratingOf, onRate }: TeamPitchProps): Rea
     () => assignFormation(team.starters.map((entry) => ({ ...entry, position: entry.slotPosition }))),
     [team.starters],
   );
+  const scene = PITCH_SCENES[theme];
   const cardFor = (entry: BoardPlayer) => (
     <BoardCard entry={entry} mode={mode} rating={ratingOf(entry.player.id)} onRate={onRate} />
   );
@@ -78,13 +93,20 @@ export function TeamPitch({ team, mode, ratingOf, onRate }: TeamPitchProps): Rea
         </p>
       </div>
 
-      <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-b from-card to-background/40 px-[5%] py-[6%]">
+      <div
+        className={cn(
+          "relative overflow-hidden rounded-2xl border px-[5%] py-[6%]",
+          scene ?? "bg-gradient-to-b from-card to-background/40",
+        )}
+      >
         <PitchLines />
-        {/* Listras do gramado, bem sutis */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(to_bottom,transparent_0_56px,rgb(255_255_255/0.025)_56px_112px)]"
-        />
+        {/* Listras do gramado, bem sutis (o cenário já traz as dele) */}
+        {scene === null && (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-0 bg-[repeating-linear-gradient(to_bottom,transparent_0_56px,rgb(255_255_255/0.025)_56px_112px)]"
+          />
+        )}
         <ul className="relative grid grid-cols-3 gap-x-[4%] gap-y-[clamp(1rem,5vw,2rem)]">
           {(Object.keys(SLOT_CELLS) as FormationSlotKey[]).map((key) => {
             const entry = slots[key];

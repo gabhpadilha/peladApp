@@ -20,6 +20,9 @@ export const CARD_SKINS = [
   // Evento de Halloween de 2026: à venda só em outubro de 2026.
   { key: "lobisomem", name: "Lobisomem", level: 3, price: 200, event: { theme: "halloween", year: 2026 } },
   { key: "vampiro", name: "Vampiro", level: 3, price: 200, event: { theme: "halloween", year: 2026 } },
+  // Evento Temporal de 2026 (aprovado pelo dono do app em 2026-10-30): à venda só em novembro de 2026.
+  { key: "trovao", name: "Trovão", level: 3, price: 200, event: { theme: "temporal", year: 2026 } },
+  { key: "relampago", name: "Relâmpago", level: 3, price: 200, event: { theme: "temporal", year: 2026 } },
 ] as const;
 
 export type CardSkin = (typeof CARD_SKINS)[number];

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowRightIcon, CoinsIcon, CrownIcon, GhostIcon, MedalIcon, SparklesIcon, StoreIcon, TrendingUpIcon, type LucideIcon } from "lucide-react";
+import { ArrowRightIcon, CloudLightningIcon, CoinsIcon, CrownIcon, GhostIcon, MedalIcon, SparklesIcon, StoreIcon, TrendingUpIcon, type LucideIcon } from "lucide-react";
 import { formatCoins } from "@/components/coin-pill";
 import { RankInsignia } from "@/components/cancha-card";
 import { PlayerCard } from "@/components/player-card";
@@ -169,6 +169,7 @@ const COIN_CHIPS = pickRules(COIN_RULES, ["Jogar uma rodada", "Enviar as suas no
 /** Texto do 1º slide por tema do mês. Tema novo: entre aqui (e em `CARD_THEMES`). */
 const EVENT_COPY: Record<CardThemeKey, { eyebrow: string; title: string; icon: LucideIcon }> = {
   halloween: { eyebrow: "Evento de outubro", title: "Halloween na pelada", icon: GhostIcon },
+  temporal: { eyebrow: "Evento de novembro", title: "Temporal na pelada", icon: CloudLightningIcon },
   default: { eyebrow: "Coleção", title: "Cartas especiais", icon: SparklesIcon },
 };
 

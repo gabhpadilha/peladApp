@@ -11,6 +11,7 @@ import {
 } from "@/app/avaliar/[matchId]/_schemas/evaluation-schema";
 import type { RatingTarget } from "@/app/avaliar/[matchId]/_data-access/get-rating-session";
 import { Button } from "@/components/ui/button";
+import { getThemeForDate } from "@/lib/card-themes";
 import { countFilled, draftAverage, isDraftComplete, type ScoreDraft } from "@/lib/rating-drafts";
 import type { VoteAwardKind } from "@/types/award";
 import { GOALKEEPER_ATTRIBUTES, OUTFIELD_ATTRIBUTES, type PlayerAttribute } from "@/types/player";
@@ -151,7 +152,14 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-6">
         {board.teams.map((team) => (
-          <TeamPitch key={team.number} team={team} mode={mode} ratingOf={ratingOf} onRate={setRatingId} />
+          <TeamPitch
+            key={team.number}
+            team={team}
+            mode={mode}
+            ratingOf={ratingOf}
+            onRate={setRatingId}
+            theme={getThemeForDate(board.match.date)}
+          />
         ))}
       </div>
 

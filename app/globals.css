@@ -66,6 +66,22 @@
   --color-award-time-da-semana-halloween-from: var(--award-time-da-semana-halloween-from);
   --color-award-time-da-semana-halloween-to: var(--award-time-da-semana-halloween-to);
   --color-award-time-da-semana-halloween-foreground: var(--award-time-da-semana-halloween-foreground);
+  --color-award-craque-temporal-frame: var(--award-craque-temporal-frame);
+  --color-award-craque-temporal-from: var(--award-craque-temporal-from);
+  --color-award-craque-temporal-to: var(--award-craque-temporal-to);
+  --color-award-craque-temporal-foreground: var(--award-craque-temporal-foreground);
+  --color-award-gol-temporal-frame: var(--award-gol-temporal-frame);
+  --color-award-gol-temporal-from: var(--award-gol-temporal-from);
+  --color-award-gol-temporal-to: var(--award-gol-temporal-to);
+  --color-award-gol-temporal-foreground: var(--award-gol-temporal-foreground);
+  --color-award-bola-murcha-temporal-frame: var(--award-bola-murcha-temporal-frame);
+  --color-award-bola-murcha-temporal-from: var(--award-bola-murcha-temporal-from);
+  --color-award-bola-murcha-temporal-to: var(--award-bola-murcha-temporal-to);
+  --color-award-bola-murcha-temporal-foreground: var(--award-bola-murcha-temporal-foreground);
+  --color-award-time-da-semana-temporal-frame: var(--award-time-da-semana-temporal-frame);
+  --color-award-time-da-semana-temporal-from: var(--award-time-da-semana-temporal-from);
+  --color-award-time-da-semana-temporal-to: var(--award-time-da-semana-temporal-to);
+  --color-award-time-da-semana-temporal-foreground: var(--award-time-da-semana-temporal-foreground);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -215,6 +231,23 @@
   --award-time-da-semana-halloween-from: oklch(0.36 0.16 265);
   --award-time-da-semana-halloween-to: oklch(0.12 0.07 270);
   --award-time-da-semana-halloween-foreground: oklch(0.93 0.06 250);
+  /* Temporal (novembro de 2026): tempestade azul-escura, dourado de raio e ciano elétrico */
+  --award-craque-temporal-frame: oklch(0.84 0.15 90);
+  --award-craque-temporal-from: oklch(0.24 0.04 260);
+  --award-craque-temporal-to: oklch(0.1 0.02 260);
+  --award-craque-temporal-foreground: oklch(0.92 0.12 95);
+  --award-gol-temporal-frame: oklch(0.84 0.13 210);
+  --award-gol-temporal-from: oklch(0.32 0.08 250);
+  --award-gol-temporal-to: oklch(0.13 0.04 255);
+  --award-gol-temporal-foreground: oklch(0.92 0.08 210);
+  --award-bola-murcha-temporal-frame: oklch(0.7 0.02 240);
+  --award-bola-murcha-temporal-from: oklch(0.32 0.02 240);
+  --award-bola-murcha-temporal-to: oklch(0.13 0.01 240);
+  --award-bola-murcha-temporal-foreground: oklch(0.9 0.02 240);
+  --award-time-da-semana-temporal-frame: oklch(0.78 0.12 290);
+  --award-time-da-semana-temporal-from: oklch(0.32 0.12 285);
+  --award-time-da-semana-temporal-to: oklch(0.12 0.05 285);
+  --award-time-da-semana-temporal-foreground: oklch(0.93 0.06 290);
 
 }
 

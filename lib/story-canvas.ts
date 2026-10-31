@@ -30,6 +30,7 @@ const INK = "#0b130f";
 const THEME_BACKGROUND: Record<CardThemeKey, [string, string]> = {
   default: ["#17211c", "#070b09"],
   halloween: ["#1f1430", "#08050d"],
+  temporal: ["#16203a", "#04070f"],
 };
 
 /** Selo da patente: cor lisa (carta fosca) ou degradê (as outras), como na carta. */

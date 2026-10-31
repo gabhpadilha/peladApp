@@ -66,7 +66,7 @@ export function PlayerCardDefs() {
  * sazonal; o Time do Mês não veste tema). Ver `awardDesignKind`.
  */
 type ThemedAwardKind = Exclude<AwardDesignKind, "jogador_do_mes">;
-type AwardDesign = AwardDesignKind | `${ThemedAwardKind}-halloween`;
+type AwardDesign = AwardDesignKind | `${ThemedAwardKind}-${Exclude<CardThemeKey, "default">}`;
 type CardDesign = CardTier | AwardDesign;
 
 type Design = {
@@ -127,6 +127,22 @@ const DESIGNS: Record<CardDesign, Design> = {
   "time_da_semana-halloween": {
     frame: "bg-award-time-da-semana-halloween-frame",
     face: "from-award-time-da-semana-halloween-from to-award-time-da-semana-halloween-to text-award-time-da-semana-halloween-foreground",
+  },
+  "craque-temporal": {
+    frame: "bg-award-craque-temporal-frame",
+    face: "from-award-craque-temporal-from to-award-craque-temporal-to text-award-craque-temporal-foreground",
+  },
+  "gol-temporal": {
+    frame: "bg-award-gol-temporal-frame",
+    face: "from-award-gol-temporal-from to-award-gol-temporal-to text-award-gol-temporal-foreground",
+  },
+  "bola_murcha-temporal": {
+    frame: "bg-award-bola-murcha-temporal-frame",
+    face: "from-award-bola-murcha-temporal-from to-award-bola-murcha-temporal-to text-award-bola-murcha-temporal-foreground",
+  },
+  "time_da_semana-temporal": {
+    frame: "bg-award-time-da-semana-temporal-frame",
+    face: "from-award-time-da-semana-temporal-from to-award-time-da-semana-temporal-to text-award-time-da-semana-temporal-foreground",
   },
   // Arte do dono do app (aprovada em 2026-10-21), alinhada à direita: os raios
   // de dentro encostam na borda de onde saem os de fora (`MonthCardOverflow`).
@@ -507,6 +523,9 @@ const SKIN_CLASSES: Record<CardSkinKey, string> = {
   icone: "card-skin-icone",
   lobisomem: "card-skin-lobisomem",
   vampiro: "card-skin-vampiro",
+  // Só no desenho antigo (comparação): as cartas do Temporal existem só na `CanchaCard`.
+  trovao: "card-skin-ametista",
+  relampago: "card-skin-icone",
 };
 
 const GOLD_FILL = "[background:var(--card-gold)]";

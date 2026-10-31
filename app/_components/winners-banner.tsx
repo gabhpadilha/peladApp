@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { GhostIcon } from "lucide-react";
+import { CloudLightningIcon, GhostIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { CardThemeKey } from "@/lib/card-themes";
 import { cn } from "@/lib/utils";
@@ -31,6 +31,16 @@ const BANNER_THEMES: Record<CardThemeKey, { box: string; eyebrow: string; cards:
       "from-award-craque-halloween-from to-award-craque-halloween-to text-award-craque-halloween-foreground",
     ],
   },
+  temporal: {
+    box: "border-award-craque-temporal-frame/55 bg-[radial-gradient(circle_at_85%_30%,oklch(0.5_0.1_230/0.5),transparent_55%),linear-gradient(160deg,oklch(0.24_0.04_260),oklch(0.1_0.02_260))]",
+    eyebrow: "text-award-craque-temporal-foreground",
+    cards: [
+      "from-award-gol-temporal-frame to-award-gol-temporal-to",
+      "from-award-time-da-semana-temporal-frame to-award-time-da-semana-temporal-to",
+      "bg-award-craque-temporal-frame",
+      "from-award-craque-temporal-from to-award-craque-temporal-to text-award-craque-temporal-foreground",
+    ],
+  },
 };
 
 const CARD_SHAPE = "[clip-path:url(#player-card-shape)]";
@@ -58,6 +68,9 @@ export function WinnersBanner({ alert }: WinnersBannerProps) {
       />
       {alert.theme === "halloween" && (
         <GhostIcon aria-hidden className="absolute -bottom-6 -left-5 size-28 text-white/6" />
+      )}
+      {alert.theme === "temporal" && (
+        <CloudLightningIcon aria-hidden className="absolute -bottom-6 -left-5 size-28 text-white/6" />
       )}
 
       {/* Três cartas viradas em leque (a do meio com "?"), flutuando. */}
