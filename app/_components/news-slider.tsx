@@ -185,9 +185,11 @@ function getEventSkins(today: string) {
 
 /** Texto do slide da Loja: com poucas cartas de evento, os nomes; com muitas, a quantidade. */
 function describeEventSkins(skins: ReturnType<typeof getEventSkins>): string {
-  const level = Math.min(...skins.map((skin) => skin.level));
+  const levels = skins.map((skin) => skin.level);
+  const level = Math.min(...levels);
   const what = skins.length <= 3 ? listFormatter.format(skins.map((skin) => skin.name)) : `${skins.length} personalizações do evento`;
-  return `Chegaram ${what}, no nível ${level}. Só ficam à venda durante o evento; quem comprar continua usando depois.`;
+  const from = levels.every((value) => value === level) ? "no" : "a partir do";
+  return `Chegaram ${what}, ${from} nível ${level}. Só ficam à venda durante o evento; quem comprar continua usando depois.`;
 }
 /**
  * Novidades do app na home: Time do Mês (a mais nova), evento do mês, Time da

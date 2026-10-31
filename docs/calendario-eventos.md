@@ -19,7 +19,7 @@ Regras de visual que valem para todo evento: sem `filter` e sem `mix-blend-mode`
 | Período | Evento | Status | Cartas na Loja |
 |---|---|---|---|
 | 01/10 – 30/10/2026 | **Halloween** | ✅ encerrado (as cartas ganhas ficam com o visual) | Lobisomem e Vampiro (nível 3, 200 PC) |
-| 31/10 – 30/11/2026 | **Toró (antes "Temporal") + Black Friday** | 🟢 no ar desde 31/10 (ligado um dia antes, a pedido do dono) | Nuvem carregada e Relâmpago (nível 3, 200 CC; -30% na Black Friday) |
+| 31/10 – 30/11/2026 | **Toró (antes "Temporal") + Black Friday** | 🟢 no ar desde 31/10 (ligado um dia antes, a pedido do dono) | Nuvem carregada e Relâmpago (nível 3, 200 CC) e Lenda do Trovão (nível 5, 600 CC); -30% na Black Friday |
 | Dezembro/2026 | **Natal** (cartas especiais) **+ Vingadores: Doomsday** (Loja), ao mesmo tempo; **Time do Ano** na última semana | ✅ escolhido pelo dono do app (2026-10-22), detalhes a definir | Cartas dos Vingadores (quantidade, nível e preço a definir) |
 | Janeiro/2027 | _a definir_ | 💡 | — |
 | Fevereiro/2027 | _a definir_ | 💡 | — |
