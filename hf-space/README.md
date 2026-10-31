@@ -11,6 +11,7 @@ pinned: false
 license: mit
 models:
   - ZhengPeng7/BiRefNet-portrait
+  - TencentARC/GFPGANv1
 preload_from_hub:
   - ZhengPeng7/BiRefNet-portrait
 ---
@@ -19,8 +20,16 @@ preload_from_hub:
 
 Máscara da pessoa para as cartas do PeladApp, com o
 [BiRefNet Portrait](https://huggingface.co/ZhengPeng7/BiRefNet-portrait) (MIT)
-em ZeroGPU. Este diretório é a cópia versionada do Space; o app chama a API
-`/mask` pelo servidor (`lib/hf-matte.ts`).
+em ZeroGPU. Antes do recorte, a API `/enhance` melhora a foto: rosto pelo
+[GFPGAN 1.4](https://github.com/TencentARC/GFPGAN) (Apache 2.0) e o resto pelo
+[Real-ESRGAN x2](https://github.com/xinntao/Real-ESRGAN) (BSD-3), com mistura
+"leve" (`FACE_WEIGHT`), e devolve a foto melhorada e a máscara dela. Os pesos
+dos dois baixam do GitHub na primeira subida. A API antiga `/mask` (só a
+máscara) continua para versões antigas do app.
+
+Este diretório é a cópia versionada do Space; o app chama a API `/enhance`
+pelo servidor (`lib/hf-matte.ts`). Mudou `app.py` ou `requirements.txt`?
+Reenvie os dois em "Files → Add file → Upload files" e espere o build.
 
 ## Como publicar (conta gratuita)
 

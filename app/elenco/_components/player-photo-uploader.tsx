@@ -31,14 +31,20 @@ function previewPlayer(member: PlayerPhotoUploaderProps["member"], photo: Player
     : { ...base, role: "outfield", position: member.position, attributes: { vel: null, chu: null, pas: null, dri: null, def: null, fis: null } };
 }
 
-/** Reserva do recorte: o servidor devolve a máscara quando o aparelho não roda o MediaPipe. */
-async function maskFromServer(photo: Blob): Promise<Blob> {
+function base64ToBlob(base64: string, type: string): Blob {
+  return new Blob([Uint8Array.from(atob(base64), (char) => char.charCodeAt(0))], { type });
+}
+
+/** Recorte pelo servidor: a máscara e, quando o Space melhorou a foto, a foto melhorada. */
+async function maskFromServer(photo: Blob): Promise<{ mask: Blob; photo?: Blob }> {
   const formData = new FormData();
   formData.set("photo", new File([photo], "photo.jpg", { type: photo.type || "image/jpeg" }));
   const result = await segmentPhoto(formData);
   if (!result.success) throw new Error(result.message);
-  const bytes = Uint8Array.from(atob(result.maskBase64), (char) => char.charCodeAt(0));
-  return new Blob([bytes], { type: "image/png" });
+  return {
+    mask: base64ToBlob(result.maskBase64, "image/png"),
+    photo: result.photoBase64 ? base64ToBlob(result.photoBase64, "image/jpeg") : undefined,
+  };
 }
 
 /**

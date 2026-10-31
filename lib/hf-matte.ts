@@ -1,6 +1,8 @@
 /**
  * Recorte principal, no servidor: máscara da pessoa pelo BiRefNet Portrait
  * (MIT) num Space ZeroGPU gratuito do Hugging Face (código em `hf-space/`).
+ * Na mesma chamada o Space melhora a foto antes de recortar (rosto pelo GFPGAN,
+ * o resto pelo Real-ESRGAN, mistura "leve"), e a carta usa a foto melhorada.
  * Recorta certo camisa escura em fundo escuro; o BiRefNet não cabe na Vercel
  * (~7GB de memória), por isso roda lá. Custo zero: cota de GPU diária da conta
  * gratuita (5 min/dia com `HF_TOKEN`).
@@ -10,12 +12,15 @@
 import sharp from "sharp";
 import { z } from "zod";
 
-const API_NAME = "mask";
-/** Space acordado responde em poucos segundos; dormindo, leva minutos (aí vale a reserva). */
-const HF_TIMEOUT_MS = 20_000;
+const API_NAME = "enhance";
+/** Space acordado responde em poucos segundos (a melhoria soma alguns); dormindo, leva minutos (aí vale a reserva). */
+const HF_TIMEOUT_MS = 30_000;
 
 const eventSchema = z.object({ event_id: z.string().min(1) });
-const resultSchema = z.tuple([z.string().min(1)]);
+/** [foto melhorada (JPEG base64), máscara (PNG base64)] */
+const resultSchema = z.tuple([z.string().min(1), z.string().min(1)]);
+
+export type HfEnhancedMatte = { photo: Buffer; mask: Buffer };
 
 export function hasHfSpace(): boolean {
   return Boolean(process.env.HF_SPACE_URL);
@@ -41,11 +46,11 @@ async function startCall(baseUrl: string, body: string, signal: AbortSignal): Pr
     if (!parsed.success) throw new Error("Space: resposta inesperada ao iniciar.");
     return { prefix, eventId: parsed.data.event_id };
   }
-  throw new Error("Space sem a API /mask.");
+  throw new Error(`Space sem a API /${API_NAME}.`);
 }
 
 /** Lê o stream (SSE) até o evento `complete` (ou `error`). */
-function parseStream(text: string): string {
+function parseStream(text: string): [string, string] {
   const blocks = text.split(/\r?\n\r?\n/);
   for (const block of blocks) {
     const event = /^event: *(.+)$/m.exec(block)?.[1]?.trim();
@@ -54,14 +59,17 @@ function parseStream(text: string): string {
     if (event === "complete") {
       const parsed = resultSchema.safeParse(JSON.parse(data));
       if (!parsed.success) throw new Error("Space: resultado inesperado.");
-      return parsed.data[0];
+      return parsed.data;
     }
   }
   throw new Error("Space: stream terminou sem resultado.");
 }
 
-/** Máscara da pessoa (PNG em tons de cinza, 255 = pessoa) no mesmo tamanho da foto recebida. */
-export async function hfMattePng(image: Buffer): Promise<Buffer> {
+/**
+ * Foto melhorada (JPEG) e a máscara da pessoa nela (PNG em tons de cinza,
+ * 255 = pessoa), as duas no mesmo tamanho da foto recebida.
+ */
+export async function hfEnhanceAndMatte(image: Buffer): Promise<HfEnhancedMatte> {
   const baseUrl = process.env.HF_SPACE_URL?.replace(/\/+$/, "");
   if (!baseUrl) throw new Error("HF_SPACE_URL não configurada.");
 
@@ -72,13 +80,17 @@ export async function hfMattePng(image: Buffer): Promise<Buffer> {
   const { prefix, eventId } = await startCall(baseUrl, JSON.stringify({ data: [image.toString("base64")] }), signal);
   const stream = await fetch(`${baseUrl}${prefix}/${API_NAME}/${eventId}`, { headers: headers(), signal });
   if (!stream.ok) throw new Error(`Space respondeu ${stream.status} no resultado.`);
-  const maskBase64 = parseStream(await stream.text());
+  const [photoBase64, maskBase64] = parseStream(await stream.text());
 
-  return sharp(Buffer.from(maskBase64, "base64"))
-    .flatten({ background: "#000000" })
-    .resize(width, height, { fit: "fill" })
-    .greyscale()
-    .extractChannel(0)
-    .png()
-    .toBuffer();
+  const [photo, mask] = await Promise.all([
+    sharp(Buffer.from(photoBase64, "base64")).resize(width, height, { fit: "fill" }).jpeg({ quality: 90 }).toBuffer(),
+    sharp(Buffer.from(maskBase64, "base64"))
+      .flatten({ background: "#000000" })
+      .resize(width, height, { fit: "fill" })
+      .greyscale()
+      .extractChannel(0)
+      .png()
+      .toBuffer(),
+  ]);
+  return { photo, mask };
 }

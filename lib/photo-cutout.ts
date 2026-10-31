@@ -2,6 +2,7 @@
  * Prepara a foto da carta (só no navegador):
  * 1. lê a foto respeitando a orientação do celular;
  * 2. acha a pessoa: máscara do servidor (BiRefNet no Hugging Face, remove.bg ou MODNet) ou, sem rede, do MediaPipe no aparelho;
+ *    pelo Hugging Face a foto também volta melhorada (GFPGAN + Real-ESRGAN), e o resto usa essa;
  * 3. enquadra no padrão das cartas do EA FC (ombros na largura toda da carta, do peito para cima) para a área de foto da carta;
  * 4. gera o recorte sem fundo (PNG com alfa) e a original (JPEG).
  * O servidor converte as duas em WebP de 640px.
@@ -46,8 +47,12 @@ export type CardPhotoDraft = {
   hasCutout: boolean;
 };
 
-/** Recorte de reserva: recebe a foto (JPEG já reduzido) e devolve a máscara da pessoa (PNG cinza, mesmo tamanho). */
-export type RemoteMask = (photo: Blob) => Promise<Blob>;
+/**
+ * Recorte pelo servidor: recebe a foto (JPEG já reduzido) e devolve a máscara da
+ * pessoa (PNG cinza, mesmo tamanho) e, quando o servidor melhorou a foto, a foto
+ * melhorada (a máscara é dela).
+ */
+export type RemoteMask = (photo: Blob) => Promise<{ mask: Blob; photo?: Blob }>;
 
 export class NoPersonFoundError extends Error {
   constructor() {
@@ -386,25 +391,48 @@ async function maskToAlpha(mask: Blob, width: number, height: number): Promise<F
   }
 }
 
+/** Desenha a foto melhorada pelo servidor no tamanho da foto enviada (a máscara casa pixel a pixel). */
+async function loadEnhanced(enhanced: Blob, width: number, height: number): Promise<HTMLCanvasElement> {
+  const decoded = await decodeImage(new File([enhanced], "enhanced.jpg", { type: enhanced.type || "image/jpeg" }));
+  try {
+    const canvas = createCanvas(width, height);
+    get2d(canvas).drawImage(decoded.source, 0, 0, width, height);
+    return canvas;
+  } finally {
+    decoded.release();
+  }
+}
+
 /**
  * Alfa da pessoa: primeiro pelo servidor (BiRefNet no Hugging Face, remove.bg
  * ou MODNet, nessa ordem); se a rede falhar, no aparelho (MediaPipe, que só é baixado nesse
- * caso e enche vãos entre orelha e gola). `null` = nenhum dos dois.
+ * caso e enche vãos entre orelha e gola). `alpha: null` = nenhum dos dois.
+ * `photo` é a foto a recortar: a melhorada pelo servidor, quando veio, ou a enviada.
  */
-async function findPersonAlpha(photo: HTMLCanvasElement, remoteMask: RemoteMask | undefined): Promise<Float32Array | null> {
+async function findPersonAlpha(
+  photo: HTMLCanvasElement,
+  remoteMask: RemoteMask | undefined,
+): Promise<{ alpha: Float32Array | null; photo: HTMLCanvasElement }> {
   if (remoteMask) {
     try {
-      const mask = await withTimeout(remoteMask(await toBlob(photo, "image/jpeg", 0.9)), REMOTE_TIMEOUT_MS);
-      return await maskToAlpha(mask, photo.width, photo.height);
+      const result = await withTimeout(remoteMask(await toBlob(photo, "image/jpeg", 0.9)), REMOTE_TIMEOUT_MS);
+      const alpha = await maskToAlpha(result.mask, photo.width, photo.height);
+      if (!result.photo) return { alpha, photo };
+      try {
+        return { alpha, photo: await loadEnhanced(result.photo, photo.width, photo.height) };
+      } catch (error) {
+        console.warn("Foto melhorada ilegível; seguindo com a original.", error);
+        return { alpha, photo };
+      }
     } catch (error) {
       console.warn("Recorte no servidor indisponível; tentando no aparelho.", error);
     }
   }
   try {
-    return personAlpha(await withTimeout(getSegmenter(), SEGMENTER_TIMEOUT_MS), photo);
+    return { alpha: personAlpha(await withTimeout(getSegmenter(), SEGMENTER_TIMEOUT_MS), photo), photo };
   } catch (error) {
     console.warn("Segmentação no aparelho indisponível; usando só a foto original.", error);
-    return null;
+    return { alpha: null, photo };
   }
 }
 
@@ -415,9 +443,7 @@ async function findPersonAlpha(photo: HTMLCanvasElement, remoteMask: RemoteMask 
  * devolve só a original (`hasCutout: false`).
  */
 export async function prepareCardPhoto(file: File, remoteMask?: RemoteMask): Promise<CardPhotoDraft> {
-  const photo = await loadScaled(file);
-
-  const alpha = await findPersonAlpha(photo, remoteMask);
+  const { alpha, photo } = await findPersonAlpha(await loadScaled(file), remoteMask);
   const box = alpha ? bustBox(alpha, photo.width, photo.height) : fallbackBox(photo.width, photo.height);
   const erodeRadius = Math.round(Math.max(photo.width, photo.height) * EDGE_ERODE);
   const mask = alpha ? maskCanvas(erode(alpha, photo.width, photo.height, erodeRadius), photo.width, photo.height) : null;
