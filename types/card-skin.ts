@@ -21,7 +21,8 @@ export const CARD_SKINS = [
   { key: "lobisomem", name: "Lobisomem", level: 3, price: 200, event: { theme: "halloween", year: 2026 } },
   { key: "vampiro", name: "Vampiro", level: 3, price: 200, event: { theme: "halloween", year: 2026 } },
   // Evento Temporal de 2026 (aprovado pelo dono do app em 2026-10-30): à venda só em novembro de 2026.
-  { key: "trovao", name: "Trovão", level: 3, price: 200, event: { theme: "temporal", year: 2026 } },
+  // A Nuvem carregada entrou no lugar do Trovão em 2026-10-31 (ninguém tinha comprado).
+  { key: "nuvem", name: "Nuvem carregada", level: 3, price: 200, event: { theme: "temporal", year: 2026 } },
   { key: "relampago", name: "Relâmpago", level: 3, price: 200, event: { theme: "temporal", year: 2026 } },
 ] as const;
 

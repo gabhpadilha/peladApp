@@ -1,5 +1,7 @@
 // Fundos do tema "Temporal" (ideia para novembro): céu de tempestade, chuva fina e raios.
-// Melhor Jogador e as duas skins da Loja (Trovão e Relâmpago); os destaques saem de `destaques-temporal.cjs`.
+// Melhor Jogador do Temporal; os destaques saem de `destaques-temporal.cjs`. O Relâmpago antigo
+// (amarelo) saiu em 2026-10-31 para a arte do dono (`skin-relampago-arte.cjs`). O Trovão
+// (tempestade roxa) saiu em 2026-10-31 para a Nuvem carregada (`skin-nuvem.cjs`); a função ficou de registro.
 // Uso: node temporal.cjs <pasta de saída> <raiz do repo>
 const path = require("path");
 const root = process.argv[3];
@@ -109,7 +111,5 @@ function relampago() {
 
 (async () => {
   await sharp(Buffer.from(craque())).webp({ quality: 86 }).toFile(`${OUT}/premio-craque-temporal.webp`);
-  await sharp(Buffer.from(trovao())).webp({ quality: 88 }).toFile(`${OUT}/skin-trovao.webp`);
-  await sharp(Buffer.from(relampago())).webp({ quality: 88 }).toFile(`${OUT}/skin-relampago.webp`);
   console.log("ok");
 })().catch((e) => { console.error(e); process.exit(1); });

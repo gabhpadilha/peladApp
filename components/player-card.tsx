@@ -524,7 +524,7 @@ const SKIN_CLASSES: Record<CardSkinKey, string> = {
   lobisomem: "card-skin-lobisomem",
   vampiro: "card-skin-vampiro",
   // Só no desenho antigo (comparação): as cartas do Temporal existem só na `CanchaCard`.
-  trovao: "card-skin-ametista",
+  nuvem: "card-skin-icone",
   relampago: "card-skin-icone",
 };
 

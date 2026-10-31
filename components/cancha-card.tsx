@@ -1,5 +1,6 @@
 import Image from "next/image";
 import type { CSSProperties } from "react";
+import { CLOUD_BOLTS, ELECTRIC_MAIN, ELECTRIC_SPARKS, ELECTRIC_STRANDS, ELECTRIC_TOP } from "@/lib/electric-trim";
 import { cn } from "@/lib/utils";
 import { PHOTO_SHADOW_GRADIENT_ID } from "@/lib/card-svg-ids";
 import { getCardRank, CARD_RANK_LABELS, RANK_FLAT_CLASSES, type CardRank } from "@/lib/card-rank";
@@ -44,6 +45,17 @@ export type Roupa = {
   trim?: NeonTrimKind | null;
   /** Neon "apagado": cor sem centro branco e brilho fraco (a Bola Murcha). */
   neonDim?: boolean;
+  /**
+   * Arte por fora da carta (WebP transparente em `public/cartas/fundos/`, do tamanho da caixa da
+   * carta de neon): moldura e enfeites pintados, por cima da moldura de neon.
+   */
+  overflow?: string;
+  /** Raios da arte de fora numa camada própria (mesmo tamanho), que estala como trovão. */
+  overflowBolts?: string;
+  /** Moldura elétrica (raios de neon) em volta da metade de baixo da carta, por fora (`ElectricTrim`). */
+  electric?: boolean;
+  /** Mini raios estalando nas nuvens de dentro da carta, atrás do jogador (`CloudBolts`). */
+  cloudBolts?: boolean;
 };
 
 const GOLD = ["#7a5512", "#e9c86a", "#fff4c8"] as const;
@@ -63,8 +75,14 @@ const ROUPAS = {
   // Halloween 2026 (aprovadas pelo dono do app em 2026-10-29): fundo que conta o evento, sem estrelinhas,
   // e o tubo de neon das premium com enfeite do bicho (azul-luar com garras e presas; vermelho-sangue com morcego e asa).
   lobisomem: { background: "skin-lobisomem", metal: ["#5f6b78", "#5f6b78", "#e2e8ef"], accent: "#e2e8ef", light: "207 226 255", bar: "#03070d", muted: "#cfe2ff", sparkles: false, neon: "#8fd0ff", trim: "lobisomem" },
-  trovao: { background: "skin-trovao", metal: ["#3a2a7a", "#3a2a7a", "#c9b8ff"], accent: "#c9b8ff", light: "200 190 255", bar: "#07051a", muted: "#d6ccff", sparkles: false, neon: "#9a86ff", trim: "trovao" },
-  relampago: { background: "skin-relampago", metal: ["#8a6a00", "#8a6a00", "#fff2a0"], accent: "#ffe14d", light: "255 235 140", bar: "#0a0800", muted: "#fff0a0", sparkles: false, neon: "#ffe62e", trim: "relampago" },
+  // Relâmpago (arte montada pelo dono do app em 2026-10-31): o miolo da arte no fundo e, por fora,
+  // a moldura dourada pintada com o raio no topo, cacos e raios, que estalam como trovão
+  // (`prototipos/skin-relampago-arte.cjs`).
+  relampago: { background: "skin-relampago", overflow: "skin-relampago-vaza", overflowBolts: "skin-relampago-raios", metal: ["#7a5a1c", "#7a5a1c", "#f0d48a"], accent: "#e0b250", light: "150 140 255", bar: "#07061c", muted: "#f0d9a0", sparkles: false, neon: "#e8b54a", trim: null },
+  // Nuvem carregada (Loja, Temporal 2026, aprovada pelo dono do app em 2026-10-31, no lugar do
+  // Trovão): nuvens de tempestade pintadas em poucos tons, neon branco, a nuvem com raio no topo,
+  // a moldura elétrica em volta da metade de baixo e mini raios estalando nas nuvens.
+  nuvem: { background: "skin-nuvem", electric: true, cloudBolts: true, metal: ["#9aa3b5", "#9aa3b5", "#ffffff"], accent: "#ffffff", light: "220 228 240", bar: "#262c3a", muted: "#e1e6ef", sparkles: false, neon: "#f2f5fb", trim: "nuvem" },
   vampiro: { background: "skin-vampiro", metal: ["#6e0f20", "#6e0f20", "#e3384e"], accent: "#e3384e", light: "255 120 140", bar: "#0d0105", muted: "#ffb3bd", sparkles: false, neon: "#ff1f3d", trim: "vampiro" },
   marmore: { background: "marmore", metal: GOLD, accent: "#e9c86a", light: "233 200 106", bar: "#070707", muted: "#e9c86a" },
   estilhacos: { background: "estilhacos", metal: GOLD, accent: "#f2c94c", light: "140 180 255", bar: "#050b20", muted: "#8fb8ff" },
@@ -187,7 +205,7 @@ function skinRoupa(skin: CardSkinKey): RoupaKey {
     case "rubi": return "rubi";
     case "icone": return "icone";
     case "lobisomem": return "lobisomem";
-    case "trovao": return "trovao";
+    case "nuvem": return "nuvem";
     case "relampago": return "relampago";
     case "vampiro": return "vampiro";
     default: return "padrao";
@@ -328,7 +346,7 @@ const NEON_TRIMS = {
     center: "M50.09 -14.13 L50.95 -12.51 L50.09 -10.96 L49.23 -12.51 Z M41.43 -9.34 A0.64 0.64 0 1 0 42.70 -9.34 A0.64 0.64 0 1 0 41.43 -9.34 Z M46.28 -7.43 A0.45 0.45 0 1 0 47.18 -7.43 A0.45 0.45 0 1 0 46.28 -7.43 Z M53.08 -7.43 A0.45 0.45 0 1 0 53.98 -7.43 A0.45 0.45 0 1 0 53.08 -7.43 Z M57.42 -9.34 A0.64 0.64 0 1 0 58.69 -9.34 A0.64 0.64 0 1 0 57.42 -9.34 Z",
   },
   // Time do Mês no trovão (pedido do dono do app em 2026-10-31): o mesmo abraço da base e um
-  // raio em contorno de neon no topo, no lugar da coroa (o Trovão da Loja tem o raio cheio).
+  // raio em contorno de neon no topo, no lugar da coroa.
   mesRaio: {
     side: [
       { d: "M102.4 64 V133 Q102.4 142.4 93 142.4 H58 L50 146", width: 0.55 },
@@ -352,22 +370,15 @@ const NEON_TRIMS = {
       "M52.75 -4.5 H48.5 A3.5 3.5 0 1 1 51.855 -9 H52.75 A2.25 2.25 0 1 1 52.75 -4.5 Z M47.75 -4.25 L46.9 -3 M49.5 -4.25 L48.3 -2.4 M51.25 -4.25 L50.4 -3 M53 -4.5 L51.8 -2.4",
   },
 
-  // Trovão: o abraço da base e um raio no topo.
-  trovao: {
-    side: [
-      { d: "M102.4 64 V133 Q102.4 142.4 93 142.4 H58 L50 146", width: 0.55 },
-      { d: `${NEON_TRIM_INNER} H64`, width: 0.7 },
-    ],
-    center: "M51.8 -12 L46.2 -4.6 L49.6 -4.6 L48 0.6 L54 -7 L50.6 -7 Z",
+
+  // Nuvem carregada: sem fios na base (as nuvens que vazam fazem esse papel) e, no topo, a
+  // nuvem com um raio saindo dela.
+  nuvem: {
+    side: [],
+    centerLines:
+      "M52.75 -5.5 H48.5 A3.5 3.5 0 1 1 51.855 -10 H52.75 A2.25 2.25 0 1 1 52.75 -5.5 Z M50.6 -5.5 L49.2 -3.4 L50.8 -3.4 L49.6 -1.2",
   },
-  // Relâmpago: faíscas em zigue-zague descendo as laterais e a base em raio.
-  relampago: {
-    side: [
-      { d: "M103.2 18 L106.4 27 L103.6 31 L107 41 L104 45 L106.6 53", width: 0.6 },
-      { d: "M102.4 70 V133 Q102.4 142.4 93 142.4 H74 L70 146 L66 142.4 H58 L50 146", width: 0.55 },
-    ],
-    center: "M51.6 -11 L46.6 -4.4 L49.6 -4.4 L48.2 0.2 L53.6 -6.6 L50.6 -6.6 Z",
-  },
+
   teia: {
     subtle: true,
     side: [
@@ -395,6 +406,92 @@ function NeonLine({ d, width, subtle }: { d: string; width: number; subtle?: boo
       {/* Miolo quase branco, como o tubo de neon da moldura (pedido do dono do app em 2026-10-29). */}
       <path d={d} strokeWidth={width * 0.6} stroke={NEON_CORE} />
     </>
+  );
+}
+
+/**
+ * Moldura elétrica (Nuvem carregada, pedido do dono do app em 2026-10-31): fios de eletricidade
+ * em neon por fora da metade de baixo da carta, sumindo para cima nas laterais (`lib/electric-trim.ts`).
+ * O fio principal fica aceso; os finos e as faíscas estalam rápido, como trovão, em tempos diferentes. Só `opacity`
+ * animada (nada de `filter`, por causa do iPhone); com movimento reduzido, tudo fica aceso.
+ */
+function ElectricTrim() {
+  return (
+    <svg
+      aria-hidden
+      viewBox="-9.524 -13.333 119.048 166.667"
+      preserveAspectRatio="none"
+      fill="none"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="pointer-events-none absolute inset-0 z-[10] size-full"
+    >
+      <defs>
+        {/* Os fios somem para cima nas laterais. */}
+        <linearGradient id="cc-electric" gradientUnits="userSpaceOnUse" x1="0" y1={ELECTRIC_TOP} x2="0" y2={ELECTRIC_TOP + 30}>
+          <stop offset="0" stopColor="var(--cc-neon)" stopOpacity="0" />
+          <stop offset="1" stopColor="var(--cc-neon)" />
+        </linearGradient>
+      </defs>
+      <g stroke="url(#cc-electric)">
+        <path d={ELECTRIC_MAIN} strokeWidth={4.2} opacity={0.12} />
+        <path d={ELECTRIC_MAIN} strokeWidth={2} opacity={0.3} />
+        <path d={ELECTRIC_MAIN} strokeWidth={0.9} opacity={0.9} />
+        <path d={ELECTRIC_MAIN} strokeWidth={0.4} stroke="#ffffff" />
+        {ELECTRIC_STRANDS.map((d, i) => (
+          <g key={d} className="animate-[cc-thunder-strike_1.9s_linear_infinite] motion-reduce:animate-none" style={{ animationDelay: `${i * 0.55}s` }}>
+            <path d={d} strokeWidth={1.4} opacity={0.18} />
+            <path d={d} strokeWidth={0.35} opacity={0.85} />
+          </g>
+        ))}
+      </g>
+      <g fill="#ffffff" className="animate-[cc-thunder-strike_1.3s_linear_infinite] motion-reduce:animate-none">
+        {ELECTRIC_SPARKS.map((spark) => (
+          <circle key={`${spark.x}-${spark.y}`} cx={spark.x} cy={spark.y} r={spark.r} opacity={spark.y > ELECTRIC_TOP + 20 ? 0.8 : 0.35} />
+        ))}
+      </g>
+    </svg>
+  );
+}
+
+/**
+ * Mini raios nas nuvens de dentro da carta (Nuvem carregada, pedido do dono do app em
+ * 2026-10-31): apagados quase sempre, estalam duas vezes rápido com a nuvem clareando, como um
+ * relâmpago, cada um no seu tempo. Ficam atrás da foto. Com movimento reduzido, não aparecem.
+ */
+function CloudBolts() {
+  return (
+    <svg aria-hidden viewBox="0 0 100 140" preserveAspectRatio="none" fill="none" strokeLinecap="round" strokeLinejoin="round" className="pointer-events-none absolute inset-0 z-[1] size-full motion-reduce:hidden">
+      <defs>
+        <radialGradient id="cc-cloud-flash">
+          <stop offset="0" stopColor="#ffffff" stopOpacity="0.75" />
+          <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
+        </radialGradient>
+      </defs>
+      {CLOUD_BOLTS.map(({ main, strands, sparks, glow, delay }) => (
+        <g key={main} className="animate-[cc-thunder-flash_3.4s_linear_infinite] opacity-0" style={{ animationDelay: delay }}>
+          <circle cx={glow.cx} cy={glow.cy} r={glow.r} fill="url(#cc-cloud-flash)" />
+          {/* Os mesmos traços da moldura elétrica, mais finos, com a sombra azulada por baixo
+              para o branco não sumir na nuvem branca. */}
+          <path d={main} stroke="#3a4560" strokeWidth={2} opacity={0.45} />
+          <g stroke="var(--cc-neon)">
+            <path d={main} strokeWidth={3.8} opacity={0.15} />
+            <path d={main} strokeWidth={1.8} opacity={0.35} />
+            <path d={main} strokeWidth={0.85} opacity={0.95} />
+            {strands.map((d) => (
+              <g key={d}>
+                <path d={d} strokeWidth={1.2} stroke="#3a4560" opacity={0.3} />
+                <path d={d} strokeWidth={0.4} opacity={0.9} />
+              </g>
+            ))}
+          </g>
+          <path d={main} strokeWidth={0.4} stroke="#ffffff" />
+          {sparks.map((spark) => (
+            <circle key={`${spark.x}-${spark.y}`} cx={spark.x} cy={spark.y} r={spark.r * 0.7} fill="#ffffff" />
+          ))}
+        </g>
+      ))}
+    </svg>
   );
 }
 
@@ -640,6 +737,8 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
           <span className="mt-[1cqw] truncate text-[3.8cqw] font-bold tracking-[0.2em] text-(--cc-muted) uppercase">{subtitle}</span>
         </div>
 
+        {roupa.cloudBolts && <CloudBolts />}
+
         {/* Sombra atrás da pessoa: ela se descola do fundo e parece estar na carta. */}
         {player.photo && <PhotoShadow />}
 
@@ -736,6 +835,16 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
     <div style={vars} className={cn("relative aspect-[5/7] shrink-0", className)}>
       {card}
       <NeonOverlay kind={hasTrim ? (roupa.trim ?? "base") : null} isDim={roupa.neonDim === true} />
+      {roupa.electric && <ElectricTrim />}
+      {roupa.overflow && (
+        // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da caixa, sem otimizar
+        <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflow}.webp`} className="pointer-events-none absolute inset-0 z-[11] size-full select-none" />
+      )}
+      {roupa.overflowBolts && (
+        // Os raios das decorações estalam como trovão (só `opacity`; com movimento reduzido, ficam acesos).
+        // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da caixa, sem otimizar
+        <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflowBolts}.webp`} className="pointer-events-none absolute inset-0 z-[12] size-full animate-[cc-thunder-strike_2.4s_linear_infinite] select-none motion-reduce:animate-none" />
+      )}
     </div>
   ) : (
     card

@@ -341,6 +341,22 @@
   0%, 100% { transform: scale(0.4) rotate(0deg); opacity: 0.2; }
   50% { transform: scale(1) rotate(45deg); opacity: 1; }
 }
+/* Relâmpago: apagado, dois estalos rápidos e some de novo (mini raios nas nuvens da Nuvem carregada). */
+@keyframes cc-thunder-flash {
+  0%, 100% { opacity: 0; }
+  2% { opacity: 1; }
+  4% { opacity: 0.1; }
+  6% { opacity: 1; }
+  14% { opacity: 0; }
+}
+/* O mesmo estalo sem apagar de todo: os fios finos da moldura elétrica e os raios das decorações do Relâmpago. */
+@keyframes cc-thunder-strike {
+  0%, 100% { opacity: 0.25; }
+  3% { opacity: 1; }
+  6% { opacity: 0.3; }
+  9% { opacity: 1; }
+  18% { opacity: 0.25; }
+}
 @keyframes reveal-fill {
   from { width: var(--fill-from); }
 }
