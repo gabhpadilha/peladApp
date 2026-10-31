@@ -50,6 +50,8 @@ export type Roupa = {
    * carta de neon): moldura e enfeites pintados, por cima da moldura de neon.
    */
   overflow?: string;
+  /** A moldura é a da arte (`overflow`): a carta não desenha o tubo de neon, o brilho nem o enfeite. */
+  artFrame?: boolean;
   /** Raios da arte de fora numa camada própria (mesmo tamanho), que estala como trovão. */
   overflowBolts?: string;
   /** Moldura elétrica (raios de neon) em volta da metade de baixo da carta, por fora (`ElectricTrim`). */
@@ -78,6 +80,11 @@ const ROUPAS = {
   // Relâmpago (arte montada pelo dono do app em 2026-10-31): o miolo da arte no fundo e, por fora,
   // a moldura dourada pintada com o raio no topo, cacos e raios, que estalam como trovão
   // (`prototipos/skin-relampago-arte.cjs`).
+  // Lenda do Trovão (carta de prestígio, aprovada pelo dono do app em 2026-10-31): a moldura de metal
+  // dourado envelhecido do concept que ele criou, por fora da carta e sem o neon dela (`artFrame`),
+  // os raios azuis estalando como trovão e o miolo da arte de tempestade dele no fundo
+  // (`prototipos/skin-lenda-arte.cjs` e `skin-lenda-fundo.cjs`).
+  lenda: { background: "skin-lenda", overflow: "skin-lenda-vaza", overflowBolts: "skin-lenda-raios", artFrame: true, metal: ["#7a5a1c", "#7a5a1c", "#f0d48a"], accent: "#d9b36a", light: "160 180 255", bar: "#050816", muted: "#e8d3a0", sparkles: false, neon: "#d9b36a", trim: null },
   relampago: { background: "skin-relampago", overflow: "skin-relampago-vaza", overflowBolts: "skin-relampago-raios", metal: ["#7a5a1c", "#7a5a1c", "#f0d48a"], accent: "#e0b250", light: "150 140 255", bar: "#07061c", muted: "#f0d9a0", sparkles: false, neon: "#e8b54a", trim: null },
   // Nuvem carregada (Loja, Temporal 2026, aprovada pelo dono do app em 2026-10-31, no lugar do
   // Trovão): nuvens de tempestade pintadas em poucos tons, neon branco, a nuvem com raio no topo,
@@ -208,6 +215,7 @@ function skinRoupa(skin: CardSkinKey): RoupaKey {
     case "lobisomem": return "lobisomem";
     case "nuvem": return "nuvem";
     case "relampago": return "relampago";
+    case "lenda": return "lenda";
     case "vampiro": return "vampiro";
     default: return "padrao";
   }
@@ -715,7 +723,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
       style={vars}
       className={cn(
         "@container relative isolate aspect-[5/7] shrink-0 rounded-[9%/6.5%] text-left font-display text-white select-none",
-        isNeon ? (roupa.neonDim ? NEON_FRAME_DIM : NEON_FRAME) : METAL_FRAME,
+        roupa.artFrame ? "" : isNeon ? (roupa.neonDim ? NEON_FRAME_DIM : NEON_FRAME) : METAL_FRAME,
         isNeon ? TRIMMED_CARD : className,
       )}
     >
@@ -822,7 +830,9 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
         aria-hidden
         className={cn(
           "pointer-events-none absolute z-[9]",
-          isNeon
+          roupa.artFrame
+            ? "hidden"
+            : isNeon
             ? cn(NEON_WINDOW, roupa.neonDim ? NEON_INNER_GLOW_DIM : NEON_INNER_GLOW)
             : cn(METAL_WINDOW, "shadow-[inset_0_0_0_0.5cqw_var(--cc-m3),inset_0_0_0_0.9cqw_rgb(0_0_0/0.35)]"),
         )}
@@ -835,7 +845,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
   return isNeon ? (
     <div style={vars} className={cn("relative aspect-[5/7] shrink-0", className)}>
       {card}
-      <NeonOverlay kind={hasTrim ? (roupa.trim ?? "base") : null} isDim={roupa.neonDim === true} />
+      {!roupa.artFrame && <NeonOverlay kind={hasTrim ? (roupa.trim ?? "base") : null} isDim={roupa.neonDim === true} />}
       {roupa.electric && <ElectricTrim />}
       {roupa.overflow && (
         // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da caixa, sem otimizar

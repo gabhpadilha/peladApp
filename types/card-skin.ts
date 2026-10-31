@@ -15,6 +15,8 @@ export const CARD_SKINS = [
   { key: "safira", name: "Safira", level: 4, price: 250 },
   { key: "ametista", name: "Ametista", level: 6, price: 350 },
   { key: "rubi", name: "Rubi", level: 8, price: 450 },
+  // Carta de prestígio (decisão do dono do app em 2026-10-31): a moldura de metal do concept dele.
+  { key: "lenda", name: "Lenda do Trovão", level: 10, price: 600 },
   // Turquesa e Ônix saíram em 2026-10-29 (decisão do dono do app; ninguém tinha comprado).
   { key: "icone", name: "Ícone", level: 16, price: 1200 },
   // Evento de Halloween de 2026: à venda só em outubro de 2026.
