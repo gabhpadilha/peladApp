@@ -52,7 +52,7 @@ export function GoalsWaiting({ matchId, missingNicknames, isOrganizer }: GoalsWa
       {isOrganizer ? (
         <div className="flex w-full flex-col gap-2">
           <Button asChild size="lg" variant="secondary" className="h-11 text-base">
-            <Link href={`/rodadas/${matchId}`}>Marcar os gols de quem está sem celular</Link>
+            <Link href={`/rodadas/${matchId}`}>Marcar os gols de quem não informou</Link>
           </Button>
           <Button size="lg" className="h-11 text-base" disabled={isPending} onClick={handleUnlock}>
             {isPending ? "Liberando…" : "Liberar as notas"}

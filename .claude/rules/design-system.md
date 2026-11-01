@@ -151,9 +151,9 @@ A tela da partida, estilo squad builder do EA FC. **Abre sozinha depois de "Cria
 
 ## ⚽ Gols confirmados (2026-11-01)
 
-- **Etapa dos gols antes das notas:** a primeira tela da votação é "Quantos gols você fez?" (bola, título em `font-display`, seletor grande − número + de 0 a 15, `GoalStepper`, "Continuar para as notas"). Depois, enquanto faltar alguém, "Esperando os gols" (atualiza sozinha a cada 5 s, lista quem falta; para o organizador, "Marcar os gols de quem está sem celular" e "Liberar as notas", que deixa quem não informou com 0).
+- **Etapa dos gols antes das notas:** a primeira tela da votação é "Quantos gols você fez?" (bola, título em `font-display`, seletor grande − número + de 0 a 15, `GoalStepper`, "Continuar para as notas"). Depois, enquanto faltar alguém, "Esperando os gols" (atualiza sozinha a cada 5 s, lista quem falta; para o organizador, "Marcar os gols de quem não informou" e "Liberar as notas", que deixa quem não informou com 0).
 - **Confirmar na nota:** faixa "Fulano diz que fez **3 gols**" com "Confirmo" (lima) / "Não foi isso" e "Opcional · N de 3 confirmações" (`GoalsConfirm`), na tela passo a passo e na folha de notas da mesa; grava na hora.
-- **Mesa tática:** card "Seus gols: N · X de 3 confirmações · Corrigir" (`RoundGoals`), painel recolhido do organizador "Gols de quem está sem celular · Marcar" e a **bolinha** branca com o número embaixo da carta, só para gols confirmados (`GoalsChip`, `GoalBall` no estilo do SofaScore).
+- **Mesa tática:** card "Seus gols: N · X de 3 confirmações · Corrigir" (`RoundGoals`), painel recolhido do organizador "Ainda não informaram os gols · N jogadores · você pode marcar por eles · Marcar" (nunca "sem celular": o app não sabe o motivo, pedido do dono do app em 2026-11-01) e a **bolinha** branca com o número embaixo da carta, só para gols confirmados (`GoalsChip`, `GoalBall` no estilo do SofaScore).
 - **Goleador da Rodada:** visual de destaque, ícone de bola, rodapé "Goleador" e o selo "N gols"; na revelação, sozinho na primeira fileira dos destaques.
 - **Atleta:** bloco "Gols" (total, por jogo, melhor rodada) e coluna "Gols" no histórico, só desde que a contagem começou.
 

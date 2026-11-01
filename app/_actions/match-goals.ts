@@ -33,7 +33,7 @@ function refresh(matchId: string) {
   revalidatePath(`/rodadas/${matchId}`);
 }
 
-/** Informa (ou corrige) os gols de um presente: o próprio ou, por quem está sem celular, o organizador. */
+/** Informa (ou corrige) os gols de um presente: o próprio ou, por quem não informou, o organizador. */
 export async function reportGoals(input: z.infer<typeof reportSchema>): Promise<GoalsActionResult> {
   const parsed = reportSchema.safeParse(input);
   if (!parsed.success) return { success: false, message: `Informe de 0 a ${GOALS_MAX} gols.` };

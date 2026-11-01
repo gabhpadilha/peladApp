@@ -88,7 +88,7 @@ function MyGoals({ board }: { board: MatchBoard }) {
   );
 }
 
-/** Organizador: gols de quem está sem celular e "Liberar as notas". */
+/** Organizador: marca os gols de quem ainda não informou e "Liberar as notas". */
 function OrganizerGoals({ board }: { board: MatchBoard }) {
   const everyone = board.teams.flatMap((team) => [...team.starters, ...team.reserves]);
   const missing = everyone.filter((entry) => !board.goals.byMember[entry.player.id] && entry.player.id !== board.memberId);
@@ -116,9 +116,9 @@ function OrganizerGoals({ board }: { board: MatchBoard }) {
           <UserRoundXIcon className="size-5" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-sm font-medium">Gols de quem está sem celular</span>
+          <span className="block text-sm font-medium">Ainda não informaram os gols</span>
           <span className="block text-xs text-muted-foreground">
-            Só o organizador · {missing.length === 1 ? "1 sem informar" : `${missing.length} sem informar`}
+            {missing.length === 1 ? "1 jogador" : `${missing.length} jogadores`} · você pode marcar por eles
           </span>
         </span>
         <span className="text-sm font-medium text-primary group-open:hidden">Marcar</span>
@@ -158,7 +158,7 @@ function OrganizerGoals({ board }: { board: MatchBoard }) {
 
 /**
  * Etapa dos gols na mesa tática: os seus gols, a espera pelos dos outros (as notas abrem
- * quando todos informam) e, para o organizador, os gols de quem está sem celular.
+ * quando todos informam) e, para o organizador, os gols de quem ainda não informou.
  */
 export function RoundGoals({ board }: { board: MatchBoard }) {
   if (board.match.status !== "open") return null;

@@ -14,7 +14,7 @@ export type MatchGoal = {
   memberId: string;
   /** O que foi informado (0 a 15). */
   goals: number;
-  /** Quem informou: o próprio jogador ou um organizador (por quem estava sem celular). */
+  /** Quem informou: o próprio jogador ou um organizador (por quem não informou). */
   reportedBy: string;
   yes: number;
   no: number;
