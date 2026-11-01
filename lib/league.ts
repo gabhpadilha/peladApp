@@ -1,6 +1,7 @@
 import "server-only";
 import { parseCardTheme } from "@/lib/card-themes";
 import { getGroupEvaluations } from "@/lib/group-scores";
+import { getGroupGoals } from "@/lib/match-goals";
 import { toPlayerPhoto } from "@/lib/player-photo";
 import {
   buildPlayers,
@@ -82,6 +83,7 @@ export async function getLeague(nextPath = "/") {
     submissionsResult,
     awardsResult,
     memberSubmissionsResult,
+    groupGoals,
   ] = await Promise.all([
       membersWithProfiles,
       supabase
@@ -99,6 +101,7 @@ export async function getLeague(nextPath = "/") {
         .eq("group_id", membership.groupId),
       // Quem enviou notas em cada rodada fechada (para o XP e as CanchaCoins).
       supabase.rpc("get_member_submissions", { target_group: membership.groupId }),
+      getGroupGoals(membership.groupId),
     ]);
 
   if (membersResult.error) throw membersResult.error;
@@ -121,6 +124,10 @@ export async function getLeague(nextPath = "/") {
   const submissions = new Set(
     memberSubmissionsResult.data.map((row) => submissionKey(row.match_id, row.member_id)),
   );
+  // Rodada fechada não aceita mais confirmação: os gols confirmados ali não mudam.
+  const confirmedGoals = new Map(
+    groupGoals.filter((goal) => goal.isConfirmed).map((goal) => [submissionKey(goal.matchId, goal.memberId), goal.goals]),
+  );
   const progressionAwards = awardsResult.data.map((award) => ({
     kind: award.kind,
     matchId: award.match_id,
@@ -129,7 +136,7 @@ export async function getLeague(nextPath = "/") {
   const progressionById = new Map<string, Progression>(
     membersResult.data.map((member) => [
       member.id,
-      computeProgression({ playerId: member.id, matches, evaluations, awards: progressionAwards, submissions }),
+      computeProgression({ playerId: member.id, matches, evaluations, awards: progressionAwards, submissions, confirmedGoals }),
     ]),
   );
 
@@ -253,7 +260,7 @@ export async function getLeague(nextPath = "/") {
       progressionById.get(memberId) ?? { level: 0, xpIntoLevel: 0, xpNeeded: 60, xp: 0, coinsEarned: WELCOME_BONUS_COINS },
     /** O que uma rodada fechada deu ao membro (tela "Você ganhou" do pacote). */
     getRoundRewards: (memberId: string, matchId: string): RoundRewards | null =>
-      computeRoundRewards({ playerId: memberId, matchId, matches, evaluations, awards: progressionAwards, submissions }),
+      computeRoundRewards({ playerId: memberId, matchId, matches, evaluations, awards: progressionAwards, submissions, confirmedGoals }),
   };
 }
 

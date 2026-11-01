@@ -12,8 +12,17 @@ import { isOvrEvaluation, type Evaluation, type Match } from "@/types/match";
 /** XP de uma rodada: nota recebida (escala 0–99, ex.: 7,5 → 75) + bônus. */
 const XP_HIGH_SCORE_BONUS = { 90: 40, 80: 20 } as const;
 const XP_SUBMITTED = 10;
-const XP_BEST_PLAYER = 100;
-const XP_OTHER_POSITIVE_AWARD = 60;
+const XP_BEST_PLAYER = 60;
+const XP_OTHER_POSITIVE_AWARD = 30;
+/** Por gol confirmado (3 "sim"): a única estatística real do jogo (decisão do dono do app em 2026-11-01). */
+const XP_PER_GOAL = 10;
+/**
+ * XP dos prêmios caiu em 2026-11-01 (pedido do dono do app: concentrava o nível nos mesmos jogadores).
+ * As rodadas jogadas antes continuam com o valor antigo, para ninguém perder nível nem saldo.
+ */
+const AWARD_XP_CUTOFF = "2026-11-01";
+const LEGACY_XP_BEST_PLAYER = 100;
+const LEGACY_XP_OTHER_POSITIVE_AWARD = 60;
 
 /** CanchaCoins de uma rodada. */
 const COINS_PLAYED = 20;
@@ -23,6 +32,7 @@ const COINS_OVR_UP = 10;
 const COINS_BEST_PLAYER = 60;
 const COINS_OTHER_POSITIVE_AWARD = 30;
 const COINS_PER_LEVEL = 20;
+const COINS_PER_GOAL = 5;
 /** Bônus de primeiro login: todo jogador começa com ele (aviso na home). */
 export const WELCOME_BONUS_COINS = 150;
 
@@ -33,6 +43,7 @@ export const COIN_RULES = [
   { label: "Enviar as suas notas", value: `+${COINS_SUBMITTED}` },
   { label: "Nota 7+ / 8+ / 9+", value: `+${COINS_SCORE_BONUS[70]} / +${COINS_SCORE_BONUS[80]} / +${COINS_SCORE_BONUS[90]}` },
   { label: "OVR subiu na rodada", value: `+${COINS_OVR_UP}` },
+  { label: "Gol confirmado", value: `+${COINS_PER_GOAL} cada` },
   { label: "Melhor Jogador", value: `+${COINS_BEST_PLAYER}` },
   { label: "Time do Mês", value: `+${COINS_BEST_PLAYER}` },
   { label: "Outros prêmios positivos", value: `+${COINS_OTHER_POSITIVE_AWARD}` },
@@ -43,6 +54,7 @@ export const XP_RULES = [
   { label: "Nota da rodada × 10", value: "7,5 → 75 XP" },
   { label: "Nota 8+ / 9+", value: `+${XP_HIGH_SCORE_BONUS[80]} / +${XP_HIGH_SCORE_BONUS[90]} XP` },
   { label: "Enviar as suas notas", value: `+${XP_SUBMITTED} XP` },
+  { label: "Gol confirmado", value: `+${XP_PER_GOAL} XP cada` },
   { label: "Melhor Jogador", value: `+${XP_BEST_PLAYER} XP` },
   { label: "Time do Mês", value: `+${XP_BEST_PLAYER} XP` },
   { label: "Outros prêmios positivos", value: `+${XP_OTHER_POSITIVE_AWARD} XP` },
@@ -90,6 +102,8 @@ type ProgressionInput = {
   awards: readonly ProgressionAward[];
   /** `matchId:memberId` de quem enviou notas em cada rodada fechada. */
   submissions: ReadonlySet<string>;
+  /** Gols confirmados (3 "sim") por `matchId:memberId`. */
+  confirmedGoals: ReadonlyMap<string, number>;
 };
 
 // Performance: os limites de cada tabela são ordenados uma vez só (antes, a cada
@@ -159,7 +173,7 @@ function indexByPlayerAndMatch<Item>(
 }
 
 /** Rodada a rodada (só as fechadas), na ordem: o que cada uma deu ao jogador. */
-function* walkRounds({ playerId, matches, evaluations, awards, submissions }: ProgressionInput) {
+function* walkRounds({ playerId, matches, evaluations, awards, submissions, confirmedGoals }: ProgressionInput) {
   let previousOvr: number | null = null;
   // Performance: OVR acumulado com somas correntes por atributo. Antes, `computeOvr`
   // recalculava todo o histórico a cada rodada (O(rodadas²) por jogador). Os totais
@@ -180,6 +194,9 @@ function* walkRounds({ playerId, matches, evaluations, awards, submissions }: Pr
     }
     const ovr = ovrFromTotals(ovrTotals);
     const gains: RoundGain[] = [];
+    const isLegacyRound = match.date < AWARD_XP_CUTOFF;
+    const bestPlayerXp = isLegacyRound ? LEGACY_XP_BEST_PLAYER : XP_BEST_PLAYER;
+    const otherAwardXp = isLegacyRound ? LEGACY_XP_OTHER_POSITIVE_AWARD : XP_OTHER_POSITIVE_AWARD;
 
     if (match.presentPlayerIds.includes(playerId)) {
       const score = averageEvaluations(received);
@@ -201,8 +218,17 @@ function* walkRounds({ playerId, matches, evaluations, awards, submissions }: Pr
         gains.push({
           key: `award-${award.kind}`,
           label: `Prêmio: ${AWARD_LABELS[award.kind].title}`,
-          xp: isBestPlayer ? XP_BEST_PLAYER : XP_OTHER_POSITIVE_AWARD,
+          xp: isBestPlayer ? bestPlayerXp : otherAwardXp,
           coins: isBestPlayer ? COINS_BEST_PLAYER : COINS_OTHER_POSITIVE_AWARD,
+        });
+      }
+      const goals = confirmedGoals.get(submissionKey(match.id, playerId)) ?? 0;
+      if (goals > 0) {
+        gains.push({
+          key: "goals",
+          label: goals === 1 ? "1 gol confirmado" : `${goals} gols confirmados`,
+          xp: goals * XP_PER_GOAL,
+          coins: goals * COINS_PER_GOAL,
         });
       }
       if (submissions.has(submissionKey(match.id, playerId))) {
@@ -222,7 +248,7 @@ function* walkRounds({ playerId, matches, evaluations, awards, submissions }: Pr
     // Time do Mês: vale o mesmo que o Melhor Jogador, mesmo sem ter jogado a última quinta.
     for (const award of playerAwards) {
       if (award.kind !== "jogador_do_mes") continue;
-      gains.unshift({ key: "award-jogador_do_mes", label: "Prêmio: Time do Mês", xp: XP_BEST_PLAYER, coins: COINS_BEST_PLAYER });
+      gains.unshift({ key: "award-jogador_do_mes", label: "Prêmio: Time do Mês", xp: bestPlayerXp, coins: COINS_BEST_PLAYER });
     }
     const ovrBefore = previousOvr;
     if (ovr !== null) previousOvr = ovr;
