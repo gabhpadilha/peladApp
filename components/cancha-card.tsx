@@ -165,6 +165,10 @@ const FLOP_ROUPA: Roupa = {
   trim: null,
 };
 
+/** Desenhos de antes de 2026-10-31, só para as cartas já ganhas (`prototipos/mes-cristal.cjs`, `murcha.cjs`). */
+const MONTH_ROUPA_CRISTAL: Roupa = { ...MONTH_ROUPA, background: "premio-time-do-mes-cristal", trim: "mes" };
+const FLOP_ROUPA_BRONZE: Roupa = { ...FLOP_ROUPA, background: "premio-bola-murcha-bronze" };
+
 /** Fora do jogo (só cartas antigas): roupas provisórias. */
 const PROVISIONAL_AWARD_ROUPAS: Partial<Record<AwardDesignKind, Roupa>> = {
   // Time da Semana (saiu do jogo em 2026-10-29): neon dourado, como os outros prêmios.
@@ -173,8 +177,11 @@ const PROVISIONAL_AWARD_ROUPAS: Partial<Record<AwardDesignKind, Roupa>> = {
 
 function awardRoupa(kind: AwardKind, theme: CardThemeKey): Roupa {
   const design = awardDesignKind(kind);
-  if (design === "jogador_do_mes") return MONTH_ROUPA;
-  if (design === "bola_murcha") return FLOP_ROUPA;
+  // Time do Mês e Bola Murcha não vestem o tema do mês, mas o desenho mudou em 2026-10-31: as cartas
+  // ganhas antes (todas gravadas com o tema do Halloween) são de colecionador e ficam com o desenho
+  // da época (pedido do dono do app): o cristal com a coroa e o bronze oxidado.
+  if (design === "jogador_do_mes") return theme === "halloween" ? MONTH_ROUPA_CRISTAL : MONTH_ROUPA;
+  if (design === "bola_murcha") return theme === "halloween" ? FLOP_ROUPA_BRONZE : FLOP_ROUPA;
   const provisional = PROVISIONAL_AWARD_ROUPAS[design];
   if (provisional) return { ...provisional, trim: theme === "halloween" ? "abobora" : "destaque" };
   const isCraque = design === "craque";
@@ -342,8 +349,8 @@ const NEON_TRIMS = {
     ],
     center: "M50.00 -9.20 L51.06 -6.46 L53.99 -6.30 L51.71 -4.44 L52.47 -1.60 L50.00 -3.20 L47.53 -1.60 L48.29 -4.44 L46.01 -6.30 L48.94 -6.46 Z",
   },
-  // Time do Mês de 2026-10-29 a 2026-10-31 (sem uso desde o trovão, `mesRaio`; fica para eventos
-  // futuros): o abraço da base das premium e a coroa no topo, em neon.
+  // Time do Mês de 2026-10-29 a 2026-10-31 (as cartas ganhas nesse tempo continuam com ele; as novas
+  // usam o trovão, `mesRaio`): o abraço da base das premium e a coroa no topo, em neon.
   mes: {
     side: [
       { d: "M102.4 64 V133 Q102.4 142.4 93 142.4 H58 L50 146", width: 0.55 },
