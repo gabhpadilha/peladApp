@@ -8,9 +8,9 @@ export type ShopSale = {
   end: string;
 };
 
-/** Black Friday 2026: o mês de novembro inteiro, em todas as personalizações à venda. */
+/** Black Friday 2026: de 31/10 (ligada um dia antes, com o Toró, a pedido do dono do app) a 30/11, em tudo. */
 export const SHOP_SALES: readonly ShopSale[] = [
-  { label: "Black Friday", percent: 30, start: "2026-11-01", end: "2026-11-30" },
+  { label: "Black Friday", percent: 30, start: "2026-10-31", end: "2026-11-30" },
 ];
 
 /** Promoção valendo em `today` (`AAAA-MM-DD`), se houver. */

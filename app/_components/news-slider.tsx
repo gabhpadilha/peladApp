@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowRightIcon, CloudLightningIcon, CoinsIcon, CrownIcon, GhostIcon, MedalIcon, SparklesIcon, StoreIcon, TrendingUpIcon, type LucideIcon } from "lucide-react";
+import { ArrowRightIcon, CloudLightningIcon, TagIcon, CoinsIcon, CrownIcon, GhostIcon, MedalIcon, SparklesIcon, StoreIcon, TrendingUpIcon, type LucideIcon } from "lucide-react";
 import { formatCoins } from "@/components/coin-pill";
 import { RankInsignia } from "@/components/cancha-card";
 import { PlayerCard } from "@/components/player-card";
@@ -14,7 +14,7 @@ import { COIN_RULES, XP_RULES, type LevelProgress } from "@/lib/progression";
 import { getNextPlayerOfTheMonthDate } from "@/lib/player-of-the-month";
 import { PLAYER_OF_THE_MONTH_MIN_RATINGS, type AwardKind } from "@/types/award";
 import { CARD_SKINS, isCardSkinOnSale, type CardSkinKey } from "@/types/card-skin";
-import type { ShopSale } from "@/lib/shop-sale";
+import { getSalePrice, type ShopSale } from "@/lib/shop-sale";
 import type { Player } from "@/types/player";
 import { cn } from "@/lib/utils";
 import { NewsCarousel } from "./news-carousel";
@@ -101,6 +101,38 @@ function Chips({ items, isCoin = false, className }: { items: readonly Chip[]; i
         </li>
       ))}
     </ul>
+  );
+}
+
+/**
+ * Arte da Black Friday (pedido do dono do app em 2026-10-31): etiqueta preta com o desconto
+ * grande e, ao lado, as cartas em destaque com o preço de tabela riscado e o novo.
+ */
+function SaleBanner({ sale, skins }: { sale: ShopSale; skins: readonly { key: CardSkinKey; name: string; price: number }[] }) {
+  return (
+    <div className="grid w-full grid-cols-[auto_minmax(0,1fr)] items-center gap-3 overflow-hidden rounded-xl border border-white/15 bg-black p-3 sm:gap-5 sm:p-4">
+      <div className="flex flex-col items-center rounded-lg bg-white px-2.5 py-2 text-black">
+        <span className="text-[0.5625rem] font-bold tracking-[0.15em] whitespace-nowrap uppercase">{sale.label}</span>
+        <span className="font-display text-4xl leading-none font-extrabold tabular-nums sm:text-5xl">-{sale.percent}%</span>
+        <span className="text-[0.625rem] font-semibold tracking-widest uppercase">em tudo</span>
+      </div>
+      <ul className="flex min-w-0 flex-col gap-2">
+        {skins.map((skin) => (
+          <li key={skin.key} className="flex items-center gap-2">
+            <div className="w-8 shrink-0">
+              <PlayerCard player={{ ...SAMPLE_PLAYER, cardSkin: skin.key }} size="fill" />
+            </div>
+            <div className="flex min-w-0 flex-col leading-tight">
+              <span className="text-sm">{skin.name}</span>
+              <span className="flex items-baseline gap-1.5">
+                <span className="text-xs text-muted-foreground tabular-nums line-through">{formatCoins(skin.price)}</span>
+                <span className="text-sm font-semibold text-amber-200 tabular-nums">{formatCoins(getSalePrice(skin.price, sale))} CC</span>
+              </span>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
 
@@ -203,7 +235,30 @@ export function NewsSlider({ event, today, shopSale, player, progress, balance }
   const shopFan: [CardSkinKey, CardSkinKey, CardSkinKey] =
     eventSkins.length >= 2 ? [eventSkins[1].key, eventSkins[0].key, "esmeralda"] : SHOP_FAN;
 
+  // Na Black Friday: as cartas do evento (ou as premium mais caras) com o preço novo.
+  const saleSkins = (eventSkins.length > 0 ? eventSkins : CARD_SKINS.filter((skin) => !("event" in skin) && skin.price > 0)).slice(0, 3);
+
   const slides = [
+    ...(shopSale
+      ? [
+          {
+            key: "promocao",
+            title: shopSale.label,
+            content: (
+              <Slide
+                icon={TagIcon}
+                eyebrow="Promoção na Loja"
+                title={shopSale.label}
+                meta={`-${shopSale.percent}% em tudo até ${formatShortDate(shopSale.end)}`}
+                text={`Todas as cartas da Loja com ${shopSale.percent}% de desconto, inclusive as do evento. O preço novo já aparece na Loja; o que você comprar é seu para sempre.`}
+                visual={<SaleBanner sale={shopSale} skins={saleSkins} />}
+                href="/loja"
+                cta="Aproveitar na Loja"
+              />
+            ),
+          },
+        ]
+      : []),
     {
       key: "jogador-do-mes",
       title: "Time do Mês",
