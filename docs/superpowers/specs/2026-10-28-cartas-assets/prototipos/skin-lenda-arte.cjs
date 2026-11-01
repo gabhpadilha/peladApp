@@ -1,3 +1,4 @@
+// SUBSTITUÍDO em 2026-11-01 por skin-lenda-v2.cjs (não rode: sobrescreveria a versão 2).
 // Skin Lenda do Trovão (2026-10-31): a moldura do concept que o dono do app criou no Gemini
 // (`lenda-concept-dono.jpg`, 737 × 1024: metal dourado envelhecido, raio no topo, raios elétricos).
 // O miolo do concept tem os textos pintados, então só a moldura entra (`skin-lenda-vaza.webp`), e o

@@ -80,10 +80,9 @@ const ROUPAS = {
   // Relâmpago (arte montada pelo dono do app em 2026-10-31): o miolo da arte no fundo e, por fora,
   // a moldura dourada pintada com o raio no topo, cacos e raios, que estalam como trovão
   // (`prototipos/skin-relampago-arte.cjs`).
-  // Lenda do Trovão (carta de prestígio, aprovada pelo dono do app em 2026-10-31): a moldura de metal
-  // dourado envelhecido do concept que ele criou, por fora da carta e sem o neon dela (`artFrame`),
-  // os raios azuis estalando como trovão e o miolo da arte de tempestade dele no fundo
-  // (`prototipos/skin-lenda-arte.cjs` e `skin-lenda-fundo.cjs`).
+  // Lenda do Trovão (carta de prestígio): desde 2026-11-01, as três camadas que o dono do app gerou no
+  // Gemini (moldura de metal dourado envelhecido por fora da carta e sem o neon dela, `artFrame`; raios
+  // dourados e azuis que estalam como trovão; fundo de tempestade), em `prototipos/skin-lenda-v2.cjs`.
   lenda: { background: "skin-lenda", overflow: "skin-lenda-vaza", overflowBolts: "skin-lenda-raios", artFrame: true, metal: ["#7a5a1c", "#7a5a1c", "#f0d48a"], accent: "#d9b36a", light: "160 180 255", bar: "#050816", muted: "#e8d3a0", sparkles: false, neon: "#d9b36a", trim: null },
   relampago: { background: "skin-relampago", overflow: "skin-relampago-vaza", overflowBolts: "skin-relampago-raios", metal: ["#7a5a1c", "#7a5a1c", "#f0d48a"], accent: "#e0b250", light: "150 140 255", bar: "#07061c", muted: "#f0d9a0", sparkles: false, neon: "#e8b54a", trim: null },
   // Nuvem carregada (Loja, Temporal 2026, aprovada pelo dono do app em 2026-10-31, no lugar do

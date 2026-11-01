@@ -1,3 +1,4 @@
+// SUBSTITUÍDO em 2026-11-01 por skin-lenda-v2.cjs (não rode: sobrescreveria a versão 2).
 // Fundo da skin Lenda do Trovão (2026-10-31): o miolo da arte "tempestade" do dono do app
 // (`lenda-fundo-dono.jpg`, 765 × 1024), recortado exatamente na janela da carta, dentro do fio
 // dourado da moldura dela (a moldura da skin vem do concept, `skin-lenda-arte.cjs`).
