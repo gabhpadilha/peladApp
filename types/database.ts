@@ -350,6 +350,104 @@ export type Database = {
           },
         ]
       }
+      match_goal_confirmations: {
+        Row: {
+          confirmed: boolean
+          created_at: string
+          group_id: string
+          match_id: string
+          member_id: string
+          voter_id: string
+        }
+        Insert: {
+          confirmed: boolean
+          created_at?: string
+          group_id: string
+          match_id: string
+          member_id: string
+          voter_id: string
+        }
+        Update: {
+          confirmed?: boolean
+          created_at?: string
+          group_id?: string
+          match_id?: string
+          member_id?: string
+          voter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_goal_confirmations_group_id_match_id_fkey"
+            columns: ["group_id", "match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["group_id", "id"]
+          },
+          {
+            foreignKeyName: "match_goal_confirmations_match_id_member_id_fkey"
+            columns: ["match_id", "member_id"]
+            isOneToOne: false
+            referencedRelation: "match_goals"
+            referencedColumns: ["match_id", "member_id"]
+          },
+          {
+            foreignKeyName: "match_goal_confirmations_match_id_voter_id_fkey"
+            columns: ["match_id", "voter_id"]
+            isOneToOne: false
+            referencedRelation: "match_attendance"
+            referencedColumns: ["match_id", "member_id"]
+          },
+        ]
+      }
+      match_goals: {
+        Row: {
+          goals: number
+          group_id: string
+          match_id: string
+          member_id: string
+          reported_by: string
+          updated_at: string
+        }
+        Insert: {
+          goals: number
+          group_id: string
+          match_id: string
+          member_id: string
+          reported_by: string
+          updated_at?: string
+        }
+        Update: {
+          goals?: number
+          group_id?: string
+          match_id?: string
+          member_id?: string
+          reported_by?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_goals_group_id_match_id_fkey"
+            columns: ["group_id", "match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["group_id", "id"]
+          },
+          {
+            foreignKeyName: "match_goals_match_id_member_id_fkey"
+            columns: ["match_id", "member_id"]
+            isOneToOne: true
+            referencedRelation: "match_attendance"
+            referencedColumns: ["match_id", "member_id"]
+          },
+          {
+            foreignKeyName: "match_goals_reported_by_fkey"
+            columns: ["reported_by"]
+            isOneToOne: false
+            referencedRelation: "group_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       matches: {
         Row: {
           closed_at: string | null
@@ -358,6 +456,7 @@ export type Database = {
           group_id: string
           id: string
           played_on: string
+          ratings_unlocked_at: string | null
           round: number
           score_a: number | null
           score_b: number | null
@@ -370,6 +469,7 @@ export type Database = {
           group_id: string
           id?: string
           played_on: string
+          ratings_unlocked_at?: string | null
           round: number
           score_a?: number | null
           score_b?: number | null
@@ -382,6 +482,7 @@ export type Database = {
           group_id?: string
           id?: string
           played_on?: string
+          ratings_unlocked_at?: string | null
           round?: number
           score_a?: number | null
           score_b?: number | null
@@ -475,6 +576,14 @@ export type Database = {
         Args: { target_match: string; theme_key: string }
         Returns: number
       }
+      confirm_goals: {
+        Args: {
+          is_confirmed: boolean
+          target_match: string
+          target_member: string
+        }
+        Returns: undefined
+      }
       counted_evaluations: {
         Args: { target_group: string }
         Returns: {
@@ -517,6 +626,18 @@ export type Database = {
           team_numbers: number[]
         }
         Returns: string
+      }
+      current_member_id: { Args: { target_group: string }; Returns: string }
+      get_group_goals: {
+        Args: { target_group: string }
+        Returns: {
+          goals: number
+          match_id: string
+          member_id: string
+          no_count: number
+          reported_by: string
+          yes_count: number
+        }[]
       }
       get_group_scores: {
         Args: { target_group: string }
@@ -571,6 +692,15 @@ export type Database = {
         }
         Returns: string
       }
+      ratings_open: { Args: { target_match: string }; Returns: boolean }
+      report_goals: {
+        Args: {
+          goal_count: number
+          target_match: string
+          target_member: string
+        }
+        Returns: undefined
+      }
       set_member_active: {
         Args: { active: boolean; target_member: string }
         Returns: undefined
@@ -586,6 +716,7 @@ export type Database = {
         Args: { in_goal: boolean; target_match: string; target_member: string }
         Returns: number
       }
+      unlock_ratings: { Args: { target_match: string }; Returns: undefined }
     }
     Enums: {
       award_kind:
@@ -604,6 +735,7 @@ export type Database = {
         | "garcom"
         | "motor"
         | "criativo"
+        | "goleador"
       match_status: "open" | "closed"
       member_role: "organizer" | "player"
       player_position: "FIX" | "ALA" | "PIV" | "GOL"
@@ -750,6 +882,7 @@ export const Constants = {
         "garcom",
         "motor",
         "criativo",
+        "goleador",
       ],
       match_status: ["open", "closed"],
       member_role: ["organizer", "player"],

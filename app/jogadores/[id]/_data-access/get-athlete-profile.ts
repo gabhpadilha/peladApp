@@ -3,6 +3,7 @@ import { getGroupAttributeAverages } from "@/lib/athlete-insights";
 import { getShareableAwardIds } from "@/lib/award-share";
 import { getCurrentCardEvent, type CardThemeKey } from "@/lib/card-themes";
 import { getLeague } from "@/lib/league";
+import { getGroupGoals } from "@/lib/match-goals";
 import {
   getMatchPerformances,
   rankPlayers,
@@ -43,6 +44,10 @@ export type AthleteProfile = {
   currentTheme: CardThemeKey;
   /** Nível e XP do atleta (públicos para a pelada). */
   levelProgress: LevelProgress;
+  /** Gols confirmados em cada rodada fechada (só as rodadas com a contagem de gols). */
+  goalsByMatch: Record<string, number>;
+  /** Resumo dos gols; `null` se ele ainda não jogou nenhuma rodada com a contagem. */
+  goalStats: { total: number; perGame: number; best: { goals: number; round: number } | null } | null;
 };
 
 /** Perfil de um atleta da pelada ativa; `null` se o id não for de alguém dela. */
@@ -63,6 +68,21 @@ export async function getAthleteProfile(memberId: string): Promise<AthleteProfil
   );
 
   const awards = league.awards.filter((award) => award.memberId === player.id);
+
+  // Gols: só rodadas fechadas e com a contagem (alguém informou gols nelas).
+  const groupGoals = await getGroupGoals(league.membership.groupId);
+  const closedIds = new Set(league.matches.filter((match) => match.status === "closed").map((match) => match.id));
+  const trackedMatchIds = new Set(groupGoals.filter((goal) => closedIds.has(goal.matchId)).map((goal) => goal.matchId));
+  const goalsByMatch: Record<string, number> = {};
+  for (const goal of groupGoals) {
+    if (goal.memberId === player.id && trackedMatchIds.has(goal.matchId) && goal.isConfirmed) goalsByMatch[goal.matchId] = goal.goals;
+  }
+  const trackedGames = performances.filter((performance) => performance.wasPresent && trackedMatchIds.has(performance.match.id));
+  const totalGoals = Object.values(goalsByMatch).reduce((sum, goals) => sum + goals, 0);
+  const bestGame = trackedGames.reduce<{ goals: number; round: number } | null>((best, performance) => {
+    const goals = goalsByMatch[performance.match.id] ?? 0;
+    return goals > 0 && (best === null || goals > best.goals) ? { goals, round: performance.match.round } : best;
+  }, null);
 
   return {
     player,
@@ -88,5 +108,8 @@ export async function getAthleteProfile(memberId: string): Promise<AthleteProfil
     groupAverages: getGroupAttributeAverages(league.activePlayers, player.role),
     currentTheme: getCurrentCardEvent(todayFormatter.format(new Date())).theme,
     levelProgress: league.getProgression(player.id),
+    goalsByMatch,
+    goalStats:
+      trackedGames.length > 0 ? { total: totalGoals, perGame: totalGoals / trackedGames.length, best: bestGame } : null,
   };
 }

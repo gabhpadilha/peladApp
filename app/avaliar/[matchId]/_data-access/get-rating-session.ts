@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getLeague } from "@/lib/league";
+import { getRoundGoalsState, type RoundGoalsState } from "@/lib/match-goals";
 import { getRoundRole, isOffPosition, type PlayerRole } from "@/lib/round-position";
 import { createClient } from "@/lib/supabase/server";
 import type { Player } from "@/types/player";
@@ -23,7 +24,18 @@ export type RatingSession =
   | { status: "closed"; match: RoundInfo }
   | { status: "not-present"; match: RoundInfo }
   | { status: "submitted"; match: RoundInfo }
-  | { status: "open"; match: RoundInfo; targets: RatingTarget[] };
+  | {
+      status: "open";
+      match: RoundInfo;
+      targets: RatingTarget[];
+      /** Etapa dos gols (vem antes das notas). */
+      goals: RoundGoalsState;
+      /** Quem está logado (para a tela de gols). */
+      memberId: string;
+      isOrganizer: boolean;
+      /** Apelido de quem ainda não informou os gols (tela de espera). */
+      missingNicknames: string[];
+    };
 
 /**
  * O que o jogador logado pode fazer na tela de notas de uma rodada: avaliar os
@@ -47,10 +59,10 @@ export async function getRatingSession(matchId: string): Promise<RatingSession> 
   }
 
   const supabase = await createClient();
-  const { data: attendance, error } = await supabase
-    .from("match_attendance")
-    .select("member_id, team, reserve, plays_in_goal")
-    .eq("match_id", matchId);
+  const [{ data: attendance, error }, goals] = await Promise.all([
+    supabase.from("match_attendance").select("member_id, team, reserve, plays_in_goal").eq("match_id", matchId),
+    getRoundGoalsState(league.membership.groupId, matchId, match.presentPlayerIds, league.currentMemberId),
+  ]);
   if (error) throw error;
   const slotByMember = new Map(attendance.map((row) => [row.member_id, row]));
 
@@ -81,5 +93,14 @@ export async function getRatingSession(matchId: string): Promise<RatingSession> 
         a.player.nickname.localeCompare(b.player.nickname, "pt-BR"),
     );
 
-  return { status: "open", match: info, targets };
+  const nicknameById = new Map(league.players.map((player) => [player.id, player.nickname]));
+  return {
+    status: "open",
+    match: info,
+    targets,
+    goals,
+    memberId: league.currentMemberId,
+    isOrganizer: league.membership.role === "organizer",
+    missingNicknames: goals.missingIds.flatMap((id) => (nicknameById.has(id) ? [nicknameById.get(id) as string] : [])),
+  };
 }

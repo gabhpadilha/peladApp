@@ -14,6 +14,7 @@ import {
   StarIcon,
   TrophyIcon,
   UtensilsIcon,
+  VolleyballIcon,
   type LucideIcon,
 } from "lucide-react";
 import type { AwardKind } from "@/types/award";
@@ -22,6 +23,7 @@ import type { AwardKind } from "@/types/award";
 export const AWARD_ICONS: Record<AwardKind, LucideIcon> = {
   craque: TrophyIcon,
   gol: GoalIcon,
+  goleador: VolleyballIcon,
   foguete: RocketIcon,
   garcom: HandPlatterIcon,
   motor: CogIcon,

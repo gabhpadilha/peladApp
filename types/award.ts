@@ -10,6 +10,8 @@ type PlayerRole = Player["role"];
 export const AWARD_KINDS = [
   "craque",
   "gol",
+  // Goleador da Rodada (2026-11-01): mais gols confirmados pelos colegas; `votes` = os gols.
+  "goleador",
   "atacante",
   "criativo",
   "defensor",
@@ -125,6 +127,12 @@ export const AWARD_LABELS: Record<
     title: "Gol da Rodada",
     question: "Quem fez o gol mais bonito?",
     hint: "O golaço da rodada. A carta vem com +1 em cada atributo.",
+    eligibility: "all",
+  },
+  goleador: {
+    title: "Goleador da Rodada",
+    question: "",
+    hint: "Mais gols confirmados na rodada (3 colegas confirmam). Sem voto. A carta vem com +1 em cada atributo.",
     eligibility: "all",
   },
   // Saiu do jogo (2026-10-29): fica só para cartas antigas.
@@ -266,6 +274,7 @@ export function formatAwardResult(award: Pick<Award, "kind" | "votes" | "score">
   if (award.kind === "jogador_do_mes") {
     return award.score === null ? "Time do Mês" : `média ${formatRoundScore(award.score)} no mês`;
   }
+  if (award.kind === "goleador") return award.votes === 1 ? "1 gol" : `${award.votes} gols`;
   const source = STAT_AWARD_SOURCES[award.kind];
   if (source && award.score !== null) return `${source.short} ${formatRoundScore(award.score)}`;
   return `${award.votes} ${award.votes === 1 ? "voto" : "votos"}`;

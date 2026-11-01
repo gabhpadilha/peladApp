@@ -1,16 +1,22 @@
 "use client";
 
 import { AttributeSlider } from "@/app/avaliar/[matchId]/_components/attribute-slider";
+import { GoalsConfirm } from "@/components/goals-confirm";
 import { OffPositionBadge } from "@/components/off-position-badge";
 import { PlayerCard } from "@/components/player-card";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import type { RoundGoalsState } from "@/lib/goal-rules";
 import { countFilled, getAttributeKeys, isDraftComplete, type ScoreDraft } from "@/lib/rating-drafts";
 import { teamRoleLabel } from "@/lib/teams";
 import { ATTRIBUTE_LABELS, POSITION_LABELS, type PlayerAttribute } from "@/types/player";
 import type { BoardPlayer } from "../_data-access/get-match-board";
 
 type RatePlayerSheetProps = {
+  matchId: string;
+  memberId: string;
+  /** Gols de cada um, para confirmar na nota. */
+  goals: RoundGoalsState;
   entry: BoardPlayer | null;
   draft: ScoreDraft | undefined;
   onScore: (playerId: string, key: PlayerAttribute, value: number) => void;
@@ -19,7 +25,7 @@ type RatePlayerSheetProps = {
 };
 
 /** Notas de um jogador (6 sliders), aberta ao tocar na carta da mesa tática. */
-export function RatePlayerSheet({ entry, draft, onScore, onClear, onClose }: RatePlayerSheetProps) {
+export function RatePlayerSheet({ matchId, memberId, goals, entry, draft, onScore, onClear, onClose }: RatePlayerSheetProps) {
   const player = entry?.player;
   // Papel da rodada: quem jogou no gol recebe notas de goleiro.
   const filled = entry ? countFilled(entry.role, draft) : 0;
@@ -45,6 +51,16 @@ export function RatePlayerSheet({ entry, draft, onScore, onClear, onClose }: Rat
             </SheetHeader>
 
             <div className="flex flex-1 flex-col gap-5 overflow-y-auto px-4 py-5">
+              {goals.byMember[player.id] && (
+                <GoalsConfirm
+                  key={player.id}
+                  matchId={matchId}
+                  nickname={player.nickname}
+                  goal={goals.byMember[player.id]}
+                  myVote={goals.myVotes[player.id]}
+                  isReporter={goals.byMember[player.id].reportedBy === memberId}
+                />
+              )}
               {getAttributeKeys(entry.role).map((key) => (
                 <AttributeSlider
                   key={`${player.id}-${key}`}

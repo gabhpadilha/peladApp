@@ -4,6 +4,7 @@ import { memo } from "react";
 import Link from "next/link";
 import { CheckIcon, PlusIcon } from "lucide-react";
 import { OffPositionBadge } from "@/components/off-position-badge";
+import { GoalsChip } from "./round-goals";
 import { PlayerCard } from "@/components/player-card";
 import { cn } from "@/lib/utils";
 import type { BoardPlayer } from "../_data-access/get-match-board";
@@ -103,6 +104,7 @@ export const BoardCard = memo(function BoardCard({ entry, mode, rating, onRate }
         </span>
       )}
       <Badge entry={entry} mode={mode} rating={rating} />
+      {entry.goal?.isConfirmed && <GoalsChip goals={entry.goal.goals} />}
     </span>
   );
 

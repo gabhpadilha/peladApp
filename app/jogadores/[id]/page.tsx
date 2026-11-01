@@ -7,6 +7,7 @@ import { GroupGate } from "@/components/group-gate";
 import { LevelProgressBar } from "@/components/level-progress";
 import { PendingEvaluationsBanner } from "@/components/pending-evaluations-banner";
 import { AthleteHero } from "./_components/athlete-hero";
+import { GoalStats } from "./_components/goal-stats";
 import { AthleteHighlights } from "./_components/athlete-highlights";
 import { AthleteTabs } from "./_components/athlete-tabs";
 import { AttributeBars } from "./_components/attribute-bars";
@@ -60,7 +61,8 @@ async function AthleteContent({ params }: { params: PageProps<"/jogadores/[id]">
           <PerformanceChart performances={profile.performances} bestScore={profile.bestScore} />
           <AttributeBars player={profile.player} groupAverages={profile.groupAverages} />
         </div>
-        <MatchHistory performances={profile.performances} />
+        {profile.goalStats && <GoalStats stats={profile.goalStats} />}
+        <MatchHistory performances={profile.performances} goalsByMatch={profile.goalStats ? profile.goalsByMatch : null} />
       </main>
     </>
   );

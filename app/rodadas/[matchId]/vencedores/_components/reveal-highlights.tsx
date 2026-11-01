@@ -16,11 +16,13 @@ type RevealHighlightsProps = {
 };
 
 /**
- * Onde cada prêmio fica no quadro: ataque e gol em cima, criação no meio, defesa e goleiro
+ * Onde cada prêmio fica no quadro: o Goleador na frente, ataque e gol em seguida, criação no meio, defesa e goleiro
  * embaixo. As duas últimas fileiras guardam os prêmios por atributo das rodadas antigas (até
  * 2026-10-29), dois por fileira para as cartas não ficarem espremidas no celular.
  */
 const ROWS: readonly (readonly AwardKind[])[] = [
+  // Goleador da Rodada (2026-11-01): sozinho na primeira fileira, à frente do ataque.
+  ["goleador"],
   ["atacante", "gol"],
   ["criativo"],
   ["defensor", "goleiro"],

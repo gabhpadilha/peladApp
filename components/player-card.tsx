@@ -167,6 +167,7 @@ const AWARD_TEXTURES: Partial<Record<AwardDesignKind, string>> = {
 const AWARD_FOOTER: Record<AwardKind, string> = {
   craque: "Melhor jogador",
   gol: "Gol da rodada",
+  goleador: "Goleador",
   drible: "Drible",
   foguete: "Foguete",
   garcom: "Garçom",

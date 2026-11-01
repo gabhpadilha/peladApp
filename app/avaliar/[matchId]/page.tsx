@@ -3,6 +3,8 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { GoalsStep } from "./_components/goals-step";
+import { GoalsWaiting } from "./_components/goals-waiting";
 import { RatingWizard } from "./_components/rating-wizard";
 import { getRatingSession } from "./_data-access/get-rating-session";
 
@@ -45,7 +47,15 @@ async function RateContent({ params }: { params: PageProps<"/avaliar/[matchId]">
     if (session.targets.length === 0) {
       return <StatusScreen title="Ninguém para avaliar" text="Só você esteve nessa rodada." />;
     }
-    return <RatingWizard match={session.match} targets={session.targets} />;
+    // Etapa dos gols antes das notas: primeiro os seus, depois a espera pelos dos outros.
+    const { goals } = session;
+    if (!goals.ratingsOpen && !(session.memberId in goals.byMember)) {
+      return <GoalsStep match={session.match} memberId={session.memberId} />;
+    }
+    if (!goals.ratingsOpen) {
+      return <GoalsWaiting matchId={session.match.id} missingNicknames={session.missingNicknames} isOrganizer={session.isOrganizer} />;
+    }
+    return <RatingWizard match={session.match} targets={session.targets} goals={goals} memberId={session.memberId} />;
   }
 
   const message = STATUS_MESSAGES[session.status];

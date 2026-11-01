@@ -18,6 +18,7 @@ import { GOALKEEPER_ATTRIBUTES, OUTFIELD_ATTRIBUTES, type PlayerAttribute } from
 import type { BoardPlayer, MatchBoard } from "../_data-access/get-match-board";
 import type { RatingState } from "./board-card";
 import { RatePlayerSheet } from "./rate-player-sheet";
+import { RoundGoals } from "./round-goals";
 import { RoundPositions } from "./round-positions";
 import { SendRatingsSheet } from "./send-ratings-sheet";
 import { TeamPitch } from "./team-pitch";
@@ -148,6 +149,8 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
         </p>
       )}
 
+      <RoundGoals board={board} />
+
       {board.canEditPositions && <RoundPositions matchId={board.match.id} teams={board.teams} />}
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-6">
@@ -203,6 +206,9 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
       )}
 
       <RatePlayerSheet
+        matchId={board.match.id}
+        memberId={board.memberId}
+        goals={board.goals}
         entry={canRate ? ratingEntry : null}
         draft={ratingEntry ? drafts[ratingEntry.player.id] : undefined}
         onScore={handleScore}

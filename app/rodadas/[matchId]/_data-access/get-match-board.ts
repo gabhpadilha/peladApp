@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { getLeague } from "@/lib/league";
+import { getRoundGoalsState, type MatchGoal, type RoundGoalsState } from "@/lib/match-goals";
 import { averageEvaluations } from "@/lib/ovr";
 import { getRoundRole, getRoundSlotPosition, type PlayerRole, type PlaysInGoal } from "@/lib/round-position";
 import { createClient } from "@/lib/supabase/server";
@@ -24,6 +25,8 @@ export type BoardPlayer = {
   slotPosition: PlayerPosition;
   /** O logado já deu nota a ele nessa rodada. */
   isRatedByMe: boolean;
+  /** Gols que ele informou na rodada (com as confirmações), se informou. */
+  goal: MatchGoal | null;
 };
 
 export type BoardTeam = {
@@ -51,6 +54,12 @@ export type MatchBoard = {
   isOutOfRound: boolean;
   /** Quantos jogadores ainda faltam para o logado avaliar (todos menos ele e quem já tem nota dele). */
   ratableCount: number;
+  /** Etapa dos gols (vem antes das notas). */
+  goals: RoundGoalsState;
+  /** Quem está logado. */
+  memberId: string;
+  /** O logado jogou a rodada. */
+  isPresent: boolean;
 };
 
 /** Mesa tática de uma rodada: os dois times com titulares e reservas. `null` se não existir na pelada. */
@@ -67,6 +76,7 @@ export async function getMatchBoard(matchId: string): Promise<MatchBoard | null>
   ]);
   const match = league.matches.find((candidate) => candidate.id === matchId);
   if (!match) return null;
+  const goals = await getRoundGoalsState(league.membership.groupId, matchId, match.presentPlayerIds, league.currentMemberId);
 
   const { data: attendance, error } = attendanceResult;
   if (error) throw error;
@@ -103,6 +113,7 @@ export async function getMatchBoard(matchId: string): Promise<MatchBoard | null>
         playsInGoal: row.plays_in_goal,
         slotPosition: getRoundSlotPosition(player, row.plays_in_goal),
         isRatedByMe: league.hasRated(matchId, player.id),
+        goal: goals.byMember[player.id] ?? null,
       },
     ];
   });
@@ -130,10 +141,14 @@ export async function getMatchBoard(matchId: string): Promise<MatchBoard | null>
     currentPlayer: playerById.get(league.currentMemberId),
     teams,
     isOrganizer: league.membership.role === "organizer",
-    canRate: match.status === "open" && isPresent && isPending,
+    // Notas só depois da etapa dos gols (todos informaram ou o organizador liberou).
+    canRate: match.status === "open" && isPresent && isPending && goals.ratingsOpen,
     canEditPositions: match.status === "open" && league.membership.role === "organizer",
     hasSubmitted: match.status === "open" && isPresent && !isPending,
     isOutOfRound: match.status === "open" && !isPresent,
     ratableCount: onBoard.filter((entry) => !entry.isSelf && !entry.isRatedByMe).length,
+    goals,
+    memberId: league.currentMemberId,
+    isPresent,
   };
 }

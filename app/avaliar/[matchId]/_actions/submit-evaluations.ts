@@ -38,6 +38,10 @@ export async function submitEvaluations(input: SubmitEvaluationsInput): Promise<
   if (session.status !== "open") {
     return { success: false, message: "Essa rodada não está aceitando notas." };
   }
+  // Etapa dos gols antes das notas (o banco também recusa, com o código PA006).
+  if (!session.goals.ratingsOpen) {
+    return { success: false, message: "As notas abrem quando todo mundo informar os gols (ou o organizador liberar)." };
+  }
 
   // Envio só completo: nota para todos os outros presentes (o banco só fecha a
   // rodada com envios completos).
