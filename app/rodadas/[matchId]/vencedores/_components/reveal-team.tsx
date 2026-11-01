@@ -2,13 +2,16 @@ import { AWARD_ICONS } from "@/components/award-icons";
 import { PlayerCard } from "@/components/player-card";
 import { Button } from "@/components/ui/button";
 import { assignFormation, type FormationSlotKey } from "@/lib/formation";
+import type { CardThemeKey } from "@/lib/card-themes";
 import { cn } from "@/lib/utils";
 import { AWARD_LABELS, formatRoundScore, type Award } from "@/types/award";
-import { revealColorStyle } from "./reveal-theme";
+import { PACK_THEMES, revealColorStyle } from "./reveal-theme";
 
 type RevealTeamProps = {
   /** Time da Semana ou Time do Mês (todas as cartas do mesmo prêmio). */
   team: Award[];
+  /** Tema da rodada (o campinho veste o cenário do evento; o Time do Mês não muda de tema). */
+  fieldTheme: CardThemeKey;
   subtitle: string;
   /** Texto do botão: o próximo passo ("E o Time do Mês…") ou "Ver todos os vencedores". */
   doneLabel: string;
@@ -42,7 +45,7 @@ function TeamCard({ award }: { award: Award }) {
 }
 
 /** Time da Semana (ou do Mês) entrando em campo no 1-2-1, uma carta por vez, com a nota. */
-export function RevealTeam({ team, subtitle, doneLabel, onDone }: RevealTeamProps) {
+export function RevealTeam({ team, fieldTheme, subtitle, doneLabel, onDone }: RevealTeamProps) {
   const slots = assignFormation(team.map((award) => ({ position: award.card.position, award })));
   const placed = new Set(Object.values(slots).flatMap((slot) => (slot ? [slot.award.id] : [])));
   // Empate na última vaga: quem não coube nas 5 vagas aparece embaixo do campo.
@@ -72,7 +75,7 @@ export function RevealTeam({ team, subtitle, doneLabel, onDone }: RevealTeamProp
         <p className="text-sm text-muted-foreground">{subtitle}</p>
       </div>
 
-      <div className="relative aspect-[3/4] w-full max-w-sm shrink-0 animate-[reveal-fade_0.5s_ease-out_0.6s_both] overflow-hidden rounded-2xl border border-white/8 bg-[repeating-linear-gradient(0deg,rgb(255_255_255/0.015)_0_40px,transparent_40px_80px)] bg-card">
+      <div className={cn("relative aspect-[3/4] w-full max-w-sm shrink-0 animate-[reveal-fade_0.5s_ease-out_0.6s_both] overflow-hidden rounded-2xl border border-white/8", PACK_THEMES[fieldTheme].field)}>
         <span aria-hidden className="absolute -top-17.5 left-1/2 size-35 -translate-x-1/2 rounded-full border border-white/8" />
         <span aria-hidden className="absolute inset-x-[25%] bottom-0 h-20 rounded-t-[5rem] border border-b-0 border-white/8" />
         {(Object.keys(SLOT_LAYOUT) as FormationSlotKey[]).map((key) => {

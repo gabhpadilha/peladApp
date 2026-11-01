@@ -45,6 +45,12 @@ export function RevealPack({ round, theme, contents, isOpening, onOpen }: Reveal
           )}
         />
         <span aria-hidden className={cn("absolute inset-x-0 top-11.5 bottom-0 overflow-hidden", BODY_CLIP, look.body)}>
+          {/* Arte do evento na capa, escurecida embaixo para o texto ler bem. */}
+          {look.art && (
+            <span className={cn("absolute inset-0 bg-cover bg-center", look.art)}>
+              <span className="absolute inset-0 bg-linear-to-b from-black/30 via-black/45 to-black/75" />
+            </span>
+          )}
           <span className={cn("absolute inset-2 rounded-md border-[1.5px]", look.border)} />
           {theme === "halloween" && (
             <GhostIcon className="absolute -right-8 -bottom-5 size-40 text-white/7" />
@@ -54,7 +60,7 @@ export function RevealPack({ round, theme, contents, isOpening, onOpen }: Reveal
           )}
           <span className="absolute inset-y-0 left-0 w-[30%] animate-[reveal-shine_2.8s_ease-in-out_infinite] bg-linear-to-r from-transparent via-white/18 to-transparent" />
           <span className={cn("relative flex h-full flex-col items-center justify-center gap-2.5 font-display", look.text)}>
-            <span className="text-xl font-extrabold tracking-[0.3em]">PELADAPP</span>
+            <span className="text-xl font-extrabold tracking-[0.3em]">CANCHA CLUB</span>
             {look.label && (
               <span
                 className={cn(

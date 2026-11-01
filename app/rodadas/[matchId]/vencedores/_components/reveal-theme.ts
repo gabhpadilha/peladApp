@@ -16,10 +16,25 @@ export function revealColorStyle(kind: AwardKind, theme: CardThemeKey): CSSPrope
   return { "--reveal-color": `var(${token})` } as CSSProperties;
 }
 
-/** Visual do pacote e do fundo em cada tema (classes literais para o Tailwind). */
+/**
+ * Visual do pacote, do fundo e dos campinhos em cada tema (classes literais para o Tailwind). O tema
+ * é o da rodada: o pacote de uma rodada de outubro continua de Halloween (pedido do dono do app em
+ * 2026-10-31: capa e campinho no tema do evento).
+ */
 export const PACK_THEMES: Record<
   CardThemeKey,
-  { screen: string; cap: string; body: string; text: string; border: string; label: string | null }
+  {
+    screen: string;
+    cap: string;
+    body: string;
+    text: string;
+    border: string;
+    label: string | null;
+    /** Arte do evento na capa do pacote (a do Melhor Jogador do tema). */
+    art: string | null;
+    /** Campinho dos destaques e dos times: o mesmo cenário da mesa tática (`public/mesa/<tema>.webp`). */
+    field: string;
+  }
 > = {
   default: {
     screen: "bg-[radial-gradient(circle_at_50%_40%,oklch(0.22_0.02_160),oklch(0.1_0.01_160)_70%)]",
@@ -28,6 +43,8 @@ export const PACK_THEMES: Record<
     text: "text-award-craque-foreground",
     border: "border-award-craque-frame/60",
     label: null,
+    art: null,
+    field: "bg-[repeating-linear-gradient(0deg,rgb(255_255_255/0.015)_0_40px,transparent_40px_80px)] bg-card",
   },
   halloween: {
     screen: "bg-[radial-gradient(circle_at_50%_40%,oklch(0.2_0.04_300),oklch(0.09_0.015_300)_70%)]",
@@ -36,6 +53,8 @@ export const PACK_THEMES: Record<
     text: "text-award-craque-halloween-foreground",
     border: "border-award-craque-halloween-frame/60",
     label: "Halloween",
+    art: "bg-[url(/cartas/fundos/premio-craque-halloween.webp)]",
+    field: "bg-[#0b0f07] bg-[url(/mesa/halloween.webp)] bg-[length:100%_100%]",
   },
   temporal: {
     screen: "bg-[radial-gradient(circle_at_50%_40%,oklch(0.22_0.04_255),oklch(0.08_0.02_260)_70%)]",
@@ -44,5 +63,7 @@ export const PACK_THEMES: Record<
     text: "text-award-craque-temporal-foreground",
     border: "border-award-craque-temporal-frame/60",
     label: "Toró",
+    art: "bg-[url(/cartas/fundos/premio-craque-temporal.webp)]",
+    field: "bg-[#060a12] bg-[url(/mesa/temporal.webp)] bg-[length:100%_100%]",
   },
 };

@@ -3,11 +3,14 @@ import { PlayerCard } from "@/components/player-card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AWARD_LABELS, formatAwardResult, type Award, type AwardKind } from "@/types/award";
-import { revealColorStyle } from "./reveal-theme";
+import type { CardThemeKey } from "@/lib/card-themes";
+import { PACK_THEMES, revealColorStyle } from "./reveal-theme";
 
 type RevealHighlightsProps = {
   /** Um prêmio por atributo da linha, o Melhor Goleiro e o Gol da Rodada. */
   awards: Award[];
+  /** Tema da rodada: o campinho veste o cenário do evento. */
+  fieldTheme: CardThemeKey;
   nextLabel: string;
   onNext: () => void;
 };
@@ -59,7 +62,7 @@ function HighlightCard({ award, order }: { award: Award; order: number }) {
  * do Melhor Goleiro e do Gol da Rodada entrando juntas num quadro tático, no
  * lugar de uma animação por carta (pedido do dono do app em 2026-10-21).
  */
-export function RevealHighlights({ awards, nextLabel, onNext }: RevealHighlightsProps) {
+export function RevealHighlights({ awards, fieldTheme, nextLabel, onNext }: RevealHighlightsProps) {
   const byKind = new Map<AwardKind, Award[]>();
   for (const award of awards) byKind.set(award.kind, [...(byKind.get(award.kind) ?? []), award]);
   const placedKinds = new Set(ROWS.flat());
@@ -88,7 +91,7 @@ export function RevealHighlights({ awards, nextLabel, onNext }: RevealHighlights
         <p className="text-sm text-muted-foreground">O melhor no ataque, na criação e na defesa, o goleiro e o gol mais bonito</p>
       </div>
 
-      <div className="relative flex w-full max-w-sm shrink-0 animate-[reveal-fade_0.5s_ease-out_0.3s_both] flex-col gap-5 overflow-hidden rounded-2xl border border-white/8 bg-[repeating-linear-gradient(0deg,rgb(255_255_255/0.015)_0_40px,transparent_40px_80px)] bg-card px-3 py-5">
+      <div className={cn("relative flex w-full max-w-sm shrink-0 animate-[reveal-fade_0.5s_ease-out_0.3s_both] flex-col gap-5 overflow-hidden rounded-2xl border border-white/8 px-3 py-5", PACK_THEMES[fieldTheme].field)}>
         <span aria-hidden className="absolute top-1/2 inset-x-0 h-px bg-white/8" />
         <span aria-hidden className="absolute top-1/2 left-1/2 size-28 -translate-1/2 rounded-full border border-white/8" />
         {ROWS.map((row) => (

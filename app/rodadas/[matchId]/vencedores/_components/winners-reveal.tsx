@@ -208,11 +208,12 @@ export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) 
       )}
 
       {step !== null && current?.type === "highlights" && (
-        <RevealHighlights awards={current.awards} nextLabel={nextLabel(steps, step)} onNext={() => goToStep(step + 1)} />
+        <RevealHighlights awards={current.awards} fieldTheme={theme} nextLabel={nextLabel(steps, step)} onNext={() => goToStep(step + 1)} />
       )}
 
       {step !== null && current?.type === "team" && (
         <RevealTeam
+          fieldTheme={theme}
           key="time-da-semana"
           team={team}
           subtitle="As 4 maiores notas da linha e a maior do gol"
@@ -223,6 +224,7 @@ export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) 
 
       {step !== null && current?.type === "month" && (
         <RevealTeam
+          fieldTheme={theme}
           key="time-do-mes"
           team={current.awards}
           subtitle="As 4 maiores médias do mês na linha e a maior do gol"
