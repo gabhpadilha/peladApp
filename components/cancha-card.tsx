@@ -52,6 +52,13 @@ export type Roupa = {
   overflow?: string;
   /** A arte de fora é mais larga que a caixa (razão entre as larguras), só para a direita: cristais que passam da sobra de 8%. */
   overflowWidth?: number;
+  /**
+   * Fundo claro e sem sombra por cima (pedido do dono do app em 2026-11-01, na Ícone de mármore): sem a sombra
+   * atrás da pessoa, sem a vinheta e sem o degradê escuro que desce até as estatísticas.
+   */
+  clean?: boolean;
+  /** Enquadramento da foto desta roupa (padrão: o da carta). */
+  photoFrame?: PhotoFrame;
   /** A moldura é a da arte (`overflow`): a carta não desenha o tubo de neon, o brilho nem o enfeite. */
   artFrame?: boolean;
   /** Raios da arte de fora numa camada própria (mesmo tamanho), que estala como trovão. */
@@ -75,7 +82,7 @@ const ROUPAS = {
   ametista: { background: "premium-ametista", overflow: "premium-ametista-vaza", overflowWidth: 774 / 714, artFrame: true, trim: null, metal: ["#5b2fa0", "#5b2fa0", "#b99bff"], accent: "#b99bff", light: "220 190 255", bar: "#0e0620", muted: "#d2bcff", sparkles: false, neon: "#c46bff" },
   rubi: { background: "premium-rubi", overflow: "premium-rubi-vaza", overflowWidth: 774 / 714, artFrame: true, trim: null, metal: ["#9b1530", "#9b1530", "#ff8fa3"], accent: "#ff8fa3", light: "255 190 200", bar: "#1a0309", muted: "#ffb3c0", sparkles: false, neon: "#ff2f66" },
   // Ícone: branco creme com moldura de ouro claro, lembrando a carta Icon do FIFA (2026-10-29).
-  icone: { background: "gema-icone", metal: ["#c9a24e", "#c9a24e", "#fff4d6"], accent: "#e2c06e", light: "255 240 200", bar: "#1a140a", muted: "#f0dfb5", sparkles: false, neon: "#ffcf4d" },
+  icone: { background: "premium-icone", clean: true, overflow: "premium-icone-vaza", overflowWidth: 774 / 714, artFrame: true, trim: null, metal: ["#c9a24e", "#c9a24e", "#fff4d6"], accent: "#e2c06e", light: "255 240 200", bar: "#1a140a", muted: "#f0dfb5", sparkles: false, neon: "#ffcf4d" },
   // Halloween 2026 (aprovadas pelo dono do app em 2026-10-29): fundo que conta o evento, sem estrelinhas,
   // e o tubo de neon das premium com enfeite do bicho (azul-luar com garras e presas; vermelho-sangue com morcego e asa).
   lobisomem: { background: "skin-lobisomem", metal: ["#5f6b78", "#5f6b78", "#e2e8ef"], accent: "#e2e8ef", light: "207 226 255", bar: "#03070d", muted: "#cfe2ff", sparkles: false, neon: "#8fd0ff", trim: "lobisomem" },
@@ -709,8 +716,8 @@ export function getCanchaCardLook(player: Player, award?: CanchaCardAward) {
 }
 
 export function CanchaCard({ player, award, className, photoSizes, photoFrame = "atual" }: CanchaCardProps) {
-  const frame = PHOTO_FRAMES[photoFrame];
   const { roupa, rank, stats, band, subtitle } = getCanchaCardLook(player, award);
+  const frame = PHOTO_FRAMES[roupa.photoFrame ?? photoFrame];
 
   const vars = {
     "--cc-m1": roupa.metal[0],
@@ -757,7 +764,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
         {roupa.cloudBolts && <CloudBolts />}
 
         {/* Sombra atrás da pessoa: ela se descola do fundo e parece estar na carta. */}
-        {player.photo && <PhotoShadow />}
+        {player.photo && !roupa.clean && <PhotoShadow />}
 
         {/* Foto grande, presa embaixo: o peito some no degradê antes do rodapé. */}
         <div className={cn("absolute z-[5]", frame.box)}>
@@ -780,6 +787,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
         </div>
 
         {/* Uma luz só: tom da roupa e vinheta por cima da foto e do fundo juntos (na fosca, só uma vinheta leve). */}
+        {!roupa.clean && (
         <div
           aria-hidden
           className={cn(
@@ -789,6 +797,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
               : "bg-[linear-gradient(180deg,rgb(var(--cc-light)/0.14),transparent_35%,transparent_60%,rgb(0_0_0/0.35)),radial-gradient(90%_75%_at_50%_42%,transparent_55%,rgb(0_0_0/0.55)_100%)]",
           )}
         />
+        )}
         {/* Feixe de luz e brilhos passando na frente do jogador. */}
         {!roupa.matte && (
           <div
@@ -804,7 +813,9 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
             className="absolute z-[7] size-[5cqw] animate-[cc-twinkle_2.2s_ease-in-out_infinite] bg-[radial-gradient(circle,#fff_0_18%,rgb(var(--cc-light)/0.9)_40%,transparent_70%)] [clip-path:polygon(50%_0,58%_42%,100%_50%,58%_58%,50%_100%,42%_58%,0_50%,42%_42%)] motion-reduce:animate-none"
           />
         ))}
-        <div aria-hidden className={cn("absolute inset-x-0 bottom-[12%] z-[7] bg-linear-to-b from-transparent to-(--cc-bar)", frame.fade)} />
+        {!roupa.clean && (
+          <div aria-hidden className={cn("absolute inset-x-0 bottom-[12%] z-[7] bg-linear-to-b from-transparent to-(--cc-bar)", frame.fade)} />
+        )}
 
         <div
           className={cn(
