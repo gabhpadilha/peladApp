@@ -18,6 +18,7 @@ import {
   type Progression,
   type RoundRewards,
 } from "@/lib/progression";
+import { computeRankingPoints } from "@/lib/ranking-points";
 import { requireActiveMembership } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 import { awardOrder, type Award } from "@/types/award";
@@ -258,6 +259,16 @@ export async function getLeague(nextPath = "/") {
     /** XP, nível e CanchaCoins ganhas de cada membro. */
     getProgression: (memberId: string): Progression =>
       progressionById.get(memberId) ?? { level: 0, xpIntoLevel: 0, xpNeeded: 60, xp: 0, coinsEarned: WELCOME_BONUS_COINS },
+    /** Pontos e rodadas de quem está na pelada: de um mês (`AAAA-MM`) ou, sem ele, de todos os tempos. */
+    getRankingPoints: (month?: string) =>
+      computeRankingPoints({
+        playerIds: activePlayers.map((player) => player.id),
+        matches,
+        evaluations,
+        awards: progressionAwards,
+        confirmedGoals,
+        month,
+      }),
     /** O que uma rodada fechada deu ao membro (tela "Você ganhou" do pacote). */
     getRoundRewards: (memberId: string, matchId: string): RoundRewards | null =>
       computeRoundRewards({ playerId: memberId, matchId, matches, evaluations, awards: progressionAwards, submissions, confirmedGoals }),

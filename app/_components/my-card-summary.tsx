@@ -10,7 +10,7 @@ import { POSITION_LABELS, type Player } from "@/types/player";
 type MyCardSummaryProps = {
   player: Player;
   delta: number | null;
-  rank: { position: number; total: number };
+  rank: { position: number; total: number; points: number };
   gamesPlayed: number;
   evaluationsReceived: number;
   /** Quantas cartas especiais o jogador tem na coleção. */
@@ -35,8 +35,8 @@ export function MyCardSummary({
   const stats = [
     {
       label: "Ranking",
-      value: hasOvr ? `${rank.position}º` : "–",
-      detail: hasOvr ? (player.role === "goalkeeper" ? "nos goleiros" : "na linha") : "sem OVR",
+      value: gamesPlayed > 0 ? `${rank.position}º` : "–",
+      detail: gamesPlayed > 0 ? `${rank.points} pontos` : "sem pontos",
     },
     { label: "Jogos", value: gamesPlayed, detail: "jogados" },
     { label: "Notas", value: evaluationsReceived, detail: "recebidas" },

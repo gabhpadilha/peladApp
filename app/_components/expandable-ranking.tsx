@@ -7,32 +7,50 @@ import { cn } from "@/lib/utils";
 import type { RankedPlayer } from "../_data-access/get-home-data";
 import { RankingList } from "./ranking-list";
 
-const OUTFIELD_SUMMARY_SIZE = 5;
-const GOALKEEPER_SUMMARY_SIZE = 2;
+const SUMMARY_SIZE = 5;
+
+type RankingView = "month" | "all";
 
 type ExpandableRankingProps = {
-  outfield: RankedPlayer[];
-  goalkeepers: RankedPlayer[];
+  month: RankedPlayer[];
+  allTime: RankedPlayer[];
+  /** Mês por extenso, na aba ("Novembro"). */
+  monthLabel: string;
   currentPlayerId: string;
 };
 
-/** Ranking resumido (top 5 da linha, top 2 do gol) com botão para ver todos os atletas. */
-export function ExpandableRanking({ outfield, goalkeepers, currentPlayerId }: ExpandableRankingProps) {
+/** Ranking por pontos: abas do mês e de todos os tempos, resumo com o top 5 e botão para ver todos. */
+export function ExpandableRanking({ month, allTime, monthLabel, currentPlayerId }: ExpandableRankingProps) {
+  const [view, setView] = useState<RankingView>("month");
   const [isExpanded, setIsExpanded] = useState(false);
-  const hiddenCount =
-    Math.max(0, outfield.length - OUTFIELD_SUMMARY_SIZE) +
-    Math.max(0, goalkeepers.length - GOALKEEPER_SUMMARY_SIZE);
-
-  const visibleOutfield = isExpanded ? outfield : outfield.slice(0, OUTFIELD_SUMMARY_SIZE);
-  const visibleGoalkeepers = isExpanded ? goalkeepers : goalkeepers.slice(0, GOALKEEPER_SUMMARY_SIZE);
+  const players = view === "month" ? month : allTime;
+  const hiddenCount = Math.max(0, players.length - SUMMARY_SIZE);
+  const tabs: { key: RankingView; label: string }[] = [
+    { key: "month", label: monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1) },
+    { key: "all", label: "Todos os tempos" },
+  ];
 
   return (
     <>
-      <div id="ranking-lists" className="flex flex-col gap-3">
-        <RankingList title="Linha" players={visibleOutfield} currentPlayerId={currentPlayerId} />
-        {goalkeepers.length > 0 && (
-          <RankingList title="Goleiros" players={visibleGoalkeepers} currentPlayerId={currentPlayerId} />
-        )}
+      <div role="tablist" aria-label="Período do ranking" className="grid grid-cols-2 gap-1 rounded-lg bg-muted p-1">
+        {tabs.map((tab) => (
+          <button
+            key={tab.key}
+            type="button"
+            role="tab"
+            aria-selected={view === tab.key}
+            onClick={() => setView(tab.key)}
+            className={cn(
+              "h-10 rounded-md text-sm font-medium transition-colors",
+              view === tab.key ? "bg-background text-foreground shadow-sm" : "text-muted-foreground",
+            )}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+      <div id="ranking-lists" role="tabpanel">
+        <RankingList players={isExpanded ? players : players.slice(0, SUMMARY_SIZE)} currentPlayerId={currentPlayerId} />
       </div>
       {hiddenCount > 0 && (
         <Button

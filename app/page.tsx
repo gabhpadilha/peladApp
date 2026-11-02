@@ -100,12 +100,13 @@ async function HomeContent() {
             )}
 
             <section aria-labelledby="ranking-title" className="flex flex-col gap-3 rounded-xl border bg-card p-4">
-              <SectionTitle id="ranking-title" aside="por OVR">
+              <SectionTitle id="ranking-title" aside="por pontos">
                 Ranking
               </SectionTitle>
               <ExpandableRanking
-                outfield={data.outfieldRanking}
-                goalkeepers={data.goalkeeperRanking}
+                month={data.monthRanking}
+                allTime={data.allTimeRanking}
+                monthLabel={data.monthLabel}
                 currentPlayerId={data.currentPlayer.id}
               />
             </section>

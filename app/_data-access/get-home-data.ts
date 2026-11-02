@@ -2,7 +2,8 @@ import { getCurrentCardEvent, type CardThemeKey, type CurrentCardEvent } from "@
 import { getActiveSale, type ShopSale } from "@/lib/shop-sale";
 import { getLeague } from "@/lib/league";
 import { averageEvaluations } from "@/lib/ovr";
-import { getMatchPerformances, rankPlayers, type PendingEvaluation } from "@/lib/players";
+import { getMatchPerformances, type PendingEvaluation } from "@/lib/players";
+import { rankByPoints, type RankedByPoints } from "@/lib/ranking-points";
 import type { LevelProgress } from "@/lib/progression";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnPurchases } from "@/app/loja/_data-access/get-shop";
@@ -11,11 +12,12 @@ import type { Match } from "@/types/match";
 import type { Player } from "@/types/player";
 
 const TOP_PERFORMERS_SIZE = 3;
+const monthFormatter = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", month: "long" });
 
 /** "Hoje" no fuso da pelada, `AAAA-MM-DD` (o servidor roda em UTC). */
 const todayFormatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" });
 
-export type RankedPlayer = { player: Player; position: number; delta: number | null };
+export type RankedPlayer = RankedByPoints<Player>;
 export type RoundPerformer = { player: Player; score: number };
 /** Rodada fechada com cartas que o jogador ainda não abriu ("Confira os vencedores"). */
 export type WinnersAlert = { matchId: string; round: number; cardCount: number; hasTeam: boolean; theme: CardThemeKey };
@@ -24,7 +26,8 @@ export type HomeData = {
   groupName: string;
   currentPlayer: Player;
   currentDelta: number | null;
-  currentRank: { position: number; total: number };
+  /** Posição e pontos no ranking de todos os tempos. */
+  currentRank: { position: number; total: number; points: number };
   gamesPlayed: number;
   evaluationsReceived: number;
   /** Cartas especiais do jogador logado (coleção). */
@@ -32,8 +35,11 @@ export type HomeData = {
   pending: PendingEvaluation[];
   latestRound: { match: Match; topPerformers: RoundPerformer[]; awards: Award[] } | null;
   openRound: { match: Match; submitted: number; expected: number } | null;
-  outfieldRanking: RankedPlayer[];
-  goalkeeperRanking: RankedPlayer[];
+  /** Ranking por pontos do mês (`AAAA-MM`, o de hoje) e de todos os tempos; todos numa lista só. */
+  monthRanking: RankedPlayer[];
+  allTimeRanking: RankedPlayer[];
+  /** Mês do ranking, por extenso ("novembro"). */
+  monthLabel: string;
   /** Evento do mês das cartas especiais (tema sazonal ou clássico). */
   cardEvent: CurrentCardEvent;
   /** "Hoje" no fuso da pelada, `AAAA-MM-DD` (cartas de evento à venda no slide da Loja). */
@@ -87,20 +93,16 @@ async function getWinnersAlert(memberId: string, match: Match | null, awards: Aw
 
 export async function getHomeData(): Promise<HomeData> {
   const league = await getLeague("/");
-  const today = todayFormatter.format(new Date());
   const currentPlayer = league.players.find((player) => player.id === league.currentMemberId);
   if (!currentPlayer) {
     throw new Error("Jogador logado não encontrado na pelada");
   }
 
-  const roleRanking = rankPlayers(league.activePlayers, currentPlayer.role);
+  const today = todayFormatter.format(new Date());
+  const monthRanking = rankByPoints(league.activePlayers, league.getRankingPoints(today.slice(0, 7)));
+  const allTimeRanking = rankByPoints(league.activePlayers, league.getRankingPoints());
+  const myAllTime = allTimeRanking.find((entry) => entry.player.id === currentPlayer.id);
   const performances = getMatchPerformances(currentPlayer.id, league.matches, league.evaluations);
-
-  const toRanked = (player: Player, index: number): RankedPlayer => ({
-    player,
-    position: index + 1,
-    delta: league.getDelta(player),
-  });
 
   const latestMatch = league.latestClosedMatch;
   const topPerformers = latestMatch
@@ -130,8 +132,9 @@ export async function getHomeData(): Promise<HomeData> {
     currentPlayer,
     currentDelta: league.getDelta(currentPlayer),
     currentRank: {
-      position: roleRanking.findIndex((player) => player.id === currentPlayer.id) + 1,
-      total: roleRanking.length,
+      position: myAllTime?.position ?? 0,
+      total: allTimeRanking.length,
+      points: myAllTime?.points ?? 0,
     },
     gamesPlayed: performances.filter((performance) => performance.wasPresent).length,
     evaluationsReceived: performances.reduce(
@@ -155,8 +158,9 @@ export async function getHomeData(): Promise<HomeData> {
         }
       : null,
     // Completos: a home mostra o resumo e expande para o ranking inteiro.
-    outfieldRanking: rankPlayers(league.activePlayers, "outfield").map(toRanked),
-    goalkeeperRanking: rankPlayers(league.activePlayers, "goalkeeper").map(toRanked),
+    monthRanking,
+    allTimeRanking,
+    monthLabel: monthFormatter.format(new Date()),
     cardEvent: getCurrentCardEvent(today),
     today,
     shopSale: getActiveSale(today),
