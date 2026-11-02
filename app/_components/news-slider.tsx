@@ -232,8 +232,11 @@ export function NewsSlider({ event, today, shopSale, player, progress, balance }
   const percent = Math.min(100, Math.round((progress.xpIntoLevel / progress.xpNeeded) * 100));
   // Com evento na Loja, as cartas dele vão no leque (a primeira no meio).
   const eventSkins = getEventSkins(today);
+  // A carta de prestígio do evento (a Lenda do Trovão, a mais cara) vai no meio, maior; as outras duas dos lados (pedido do dono do app em 2026-11-02).
+  const flagship = eventSkins.find((skin) => skin.key === "lenda") ?? eventSkins.reduce<(typeof eventSkins)[number] | null>((best, skin) => (best === null || skin.price > best.price ? skin : best), null);
+  const sideSkins = eventSkins.filter((skin) => skin !== flagship);
   const shopFan: [CardSkinKey, CardSkinKey, CardSkinKey] =
-    eventSkins.length >= 2 ? [eventSkins[1].key, eventSkins[0].key, "esmeralda"] : SHOP_FAN;
+    flagship && sideSkins.length >= 2 ? [sideSkins[1].key, flagship.key, sideSkins[0].key] : SHOP_FAN;
 
   // Na Black Friday: as cartas do evento (ou as premium mais caras) com o preço novo.
   const saleSkins = (eventSkins.length > 0 ? eventSkins : CARD_SKINS.filter((skin) => !("event" in skin) && skin.price > 0)).slice(0, 3);
