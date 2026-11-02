@@ -138,11 +138,14 @@ function boxBlur(a, W, H, r, passes) {
       const [sx, sy] = mapPoint(xb + 0.5, y + 0.5);
       if (sx >= W - 2 || sy >= H - 2 || sx < 1 || sy < 1) continue;
       const o = (y * OUT_W + x) * 4;
-      if (d >= 0 && wd < -3) {
-        // Dentro da janela só ficam as filigranas dos cantos (ouro fino), por cima da barra do nome e das
+      const onEmblem = sx > 625 && sx < 725 && sy > 250 && sy < 385; // o raio do topo atravessa a borda da janela
+      // No raio do topo não há rampa na borda da janela (ela escurecia o ouro por 1 a 2 px, um risco): ou é o
+      // traço dourado (por transparência) ou é a arte opaca.
+      if (d >= 0 && (wd < -3 || (onEmblem && wd < -1))) {
+        // Dentro da janela só ficam as filigranas dos cantos e a ponta do raio do topo (ouro), por cima da barra do nome e das
         // estatísticas, como parte da moldura. O resto da janela é o fundo.
         const nearCorner = Math.min(Math.abs(sx - EDGE.left), Math.abs(sx - EDGE.right)) < 120 && Math.min(Math.abs(sy - EDGE.top), Math.abs(sy - EDGE.bottom)) < 120;
-        if (!nearCorner || panelDistance(sx, sy) < -58) continue;
+        if (!onEmblem && (!nearCorner || panelDistance(sx, sy) < -58)) continue;
         const a = smooth(70, 120, 0.3 * sOrig[0](sx, sy) + 0.59 * sOrig[1](sx, sy) + 0.11 * sOrig[2](sx, sy));
         if (a <= 0) continue;
         const base = [18, 24, 45]; // o azul-noite por baixo: tira o escuro da borda do traço

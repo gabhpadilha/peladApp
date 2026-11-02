@@ -58,6 +58,8 @@ export type Roupa = {
    * atrás da pessoa, sem a vinheta e sem o degradê escuro que desce até as estatísticas.
    */
   clean?: boolean;
+  /** Barra do nome sem o fundo escuro (só a linha embaixo): as letras ficam direto sobre a arte. */
+  bareName?: boolean;
   /** Enquadramento da foto desta roupa (padrão: o da carta). */
   photoFrame?: PhotoFrame;
   /** A moldura é a da arte (`overflow`): a carta não desenha o tubo de neon, o brilho nem o enfeite. */
@@ -94,7 +96,7 @@ const ROUPAS = {
   // Lenda do Trovão (carta de prestígio): desde 2026-11-01, as três camadas que o dono do app gerou no
   // Gemini (moldura de metal dourado envelhecido por fora da carta e sem o neon dela, `artFrame`; raios
   // dourados e azuis que estalam como trovão; fundo de tempestade), em `prototipos/skin-lenda-v2.cjs`.
-  lenda: { background: "skin-lenda", clean: true, overflow: "skin-lenda-vaza", overflowWidth: 774 / 714, overflowLeft: 60 / 714, overflowBolts: "skin-lenda-raios", innerBolts: "skin-lenda-raios-dentro", artFrame: true, metal: ["#7a5a1c", "#7a5a1c", "#f0d48a"], accent: "#d9b36a", light: "160 180 255", bar: "#050816", muted: "#e8d3a0", sparkles: false, neon: "#d9b36a", trim: null },
+  lenda: { background: "skin-lenda", clean: true, bareName: true, overflow: "skin-lenda-vaza", overflowWidth: 774 / 714, overflowLeft: 60 / 714, overflowBolts: "skin-lenda-raios", innerBolts: "skin-lenda-raios-dentro", artFrame: true, metal: ["#7a5a1c", "#7a5a1c", "#f0d48a"], accent: "#d9b36a", light: "160 180 255", bar: "#050816", muted: "#e8d3a0", sparkles: false, neon: "#d9b36a", trim: null },
   relampago: { background: "premium-relampago", overflow: "premium-relampago-vaza", overflowWidth: 774 / 714, overflowBolts: "premium-relampago-raios", innerBolts: "premium-relampago-raios-dentro", artFrame: true, metal: ["#7a5a1c", "#7a5a1c", "#f0d48a"], accent: "#e0b250", light: "255 190 90", bar: "#0b0805", muted: "#f0d9a0", sparkles: false, neon: "#e8b54a", trim: null },
   // Nuvem carregada (Loja, Temporal 2026, aprovada pelo dono do app em 2026-10-31, no lugar do
   // Trovão): nuvens de tempestade pintadas em poucos tons, neon branco, a nuvem com raio no topo,
@@ -588,6 +590,7 @@ const PHOTO_FRAMES: Record<PhotoFrame, { box: string; image: string; fade: strin
 
 const EMPTY_VALUE = "–";
 
+
 export type CanchaCardAward = {
   kind: AwardKind;
   theme: CardThemeKey;
@@ -666,7 +669,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
         <div
           className={cn(
             "absolute inset-x-0 top-0 z-[3] flex h-[16%] flex-col justify-center border-b-[0.6cqw] border-(--cc-accent) pt-[2.6cqw] pr-[26cqw] pl-[8cqw] leading-none whitespace-nowrap",
-            roupa.matte ? "bg-(--cc-bar)" : "bg-linear-to-b from-black/80 to-black/40",
+            roupa.bareName ? "" : roupa.matte ? "bg-(--cc-bar)" : "bg-linear-to-b from-black/80 to-black/40",
           )}
         >
           <span className="truncate text-[10.5cqw] font-extrabold">{player.nickname}</span>
