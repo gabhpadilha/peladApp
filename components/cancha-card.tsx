@@ -59,7 +59,7 @@ export type Roupa = {
    */
   clean?: boolean;
   /** O conteúdo (foto, nome e estatísticas) fica dentro de uma janela mais recuada: por dentro do fio fino de dentro da borda da arte. */
-  window?: "inner";
+  window?: "inner" | "ring";
   /** Barra do nome sem o fundo escuro (só a linha embaixo): as letras ficam direto sobre a arte. */
   bareName?: boolean;
   /** Enquadramento da foto desta roupa (padrão: o da carta). */
@@ -232,6 +232,26 @@ const CRAQUE_FOGO: Roupa = {
   trim: null,
 };
 
+/**
+ * Destaques fora do Halloween (2026-11-02, arte do dono do app): um redemoinho de água num cartão de fio de ouro com neon ciano por fora e
+ * gotas em volta, sem render em 3D (`prototipos/destaques-agua-arte.cjs`). Um fundo só para todos; o que distingue o prêmio é a faixa com o nome.
+ */
+const HIGHLIGHT_AGUA: Roupa = {
+  background: "premio-destaque-agua-arte",
+  overflow: "premio-destaque-agua-arte-vaza",
+  window: "ring",
+  artFrame: true,
+  clean: true,
+  metal: ["#2f6fd6", "#2f6fd6", "#cfe2ff"],
+  accent: "#8fe4ff",
+  light: "190 220 255",
+  bar: "#040c22",
+  muted: "#a9e6ff",
+  sparkles: false,
+  neon: "#36d4ff",
+  trim: null,
+};
+
 function awardRoupa(kind: AwardKind, theme: CardThemeKey): Roupa {
   const design = awardDesignKind(kind);
   // Time do Mês e Bola Murcha não vestem o tema do mês, mas o desenho mudou em 2026-10-31: as cartas
@@ -247,15 +267,11 @@ function awardRoupa(kind: AwardKind, theme: CardThemeKey): Roupa {
   // com a nuvem chovendo, as mesmas de fora de evento), no lugar da taça e dos raios dourados
   // (pedido do dono do app em 2026-10-31).
   const designTheme: CardThemeKey = theme === "temporal" ? "default" : theme;
+  if (!isCraque && designTheme !== "halloween") return HIGHLIGHT_AGUA;
   const colors = (isCraque ? CRAQUE_COLORS : HIGHLIGHT_COLORS)[designTheme];
   const art = isCraque ? "craque" : HIGHLIGHT_ART.has(kind) ? kind : "gol";
   return {
-    // Destaques: um fundo só, sem o ícone do prêmio: o mármore líquido da água (2026-10-31).
-    background: isCraque
-      ? `premio-${art}-${designTheme}`
-      : designTheme === "default"
-        ? "premio-destaque-agua"
-        : `premio-${art}-${designTheme}`,
+    background: `premio-${art}-${designTheme}`,
     metal: [colors.frame, colors.frame, colors.hairline],
     accent: colors.accent,
     light: colors.light,
@@ -263,7 +279,7 @@ function awardRoupa(kind: AwardKind, theme: CardThemeKey): Roupa {
     muted: colors.muted,
     sparkles: false,
     neon: colors.neon,
-    trim: isCraque ? "craque" : designTheme === "halloween" ? "abobora" : designTheme === "default" ? "chuva" : "destaque",
+    trim: isCraque ? "craque" : "abobora",
   };
 }
 
@@ -351,6 +367,8 @@ const NEON_INNER_GLOW_DIM = "shadow-[inset_0_0_1.6cqw_color-mix(in_oklab,var(--c
 /** Janela das cartas de neon: a moldura é mais fina (1,7% da largura). */
 const NEON_WINDOW = "inset-x-[1.7%] inset-y-[1.21%] rounded-[7.3cqw]";
 /** Janela do conteúdo das cartas com a borda desenhada na arte (`window: "inner"`): por dentro do fio fino de dentro dela. */
+/** Janela até o lado de dentro do fio de ouro da arte (`window: "ring"`): sem faixa de arte entre o conteúdo e o fio. */
+const RING_WINDOW = "inset-x-[0.9%] inset-y-[0.65%] rounded-[8cqw]";
 const INNER_WINDOW = "inset-x-[5.8%] inset-y-[4.2%] rounded-[3.6cqw]";
 const METAL_WINDOW = cn("inset-x-[2.6%] inset-y-[1.86%]", INNER_CORNERS);
 
@@ -427,14 +445,6 @@ const NEON_TRIMS = {
   abobora: {
     side: [{ d: "M72 142.4 H57 L50 145.6", width: 0.55 }],
     center: "M45.4 -4.4 A4.6 3.6 0 1 0 54.6 -4.4 A4.6 3.6 0 1 0 45.4 -4.4 Z M47.5 -5.8 L49 -5.8 L48.25 -4.5 Z M51 -5.8 L52.5 -5.8 L51.75 -4.5 Z M47.4 -3.4 Q50 -1.6 52.6 -3.4 Q50 -2.5 47.4 -3.4 Z M49.4 -7.8 L50.6 -7.8 L51.3 -9.8 L50.2 -9.8 Z",
-  },
-  // Destaques na água (aprovados pelo dono do app em 2026-10-31): o traço curto na base e a
-  // nuvem chovendo no topo, no traço do ícone que ele mandou (nuvem fechada, quatro pingos
-  // inclinados, curto e longo alternados).
-  chuva: {
-    side: [{ d: "M72 142.4 H57 L50 145.6", width: 0.55 }],
-    centerLines:
-      "M52.75 -4.5 H48.5 A3.5 3.5 0 1 1 51.855 -9 H52.75 A2.25 2.25 0 1 1 52.75 -4.5 Z M47.75 -4.25 L46.9 -3 M49.5 -4.25 L48.3 -2.4 M51.25 -4.25 L50.4 -3 M53 -4.5 L51.8 -2.4",
   },
 
 
@@ -693,7 +703,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
       )}
     >
       <div
-        className={cn("absolute overflow-hidden bg-cover bg-center", roupa.window === "inner" ? INNER_WINDOW : isNeon ? NEON_WINDOW : METAL_WINDOW)}
+        className={cn("absolute overflow-hidden bg-cover bg-center", roupa.window === "inner" ? INNER_WINDOW : roupa.window === "ring" ? RING_WINDOW : isNeon ? NEON_WINDOW : METAL_WINDOW)}
         style={{ backgroundImage: `url(/cartas/fundos/${roupa.background}.webp)` }}
       >
         {roupa.innerBolts && (
