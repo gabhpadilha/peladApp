@@ -49,8 +49,10 @@ export type Roupa = {
    * carta de neon): moldura e enfeites pintados, por cima da moldura de neon.
    */
   overflow?: string;
-  /** A arte de fora é mais larga que a caixa (razão entre as larguras), só para a direita: cristais que passam da sobra de 8%. */
+  /** A arte de fora é mais larga que a caixa (razão entre as larguras): o aglomerado que passa da sobra de 8%. */
   overflowWidth?: number;
+  /** Quanto dessa largura extra fica à esquerda da caixa (razão com a largura da caixa); sem ele, tudo vai para a direita. */
+  overflowLeft?: number;
   /**
    * Fundo claro e sem sombra por cima (pedido do dono do app em 2026-11-01, na Ícone de mármore): sem a sombra
    * atrás da pessoa, sem a vinheta e sem o degradê escuro que desce até as estatísticas.
@@ -92,7 +94,7 @@ const ROUPAS = {
   // Lenda do Trovão (carta de prestígio): desde 2026-11-01, as três camadas que o dono do app gerou no
   // Gemini (moldura de metal dourado envelhecido por fora da carta e sem o neon dela, `artFrame`; raios
   // dourados e azuis que estalam como trovão; fundo de tempestade), em `prototipos/skin-lenda-v2.cjs`.
-  lenda: { background: "skin-lenda", overflow: "skin-lenda-vaza", overflowBolts: "skin-lenda-raios", artFrame: true, metal: ["#7a5a1c", "#7a5a1c", "#f0d48a"], accent: "#d9b36a", light: "160 180 255", bar: "#050816", muted: "#e8d3a0", sparkles: false, neon: "#d9b36a", trim: null },
+  lenda: { background: "skin-lenda", clean: true, overflow: "skin-lenda-vaza", overflowWidth: 774 / 714, overflowLeft: 60 / 714, overflowBolts: "skin-lenda-raios", innerBolts: "skin-lenda-raios-dentro", artFrame: true, metal: ["#7a5a1c", "#7a5a1c", "#f0d48a"], accent: "#d9b36a", light: "160 180 255", bar: "#050816", muted: "#e8d3a0", sparkles: false, neon: "#d9b36a", trim: null },
   relampago: { background: "premium-relampago", overflow: "premium-relampago-vaza", overflowWidth: 774 / 714, overflowBolts: "premium-relampago-raios", innerBolts: "premium-relampago-raios-dentro", artFrame: true, metal: ["#7a5a1c", "#7a5a1c", "#f0d48a"], accent: "#e0b250", light: "255 190 90", bar: "#0b0805", muted: "#f0d9a0", sparkles: false, neon: "#e8b54a", trim: null },
   // Nuvem carregada (Loja, Temporal 2026, aprovada pelo dono do app em 2026-10-31, no lugar do
   // Trovão): nuvens de tempestade pintadas em poucos tons, neon branco, a nuvem com raio no topo,
@@ -776,12 +778,12 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
       {!roupa.artFrame && <NeonOverlay kind={hasTrim ? (roupa.trim ?? "base") : null} isDim={roupa.neonDim === true} />}
       {roupa.overflow && (
         // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da caixa, sem otimizar
-        <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflow}.webp`} className={cn("pointer-events-none absolute top-0 left-0 z-[11] h-full select-none", roupa.overflowWidth ? "max-w-none" : "w-full")} style={roupa.overflowWidth ? { width: `${roupa.overflowWidth * 100}%` } : undefined} />
+        <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflow}.webp`} className={cn("pointer-events-none absolute top-0 left-0 z-[11] h-full select-none", roupa.overflowWidth ? "max-w-none" : "w-full")} style={roupa.overflowWidth ? { width: `${roupa.overflowWidth * 100}%`, left: `${-(roupa.overflowLeft ?? 0) * 100}%` } : undefined} />
       )}
       {roupa.overflowBolts && (
         // Os raios das decorações estalam como trovão (só `opacity`; com movimento reduzido, ficam acesos).
         // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da caixa, sem otimizar
-        <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflowBolts}.webp`} className={cn("pointer-events-none absolute top-0 left-0 z-[12] h-full select-none motion-reduce:animate-none", roupa.overflowWidth ? "max-w-none" : "w-full", roupa.innerBolts ? "animate-[cc-thunder-flash_3.2s_linear_infinite]" : "animate-[cc-thunder-strike_2.4s_linear_infinite]")} style={roupa.overflowWidth ? { width: `${roupa.overflowWidth * 100}%` } : undefined} />
+        <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflowBolts}.webp`} className={cn("pointer-events-none absolute top-0 left-0 z-[12] h-full select-none motion-reduce:animate-none", roupa.overflowWidth ? "max-w-none" : "w-full", roupa.innerBolts ? "animate-[cc-thunder-flash_3.2s_linear_infinite]" : "animate-[cc-thunder-strike_2.4s_linear_infinite]")} style={roupa.overflowWidth ? { width: `${roupa.overflowWidth * 100}%`, left: `${-(roupa.overflowLeft ?? 0) * 100}%` } : undefined} />
       )}
     </div>
   ) : (
