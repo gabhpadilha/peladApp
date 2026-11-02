@@ -15,6 +15,7 @@ const SRC = path.join(__dirname, "premium-nuvem-dono.jpg");
 const EDGE = { left: 160, right: 1181, top: 298, bottom: 1701 }; // borda de fora do painel (medida)
 const RADIUS = 90;
 const BG = 12;
+const FADE_ART = 210; // a nuvem esmaece suave nos últimos px da arte (ela vem cortada reta na borda direita)
 const BW = 714, BH = 1000, OUT_W = 774;
 const CW = BW * 0.84, CH = BH * 0.84, CX0 = BW * 0.08, CY0 = BH * 0.08;
 const SX = CW / (EDGE.right - EDGE.left), SY = CH / (EDGE.bottom - EDGE.top);
@@ -135,7 +136,10 @@ function boxBlur(a, W, H, r, passes) {
       const o = (y * OUT_W + x) * 4;
       const fr = sFill[0](sx, sy), fg = sFill[1](sx, sy), fb = sFill[2](sx, sy);
       const key = smooth(10, 45, Math.max(Math.abs(fr - BG), Math.abs(fg - BG), Math.abs(fb - BG)));
-      const alpha = (d < 0 ? key : smooth(-3, -1, wd)) * (1 - smooth(W - 110, W - 4, sx));
+      // Degradê longo à direita (sem borda de ruído: ficava bruto), menos no tubo e no fio (que são a moldura, fixa).
+      const pd = panelDistance(sx, sy);
+      const fade = 1 - smooth(W - (pd > 8 && pd < 42 ? 110 : FADE_ART), W - 4, sx);
+      const alpha = (d < 0 ? key : smooth(-3, -1, wd)) * fade;
       if (alpha > 0) { vaza[o] = clamp(fr, 0, 255); vaza[o + 1] = clamp(fg, 0, 255); vaza[o + 2] = clamp(fb, 0, 255); vaza[o + 3] = Math.round(alpha * 255); }
       const b = clamp(sBolt(sx, sy)) * (d < 0 ? 1 : smooth(-1, 1, wd));
       if (b > 0) { raios[o] = clamp(sOrig[0](sx, sy), 0, 255); raios[o + 1] = clamp(sOrig[1](sx, sy), 0, 255); raios[o + 2] = clamp(sOrig[2](sx, sy), 0, 255); raios[o + 3] = Math.round(b * 255); }
