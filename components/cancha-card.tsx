@@ -1,6 +1,5 @@
 import Image from "next/image";
 import type { CSSProperties } from "react";
-import { CLOUD_BOLTS, ELECTRIC_MAIN, ELECTRIC_SPARKS, ELECTRIC_STRANDS, ELECTRIC_TOP } from "@/lib/electric-trim";
 import { cn } from "@/lib/utils";
 import { PHOTO_SHADOW_GRADIENT_ID } from "@/lib/card-svg-ids";
 import { getCardRank, CARD_RANK_LABELS, RANK_FLAT_CLASSES, type CardRank } from "@/lib/card-rank";
@@ -63,10 +62,11 @@ export type Roupa = {
   artFrame?: boolean;
   /** Raios da arte de fora numa camada própria (mesmo tamanho), que estala como trovão. */
   overflowBolts?: string;
-  /** Moldura elétrica (raios de neon) em volta da metade de baixo da carta, por fora (`ElectricTrim`). */
-  electric?: boolean;
-  /** Mini raios estalando nas nuvens de dentro da carta, atrás do jogador (`CloudBolts`). */
-  cloudBolts?: boolean;
+  /**
+   * Raios de dentro da janela, atrás do jogador (WebP do tamanho da janela): piscam junto com os de fora
+   * (`overflowBolts`), acendendo e apagando por inteiro, como um trovão.
+   */
+  innerBolts?: string;
 };
 
 const GOLD = ["#7a5512", "#e9c86a", "#fff4c8"] as const;
@@ -97,7 +97,7 @@ const ROUPAS = {
   // Nuvem carregada (Loja, Temporal 2026, aprovada pelo dono do app em 2026-10-31, no lugar do
   // Trovão): nuvens de tempestade pintadas em poucos tons, neon branco, a nuvem com raio no topo,
   // a moldura elétrica em volta da metade de baixo e mini raios estalando nas nuvens.
-  nuvem: { background: "skin-nuvem", electric: true, cloudBolts: true, metal: ["#9aa3b5", "#9aa3b5", "#ffffff"], accent: "#ffffff", light: "220 228 240", bar: "#262c3a", muted: "#e1e6ef", sparkles: false, neon: "#f2f5fb", trim: "nuvem" },
+  nuvem: { background: "premium-nuvem", overflow: "premium-nuvem-vaza", overflowWidth: 774 / 714, overflowBolts: "premium-nuvem-raios", innerBolts: "premium-nuvem-raios-dentro", artFrame: true, metal: ["#9aa3b5", "#9aa3b5", "#ffffff"], accent: "#ffffff", light: "220 228 240", bar: "#0b0f17", muted: "#e1e6ef", sparkles: false, neon: "#f2f5fb", trim: null },
   vampiro: { background: "skin-vampiro", metal: ["#6e0f20", "#6e0f20", "#e3384e"], accent: "#e3384e", light: "255 120 140", bar: "#0d0105", muted: "#ffb3bd", sparkles: false, neon: "#ff1f3d", trim: "vampiro" },
   marmore: { background: "marmore", metal: GOLD, accent: "#e9c86a", light: "233 200 106", bar: "#070707", muted: "#e9c86a" },
   estilhacos: { background: "estilhacos", metal: GOLD, accent: "#f2c94c", light: "140 180 255", bar: "#050b20", muted: "#8fb8ff" },
@@ -395,14 +395,6 @@ const NEON_TRIMS = {
   },
 
 
-  // Nuvem carregada: sem fios na base (as nuvens que vazam fazem esse papel) e, no topo, a
-  // nuvem com um raio saindo dela.
-  nuvem: {
-    side: [],
-    centerLines:
-      "M52.75 -5.5 H48.5 A3.5 3.5 0 1 1 51.855 -10 H52.75 A2.25 2.25 0 1 1 52.75 -5.5 Z M50.6 -5.5 L49.2 -3.4 L50.8 -3.4 L49.6 -1.2",
-  },
-
   teia: {
     subtle: true,
     side: [
@@ -430,92 +422,6 @@ function NeonLine({ d, width, subtle }: { d: string; width: number; subtle?: boo
       {/* Miolo quase branco, como o tubo de neon da moldura (pedido do dono do app em 2026-10-29). */}
       <path d={d} strokeWidth={width * 0.6} stroke={NEON_CORE} />
     </>
-  );
-}
-
-/**
- * Moldura elétrica (Nuvem carregada, pedido do dono do app em 2026-10-31): fios de eletricidade
- * em neon por fora da metade de baixo da carta, sumindo para cima nas laterais (`lib/electric-trim.ts`).
- * O fio principal fica aceso; os finos e as faíscas estalam rápido, como trovão, em tempos diferentes. Só `opacity`
- * animada (nada de `filter`, por causa do iPhone); com movimento reduzido, tudo fica aceso.
- */
-function ElectricTrim() {
-  return (
-    <svg
-      aria-hidden
-      viewBox="-9.524 -13.333 119.048 166.667"
-      preserveAspectRatio="none"
-      fill="none"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className="pointer-events-none absolute inset-0 z-[10] size-full"
-    >
-      <defs>
-        {/* Os fios somem para cima nas laterais. */}
-        <linearGradient id="cc-electric" gradientUnits="userSpaceOnUse" x1="0" y1={ELECTRIC_TOP} x2="0" y2={ELECTRIC_TOP + 30}>
-          <stop offset="0" stopColor="var(--cc-neon)" stopOpacity="0" />
-          <stop offset="1" stopColor="var(--cc-neon)" />
-        </linearGradient>
-      </defs>
-      <g stroke="url(#cc-electric)">
-        <path d={ELECTRIC_MAIN} strokeWidth={4.2} opacity={0.12} />
-        <path d={ELECTRIC_MAIN} strokeWidth={2} opacity={0.3} />
-        <path d={ELECTRIC_MAIN} strokeWidth={0.9} opacity={0.9} />
-        <path d={ELECTRIC_MAIN} strokeWidth={0.4} stroke="#ffffff" />
-        {ELECTRIC_STRANDS.map((d, i) => (
-          <g key={d} className="animate-[cc-thunder-strike_1.9s_linear_infinite] motion-reduce:animate-none" style={{ animationDelay: `${i * 0.55}s` }}>
-            <path d={d} strokeWidth={1.4} opacity={0.18} />
-            <path d={d} strokeWidth={0.35} opacity={0.85} />
-          </g>
-        ))}
-      </g>
-      <g fill="#ffffff" className="animate-[cc-thunder-strike_1.3s_linear_infinite] motion-reduce:animate-none">
-        {ELECTRIC_SPARKS.map((spark) => (
-          <circle key={`${spark.x}-${spark.y}`} cx={spark.x} cy={spark.y} r={spark.r} opacity={spark.y > ELECTRIC_TOP + 20 ? 0.8 : 0.35} />
-        ))}
-      </g>
-    </svg>
-  );
-}
-
-/**
- * Mini raios nas nuvens de dentro da carta (Nuvem carregada, pedido do dono do app em
- * 2026-10-31): apagados quase sempre, estalam duas vezes rápido com a nuvem clareando, como um
- * relâmpago, cada um no seu tempo. Ficam atrás da foto. Com movimento reduzido, não aparecem.
- */
-function CloudBolts() {
-  return (
-    <svg aria-hidden viewBox="0 0 100 140" preserveAspectRatio="none" fill="none" strokeLinecap="round" strokeLinejoin="round" className="pointer-events-none absolute inset-0 z-[1] size-full motion-reduce:hidden">
-      <defs>
-        <radialGradient id="cc-cloud-flash">
-          <stop offset="0" stopColor="#ffffff" stopOpacity="0.75" />
-          <stop offset="1" stopColor="#ffffff" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-      {CLOUD_BOLTS.map(({ main, strands, sparks, glow, delay }) => (
-        <g key={main} className="animate-[cc-thunder-flash_3.4s_linear_infinite] opacity-0" style={{ animationDelay: delay }}>
-          <circle cx={glow.cx} cy={glow.cy} r={glow.r} fill="url(#cc-cloud-flash)" />
-          {/* Os mesmos traços da moldura elétrica, mais finos, com a sombra azulada por baixo
-              para o branco não sumir na nuvem branca. */}
-          <path d={main} stroke="#3a4560" strokeWidth={2} opacity={0.45} />
-          <g stroke="var(--cc-neon)">
-            <path d={main} strokeWidth={3.8} opacity={0.15} />
-            <path d={main} strokeWidth={1.8} opacity={0.35} />
-            <path d={main} strokeWidth={0.85} opacity={0.95} />
-            {strands.map((d) => (
-              <g key={d}>
-                <path d={d} strokeWidth={1.2} stroke="#3a4560" opacity={0.3} />
-                <path d={d} strokeWidth={0.4} opacity={0.9} />
-              </g>
-            ))}
-          </g>
-          <path d={main} strokeWidth={0.4} stroke="#ffffff" />
-          {sparks.map((spark) => (
-            <circle key={`${spark.x}-${spark.y}`} cx={spark.x} cy={spark.y} r={spark.r * 0.7} fill="#ffffff" />
-          ))}
-        </g>
-      ))}
-    </svg>
   );
 }
 
@@ -746,6 +652,10 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
         className={cn("absolute overflow-hidden bg-cover bg-center", isNeon ? NEON_WINDOW : METAL_WINDOW)}
         style={{ backgroundImage: `url(/cartas/fundos/${roupa.background}.webp)` }}
       >
+        {roupa.innerBolts && (
+          // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da janela, sem otimizar
+          <img aria-hidden alt="" src={`/cartas/fundos/${roupa.innerBolts}.webp`} className="pointer-events-none absolute inset-0 z-[2] size-full animate-[cc-thunder-flash_3.2s_linear_infinite] select-none motion-reduce:animate-none" />
+        )}
         {/* Clarão atrás da cabeça, na cor da luz da roupa. */}
         {!roupa.matte && (
           <div aria-hidden className="absolute inset-0 z-[2] bg-[radial-gradient(34%_24%_at_50%_30%,rgb(var(--cc-light)/0.55),transparent_75%)]" />
@@ -761,7 +671,6 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
           <span className="mt-[1cqw] truncate text-[3.8cqw] font-bold tracking-[0.2em] text-(--cc-muted) uppercase">{subtitle}</span>
         </div>
 
-        {roupa.cloudBolts && <CloudBolts />}
 
         {/* Sombra atrás da pessoa: ela se descola do fundo e parece estar na carta. */}
         {player.photo && !roupa.clean && <PhotoShadow />}
@@ -865,7 +774,6 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
     <div style={vars} className={cn("relative aspect-[5/7] shrink-0", className)}>
       {card}
       {!roupa.artFrame && <NeonOverlay kind={hasTrim ? (roupa.trim ?? "base") : null} isDim={roupa.neonDim === true} />}
-      {roupa.electric && <ElectricTrim />}
       {roupa.overflow && (
         // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da caixa, sem otimizar
         <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflow}.webp`} className={cn("pointer-events-none absolute top-0 left-0 z-[11] h-full select-none", roupa.overflowWidth ? "max-w-none" : "w-full")} style={roupa.overflowWidth ? { width: `${roupa.overflowWidth * 100}%` } : undefined} />
@@ -873,7 +781,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
       {roupa.overflowBolts && (
         // Os raios das decorações estalam como trovão (só `opacity`; com movimento reduzido, ficam acesos).
         // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da caixa, sem otimizar
-        <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflowBolts}.webp`} className="pointer-events-none absolute inset-0 z-[12] size-full animate-[cc-thunder-strike_2.4s_linear_infinite] select-none motion-reduce:animate-none" />
+        <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflowBolts}.webp`} className={cn("pointer-events-none absolute top-0 left-0 z-[12] h-full select-none motion-reduce:animate-none", roupa.overflowWidth ? "max-w-none" : "w-full", roupa.innerBolts ? "animate-[cc-thunder-flash_3.2s_linear_infinite]" : "animate-[cc-thunder-strike_2.4s_linear_infinite]")} style={roupa.overflowWidth ? { width: `${roupa.overflowWidth * 100}%` } : undefined} />
       )}
     </div>
   ) : (
