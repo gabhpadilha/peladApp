@@ -1,20 +1,23 @@
-// Lenda do Trovão, versão 3 (2026-11-01): `lenda-v3-dono.jpg` (1342 × 2000: céu de tempestade azul-noite com
-// raios azuis e dourados, fio de ouro fino com filigranas nos cantos e um raio dourado no topo, tubo de neon azul
-// e uma nuvem de tempestade que passa por cima da moldura pelo lado ESQUERDO). Mesmo caminho do Relâmpago
-// (`premium-relampago.cjs`): os raios saem do fundo e vão para duas camadas que piscam (`innerBolts` e
-// `overflowBolts`). Diferenças: a imagem de fora tem 60 px extras à esquerda (`overflowLeft` na roupa), a
-// arte tem filigranas e o raio do topo, que ficam fixos, e os raios são achados pelo contraste local.
+// Lenda do Trovão, versão 4 (2026-11-01): `lenda-v4-leonardo-dono.jpg` (2000 × 2000, gerada no Leonardo/Dreamina
+// pelo dono do app: céu azul-noite liso, moldura de ouro envelhecido com faixa azul-marinho e neon ciano por dentro
+// do fio, filigranas nos cantos, raio dourado no topo e uma nuvem de tempestade com raios que passa por cima da
+// moldura pelo lado ESQUERDO). Mesmo caminho da v3 (`skin-lenda-v3.cjs`): raios separados em `innerBolts` e
+// `overflowBolts`, filigranas e raio do topo na camada de fora. Diferenças: o neon fica DENTRO do fio de ouro (a
+// borda da carta é o fio de dentro; a faixa e o fio de fora vão na sobra), a nuvem sai ~350 px da arte (a distância
+// fora da moldura é comprimida de forma suave para caber em `LEFT_EXT`), e a marca do gerador (canto de baixo) fica fora.
 // Saem `skin-lenda.webp`, `skin-lenda-raios-dentro.webp`, `skin-lenda-vaza.webp` e `skin-lenda-raios.webp`.
-// Uso: node skin-lenda-v3.cjs <pasta de saída> <raiz do repo>
+// Uso: node skin-lenda-v4.cjs <pasta de saída> <raiz do repo>
 const path = require("path");
 const sharp = require(path.resolve(process.argv[3], "node_modules/sharp"));
 const OUT = process.argv[2];
-const SRC = path.join(__dirname, "lenda-v3-dono.jpg");
+const SRC = path.join(__dirname, "lenda-v4-leonardo-dono.jpg");
 
-const EDGE = { left: 191, right: 1151, top: 319, bottom: 1681 }; // borda de fora do fio de ouro (medida)
-const RADIUS = 50;
-const BG = 12;
-const BW = 714, BH = 1000, LEFT_EXT = 60, OUT_W = LEFT_EXT + BW; // a nuvem sai pela esquerda
+const EDGE = { left: 507, right: 1494, top: 265, bottom: 1741 }; // borda de fora do fio de ouro de DENTRO (medida)
+const RADIUS = 45;
+const BG = 0;
+const BAND_ART = 42; // faixa azul-marinho e fio de fora (px da arte), que não encolhem
+const L_WARP = 450; // o que passa da faixa (a nuvem) encolhe suave: dist_saída = e / (1 + e / L)
+const BW = 714, BH = 1000, LEFT_EXT = 85, OUT_W = LEFT_EXT + BW; // a nuvem sai pela esquerda
 const CW = BW * 0.84, CH = BH * 0.84, CX0 = BW * 0.08, CY0 = BH * 0.08;
 const SX = CW / (EDGE.right - EDGE.left), SY = CH / (EDGE.bottom - EDGE.top);
 const CORNER = RADIUS * SX;
@@ -24,7 +27,17 @@ const FW = 600, FH = 860;
 
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const smooth = (a, b, t) => { t = clamp((t - a) / (b - a)); return t * t * (3 - 2 * t); };
-const mapPoint = (x, y) => [EDGE.left + (x - CX0) / SX, EDGE.top + (y - CY0) / SY];
+function mapPoint(x, y) {
+  let u = EDGE.left + (x - CX0) / SX;
+  const v = EDGE.top + (y - CY0) / SY;
+  const edge = EDGE.left - BAND_ART;
+  if (u < edge) { const q = edge - u; u = edge - q / Math.max(0.04, 1 - q / L_WARP); }
+  return [u, v];
+}
+const inCorner = (sx, sy, pad) => Math.min(Math.abs(sx - EDGE.left), Math.abs(sx - EDGE.right)) < pad && Math.min(Math.abs(sy - EDGE.top), Math.abs(sy - EDGE.bottom)) < pad;
+const onEmblem = (sx, sy) => sx > 840 && sx < 1170 && sy > 215 && sy < 440; // o raio do topo e os arremates do fio
+// Ouro ou cobre-rosado das filigranas (o azul da arte e o neon ciano têm b > r): o de baixo é mais pálido que o de cima.
+const gold = (r, g, b) => smooth(0.03, 0.14, (r - b) / 255) * smooth(45, 90, 0.3 * r + 0.59 * g + 0.11 * b);
 function depth(x, y) {
   const lx = x - CX0, ly = y - CY0;
   if (lx <= 0 || ly <= 0 || lx >= CW || ly >= CH) return -1;
@@ -68,6 +81,12 @@ function boxBlur(a, W, H, r, passes) {
   const ch = [new Float32Array(N), new Float32Array(N), new Float32Array(N)];
   for (let i = 0; i < N; i++) { ch[0][i] = data[i * 3]; ch[1][i] = data[i * 3 + 1]; ch[2][i] = data[i * 3 + 2]; }
 
+  // Linhas em que a nuvem passa por cima da moldura à esquerda: ali o painel de dentro está coberto pela nuvem (não há fio
+  // para apagar, e apagar a faixa recortaria a nuvem).
+  const cloudRow = new Uint8Array(H);
+  for (let y = 0; y < H; y++) { for (let x = 250; x < 430; x += 2) { const i = y * W + x; if (Math.max(ch[0][i], ch[1][i], ch[2][i]) > 28) { cloudRow[y] = 1; break; } } }
+  const cloudNear = new Uint8Array(H);
+  for (let y = 0; y < H; y++) if (cloudRow[y]) for (let k = -14; k <= 14; k++) if (y + k >= 0 && y + k < H) cloudNear[y + k] = 1;
   // Raios: linhas finas bem mais claras que o entorno (o contraste local não pega as nuvens iluminadas). O fio de
   // ouro, as filigranas dos cantos, o raio do topo e o tubo de neon ficam fixos.
   const lum = new Float32Array(N);
@@ -80,10 +99,10 @@ function boxBlur(a, W, H, r, passes) {
       let m = smooth(22, 60, lum[i] - around[i]) * smooth(150, 205, lum[i]);
       if (m <= 0) continue;
       const d = panelDistance(x, y);
-      const nearCorner = Math.min(Math.abs(x - EDGE.left), Math.abs(x - EDGE.right)) < 120 && Math.min(Math.abs(y - EDGE.top), Math.abs(y - EDGE.bottom)) < 120;
-      if ((d > (nearCorner ? -55 : -9) && d < 6) || (d > 9 && d < 38)) m = 0; // fio de ouro, filigranas e tubo de neon
-      if (x > 625 && x < 725 && y > 250 && y < 380) m = 0; // o raio dourado do topo
-      m *= 1 - smooth(W - 130, W - 6, x);
+      // O fio de ouro fino de dentro (contas) a ~27 px da borda também brilha e seria tomado por raio: fora da nuvem, a faixa
+      // de 9 a 62 px para dentro da borda não tem raio (os de dentro estão mais ao centro).
+      const beaded = d > -62 && d < -9 && !(x < EDGE.left + 150 && cloudNear[y]);
+      if ((d > -16 && d < 46) || beaded || inCorner(x, y, 240) || onEmblem(x, y) || y > 1860) m = 0; // neon, fios, faixa, filigranas, raio do topo e marca do gerador
       bolt[i] = m;
     }
   }
@@ -104,6 +123,60 @@ function boxBlur(a, W, H, r, passes) {
       const i = y * W + x, j = Math.min(h4 - 1, Math.floor(y / S)) * w4 + Math.min(w4 - 1, Math.floor(x / S)), m = soft[i];
       for (let c = 0; c < 3; c++) fill[c][i] = m > 0 && bw[j] > 0.02 ? ch[c][i] * (1 - m) + (bc[c][j] / bw[j]) * m : ch[c][i];
     }
+  }
+
+  // Filigranas dos cantos (e o miolo preto delas): apagadas do fundo. A região é preenchida por interpolação suave
+  // (equação de Laplace, relaxando numa grade de 4 px): o brilho azul que entra pelas bordas continua para dentro, sem
+  // deixar um retângulo mais escuro. O fio do painel (~28 px da borda) e o neon ficam.
+  const CORNER_CUT = -31.5, CS = 4;
+  // O raio dourado do topo e os arremates do fio (ouro forte), com uma folga de 6 px para o contorno claro: ficam intactos.
+  const goldCore = new Float32Array(N);
+  for (let y = 215; y < 440; y++) for (let x = 840; x < 1170; x++) { const i = y * W + x; if (ch[0][i] > 150 && ch[1][i] > 110 && ch[2][i] < 110 && ch[0][i] > ch[2][i] + 60) goldCore[i] = 1; }
+  const goldKeep = dilate(goldCore, W, H, 6);
+  const cornerHard = new Float32Array(N);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const d = panelDistance(x, y);
+    // As filigranas e, bem no cantinho (130 px), também a pontinha de folha onde os dois fios do painel se encontram (130 px: os fios recomeçam depois).
+    // Também o painel de dentro em toda a volta (o fio fino de ouro a ~28 px da borda e a segunda linha de neon, a 12 a 16 px): era a borda em
+    // que os enfeites se apoiavam, e sem eles sobrava um fio solto.
+    if ((inCorner(x, y, 215) && d < CORNER_CUT) || (inCorner(x, y, 130) && d < -19) || (d < -9 && d > -62 && !(x < EDGE.left + 150 && cloudNear[y]) && !(goldKeep[y * W + x] > 0))) cornerHard[y * W + x] = 1;
+  }
+  const cornerSoft = boxBlur(cornerHard, W, H, 7, 2); // borda suave: sem degrau onde acaba a área apagada
+  const cw = Math.ceil(W / CS), chh = Math.ceil(H / CS), cn = cw * chh;
+  const cSum = [new Float32Array(cn), new Float32Array(cn), new Float32Array(cn)], cValid = new Float32Array(cn), cCorner = new Float32Array(cn);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const i = y * W + x, j = Math.floor(y / CS) * cw + Math.floor(x / CS);
+    if (cornerHard[i] > 0) cCorner[j]++;
+    else if (cornerSoft[i] < 0.02 && grow[i] < 0.02 && panelDistance(x, y) < -70) { cValid[j]++; for (let c = 0; c < 3; c++) cSum[c][j] += ch[c][i]; }
+  }
+  // 2 = a preencher, 1 = conhecida (azul-noite de dentro do painel), 0 = ignorada (moldura, fora)
+  const cType = new Uint8Array(cn), cVal = [new Float32Array(cn), new Float32Array(cn), new Float32Array(cn)];
+  for (let j = 0; j < cn; j++) {
+    if (cCorner[j] >= 4) cType[j] = 2;
+    else if (cValid[j] >= 4) { cType[j] = 1; for (let c = 0; c < 3; c++) cVal[c][j] = cSum[c][j] / cValid[j]; }
+  }
+  for (let j = 0; j < cn; j++) if (cType[j] === 2) { // chute inicial: a média das conhecidas à volta
+    const cx = j % cw, cy = Math.floor(j / cw); let acc = [0, 0, 0], n = 0;
+    for (let dy = -30; dy <= 30; dy += 3) for (let dx = -30; dx <= 30; dx += 3) { const xx = cx + dx, yy = cy + dy; if (xx < 0 || yy < 0 || xx >= cw || yy >= chh) continue; const k = yy * cw + xx; if (cType[k] === 1) { for (let c = 0; c < 3; c++) acc[c] += cVal[c][k]; n++; } }
+    for (let c = 0; c < 3; c++) cVal[c][j] = n ? acc[c] / n : 20;
+  }
+  for (let it = 0; it < 500; it++) for (let j = 0; j < cn; j++) {
+    if (cType[j] !== 2) continue;
+    const cx = j % cw, cy = Math.floor(j / cw); let acc = [0, 0, 0], n = 0;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const xx = cx + dx, yy = cy + dy; if (xx < 0 || yy < 0 || xx >= cw || yy >= chh) continue; const k = yy * cw + xx; if (cType[k] === 0) continue; for (let c = 0; c < 3; c++) acc[c] += cVal[c][k]; n++; }
+    if (n) for (let c = 0; c < 3; c++) cVal[c][j] = acc[c] / n;
+  }
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const i = y * W + x, m = cornerSoft[i];
+    if (m <= 0.001) continue;
+    const gx = (x + 0.5) / CS - 0.5, gy = (y + 0.5) / CS - 0.5, x0 = Math.floor(gx), y0 = Math.floor(gy), tx = gx - x0, ty = gy - y0;
+    let acc = [0, 0, 0], wsum = 0;
+    for (const [ox, oy, wgt] of [[0, 0, (1 - tx) * (1 - ty)], [1, 0, tx * (1 - ty)], [0, 1, (1 - tx) * ty], [1, 1, tx * ty]]) {
+      const xx = x0 + ox, yy = y0 + oy; if (xx < 0 || yy < 0 || xx >= cw || yy >= chh) continue;
+      const k = yy * cw + xx; if (cType[k] === 0) continue;
+      for (let c = 0; c < 3; c++) acc[c] += cVal[c][k] * wgt; wsum += wgt;
+    }
+    if (wsum > 0.05) for (let c = 0; c < 3; c++) fill[c][i] = fill[c][i] * (1 - m) + (acc[c] / wsum) * m;
   }
 
   const sampler = (arr) => (fx, fy) => {
@@ -138,26 +211,25 @@ function boxBlur(a, W, H, r, passes) {
       const [sx, sy] = mapPoint(xb + 0.5, y + 0.5);
       if (sx >= W - 2 || sy >= H - 2 || sx < 1 || sy < 1) continue;
       const o = (y * OUT_W + x) * 4;
-      const onEmblem = sx > 625 && sx < 725 && sy > 250 && sy < 385; // o raio do topo atravessa a borda da janela
-      // No raio do topo não há rampa na borda da janela (ela escurecia o ouro por 1 a 2 px, um risco): ou é o
-      // traço dourado (por transparência) ou é a arte opaca.
-      if (d >= 0 && (wd < -3 || (onEmblem && wd < -1))) {
-        // Dentro da janela só ficam as filigranas dos cantos e a ponta do raio do topo (ouro), por cima da barra do nome e das
+      // No topo, a segunda linha de neon (e as pontas do arremate do raio) fica logo abaixo da borda da janela:
+      // a camada de fora desce mais 14 px ali (onde só há a barra do nome, nunca a foto) e some aos poucos.
+      const ext = 14 * (1 - smooth(CY0 + 24, CY0 + 44, y)), inner = -3 - ext;
+      if (d >= 0 && (wd < inner || (onEmblem(sx, sy) && wd < inner + 2))) {
+        // Dentro da janela só ficam as filigranas dos cantos e o raio do topo (ouro), por cima da barra do nome e das
         // estatísticas, como parte da moldura. O resto da janela é o fundo.
-        const nearCorner = Math.min(Math.abs(sx - EDGE.left), Math.abs(sx - EDGE.right)) < 120 && Math.min(Math.abs(sy - EDGE.top), Math.abs(sy - EDGE.bottom)) < 120;
-        if (!onEmblem && (!nearCorner || panelDistance(sx, sy) < -58)) continue;
-        const a = smooth(70, 120, 0.3 * sOrig[0](sx, sy) + 0.59 * sOrig[1](sx, sy) + 0.11 * sOrig[2](sx, sy));
+        // Só o raio do topo (e os arremates do fio). As filigranas dos cantos saíram da arte (o dono pediu só a borda).
+        if (!onEmblem(sx, sy)) continue;
+        const a = gold(sOrig[0](sx, sy), sOrig[1](sx, sy), sOrig[2](sx, sy));
         if (a <= 0) continue;
-        const base = [18, 24, 45]; // o azul-noite por baixo: tira o escuro da borda do traço
-        for (let c = 0; c < 3; c++) vaza[o + c] = clamp((sOrig[c](sx, sy) - base[c] * (1 - a)) / Math.max(a, 0.25), 0, 255);
+        for (let c = 0; c < 3; c++) vaza[o + c] = clamp(sOrig[c](sx, sy), 0, 255);
         vaza[o + 3] = Math.round(a * 255);
         continue;
       }
       const fr = sFill[0](sx, sy), fg = sFill[1](sx, sy), fb = sFill[2](sx, sy);
       const key = smooth(10, 45, Math.max(Math.abs(fr - BG), Math.abs(fg - BG), Math.abs(fb - BG)));
-      const alpha = (d < 0 ? key : smooth(-3, -1, wd)) * (1 - smooth(W - 110, W - 4, sx));
+      const alpha = (d < 0 ? key : smooth(inner, inner + 2 + ext * 0.6, wd)) * smooth(0, 24, x) * (sy > 1860 ? 0 : 1); // borda de fora da imagem e marca do gerador
       if (alpha > 0) { vaza[o] = clamp(fr, 0, 255); vaza[o + 1] = clamp(fg, 0, 255); vaza[o + 2] = clamp(fb, 0, 255); vaza[o + 3] = Math.round(alpha * 255); }
-      const b = clamp(sBolt(sx, sy)) * (d < 0 ? 1 : smooth(-1, 1, wd));
+      const b = clamp(sBolt(sx, sy)) * (d < 0 ? 1 : smooth(-1, 1, wd)) * smooth(0, 24, x);
       if (b > 0) { raios[o] = clamp(sOrig[0](sx, sy), 0, 255); raios[o + 1] = clamp(sOrig[1](sx, sy), 0, 255); raios[o + 2] = clamp(sOrig[2](sx, sy), 0, 255); raios[o + 3] = Math.round(b * 255); }
     }
   }
