@@ -73,8 +73,8 @@ export type Roupa = {
    * (`overflowBolts`), acendendo e apagando por inteiro, como um trovão.
    */
   innerBolts?: string;
-  /** Os raios acendem de uma ponta à outra (`cc-bolt-in`/`cc-bolt-out`), em vez de piscar por inteiro. */
-  sweep?: "raio";
+  /** Os raios (`innerBolts` e `overflowBolts`) ficam parados, sem animação. */
+  still?: boolean;
 };
 
 const GOLD = ["#7a5512", "#e9c86a", "#fff4c8"] as const;
@@ -147,14 +147,14 @@ const HIGHLIGHT_ART = new Set<AwardKind>(["atacante", "criativo", "defensor", "g
  * Não veste o tema do mês (`hasSeasonalTheme`). As cartas de outubro seguem no cristal (`MONTH_ROUPA_CRISTAL`).
  */
 const MONTH_ROUPA: Roupa = {
-  // Arte do dono do app (2026-11-02): neon roxo por fora com a coroa, painel de vidro e tempestade roxa com um aglomerado de
-  // raios que passa por cima da moldura e acende como trovão (`prototipos/premium-time-do-mes.cjs`).
+  // Arte do dono do app em camadas (2026-11-02): neon roxo com a coroa, tempestade roxa e um aglomerado de raios por cima da moldura
+  // que muda de intensidade, sem apagar (`prototipos/premio-time-do-mes.cjs`).
   background: "premium-time-do-mes",
   overflow: "premium-time-do-mes-vaza",
-  overflowWidth: 774 / 714,
+  overflowWidth: 790 / 714,
   overflowBolts: "premium-time-do-mes-raios",
   innerBolts: "premium-time-do-mes-raios-dentro",
-  sweep: "raio",
+  still: true,
   artFrame: true,
   clean: true,
   metal: ["#b8902f", "#b8902f", "#fff1c2"],
@@ -197,7 +197,7 @@ const MONTH_ROUPA_CRISTAL: Roupa = {
   overflowWidth: undefined,
   overflowBolts: undefined,
   innerBolts: undefined,
-  sweep: undefined,
+  still: false,
   artFrame: false,
   clean: false,
 };
@@ -698,7 +698,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
       >
         {roupa.innerBolts && (
           // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da janela, sem otimizar
-          <img aria-hidden alt="" src={`/cartas/fundos/${roupa.innerBolts}.webp`} className={cn("pointer-events-none absolute inset-0 z-[2] size-full select-none motion-reduce:animate-none", roupa.sweep ? "animate-[cc-bolt-in_3.2s_linear_infinite]" : "animate-[cc-thunder-flash_3.2s_linear_infinite]")} />
+          <img aria-hidden alt="" src={`/cartas/fundos/${roupa.innerBolts}.webp`} className={cn("pointer-events-none absolute inset-0 z-[2] size-full select-none motion-reduce:animate-none", !roupa.still && "animate-[cc-thunder-flash_3.2s_linear_infinite]")} />
         )}
         {/* Clarão atrás da cabeça, na cor da luz da roupa. */}
         {!roupa.matte && (
@@ -825,7 +825,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
       {roupa.overflowBolts && (
         // Os raios das decorações estalam como trovão (só `opacity`; com movimento reduzido, ficam acesos).
         // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da caixa, sem otimizar
-        <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflowBolts}.webp`} className={cn("pointer-events-none absolute top-0 left-0 z-[12] h-full select-none motion-reduce:animate-none", roupa.overflowWidth ? "max-w-none" : "w-full", roupa.sweep ? "animate-[cc-bolt-out_3.2s_linear_infinite]" : roupa.innerBolts ? "animate-[cc-thunder-flash_3.2s_linear_infinite]" : "animate-[cc-thunder-strike_2.4s_linear_infinite]")} style={roupa.overflowWidth ? { width: `${roupa.overflowWidth * 100}%`, left: `${-(roupa.overflowLeft ?? 0) * 100}%` } : undefined} />
+        <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflowBolts}.webp`} className={cn("pointer-events-none absolute top-0 left-0 z-[12] h-full select-none motion-reduce:animate-none", roupa.overflowWidth ? "max-w-none" : "w-full", roupa.still ? "" : roupa.innerBolts ? "animate-[cc-thunder-flash_3.2s_linear_infinite]" : "animate-[cc-thunder-strike_2.4s_linear_infinite]")} style={roupa.overflowWidth ? { width: `${roupa.overflowWidth * 100}%`, left: `${-(roupa.overflowLeft ?? 0) * 100}%` } : undefined} />
       )}
     </div>
   ) : (
