@@ -349,6 +349,15 @@
   6% { opacity: 1; }
   14% { opacity: 0; }
 }
+/* Lenda do Trovão: a camada extra dos raios acende forte, dá um segundo clarão e vai esmaecendo devagar (fica visível quase metade do ciclo). */
+@keyframes cc-thunder-glow {
+  0%, 100% { opacity: 0; }
+  3% { opacity: 1; }
+  6% { opacity: 0.35; }
+  9% { opacity: 1; }
+  24% { opacity: 0.8; }
+  42% { opacity: 0; }
+}
 /* O mesmo estalo sem apagar de todo: os fios finos da moldura elétrica e os raios das decorações do Relâmpago. */
 @keyframes cc-thunder-strike {
   0%, 100% { opacity: 0.25; }

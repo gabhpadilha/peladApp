@@ -60,6 +60,8 @@ export type Roupa = {
   clean?: boolean;
   /** O conteúdo (foto, nome e estatísticas) fica dentro de uma janela mais recuada: por dentro do fio fino de dentro da borda da arte. */
   window?: "inner" | "ring";
+  /** Raio do canto da janela `ring`, em cqw (padrão 8: o do fio de ouro dos destaques; a Lenda tem 5,2). */
+  windowRadius?: number;
   /** Barra do nome sem o fundo escuro (só a linha embaixo): as letras ficam direto sobre a arte. */
   bareName?: boolean;
   /** Enquadramento da foto desta roupa (padrão: o da carta). */
@@ -75,6 +77,8 @@ export type Roupa = {
   innerBolts?: string;
   /** Os raios (`innerBolts` e `overflowBolts`) ficam parados, sem animação. */
   still?: boolean;
+  /** Os raios acendem forte e esmaecem devagar (`cc-thunder-glow`), em vez do estalo curto. */
+  glow?: boolean;
 };
 
 const GOLD = ["#7a5512", "#e9c86a", "#fff4c8"] as const;
@@ -97,10 +101,9 @@ const ROUPAS = {
   // Relâmpago (arte montada pelo dono do app em 2026-10-31): o miolo da arte no fundo e, por fora,
   // a moldura dourada pintada com o raio no topo, cacos e raios, que estalam como trovão
   // (`prototipos/skin-relampago-arte.cjs`).
-  // Lenda do Trovão (carta de prestígio): desde 2026-11-01, as três camadas que o dono do app gerou no
-  // Gemini (moldura de metal dourado envelhecido por fora da carta e sem o neon dela, `artFrame`; raios
-  // dourados e azuis que estalam como trovão; fundo de tempestade), em `prototipos/skin-lenda-v2.cjs`.
-  lenda: { background: "skin-lenda", clean: true, bareName: true, overflow: "skin-lenda-vaza", overflowWidth: 799 / 714, overflowLeft: 85 / 714, overflowBolts: "skin-lenda-raios", innerBolts: "skin-lenda-raios-dentro", artFrame: true, metal: ["#7a5a1c", "#7a5a1c", "#f0d48a"], accent: "#d9b36a", light: "160 180 255", bar: "#050816", muted: "#e8d3a0", sparkles: false, neon: "#d9b36a", trim: null },
+  // Lenda do Trovão (carta de prestígio): desde 2026-11-02, as três camadas do Gemini (a tempestade azul e laranja, o fio de ouro
+  // com o neon em raios e o cristal de rocha com raios por cima da moldura), em `prototipos/skin-lenda-v5.cjs`.
+  lenda: { background: "skin-lenda", overflow: "skin-lenda-vaza", overflowWidth: 800 / 714, overflowBolts: "skin-lenda-raios", innerBolts: "skin-lenda-raios-dentro", glow: true, window: "ring", windowRadius: 5.2, artFrame: true, clean: true, bareName: true, metal: ["#7a5a1c", "#7a5a1c", "#f0d48a"], accent: "#e6b85c", light: "190 200 255", bar: "#050816", muted: "#f0dcb0", sparkles: false, neon: "#8fc2ff", trim: null },
   relampago: { background: "premium-relampago", clean: true, overflow: "premium-relampago-vaza", overflowWidth: 774 / 714, overflowBolts: "premium-relampago-raios", innerBolts: "premium-relampago-raios-dentro", artFrame: true, metal: ["#7a5a1c", "#7a5a1c", "#f0d48a"], accent: "#e0b250", light: "255 190 90", bar: "#0b0805", muted: "#f0d9a0", sparkles: false, neon: "#e8b54a", trim: null },
   // Nuvem carregada (Loja, Temporal 2026, aprovada pelo dono do app em 2026-10-31, no lugar do
   // Trovão): nuvens de tempestade pintadas em poucos tons, neon branco, a nuvem com raio no topo,
@@ -368,7 +371,7 @@ const NEON_INNER_GLOW_DIM = "shadow-[inset_0_0_1.6cqw_color-mix(in_oklab,var(--c
 const NEON_WINDOW = "inset-x-[1.7%] inset-y-[1.21%] rounded-[7.3cqw]";
 /** Janela do conteúdo das cartas com a borda desenhada na arte (`window: "inner"`): por dentro do fio fino de dentro dela. */
 /** Janela até o lado de dentro do fio de ouro da arte (`window: "ring"`): sem faixa de arte entre o conteúdo e o fio. */
-const RING_WINDOW = "inset-x-[0.9%] inset-y-[0.65%] rounded-[8cqw]";
+const RING_WINDOW = "inset-x-[0.9%] inset-y-[0.65%]";
 const INNER_WINDOW = "inset-x-[5.8%] inset-y-[4.2%] rounded-[3.6cqw]";
 const METAL_WINDOW = cn("inset-x-[2.6%] inset-y-[1.86%]", INNER_CORNERS);
 
@@ -704,11 +707,11 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
     >
       <div
         className={cn("absolute overflow-hidden bg-cover bg-center", roupa.window === "inner" ? INNER_WINDOW : roupa.window === "ring" ? RING_WINDOW : isNeon ? NEON_WINDOW : METAL_WINDOW)}
-        style={{ backgroundImage: `url(/cartas/fundos/${roupa.background}.webp)` }}
+        style={{ backgroundImage: `url(/cartas/fundos/${roupa.background}.webp)`, ...(roupa.window === "ring" ? { borderRadius: `${roupa.windowRadius ?? 8}cqw` } : null) }}
       >
         {roupa.innerBolts && (
           // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da janela, sem otimizar
-          <img aria-hidden alt="" src={`/cartas/fundos/${roupa.innerBolts}.webp`} className={cn("pointer-events-none absolute inset-0 z-[2] size-full select-none motion-reduce:animate-none", !roupa.still && "animate-[cc-thunder-flash_3.2s_linear_infinite]")} />
+          <img aria-hidden alt="" src={`/cartas/fundos/${roupa.innerBolts}.webp`} className={cn("pointer-events-none absolute inset-0 z-[2] size-full select-none motion-reduce:animate-none", !roupa.still && (roupa.glow ? "animate-[cc-thunder-glow_3.6s_ease-out_infinite]" : "animate-[cc-thunder-flash_3.2s_linear_infinite]"))} />
         )}
         {/* Clarão atrás da cabeça, na cor da luz da roupa. */}
         {!roupa.matte && (
@@ -835,7 +838,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
       {roupa.overflowBolts && (
         // Os raios das decorações estalam como trovão (só `opacity`; com movimento reduzido, ficam acesos).
         // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da caixa, sem otimizar
-        <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflowBolts}.webp`} className={cn("pointer-events-none absolute top-0 left-0 z-[12] h-full select-none motion-reduce:animate-none", roupa.overflowWidth ? "max-w-none" : "w-full", roupa.still ? "" : roupa.innerBolts ? "animate-[cc-thunder-flash_3.2s_linear_infinite]" : "animate-[cc-thunder-strike_2.4s_linear_infinite]")} style={roupa.overflowWidth ? { width: `${roupa.overflowWidth * 100}%`, left: `${-(roupa.overflowLeft ?? 0) * 100}%` } : undefined} />
+        <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflowBolts}.webp`} className={cn("pointer-events-none absolute top-0 left-0 z-[12] h-full select-none motion-reduce:animate-none", roupa.overflowWidth ? "max-w-none" : "w-full", roupa.still ? "" : roupa.glow ? "animate-[cc-thunder-glow_3.6s_ease-out_infinite]" : roupa.innerBolts ? "animate-[cc-thunder-flash_3.2s_linear_infinite]" : "animate-[cc-thunder-strike_2.4s_linear_infinite]")} style={roupa.overflowWidth ? { width: `${roupa.overflowWidth * 100}%`, left: `${-(roupa.overflowLeft ?? 0) * 100}%` } : undefined} />
       )}
     </div>
   ) : (
