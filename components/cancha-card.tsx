@@ -50,6 +50,8 @@ export type Roupa = {
    * carta de neon): moldura e enfeites pintados, por cima da moldura de neon.
    */
   overflow?: string;
+  /** A arte de fora é mais larga que a caixa (razão entre as larguras), só para a direita: cristais que passam da sobra de 8%. */
+  overflowWidth?: number;
   /** A moldura é a da arte (`overflow`): a carta não desenha o tubo de neon, o brilho nem o enfeite. */
   artFrame?: boolean;
   /** Raios da arte de fora numa camada própria (mesmo tamanho), que estala como trovão. */
@@ -68,10 +70,10 @@ const ROUPAS = {
   padrao: { background: "fosco-grafite", metal: ["#2a312d", "#2a312d", "rgb(255 255 255 / 0.1)"], accent: "#8fa197", light: "255 255 255", bar: "#121714", muted: "#9fb0a4", matte: true },
   // Skins premium (aprovadas pelo dono do app em 2026-10-29): fundo lapidado na cor da pedra,
   // moldura em tubo de neon com o enfeite da base (`neon`) e sem estrelinhas. Fundos gerados por `prototipos/gemas.cjs` (docs).
-  esmeralda: { background: "gema-esmeralda", metal: ["#0f6b45", "#0f6b45", "#5fd39a"], accent: "#5fd39a", light: "160 255 200", bar: "#03140c", muted: "#9fffc8", sparkles: false, neon: "#2dffa0" },
-  safira: { background: "gema-safira", metal: ["#1d4fa8", "#1d4fa8", "#7fb0ff"], accent: "#7fb0ff", light: "170 200 255", bar: "#040a1c", muted: "#a9c8ff", sparkles: false, neon: "#36a6ff" },
-  ametista: { background: "gema-ametista", metal: ["#5b2fa0", "#5b2fa0", "#b99bff"], accent: "#b99bff", light: "220 190 255", bar: "#0e0620", muted: "#d2bcff", sparkles: false, neon: "#c46bff" },
-  rubi: { background: "gema-rubi", metal: ["#9b1530", "#9b1530", "#ff8fa3"], accent: "#ff8fa3", light: "255 190 200", bar: "#1a0309", muted: "#ffb3c0", sparkles: false, neon: "#ff2f66" },
+  esmeralda: { background: "premium-esmeralda", overflow: "premium-esmeralda-vaza", overflowWidth: 774 / 714, artFrame: true, trim: null, metal: ["#0f6b45", "#0f6b45", "#5fd39a"], accent: "#5fd39a", light: "160 255 200", bar: "#03140c", muted: "#9fffc8", sparkles: false, neon: "#2dffa0" },
+  safira: { background: "premium-safira", overflow: "premium-safira-vaza", overflowWidth: 774 / 714, artFrame: true, trim: null, metal: ["#1d4fa8", "#1d4fa8", "#7fb0ff"], accent: "#7fb0ff", light: "170 200 255", bar: "#040a1c", muted: "#a9c8ff", sparkles: false, neon: "#36a6ff" },
+  ametista: { background: "premium-ametista", overflow: "premium-ametista-vaza", overflowWidth: 774 / 714, artFrame: true, trim: null, metal: ["#5b2fa0", "#5b2fa0", "#b99bff"], accent: "#b99bff", light: "220 190 255", bar: "#0e0620", muted: "#d2bcff", sparkles: false, neon: "#c46bff" },
+  rubi: { background: "premium-rubi", overflow: "premium-rubi-vaza", overflowWidth: 774 / 714, artFrame: true, trim: null, metal: ["#9b1530", "#9b1530", "#ff8fa3"], accent: "#ff8fa3", light: "255 190 200", bar: "#1a0309", muted: "#ffb3c0", sparkles: false, neon: "#ff2f66" },
   // Ícone: branco creme com moldura de ouro claro, lembrando a carta Icon do FIFA (2026-10-29).
   icone: { background: "gema-icone", metal: ["#c9a24e", "#c9a24e", "#fff4d6"], accent: "#e2c06e", light: "255 240 200", bar: "#1a140a", muted: "#f0dfb5", sparkles: false, neon: "#ffcf4d" },
   // Halloween 2026 (aprovadas pelo dono do app em 2026-10-29): fundo que conta o evento, sem estrelinhas,
@@ -855,7 +857,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
       {roupa.electric && <ElectricTrim />}
       {roupa.overflow && (
         // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da caixa, sem otimizar
-        <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflow}.webp`} className="pointer-events-none absolute inset-0 z-[11] size-full select-none" />
+        <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflow}.webp`} className={cn("pointer-events-none absolute top-0 left-0 z-[11] h-full select-none", roupa.overflowWidth ? "max-w-none" : "w-full")} style={roupa.overflowWidth ? { width: `${roupa.overflowWidth * 100}%` } : undefined} />
       )}
       {roupa.overflowBolts && (
         // Os raios das decorações estalam como trovão (só `opacity`; com movimento reduzido, ficam acesos).
