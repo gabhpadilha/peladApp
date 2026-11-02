@@ -58,6 +58,8 @@ export type Roupa = {
    * atrás da pessoa, sem a vinheta e sem o degradê escuro que desce até as estatísticas.
    */
   clean?: boolean;
+  /** O conteúdo (foto, nome e estatísticas) fica dentro de uma janela mais recuada: por dentro do fio fino de dentro da borda da arte. */
+  window?: "inner";
   /** Barra do nome sem o fundo escuro (só a linha embaixo): as letras ficam direto sobre a arte. */
   bareName?: boolean;
   /** Enquadramento da foto desta roupa (padrão: o da carta). */
@@ -71,6 +73,8 @@ export type Roupa = {
    * (`overflowBolts`), acendendo e apagando por inteiro, como um trovão.
    */
   innerBolts?: string;
+  /** Os raios acendem de uma ponta à outra (`cc-bolt-in`/`cc-bolt-out`), em vez de piscar por inteiro. */
+  sweep?: "raio";
 };
 
 const GOLD = ["#7a5512", "#e9c86a", "#fff4c8"] as const;
@@ -139,14 +143,20 @@ const HIGHLIGHT_COLORS: Record<CardThemeKey, AwardColors> = {
 const HIGHLIGHT_ART = new Set<AwardKind>(["atacante", "criativo", "defensor", "goleiro", "gol", "foguete", "garcom", "drible", "motor"]);
 
 /**
- * Time do Mês (aprovado pelo dono do app em 2026-10-31, no lugar do cristal roxo): o trovão em
- * roxo bem aceso, um raio grande desenhado em contornos de neon concêntricos ao lado do jogador,
- * e um raio em contorno de neon no topo, no lugar da coroa (`NEON_TRIMS.mesRaio`), com o abraço
- * da base das premium. Não veste o tema do mês (`hasSeasonalTheme`). Fundo
- * `premio-time-do-mes.webp`, gerado por `prototipos/mes-trovao.cjs` (docs).
+ * Time do Mês: a arte do dono do app de 2026-11-02 (tubo de neon roxo com a coroa, painel de vidro e tempestade roxa).
+ * Não veste o tema do mês (`hasSeasonalTheme`). As cartas de outubro seguem no cristal (`MONTH_ROUPA_CRISTAL`).
  */
 const MONTH_ROUPA: Roupa = {
-  background: "premio-time-do-mes",
+  // Arte do dono do app (2026-11-02): neon roxo por fora com a coroa, painel de vidro e tempestade roxa com um aglomerado de
+  // raios que passa por cima da moldura e acende como trovão (`prototipos/premium-time-do-mes.cjs`).
+  background: "premium-time-do-mes",
+  overflow: "premium-time-do-mes-vaza",
+  overflowWidth: 774 / 714,
+  overflowBolts: "premium-time-do-mes-raios",
+  innerBolts: "premium-time-do-mes-raios-dentro",
+  sweep: "raio",
+  artFrame: true,
+  clean: true,
   metal: ["#b8902f", "#b8902f", "#fff1c2"],
   accent: "#f3d27a",
   light: "220 180 255",
@@ -154,7 +164,7 @@ const MONTH_ROUPA: Roupa = {
   muted: "#f3d27a",
   sparkles: false,
   neon: "#b46bff",
-  trim: "mesRaio",
+  trim: null,
 };
 
 /**
@@ -178,13 +188,48 @@ const FLOP_ROUPA: Roupa = {
 };
 
 /** Desenhos de antes de 2026-10-31, só para as cartas já ganhas (`prototipos/mes-cristal.cjs`, `murcha.cjs`). */
-const MONTH_ROUPA_CRISTAL: Roupa = { ...MONTH_ROUPA, background: "premio-time-do-mes-cristal", trim: "mes" };
+// O desenho antigo (cristal roxo com a coroa) das cartas ganhas em outubro: só o fundo e o enfeite, sem a arte de fora.
+const MONTH_ROUPA_CRISTAL: Roupa = {
+  ...MONTH_ROUPA,
+  background: "premio-time-do-mes-cristal",
+  trim: "mes",
+  overflow: undefined,
+  overflowWidth: undefined,
+  overflowBolts: undefined,
+  innerBolts: undefined,
+  sweep: undefined,
+  artFrame: false,
+  clean: false,
+};
 const FLOP_ROUPA_BRONZE: Roupa = { ...FLOP_ROUPA, background: "premio-bola-murcha-bronze" };
 
 /** Fora do jogo (só cartas antigas): roupas provisórias. */
 const PROVISIONAL_AWARD_ROUPAS: Partial<Record<AwardDesignKind, Roupa>> = {
   // Time da Semana (saiu do jogo em 2026-10-29): neon dourado, como os outros prêmios.
   time_da_semana: { ...ROUPAS.estilhacos, neon: "#ffd24d", trim: null },
+};
+
+/**
+ * Melhor Jogador fora de evento (2026-11-02, arte do dono do app em três camadas do Gemini): o sol com circuitos dourados, o neon
+ * dourado com fogo em volta e uma coroa em chamas que passa por cima da moldura pela direita (`prototipos/premio-craque-fogo.cjs`).
+ * Neon e coroa vêm da arte (`artFrame`); sem sombras por cima (`clean`) e o nome direto sobre a arte (`bareName`), para a estrela do topo aparecer.
+ */
+const CRAQUE_FOGO: Roupa = {
+  background: "premio-craque-fogo",
+  overflow: "premio-craque-fogo-vaza",
+  overflowWidth: 824 / 714,
+  window: "inner",
+  artFrame: true,
+  clean: true,
+  bareName: true,
+  metal: ["#b8902f", "#b8902f", "#fff1c2"],
+  accent: "#ffc14d",
+  light: "255 190 90",
+  bar: "#0a0604",
+  muted: "#ffd9a0",
+  sparkles: false,
+  neon: "#ffb020",
+  trim: null,
 };
 
 function awardRoupa(kind: AwardKind, theme: CardThemeKey): Roupa {
@@ -197,6 +242,7 @@ function awardRoupa(kind: AwardKind, theme: CardThemeKey): Roupa {
   const provisional = PROVISIONAL_AWARD_ROUPAS[design];
   if (provisional) return { ...provisional, trim: theme === "halloween" ? "abobora" : "destaque" };
   const isCraque = design === "craque";
+  if (isCraque && theme !== "halloween") return CRAQUE_FOGO;
   // No Toró, Melhor Jogador e destaques usam as cartas novas dos prêmios (o sol art déco e a água
   // com a nuvem chovendo, as mesmas de fora de evento), no lugar da taça e dos raios dourados
   // (pedido do dono do app em 2026-10-31).
@@ -304,6 +350,8 @@ const NEON_FRAME_DIM =
 const NEON_INNER_GLOW_DIM = "shadow-[inset_0_0_1.6cqw_color-mix(in_oklab,var(--cc-neon),transparent_70%)]";
 /** Janela das cartas de neon: a moldura é mais fina (1,7% da largura). */
 const NEON_WINDOW = "inset-x-[1.7%] inset-y-[1.21%] rounded-[7.3cqw]";
+/** Janela do conteúdo das cartas com a borda desenhada na arte (`window: "inner"`): por dentro do fio fino de dentro dela. */
+const INNER_WINDOW = "inset-x-[5.8%] inset-y-[4.2%] rounded-[3.6cqw]";
 const METAL_WINDOW = cn("inset-x-[2.6%] inset-y-[1.86%]", INNER_CORNERS);
 
 /**
@@ -361,8 +409,8 @@ const NEON_TRIMS = {
     ],
     center: "M50.00 -9.20 L51.06 -6.46 L53.99 -6.30 L51.71 -4.44 L52.47 -1.60 L50.00 -3.20 L47.53 -1.60 L48.29 -4.44 L46.01 -6.30 L48.94 -6.46 Z",
   },
-  // Time do Mês de 2026-10-29 a 2026-10-31 (as cartas ganhas nesse tempo continuam com ele; as novas
-  // usam o trovão, `mesRaio`): o abraço da base das premium e a coroa no topo, em neon.
+  // Time do Mês das cartas de outubro (continuam com ele; as novas usam a arte do dono do app):
+  // o abraço da base das premium e a coroa no topo, em neon.
   mes: {
     side: [
       { d: "M102.4 64 V133 Q102.4 142.4 93 142.4 H58 L50 146", width: 0.55 },
@@ -372,15 +420,6 @@ const NEON_TRIMS = {
     // pontas e o losango em cima, no mesmo neon roxo da carta.
     centerLines: "M42.06 -8.44 L44.38 -1.78 L46.73 -6.82 L48.41 -1.78 L50.09 -10.42 L51.77 -1.78 L53.53 -6.82 L55.81 -1.78 L58.13 -8.44 M42.06 -8.44 L48.41 -1.78 M58.13 -8.44 L51.77 -1.78",
     center: "M50.09 -14.13 L50.95 -12.51 L50.09 -10.96 L49.23 -12.51 Z M41.43 -9.34 A0.64 0.64 0 1 0 42.70 -9.34 A0.64 0.64 0 1 0 41.43 -9.34 Z M46.28 -7.43 A0.45 0.45 0 1 0 47.18 -7.43 A0.45 0.45 0 1 0 46.28 -7.43 Z M53.08 -7.43 A0.45 0.45 0 1 0 53.98 -7.43 A0.45 0.45 0 1 0 53.08 -7.43 Z M57.42 -9.34 A0.64 0.64 0 1 0 58.69 -9.34 A0.64 0.64 0 1 0 57.42 -9.34 Z",
-  },
-  // Time do Mês no trovão (pedido do dono do app em 2026-10-31): o mesmo abraço da base e um
-  // raio em contorno de neon no topo, no lugar da coroa.
-  mesRaio: {
-    side: [
-      { d: "M102.4 64 V133 Q102.4 142.4 93 142.4 H58 L50 146", width: 0.55 },
-      { d: `${NEON_TRIM_INNER} H64`, width: 0.7 },
-    ],
-    centerLines: "M45.6 -5.3 L50.55 -11.63 L49.45 -7.5 L54.4 -7.5 L49.45 -1.18 L50.55 -5.3 Z",
   },
   destaque: {
     side: [{ d: "M72 142.4 H57 L50 145.6", width: 0.55 }],
@@ -654,12 +693,12 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
       )}
     >
       <div
-        className={cn("absolute overflow-hidden bg-cover bg-center", isNeon ? NEON_WINDOW : METAL_WINDOW)}
+        className={cn("absolute overflow-hidden bg-cover bg-center", roupa.window === "inner" ? INNER_WINDOW : isNeon ? NEON_WINDOW : METAL_WINDOW)}
         style={{ backgroundImage: `url(/cartas/fundos/${roupa.background}.webp)` }}
       >
         {roupa.innerBolts && (
           // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da janela, sem otimizar
-          <img aria-hidden alt="" src={`/cartas/fundos/${roupa.innerBolts}.webp`} className="pointer-events-none absolute inset-0 z-[2] size-full animate-[cc-thunder-flash_3.2s_linear_infinite] select-none motion-reduce:animate-none" />
+          <img aria-hidden alt="" src={`/cartas/fundos/${roupa.innerBolts}.webp`} className={cn("pointer-events-none absolute inset-0 z-[2] size-full select-none motion-reduce:animate-none", roupa.sweep ? "animate-[cc-bolt-in_3.2s_linear_infinite]" : "animate-[cc-thunder-flash_3.2s_linear_infinite]")} />
         )}
         {/* Clarão atrás da cabeça, na cor da luz da roupa. */}
         {!roupa.matte && (
@@ -786,7 +825,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
       {roupa.overflowBolts && (
         // Os raios das decorações estalam como trovão (só `opacity`; com movimento reduzido, ficam acesos).
         // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da caixa, sem otimizar
-        <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflowBolts}.webp`} className={cn("pointer-events-none absolute top-0 left-0 z-[12] h-full select-none motion-reduce:animate-none", roupa.overflowWidth ? "max-w-none" : "w-full", roupa.innerBolts ? "animate-[cc-thunder-flash_3.2s_linear_infinite]" : "animate-[cc-thunder-strike_2.4s_linear_infinite]")} style={roupa.overflowWidth ? { width: `${roupa.overflowWidth * 100}%`, left: `${-(roupa.overflowLeft ?? 0) * 100}%` } : undefined} />
+        <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflowBolts}.webp`} className={cn("pointer-events-none absolute top-0 left-0 z-[12] h-full select-none motion-reduce:animate-none", roupa.overflowWidth ? "max-w-none" : "w-full", roupa.sweep ? "animate-[cc-bolt-out_3.2s_linear_infinite]" : roupa.innerBolts ? "animate-[cc-thunder-flash_3.2s_linear_infinite]" : "animate-[cc-thunder-strike_2.4s_linear_infinite]")} style={roupa.overflowWidth ? { width: `${roupa.overflowWidth * 100}%`, left: `${-(roupa.overflowLeft ?? 0) * 100}%` } : undefined} />
       )}
     </div>
   ) : (
