@@ -1,5 +1,6 @@
 import { SectionTitle } from "@/components/section-title";
 import { getCardStats } from "@/lib/card-stats";
+import { StatRadar } from "./stat-radar";
 import type { Player } from "@/types/player";
 
 type StatBarsProps = {
@@ -19,6 +20,8 @@ export function StatBars({ player, groupAverages }: StatBarsProps) {
   return (
     <section aria-labelledby="attributes-title" className="flex flex-col gap-4 rounded-xl border bg-card p-4">
       <SectionTitle id="attributes-title">Estatísticas da carta</SectionTitle>
+
+      <StatRadar stats={stats} groupAverages={groupAverages} nickname={player.nickname} />
 
       <p className="flex items-center gap-4 text-xs text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">
