@@ -65,7 +65,7 @@ export function PlayerCardDefs() {
  * Visual da carta: faixa da carta base ou um dos 4 visuais de prêmio (com tema
  * sazonal; o Time do Mês não veste tema). Ver `awardDesignKind`.
  */
-type ThemedAwardKind = Exclude<AwardDesignKind, "jogador_do_mes">;
+type ThemedAwardKind = Exclude<AwardDesignKind, "jogador_do_mes" | "campeao_do_mes">;
 type AwardDesign = AwardDesignKind | `${ThemedAwardKind}-${Exclude<CardThemeKey, "default">}`;
 type CardDesign = CardTier | AwardDesign;
 
@@ -153,6 +153,14 @@ const DESIGNS: Record<CardDesign, Design> = {
     hasArt: true,
     shadow: "var(--award-jogador-do-mes-to)",
   },
+  // O Campeão do Mês só existe na carta nova (`CanchaCard`); aqui, o visual do Time do Mês.
+  campeao_do_mes: {
+    frame:
+      "bg-linear-to-br from-award-jogador-do-mes-frame-light via-award-jogador-do-mes-frame to-award-jogador-do-mes-frame-dark",
+    face: "bg-[url(/cartas/jogador-do-mes-fundo.webp)] bg-cover bg-right text-award-jogador-do-mes-foreground",
+    hasArt: true,
+    shadow: "var(--award-jogador-do-mes-to)",
+  },
 };
 
 /** Textura da face: a padrão (linhas finas) ou a do visual do prêmio. */
@@ -181,6 +189,7 @@ const AWARD_FOOTER: Record<AwardKind, string> = {
   bola_murcha: "Bola murcha",
   time_da_semana: "Time da semana",
   jogador_do_mes: "Time do mês",
+  campeao_do_mes: "Campeão do mês",
 };
 
 /** Tamanho da carta (sem o recorte), usado também pela carta da Loja, que tem enfeites por fora. */
@@ -259,7 +268,7 @@ function getDesign(player: Player, award: PlayerCardAward | undefined): CardDesi
   if (!award) return getCardTier(player.ovr ?? 0);
   // Destaques (Gol e prêmios das estatísticas) dividem o visual do Gol; só o ícone muda.
   const kind = awardDesignKind(award.kind);
-  if (kind === "jogador_do_mes" || award.theme === "default") return kind;
+  if (kind === "jogador_do_mes" || kind === "campeao_do_mes" || award.theme === "default") return kind;
   return `${kind}-${award.theme}`;
 }
 
@@ -332,7 +341,7 @@ export function LegacyPlayerCard({ player, size = "md", award, className }: Play
   const design = getDesign(player, award);
   const { frame, face, hasArt, shadow } = DESIGNS[design];
   // A arte que vaza precisa ficar fora do recorte do escudo: a carta vai num invólucro.
-  const hasOverflow = design === "jogador_do_mes";
+  const hasOverflow = design === "jogador_do_mes" || design === "campeao_do_mes";
   const tier = getCardTier(player.ovr ?? 0);
   const attributeKeys: readonly PlayerAttribute[] =
     player.role === "goalkeeper" ? GOALKEEPER_ATTRIBUTES : OUTFIELD_ATTRIBUTES;

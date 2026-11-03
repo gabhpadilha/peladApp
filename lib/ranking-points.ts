@@ -20,7 +20,7 @@ export const POINTS_PER_GOAL = 10;
  * Prêmios que não somam: a zoeira (Bola Murcha, Fominha) e os de time (Time do Mês, que sai do
  * desempenho do mês, e Time da Semana, que saiu do jogo). Melhor Jogador vale mais que os outros.
  */
-const NON_POINT_AWARDS: ReadonlySet<AwardKind> = new Set(["bola_murcha", "fominha", "jogador_do_mes", "time_da_semana"]);
+const NON_POINT_AWARDS: ReadonlySet<AwardKind> = new Set(["bola_murcha", "fominha", "jogador_do_mes", "campeao_do_mes", "time_da_semana"]);
 
 /** As regras como aparecem para o jogador, tiradas das mesmas constantes. */
 export const POINTS_RULES = [

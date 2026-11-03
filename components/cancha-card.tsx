@@ -255,11 +255,38 @@ const HIGHLIGHT_AGUA: Roupa = {
   trim: null,
 };
 
+/**
+ * Campeão do Mês (2026-11-02, arte do dono do app no Gemini; `prototipos/campeao-mes.cjs`): tempestade azul e laranja num
+ * cartão de fio de ouro fino com o neon azul por fora, o louro de platina no topo e um aglomerado de cristais com
+ * nuvem e raios que passa por cima da moldura pela direita. Janela `ring` (o conteúdo vai até o lado de dentro do ouro).
+ */
+const CAMPEAO_MES: Roupa = {
+  background: "campeao-mes",
+  overflow: "campeao-mes-vaza",
+  overflowWidth: 774 / 714,
+  overflowBolts: "campeao-mes-raios",
+  innerBolts: "campeao-mes-raios-dentro",
+  glow: true,
+  window: "ring",
+  windowRadius: 8.6,
+  artFrame: true,
+  clean: true,
+  metal: ["#2f6fd6", "#2f6fd6", "#cfe2ff"],
+  accent: "#ffd277",
+  light: "190 215 255",
+  bar: "#050b24",
+  muted: "#bcd4ff",
+  sparkles: false,
+  neon: "#2f8dff",
+  trim: null,
+};
+
 function awardRoupa(kind: AwardKind, theme: CardThemeKey): Roupa {
   const design = awardDesignKind(kind);
   // Time do Mês e Bola Murcha não vestem o tema do mês, mas o desenho mudou em 2026-10-31: as cartas
   // ganhas antes (todas gravadas com o tema do Halloween) são de colecionador e ficam com o desenho
   // da época (pedido do dono do app): o cristal com a coroa e o bronze oxidado.
+  if (design === "campeao_do_mes") return CAMPEAO_MES;
   if (design === "jogador_do_mes") return theme === "halloween" ? MONTH_ROUPA_CRISTAL : MONTH_ROUPA;
   if (design === "bola_murcha") return theme === "halloween" ? FLOP_ROUPA_BRONZE : FLOP_ROUPA;
   const provisional = PROVISIONAL_AWARD_ROUPAS[design];

@@ -18,6 +18,8 @@ export const AWARD_KINDS = [
   "goleiro",
   "bola_murcha",
   "jogador_do_mes",
+  // Campeão do Mês (2026-11-02): quem vence o ranking de pontos do mês.
+  "campeao_do_mes",
 ] as const;
 
 /**
@@ -74,6 +76,7 @@ export function awardDesignKind(kind: AwardKind): AwardDesignKind {
     case "bola_murcha":
     case "time_da_semana":
     case "jogador_do_mes":
+    case "campeao_do_mes":
       return kind;
     // Carta antiga de Fominha veste a zoeira.
     case "fominha":
@@ -84,7 +87,7 @@ export function awardDesignKind(kind: AwardKind): AwardDesignKind {
 }
 
 /** Os únicos visuais de carta especial (cada um com as versões dos temas). */
-export type AwardDesignKind = "craque" | "gol" | "bola_murcha" | "time_da_semana" | "jogador_do_mes";
+export type AwardDesignKind = "craque" | "gol" | "bola_murcha" | "time_da_semana" | "jogador_do_mes" | "campeao_do_mes";
 
 /** O atributo que deu o prêmio, destacado na carta (VEL no Foguete, DRI no Drible…). */
 export const AWARD_ATTRIBUTES: Partial<Record<AwardKind, string>> = {
@@ -107,7 +110,7 @@ export const PLAYER_OF_THE_MONTH_MIN_RATINGS = 5;
  * sazonal; os outros prêmios vestem o tema do mês.
  */
 export function hasSeasonalTheme(kind: AwardKind): boolean {
-  return kind !== "jogador_do_mes" && awardDesignKind(kind) !== "bola_murcha";
+  return kind !== "jogador_do_mes" && kind !== "campeao_do_mes" && awardDesignKind(kind) !== "bola_murcha";
 }
 
 /** Quem pode receber o voto: o banco confere de novo (`guard_round_vote`). */
@@ -220,6 +223,12 @@ export const AWARD_LABELS: Record<
     hint: `As 4 maiores notas médias do mês na linha e a maior do gol (com pelo menos ${PLAYER_OF_THE_MONTH_MIN_RATINGS} notas), ao fechar a rodada da última quinta. Sem voto.`,
     eligibility: "all",
   },
+  campeao_do_mes: {
+    title: "Campeão do Mês",
+    question: "",
+    hint: "Quem terminou o mês em primeiro no ranking de pontos, ao fechar a rodada da última quinta. Sem voto. A carta vem com +1 em cada atributo.",
+    eligibility: "all",
+  },
 };
 
 /** Rótulo da regra de quem concorre ("Só goleiros"), ou `null` se vale para todos. */
@@ -273,6 +282,9 @@ export function formatAwardResult(award: Pick<Award, "kind" | "votes" | "score">
   }
   if (award.kind === "jogador_do_mes") {
     return award.score === null ? "Time do Mês" : `média ${formatRoundScore(award.score)} no mês`;
+  }
+  if (award.kind === "campeao_do_mes") {
+    return award.votes === 0 ? "Campeão do Mês" : `${award.votes} pontos no mês`;
   }
   if (award.kind === "goleador") return award.votes === 1 ? "1 gol" : `${award.votes} gols`;
   const source = STAT_AWARD_SOURCES[award.kind];

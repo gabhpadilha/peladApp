@@ -213,7 +213,7 @@ function* walkRounds({ playerId, matches, evaluations, awards, submissions, conf
       }
       for (const award of playerAwards) {
         if (NON_POSITIVE_AWARDS.has(award.kind)) continue;
-        if (award.kind === "jogador_do_mes") continue;
+        if (award.kind === "jogador_do_mes" || award.kind === "campeao_do_mes") continue;
         const isBestPlayer = award.kind === "craque";
         gains.push({
           key: `award-${award.kind}`,
@@ -247,8 +247,8 @@ function* walkRounds({ playerId, matches, evaluations, awards, submissions, conf
     }
     // Time do Mês: vale o mesmo que o Melhor Jogador, mesmo sem ter jogado a última quinta.
     for (const award of playerAwards) {
-      if (award.kind !== "jogador_do_mes") continue;
-      gains.unshift({ key: "award-jogador_do_mes", label: "Prêmio: Time do Mês", xp: bestPlayerXp, coins: COINS_BEST_PLAYER });
+      if (award.kind !== "jogador_do_mes" && award.kind !== "campeao_do_mes") continue;
+      gains.unshift({ key: `award-${award.kind}`, label: `Prêmio: ${AWARD_LABELS[award.kind].title}`, xp: bestPlayerXp, coins: COINS_BEST_PLAYER });
     }
     const ovrBefore = previousOvr;
     if (ovr !== null) previousOvr = ovr;

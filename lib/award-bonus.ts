@@ -21,6 +21,7 @@ export const BOOSTED_AWARDS: readonly AwardKind[] = [
   "goleiro",
   "time_da_semana",
   "jogador_do_mes",
+  "campeao_do_mes",
 ];
 
 function boost(value: number | null): number | null {

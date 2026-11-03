@@ -37,4 +37,5 @@ export const AWARD_ICONS: Record<AwardKind, LucideIcon> = {
   bola_murcha: FrownIcon,
   time_da_semana: StarIcon,
   jogador_do_mes: CrownIcon,
+  campeao_do_mes: TrophyIcon,
 };
