@@ -50,8 +50,6 @@ async function HomeContent() {
           today={data.today}
           shopSale={data.shopSale}
           player={data.currentPlayer}
-          progress={data.levelProgress}
-          balance={data.balance}
         />
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">

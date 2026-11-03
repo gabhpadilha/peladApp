@@ -207,6 +207,7 @@
   /* Time do Mês: moldura dourada em degradê sobre a arte roxa do dono do app
      (public/cartas/jogador-do-mes-fundo.webp); não veste tema sazonal. */
   --award-jogador-do-mes-frame: #d9b866;
+  --award-campeao-do-mes-frame: #2f8dff;
   --award-jogador-do-mes-frame-light: #f6e6a8;
   --award-jogador-do-mes-frame-dark: #a9843d;
   --award-jogador-do-mes-from: #6b1a8f;

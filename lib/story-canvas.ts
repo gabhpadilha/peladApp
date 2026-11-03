@@ -448,6 +448,7 @@ function storySubtitle(award: Award): string {
   const ratings = award.votes === 1 ? "1 avaliação" : `${award.votes} avaliações`;
   if (award.kind === "time_da_semana") return award.score === null ? ratings : `Nota ${formatRoundScore(award.score)} na rodada · ${ratings}`;
   if (award.kind === "jogador_do_mes") return award.score === null ? ratings : `Média ${formatRoundScore(award.score)} no mês · ${ratings}`;
+  if (award.kind === "campeao_do_mes") return `${award.votes} pontos no ranking do mês`;
   const source = STAT_AWARD_SOURCES[award.kind];
   if (source && award.score !== null) return `${source.label}: ${formatRoundScore(award.score)} · ${ratings}`;
   return award.votes === 1 ? "1 voto da galera" : `${award.votes} votos da galera`;

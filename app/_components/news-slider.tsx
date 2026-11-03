@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowRightIcon, CloudLightningIcon, TagIcon, CoinsIcon, CrownIcon, GhostIcon, MedalIcon, SparklesIcon, StoreIcon, TrendingUpIcon, type LucideIcon } from "lucide-react";
+import { ArrowRightIcon, CloudLightningIcon, TagIcon, GhostIcon, MedalIcon, SparklesIcon, StoreIcon, TrophyIcon, type LucideIcon } from "lucide-react";
 import { formatCoins } from "@/components/coin-pill";
 import { RankInsignia } from "@/components/cancha-card";
 import { PlayerCard } from "@/components/player-card";
@@ -10,7 +10,7 @@ import { SAMPLE_PLAYER } from "@/lib/sample-player";
 import { withAwardBonus } from "@/lib/award-bonus";
 import { CARD_THEME_LABELS, type CardThemeKey, type CurrentCardEvent } from "@/lib/card-themes";
 import { formatShortDate } from "@/lib/format-date";
-import { COIN_RULES, XP_RULES, type LevelProgress } from "@/lib/progression";
+import { POINTS_RULES } from "@/lib/ranking-points";
 import { getNextPlayerOfTheMonthDate } from "@/lib/player-of-the-month";
 import { PLAYER_OF_THE_MONTH_MIN_RATINGS, type AwardKind } from "@/types/award";
 import { CARD_SKINS, isCardSkinOnSale, type CardSkinKey } from "@/types/card-skin";
@@ -26,8 +26,6 @@ type NewsSliderProps = {
   /** Promoção da Loja valendo hoje (ex.: Black Friday). */
   shopSale: ShopSale | null;
   player: Player;
-  progress: LevelProgress;
-  balance: number;
 };
 
 function formatDaysLeft(daysLeft: number): string {
@@ -183,20 +181,19 @@ function RankLadder({ current }: { current: CardRank }) {
   );
 }
 
-const pickRules = (rules: readonly Chip[], labels: readonly string[]) =>
-  rules.filter((rule) => labels.includes(rule.label));
-
-const XP_CHIPS = pickRules(XP_RULES, ["Nota da rodada × 10", "Enviar as suas notas", "Melhor Jogador"]);
-/** Como ganhar o Time do Mês (espelha `compute_match_awards`). */
-const PLAYER_OF_THE_MONTH_CHIPS: readonly Chip[] = [
-  { label: "Linha", value: "4 maiores médias" },
-  { label: "Gol", value: "maior média" },
-  { label: "Mínimo", value: `${PLAYER_OF_THE_MONTH_MIN_RATINGS} notas no mês` },
-  { label: "Quando", value: "última quinta" },
-  { label: "Bônus", value: "+1 em tudo" },
+/** As duas cartas da última quinta do mês (espelham `compute_match_awards`). */
+const MONTH_CARDS: readonly { kind: AwardKind; title: string; text: string }[] = [
+  {
+    kind: "jogador_do_mes",
+    title: "Time do Mês",
+    text: `As 4 maiores médias de notas do mês na linha e a maior do gol (mínimo ${PLAYER_OF_THE_MONTH_MIN_RATINGS} notas).`,
+  },
+  {
+    kind: "campeao_do_mes",
+    title: "Campeão do Mês",
+    text: "Quem terminar o mês com mais pontos no ranking. Empate no topo: todos levam.",
+  },
 ];
-
-const COIN_CHIPS = pickRules(COIN_RULES, ["Jogar uma rodada", "Enviar as suas notas", "Melhor Jogador", "Subir de nível"]);
 
 /** Texto do 1º slide por tema do mês. Tema novo: entre aqui (e em `CARD_THEMES`). */
 const EVENT_COPY: Record<CardThemeKey, { eyebrow: string; title: string; icon: LucideIcon }> = {
@@ -224,12 +221,12 @@ function describeEventSkins(skins: ReturnType<typeof getEventSkins>): string {
   return `Chegaram ${what}, ${from} nível ${level}. Só ficam à venda durante o evento; quem comprar continua usando depois.`;
 }
 /**
- * Novidades do app na home: Time do Mês (a mais nova), evento do mês, Time da
- * Semana, Loja (com as cartas do evento), XP e CanchaCoins.
+ * Novidades do app na home: promoção, ranking por pontos (com as cartas do Time do Mês e do
+ * Campeão do Mês), evento do mês, Loja (com as cartas do evento) e Patentes. XP e CanchaCoins
+ * saíram em 2026-11-02 (pedido do dono do app: já aparecem na Carreira e na Loja).
  */
-export function NewsSlider({ event, today, shopSale, player, progress, balance }: NewsSliderProps) {
+export function NewsSlider({ event, today, shopSale, player }: NewsSliderProps) {
   const eventCopy = EVENT_COPY[event.theme];
-  const percent = Math.min(100, Math.round((progress.xpIntoLevel / progress.xpNeeded) * 100));
   // Com evento na Loja, as cartas dele vão no leque (a primeira no meio).
   const eventSkins = getEventSkins(today);
   // A carta de prestígio do evento (a Lenda do Trovão, a mais cara) vai no meio, maior; as outras duas dos lados (pedido do dono do app em 2026-11-02).
@@ -263,31 +260,37 @@ export function NewsSlider({ event, today, shopSale, player, progress, balance }
         ]
       : []),
     {
-      key: "jogador-do-mes",
-      title: "Time do Mês",
+      key: "ranking",
+      title: "Ranking por pontos",
       content: (
         <Slide
-          icon={CrownIcon}
-          eyebrow="Novidade · sem votação"
-          title="Time do Mês"
-          meta={`Próxima carta: ${formatShortDate(getNextPlayerOfTheMonthDate(today))}, ao fechar a rodada`}
-          text="Na última quinta do mês, as 4 maiores médias de notas do mês na linha e a maior do gol levam a carta mais rara da pelada."
+          icon={TrophyIcon}
+          eyebrow="Novidade · ranking por pontos"
+          title="Ranking por pontos"
+          meta={`Próximas cartas: ${formatShortDate(getNextPlayerOfTheMonthDate(today))}, ao fechar a rodada`}
+          text="Cada rodada é uma etapa: quem joga mais soma mais. O ranking do mês e o de todos os tempos ficam mais abaixo, aqui na home. Na última quinta do mês saem duas cartas."
           visual={
-            // Carta e chips lado a lado; no celular, carta menor e chips um por linha, para o
-            // slide caber na tela sem rolar (pedido do dono do app em 2026-10-29).
-            <div className="flex w-full items-center gap-3 sm:gap-5 sm:pr-3">
-              <div className="w-24 shrink-0 sm:w-48">
-                <PlayerCard
-                  player={withAwardBonus(SAMPLE_PLAYER, "jogador_do_mes")}
-                  award={{ kind: "jogador_do_mes", theme: "default" }}
-                  size="fill"
-                />
+            <div className="flex w-full flex-col gap-4">
+              <div className="grid w-full grid-cols-2 gap-3 sm:mx-auto sm:max-w-lg sm:gap-6">
+                {MONTH_CARDS.map((card) => (
+                  <div key={card.kind} className="flex min-w-0 flex-col items-center gap-2 text-center">
+                    <div className="w-28 sm:w-40">
+                      <PlayerCard
+                        player={withAwardBonus(SAMPLE_PLAYER, card.kind)}
+                        award={{ kind: card.kind, theme: "default" }}
+                        size="fill"
+                      />
+                    </div>
+                    <p className="font-display text-base leading-none font-bold uppercase">{card.title}</p>
+                    <p className="text-xs text-muted-foreground">{card.text}</p>
+                  </div>
+                ))}
               </div>
-              <Chips items={PLAYER_OF_THE_MONTH_CHIPS} className="min-w-0 flex-col items-start sm:flex-row [&>li]:text-[0.6875rem] sm:[&>li]:text-xs" />
+              <Chips items={POINTS_RULES} className="justify-center" />
             </div>
           }
-          href={`/jogadores/${player.id}/colecao`}
-          cta="Ver a coleção"
+          href="/#ranking-title"
+          cta="Ver o ranking"
         />
       ),
     },
@@ -362,65 +365,6 @@ export function NewsSlider({ event, today, shopSale, player, progress, balance }
           visual={<RankLadder current={getCardRank(player.ovr)} />}
           href={`/jogadores/${player.id}`}
           cta="Ver minha carreira"
-        />
-      ),
-    },
-    {
-      key: "xp",
-      title: "XP e nível",
-      content: (
-        <Slide
-          icon={TrendingUpIcon}
-          eyebrow="Pontos de experiência"
-          title="XP e nível"
-          text="Cada rodada fechada dá XP, e ele nunca cai. Subir de nível libera cartas na Loja."
-          visual={
-            <div className="flex w-full flex-col gap-3">
-              <div className="flex flex-col gap-2 rounded-lg bg-muted/50 p-3">
-                <div className="flex items-baseline justify-between">
-                  <p className="font-display text-xl font-bold uppercase">Seu nível {progress.level}</p>
-                  <p className="text-sm text-muted-foreground tabular-nums">
-                    {progress.xpIntoLevel} / {progress.xpNeeded} XP
-                  </p>
-                </div>
-                <div className="h-2.5 overflow-hidden rounded-full bg-muted">
-                  {/* Largura dinâmica: o Tailwind não gera classes por valor calculado. */}
-                  <div className="h-full rounded-full bg-primary" style={{ width: `${percent}%` }} />
-                </div>
-              </div>
-              <Chips items={XP_CHIPS} />
-            </div>
-          }
-          href={`/jogadores/${player.id}`}
-          cta="Ver meu nível"
-        />
-      ),
-    },
-    {
-      key: "coins",
-      title: "CanchaCoins",
-      content: (
-        <Slide
-          icon={CoinsIcon}
-          eyebrow="Moeda do app"
-          title="CanchaCoins"
-          text="Ganhe jogando e gaste na Loja. O que você compra é seu para sempre."
-          visual={
-            <div className="flex w-full flex-col gap-3">
-              <div className="flex items-center justify-between rounded-lg border border-amber-300/30 bg-amber-300/10 p-3">
-                <span className="text-sm text-amber-200/80">Seu saldo</span>
-                <span className="flex items-baseline gap-1.5">
-                  <span className="font-display text-3xl leading-none font-extrabold text-amber-200 tabular-nums">
-                    {formatCoins(balance)}
-                  </span>
-                  <span className="text-sm text-amber-200/70">CC</span>
-                </span>
-              </div>
-              <Chips items={COIN_CHIPS} isCoin />
-            </div>
-          }
-          href="/loja"
-          cta="Gastar na Loja"
         />
       ),
     },

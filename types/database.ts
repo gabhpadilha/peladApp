@@ -736,6 +736,7 @@ export type Database = {
         | "motor"
         | "criativo"
         | "goleador"
+        | "campeao_do_mes"
       match_status: "open" | "closed"
       member_role: "organizer" | "player"
       player_position: "FIX" | "ALA" | "PIV" | "GOL"
@@ -883,6 +884,7 @@ export const Constants = {
         "motor",
         "criativo",
         "goleador",
+        "campeao_do_mes",
       ],
       match_status: ["open", "closed"],
       member_role: ["organizer", "player"],

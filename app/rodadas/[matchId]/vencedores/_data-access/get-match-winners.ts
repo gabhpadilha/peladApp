@@ -10,8 +10,8 @@ import type { Player } from "@/types/player";
 
 /**
  * Ordem das cartas: a zoeira abre e os prêmios mais importantes vêm depois. O
- * Time da Semana, o Time do Mês (só na rodada da última quinta) e o Melhor
- * Jogador, nessa ordem, ficam no fim (`buildSteps` em `winners-reveal.tsx`).
+ * Time da Semana, o Time do Mês e o Campeão do Mês (só na rodada da última quinta)
+ * e o Melhor Jogador, nessa ordem, ficam no fim (`buildSteps` em `winners-reveal.tsx`).
  */
 const REVEAL_ORDER: readonly AwardKind[] = [
   "bola_murcha",
@@ -26,6 +26,7 @@ const REVEAL_ORDER: readonly AwardKind[] = [
   "atacante",
   "gol",
   "jogador_do_mes",
+  "campeao_do_mes",
   "craque",
 ];
 

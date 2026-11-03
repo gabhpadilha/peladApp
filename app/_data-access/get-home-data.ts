@@ -4,9 +4,7 @@ import { getLeague } from "@/lib/league";
 import { averageEvaluations } from "@/lib/ovr";
 import { getMatchPerformances, type PendingEvaluation } from "@/lib/players";
 import { rankByPoints, type RankedByPoints } from "@/lib/ranking-points";
-import type { LevelProgress } from "@/lib/progression";
 import { createClient } from "@/lib/supabase/server";
-import { getOwnPurchases } from "@/app/loja/_data-access/get-shop";
 import type { Award } from "@/types/award";
 import type { Match } from "@/types/match";
 import type { Player } from "@/types/player";
@@ -49,9 +47,6 @@ export type HomeData = {
   winnersAlert: WinnersAlert | null;
   /** Aviso do bônus de boas-vindas, enquanto o jogador não o fechar. */
   showWelcomeBonus: boolean;
-  /** Nível e saldo de CanchaCoins (slides de novidades). */
-  levelProgress: LevelProgress;
-  balance: number;
 };
 
 /** O jogador ainda não viu o aviso do bônus de primeiro login. */
@@ -120,12 +115,10 @@ export async function getHomeData(): Promise<HomeData> {
     : [];
 
   const openMatch = league.matches.findLast((match) => match.status === "open");
-  const [winnersAlert, showWelcomeBonus, purchases] = await Promise.all([
+  const [winnersAlert, showWelcomeBonus] = await Promise.all([
     getWinnersAlert(league.currentMemberId, latestMatch, league.awards),
     hasUnseenWelcomeBonus(league.currentMemberId),
-    getOwnPurchases(league.currentMemberId),
   ]);
-  const progression = league.getProgression(currentPlayer.id);
 
   return {
     groupName: league.membership.groupName,
@@ -166,7 +159,5 @@ export async function getHomeData(): Promise<HomeData> {
     shopSale: getActiveSale(today),
     winnersAlert,
     showWelcomeBonus,
-    levelProgress: progression,
-    balance: progression.coinsEarned - purchases.spent,
   };
 }

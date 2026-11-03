@@ -34,20 +34,27 @@ type Step =
  * O pacote em até 6 passos (pedido do dono do app em 2026-10-21, "menos
  * maçante"): a zoeira (Bola Murcha e Fominha juntas), os destaques da rodada num
  * quadro (atributos, Goleiro e Gol), o Time da Semana, o Time do Mês (só na última
- * quinta), o Melhor Jogador sozinho e, fechando, a sua rodada.
+ * quinta), o Campeão do Mês (na mesma rodada), o Melhor Jogador sozinho e, fechando, a sua rodada.
  */
 function buildSteps(revealed: Award[], hasTeam: boolean, hasRewards: boolean): Step[] {
   const zoeira = revealed.filter((award) => ZOEIRA_AWARDS.includes(award.kind));
   const month = revealed.filter((award) => award.kind === "jogador_do_mes");
+  const champions = revealed.filter((award) => award.kind === "campeao_do_mes");
   const best = revealed.filter((award) => award.kind === "craque");
   const highlights = revealed.filter(
-    (award) => !ZOEIRA_AWARDS.includes(award.kind) && award.kind !== "jogador_do_mes" && award.kind !== "craque",
+    (award) =>
+      !ZOEIRA_AWARDS.includes(award.kind) &&
+      award.kind !== "jogador_do_mes" &&
+      award.kind !== "campeao_do_mes" &&
+      award.kind !== "craque",
   );
   const steps: Step[] = [];
   if (zoeira.length > 0) steps.push({ type: "zoeira", awards: zoeira });
   if (highlights.length > 0) steps.push({ type: "highlights", awards: highlights });
   if (hasTeam) steps.push({ type: "team" });
   if (month.length > 0) steps.push({ type: "month", awards: month });
+  // O Campeão do Mês (ranking de pontos) é revelado logo depois do Time do Mês, uma carta por vez.
+  for (const award of champions) steps.push({ type: "award", award });
   for (const award of best) steps.push({ type: "award", award });
   if (hasRewards) steps.push({ type: "rewards" });
   return steps;
