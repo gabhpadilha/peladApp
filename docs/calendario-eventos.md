@@ -63,6 +63,15 @@ Cada ideia pode ter: tema das cartas especiais, 1 ou 2 cartas na Loja e, opciona
   - Antes de implementar: pesquisar bibliotecas gratuitas de animação/UI (ex.: Motion/Framer Motion, já planejada no projeto; Lottie) e testar no iPhone de verdade.
 - 💡 Foto especial ou dinâmica por carta (já estava nos próximos passos).
 
+## Projeto futuro: linha do tempo no radar do atleta (2026-11-03)
+
+O dono do app mostrou o gráfico do SofaScore (radar com uma linha do tempo por mês embaixo) e pediu uma representação visual; achou "muito cru" para entrar agora e mandou deixar anotado. Desenho conversado:
+
+- **Opção A:** radar do Geral contra a média da pelada (o que já existe), com o seletor de períodos (bolinhas e rótulos: Geral, out. 2026, nov. 2026).
+- **Opção B:** ao escolher um mês, o radar daquele mês (lima) contra o geral do jogador (tracejado), com uma linha de texto com a diferença por estatística ("Em novembro: Ataque +8, Criação +3, Defesa +3 em relação ao geral. 2 rodadas.").
+- **Quando fazer:** depois de pelo menos 3 ou 4 rodadas por mês (hoje só há 2, as de outubro). Versão simples: só "Geral" contra "Último mês".
+- **Como:** sem banco novo; as estatísticas do mês usam a mesma média da carta (`computeAttributes`/`getStatsFromAttributes`) só com as avaliações fechadas do mês. O radar atual é `StatRadar` (`app/jogadores/[id]/_components/stat-radar.tsx`).
+
 ## Decisões já tomadas
 
 - Cartas de evento ficam à venda só durante o evento daquele ano e não voltam sozinhas no ano seguinte; quem comprou continua usando (2026-10-21).

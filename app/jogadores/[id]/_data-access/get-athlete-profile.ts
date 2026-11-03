@@ -17,6 +17,20 @@ import type { Player } from "@/types/player";
 /** "Hoje" no fuso da pelada, `AAAA-MM-DD` (o servidor roda em UTC). */
 const todayFormatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" });
 
+/** Gols confirmados do atleta e a artilharia da pelada (só rodadas fechadas com a contagem de gols). */
+export type GoalStatsData = {
+  total: number;
+  perGame: number;
+  best: { goals: number; round: number } | null;
+  /** Rodadas com a contagem em que ele jogou, e em quantas delas fez gol. */
+  games: number;
+  goalGames: number;
+  /** Gols em cada rodada em que ele jogou (para o gráfico). */
+  byRound: { round: number; goals: number }[];
+  /** Posição dele na artilharia da pelada, de todos os tempos (`null` sem gols); a lista fica na home. */
+  rank: number | null;
+};
+
 export type AthleteProfile = {
   player: Player;
   /** Jogador logado, para o cabeçalho. */
@@ -46,8 +60,8 @@ export type AthleteProfile = {
   levelProgress: LevelProgress;
   /** Gols confirmados em cada rodada fechada (só as rodadas com a contagem de gols). */
   goalsByMatch: Record<string, number>;
-  /** Resumo dos gols; `null` se ele ainda não jogou nenhuma rodada com a contagem. */
-  goalStats: { total: number; perGame: number; best: { goals: number; round: number } | null } | null;
+  /** Resumo dos gols (sempre presente: sem rodada com a contagem, `games` é 0 e a tela explica). */
+  goalStats: GoalStatsData;
 };
 
 /** Perfil de um atleta da pelada ativa; `null` se o id não for de alguém dela. */
@@ -84,6 +98,14 @@ export async function getAthleteProfile(memberId: string): Promise<AthleteProfil
     return goals > 0 && (best === null || goals > best.goals) ? { goals, round: performance.match.round } : best;
   }, null);
 
+  // Artilharia: gols confirmados por jogador ativo nas rodadas com a contagem (empate: a mesma posição).
+  const goalsByPlayer = new Map<string, number>();
+  for (const goal of groupGoals) {
+    if (!goal.isConfirmed || !trackedMatchIds.has(goal.matchId) || !league.isActive(goal.memberId)) continue;
+    goalsByPlayer.set(goal.memberId, (goalsByPlayer.get(goal.memberId) ?? 0) + goal.goals);
+  }
+  const ownGoals = goalsByPlayer.get(player.id) ?? 0;
+
   return {
     player,
     currentPlayer: league.players.find((candidate) => candidate.id === league.currentMemberId),
@@ -109,7 +131,14 @@ export async function getAthleteProfile(memberId: string): Promise<AthleteProfil
     currentTheme: getCurrentCardEvent(todayFormatter.format(new Date())).theme,
     levelProgress: league.getProgression(player.id),
     goalsByMatch,
-    goalStats:
-      trackedGames.length > 0 ? { total: totalGoals, perGame: totalGoals / trackedGames.length, best: bestGame } : null,
+    goalStats: {
+      total: totalGoals,
+      perGame: trackedGames.length > 0 ? totalGoals / trackedGames.length : 0,
+      best: bestGame,
+      games: trackedGames.length,
+      goalGames: trackedGames.filter((performance) => (goalsByMatch[performance.match.id] ?? 0) > 0).length,
+      byRound: trackedGames.map((performance) => ({ round: performance.match.round, goals: goalsByMatch[performance.match.id] ?? 0 })),
+      rank: ownGoals > 0 ? [...goalsByPlayer.values()].filter((goals) => goals > ownGoals).length + 1 : null,
+    },
   };
 }

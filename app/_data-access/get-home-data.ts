@@ -3,6 +3,7 @@ import { getActiveSale, type ShopSale } from "@/lib/shop-sale";
 import { getLeague } from "@/lib/league";
 import { getRoundScore } from "@/lib/ovr";
 import { getMatchPerformances, type PendingEvaluation } from "@/lib/players";
+import { rankScorers, type Scorer } from "@/lib/goal-ranking";
 import { rankByPoints, type RankedByPoints } from "@/lib/ranking-points";
 import { createClient } from "@/lib/supabase/server";
 import type { Award } from "@/types/award";
@@ -16,6 +17,7 @@ const monthFormatter = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao
 const todayFormatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" });
 
 export type RankedPlayer = RankedByPoints<Player>;
+export type TopScorer = Scorer<Player>;
 export type RoundPerformer = { player: Player; score: number };
 /** Rodada fechada com cartas que o jogador ainda não abriu ("Confira os vencedores"). */
 export type WinnersAlert = { matchId: string; round: number; cardCount: number; hasTeam: boolean; theme: CardThemeKey };
@@ -36,6 +38,9 @@ export type HomeData = {
   /** Ranking por pontos do mês (`AAAA-MM`, o de hoje) e de todos os tempos; todos numa lista só. */
   monthRanking: RankedPlayer[];
   allTimeRanking: RankedPlayer[];
+  /** Artilharia (gols confirmados) do mês e de todos os tempos, só quem marcou. */
+  monthScorers: TopScorer[];
+  allTimeScorers: TopScorer[];
   /** Mês do ranking, por extenso ("novembro"). */
   monthLabel: string;
   /** Evento do mês das cartas especiais (tema sazonal ou clássico). */
@@ -96,6 +101,8 @@ export async function getHomeData(): Promise<HomeData> {
   const today = todayFormatter.format(new Date());
   const monthRanking = rankByPoints(league.activePlayers, league.getRankingPoints(today.slice(0, 7)));
   const allTimeRanking = rankByPoints(league.activePlayers, league.getRankingPoints());
+  const monthScorers = rankScorers(league.activePlayers, league.getGoalTotals(today.slice(0, 7)));
+  const allTimeScorers = rankScorers(league.activePlayers, league.getGoalTotals());
   const myAllTime = allTimeRanking.find((entry) => entry.player.id === currentPlayer.id);
   const performances = getMatchPerformances(currentPlayer.id, league.matches, league.evaluations);
 
@@ -153,6 +160,8 @@ export async function getHomeData(): Promise<HomeData> {
     // Completos: a home mostra o resumo e expande para o ranking inteiro.
     monthRanking,
     allTimeRanking,
+    monthScorers,
+    allTimeScorers,
     monthLabel: monthFormatter.format(new Date()),
     cardEvent: getCurrentCardEvent(today),
     today,

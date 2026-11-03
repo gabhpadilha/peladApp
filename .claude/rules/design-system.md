@@ -164,7 +164,8 @@ A tela da partida, estilo squad builder do EA FC. **Abre sozinha depois de "Cria
 - **Confirmar na nota:** faixa "Fulano diz que fez **3 gols**" com "Confirmo" (lima) / "Não foi isso" e "Opcional · N de 3 confirmações" (`GoalsConfirm`), na tela passo a passo e na folha de notas da mesa; grava na hora.
 - **Mesa tática:** card "Seus gols: N · X de 3 confirmações · Corrigir" (`RoundGoals`), painel recolhido do organizador "Ainda não informaram os gols · N jogadores · você pode marcar por eles · Marcar" (nunca "sem celular": o app não sabe o motivo, pedido do dono do app em 2026-11-01) e a **bolinha** branca com o número embaixo da carta, só para gols confirmados (`GoalsChip`, `GoalBall` no estilo do SofaScore).
 - **Goleador da Rodada:** visual de destaque, ícone de bola, rodapé "Goleador" e o selo "N gols"; na revelação, sozinho na primeira fileira dos destaques.
-- **Atleta:** bloco "Gols" (total, por jogo, melhor rodada) e coluna "Gols" no histórico, só desde que a contagem começou.
+- **Home, "Artilharia" (2026-11-03):** logo abaixo do ranking de pontos, abas do mês e de todos os tempos, top 5 com a miniatura da carta, a bolinha e os gols, "Ver artilharia completa (+N)"; vazio explica como os gols entram.
+- **Atleta:** bloco "Gols" em destaque, logo depois dos 4 destaques (total grande com a bola, por jogo, melhor rodada, jogos com gol, gráfico de barras de gols por rodada e, no título, "Nº na artilharia"; sempre visível, com texto explicando quando ainda não há rodada contada) e coluna "Gols" no histórico, só desde que a contagem começou.
 
 ## 📱 Tela de notas (vestiário, mobile) — `/avaliar/[matchId]`
 

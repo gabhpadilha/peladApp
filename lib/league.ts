@@ -19,6 +19,7 @@ import {
   type RoundRewards,
 } from "@/lib/progression";
 import { computeRankingPoints } from "@/lib/ranking-points";
+import { computeGoalTotals } from "@/lib/goal-ranking";
 import { requireActiveMembership } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 import { awardOrder, type Award } from "@/types/award";
@@ -260,6 +261,15 @@ export async function getLeague(nextPath = "/") {
     getProgression: (memberId: string): Progression =>
       progressionById.get(memberId) ?? { level: 0, xpIntoLevel: 0, xpNeeded: 60, xp: 0, coinsEarned: WELCOME_BONUS_COINS },
     /** Pontos e rodadas de quem está na pelada: de um mês (`AAAA-MM`) ou, sem ele, de todos os tempos. */
+    /** Gols confirmados e jogos de quem está na pelada: de um mês (`AAAA-MM`) ou, sem ele, de todos os tempos. */
+    getGoalTotals: (month?: string) =>
+      computeGoalTotals({
+        playerIds: activePlayers.map((player) => player.id),
+        matches,
+        confirmedGoals,
+        trackedMatchIds: new Set(groupGoals.map((goal) => goal.matchId)),
+        month,
+      }),
     getRankingPoints: (month?: string) =>
       computeRankingPoints({
         playerIds: activePlayers.map((player) => player.id),

@@ -13,6 +13,7 @@ import { WinnersBanner } from "./_components/winners-banner";
 import { WelcomeBonusDialog } from "./_components/welcome-bonus-dialog";
 import { WELCOME_BONUS_COINS } from "@/lib/progression";
 import { ExpandableRanking } from "./_components/expandable-ranking";
+import { ScorersRanking } from "./_components/scorers-ranking";
 import { getHomeData } from "./_data-access/get-home-data";
 
 export default function Home() {
@@ -104,6 +105,18 @@ async function HomeContent() {
               <ExpandableRanking
                 month={data.monthRanking}
                 allTime={data.allTimeRanking}
+                monthLabel={data.monthLabel}
+                currentPlayerId={data.currentPlayer.id}
+              />
+            </section>
+
+            <section aria-labelledby="scorers-title" className="flex flex-col gap-3 rounded-xl border bg-card p-4">
+              <SectionTitle id="scorers-title" aside="gols confirmados">
+                Artilharia
+              </SectionTitle>
+              <ScorersRanking
+                month={data.monthScorers}
+                allTime={data.allTimeScorers}
                 monthLabel={data.monthLabel}
                 currentPlayerId={data.currentPlayer.id}
               />

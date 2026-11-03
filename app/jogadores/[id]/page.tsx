@@ -57,12 +57,12 @@ async function AthleteContent({ params }: { params: PageProps<"/jogadores/[id]">
           performances={profile.performances}
           gamesPlayed={profile.gamesPlayed}
         />
+        <GoalStats stats={profile.goalStats} />
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
           <PerformanceChart performances={profile.performances} bestScore={profile.bestScore} />
           <StatBars player={profile.player} groupAverages={profile.groupAverages} />
         </div>
-        {profile.goalStats && <GoalStats stats={profile.goalStats} />}
-        <MatchHistory performances={profile.performances} goalsByMatch={profile.goalStats ? profile.goalsByMatch : null} />
+        <MatchHistory performances={profile.performances} goalsByMatch={profile.goalStats.games > 0 ? profile.goalsByMatch : null} />
       </main>
     </>
   );
