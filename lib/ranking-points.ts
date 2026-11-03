@@ -1,4 +1,4 @@
-import { getRoundScore } from "@/lib/ovr";
+import { computeOvr } from "@/lib/ovr";
 import { getClosedMatches } from "@/lib/players";
 import { submissionKey, type ProgressionAward } from "@/lib/progression";
 import type { AwardKind } from "@/types/award";
@@ -12,8 +12,9 @@ import type { Evaluation, Match } from "@/types/match";
  */
 
 /**
- * Pontos da rodada = nota da rodada na escala 0–99 (`getRoundScore`: o OVR da rodada a partir de 2026-11-02, e a
- * média dos 6 atributos x10 nas de antes), mais os extras abaixo.
+ * Pontos da rodada = o OVR da rodada (a média das 2 maiores das 3 estatísticas das notas recebidas), mais os extras
+ * abaixo. Vale para todas as rodadas fechadas, as de antes de 2026-11-02 também: os pontos delas foram recalculados
+ * (decisão do dono do app, "para ficar justo"); o XP e as moedas não mudam.
  */
 export const POINTS_BEST_PLAYER = 40;
 export const POINTS_OTHER_AWARD = 20;
@@ -83,7 +84,9 @@ export function computeRankingPoints({
       const total = totals.get(playerId);
       if (!total) continue;
       const key = submissionKey(match.id, playerId);
-      const score = getRoundScore(match.date, evaluationsByKey.get(key) ?? []);
+      // Todas as rodadas pelo OVR da rodada, inclusive as de antes de 2026-11-02 (pontos recalculados a pedido do dono do
+      // app, para ficar justo); o XP e as moedas dessas rodadas continuam como eram (`getRoundScore` em `lib/progression.ts`).
+      const score = computeOvr(evaluationsByKey.get(key) ?? []);
       total.rounds += 1;
       total.points += Math.round(score ?? 0) + (awardPointsByKey.get(key) ?? 0) + (confirmedGoals.get(key) ?? 0) * POINTS_PER_GOAL;
     }
