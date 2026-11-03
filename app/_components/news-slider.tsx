@@ -10,7 +10,6 @@ import { SAMPLE_PLAYER } from "@/lib/sample-player";
 import { withAwardBonus } from "@/lib/award-bonus";
 import { CARD_THEME_LABELS, type CardThemeKey, type CurrentCardEvent } from "@/lib/card-themes";
 import { formatShortDate } from "@/lib/format-date";
-import { POINTS_RULES } from "@/lib/ranking-points";
 import { getNextPlayerOfTheMonthDate } from "@/lib/player-of-the-month";
 import type { AwardKind } from "@/types/award";
 import { CARD_SKINS, isCardSkinOnSale, type CardSkinKey } from "@/types/card-skin";
@@ -183,16 +182,16 @@ function RankLadder({ current }: { current: CardRank }) {
 
 /** As duas cartas da última quinta do mês (espelham `compute_match_awards`). */
 const MONTH_CARDS: readonly { kind: AwardKind; title: string; text: string }[] = [
-  {
-    kind: "jogador_do_mes",
-    title: "Time do Mês",
-    text: "Os 5 primeiros do ranking de pontos do mês, linha e gol juntos.",
-  },
-  {
-    kind: "campeao_do_mes",
-    title: "Campeão do Mês",
-    text: "O 1º do ranking de pontos do mês. Empate no topo: todos levam.",
-  },
+  { kind: "jogador_do_mes", title: "Time do Mês", text: "Top 5 do ranking do mês" },
+  { kind: "campeao_do_mes", title: "Campeão do Mês", text: "1º do ranking do mês" },
+];
+
+/** Os pontos de cada rodada, em chips curtos (os mesmos valores de `POINTS_RULES`). */
+const POINTS_CHIPS: readonly Chip[] = [
+  { label: "Rodada", value: "OVR da rodada" },
+  { label: "Melhor Jogador", value: "+40" },
+  { label: "Outros prêmios", value: "+20" },
+  { label: "Gol confirmado", value: "+10" },
 ];
 
 /** Texto do 1º slide por tema do mês. Tema novo: entre aqui (e em `CARD_THEMES`). */
@@ -268,13 +267,13 @@ export function NewsSlider({ event, today, shopSale, player }: NewsSliderProps) 
           eyebrow="Novidade · ranking por pontos"
           title="Ranking por pontos"
           meta={`Próximas cartas: ${formatShortDate(getNextPlayerOfTheMonthDate(today))}, ao fechar a rodada`}
-          text="Cada rodada é uma etapa: quem joga mais soma mais. O ranking do mês e o de todos os tempos ficam mais abaixo, aqui na home. Na última quinta do mês saem duas cartas."
+          text="Cada rodada é uma etapa e quem joga mais soma mais. O ranking está logo abaixo. As duas cartas saem na última quinta do mês."
           visual={
-            <div className="flex w-full flex-col gap-4">
+            <div className="flex w-full flex-col gap-3">
               <div className="grid w-full grid-cols-2 gap-3 sm:mx-auto sm:max-w-lg sm:gap-6">
                 {MONTH_CARDS.map((card) => (
-                  <div key={card.kind} className="flex min-w-0 flex-col items-center gap-2 text-center">
-                    <div className="w-28 sm:w-40">
+                  <div key={card.kind} className="flex min-w-0 flex-col items-center gap-1.5 text-center">
+                    <div className="w-[5.5rem] sm:w-36">
                       <PlayerCard
                         player={withAwardBonus(SAMPLE_PLAYER, card.kind)}
                         award={{ kind: card.kind, theme: "default" }}
@@ -282,11 +281,11 @@ export function NewsSlider({ event, today, shopSale, player }: NewsSliderProps) 
                       />
                     </div>
                     <p className="font-display text-base leading-none font-bold uppercase">{card.title}</p>
-                    <p className="text-xs text-muted-foreground">{card.text}</p>
+                    <p className="text-[0.6875rem] leading-snug text-muted-foreground sm:text-xs">{card.text}</p>
                   </div>
                 ))}
               </div>
-              <Chips items={POINTS_RULES} className="justify-center" />
+              <Chips items={POINTS_CHIPS} className="justify-center [&>li]:text-[0.6875rem] sm:[&>li]:text-xs" />
             </div>
           }
           href="/#ranking-title"
