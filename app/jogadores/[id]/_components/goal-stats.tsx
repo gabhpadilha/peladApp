@@ -3,6 +3,75 @@ import { SectionTitle } from "@/components/section-title";
 import { cn } from "@/lib/utils";
 import type { GoalStatsData } from "../_data-access/get-athlete-profile";
 
+/** As façanhas de gols num jogo só (nomes do futebol: doblete, hat-trick e poker; 5 ou mais sem nome). */
+const FEATS = [
+  { key: "doblete", label: "Doblete", detail: "2 gols", mark: "2" },
+  { key: "hatTrick", label: "Hat-trick", detail: "3 gols", mark: "3" },
+  { key: "poker", label: "Poker", detail: "4 gols", mark: "4" },
+  { key: "fivePlus", label: "5 ou mais", detail: "gols", mark: "5+" },
+] as const;
+
+/** Quantos jogos recentes entram no gráfico de gols por rodada (mais que isso espreme as barras). */
+const CHART_GAMES = 5;
+
+/** Os cinco remendos pretos da borda da bola, cortados pela borda (como numa bola de futebol vista de frente): cada um é um pentágono com uma ponta para o centro, mais a costura até perto do número. */
+const BALL_PATCHES = Array.from({ length: 5 }, (_, index) => {
+  const angle = -Math.PI / 2 + (index * 2 * Math.PI) / 5;
+  const toPoint = (radius: number, around = angle) => `${(24 + radius * Math.cos(around)).toFixed(2)},${(24 + radius * Math.sin(around)).toFixed(2)}`;
+  const center = { x: 24 + 19 * Math.cos(angle), y: 24 + 19 * Math.sin(angle) };
+  const points = Array.from({ length: 5 }, (_, vertex) => {
+    const around = angle + Math.PI + (vertex * 2 * Math.PI) / 5;
+    return `${(center.x + 7 * Math.cos(around)).toFixed(2)},${(center.y + 7 * Math.sin(around)).toFixed(2)}`;
+  }).join(" ");
+  // A costura sai da ponta do remendo que aponta para o centro e vai até perto do número.
+  const inner = { x: center.x + 7 * Math.cos(angle + Math.PI), y: center.y + 7 * Math.sin(angle + Math.PI) };
+  return { points, seam: `${inner.x.toFixed(2)},${inner.y.toFixed(2)} ${toPoint(11.5)}` };
+});
+
+/** Ícone da façanha: uma bola de futebol com o número de gols no meio (a mesma para todas, para ficar uniforme). */
+function FeatBall({ mark, earned }: { mark: string; earned: boolean }) {
+  return (
+    <svg viewBox="0 0 48 48" aria-hidden className={cn("size-14", !earned && "opacity-40")}>
+      {earned ? (
+        <>
+          <defs>
+            <clipPath id="feat-ball-clip">
+              <circle cx="24" cy="24" r="21" />
+            </clipPath>
+          </defs>
+          <circle cx="24" cy="24" r="21" fill="#fff" />
+          <g clipPath="url(#feat-ball-clip)">
+            {BALL_PATCHES.map((patch) => (
+              <g key={patch.points}>
+                <polyline points={patch.seam} fill="none" stroke="#111" strokeWidth={1.3} strokeLinecap="round" />
+                <polygon points={patch.points} fill="#111" />
+              </g>
+            ))}
+          </g>
+          <circle cx="24" cy="24" r="21" fill="none" stroke="#111" strokeWidth={2} />
+        </>
+      ) : (
+        <circle cx="24" cy="24" r="21" fill="none" stroke="currentColor" strokeWidth={1.5} strokeDasharray="3 3" className="text-muted-foreground" />
+      )}
+      <text
+        x="24"
+        y="24.5"
+        textAnchor="middle"
+        dominantBaseline="central"
+        fontSize={mark.length > 1 ? 18 : 24}
+        fontWeight={800}
+        className={cn("font-display", earned ? "fill-[#111]" : "fill-muted-foreground")}
+        // Contorno branco para o número ler por cima das costuras.
+        stroke={earned ? "#fff" : "none"}
+        strokeWidth={earned ? 3.2 : 0}
+        paintOrder="stroke"
+      >
+        {mark}
+      </text>
+    </svg>
+  );
+}
+
 const perGameFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
 
 /**
@@ -11,7 +80,8 @@ const perGameFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits:
  * título e a lista da pelada fica na home. Sempre aparece (mesmo sem gols) e explica o que falta.
  */
 export function GoalStats({ stats }: { stats: GoalStatsData }) {
-  const maxGoals = Math.max(1, ...stats.byRound.map((entry) => entry.goals));
+  const recent = stats.byRound.slice(-CHART_GAMES);
+  const maxGoals = Math.max(1, ...recent.map((entry) => entry.goals));
   const blocks = [
     { value: perGameFormatter.format(stats.perGame), label: "por jogo" },
     { value: stats.best ? String(stats.best.goals) : "–", label: stats.best ? `melhor · R${stats.best.round}` : "melhor rodada" },
@@ -41,15 +111,32 @@ export function GoalStats({ stats }: { stats: GoalStatsData }) {
         ))}
       </div>
 
+      <div className="flex flex-col gap-2">
+        <h3 className="text-xs font-medium text-muted-foreground uppercase">Gols num jogo só</h3>
+        <ul className="grid grid-cols-4 gap-2">
+          {FEATS.map((feat) => {
+            const count = stats.feats[feat.key];
+            return (
+              <li key={feat.key} className="flex flex-col items-center gap-1 text-center" aria-label={`${feat.label}: ${count}`}>
+                <FeatBall mark={feat.mark} earned={count > 0} />
+                <span className={cn("font-display text-2xl leading-none font-bold tabular-nums", count === 0 && "text-muted-foreground")}>{count}</span>
+                <span className="text-xs leading-tight font-medium">{feat.label}</span>
+                <span className="text-[10px] leading-none text-muted-foreground">{feat.detail}</span>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
       {stats.games === 0 ? (
         <p className="text-sm text-muted-foreground">
           Os gols aparecem aqui quando fechar a primeira rodada com a contagem: cada um informa os seus e três colegas confirmam.
         </p>
       ) : (
         <div className="flex flex-col gap-2">
-          <h3 className="text-xs font-medium text-muted-foreground uppercase">Gols por rodada</h3>
+          <h3 className="text-xs font-medium text-muted-foreground uppercase">Gols nos últimos {recent.length === 1 ? "jogo" : `${recent.length} jogos`}</h3>
           <ol className="flex h-28 items-end gap-1.5 border-b border-border sm:gap-3">
-            {stats.byRound.map((entry) => (
+            {recent.map((entry) => (
               <li
                 key={entry.round}
                 className="flex h-full min-w-0 flex-1 flex-col items-center justify-end gap-1"
@@ -66,7 +153,7 @@ export function GoalStats({ stats }: { stats: GoalStatsData }) {
             ))}
           </ol>
           <ol className="flex gap-1.5 sm:gap-3">
-            {stats.byRound.map((entry) => (
+            {recent.map((entry) => (
               <li key={entry.round} className="min-w-0 flex-1 text-center text-[10px] text-muted-foreground tabular-nums">
                 R{entry.round}
               </li>

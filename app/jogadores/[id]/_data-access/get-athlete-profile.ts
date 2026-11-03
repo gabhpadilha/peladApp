@@ -27,6 +27,8 @@ export type GoalStatsData = {
   goalGames: number;
   /** Gols em cada rodada em que ele jogou (para o gráfico). */
   byRound: { round: number; goals: number }[];
+  /** Jogos em que fez 2 gols (doblete), 3 (hat-trick), 4 (poker) e 5 ou mais (nomes que existem no futebol; 5+ sem nome). */
+  feats: { doblete: number; hatTrick: number; poker: number; fivePlus: number };
   /** Posição dele na artilharia da pelada, de todos os tempos (`null` sem gols); a lista fica na home. */
   rank: number | null;
 };
@@ -138,6 +140,12 @@ export async function getAthleteProfile(memberId: string): Promise<AthleteProfil
       games: trackedGames.length,
       goalGames: trackedGames.filter((performance) => (goalsByMatch[performance.match.id] ?? 0) > 0).length,
       byRound: trackedGames.map((performance) => ({ round: performance.match.round, goals: goalsByMatch[performance.match.id] ?? 0 })),
+      feats: {
+        doblete: trackedGames.filter((performance) => goalsByMatch[performance.match.id] === 2).length,
+        hatTrick: trackedGames.filter((performance) => goalsByMatch[performance.match.id] === 3).length,
+        poker: trackedGames.filter((performance) => goalsByMatch[performance.match.id] === 4).length,
+        fivePlus: trackedGames.filter((performance) => (goalsByMatch[performance.match.id] ?? 0) >= 5).length,
+      },
       rank: ownGoals > 0 ? [...goalsByPlayer.values()].filter((goals) => goals > ownGoals).length + 1 : null,
     },
   };
