@@ -11,27 +11,32 @@ const GRID_POSITION: Record<(typeof GRID_LINES)[number], string> = {
   75: "bottom-3/4",
 };
 
+/** Quantas rodadas jogadas entram no gráfico (mais que isso espreme as barras); a tabela de histórico tem todas. */
+const CHART_ROUNDS = 5;
+
 type PerformanceChartProps = {
   performances: MatchPerformance[];
   bestScore: number | null;
 };
 
 /**
- * Nota recebida em cada rodada fechada (média das avaliações, 0–99).
+ * Nota recebida nas últimas 5 rodadas fechadas em que o jogador jogou (a nota da rodada, 0–99).
  * Uma série só: sem legenda. A tabela de histórico abaixo é a visão em tabela.
  */
-export function PerformanceChart({ performances, bestScore }: PerformanceChartProps) {
+export function PerformanceChart({ performances: allPerformances, bestScore }: PerformanceChartProps) {
+  // Só as últimas rodadas em que ele jogou (decisão do dono do app em 2026-11-03: com muitas rodadas o gráfico espremia).
+  const performances = allPerformances.filter((performance) => performance.wasPresent).slice(-CHART_ROUNDS);
   const latest = performances.findLast((performance) => performance.score !== null);
 
   return (
     <section aria-labelledby="performance-title" className="flex flex-col gap-4 rounded-xl border bg-card p-4">
       <SectionTitle id="performance-title" aside={bestScore !== null ? `melhor nota ${bestScore}` : null}>
-        Desempenho por rodada
+        {performances.length > 1 ? `Últimas ${performances.length} rodadas` : "Desempenho por rodada"}
       </SectionTitle>
 
       {performances.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          O gráfico aparece quando a primeira rodada for fechada.
+          O gráfico aparece depois da primeira rodada fechada em que ele jogar.
         </p>
       ) : (
       <>
