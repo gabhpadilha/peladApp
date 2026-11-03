@@ -1,5 +1,6 @@
 import type { Evaluation } from "@/types/match";
 import { getOvrFromStats, getStatsFromAttributes } from "@/lib/card-stats";
+import { THREE_STAT_RATINGS_FROM } from "@/lib/rating-stats";
 import { GOALKEEPER_ATTRIBUTES, type PlayerAttribute } from "@/types/player";
 
 export const SCORE_MIN = 1;
@@ -32,6 +33,19 @@ export function getEvaluationScore(evaluation: Evaluation): number {
 export function averageEvaluations(evaluations: readonly Evaluation[]): number | null {
   const evaluationAverage = average(evaluations.map(getEvaluationScore));
   return evaluationAverage === null ? null : toCardScale(evaluationAverage);
+}
+
+/**
+ * Rodadas com data a partir daqui (`AAAA-MM-DD`) têm como nota da rodada o **OVR da rodada** (decisão do dono do
+ * app em 2026-11-02): cada estatística é a média das notas recebidas e a nota é a média das 2 maiores das 3,
+ * a mesma regra do OVR. As de antes guardam a média dos 6 atributos (XP, moedas e pontos não mudam).
+ * Espelha `public.round_score` no banco (junto com a votação de 3 notas, `THREE_STAT_RATINGS_FROM`).
+ */
+export const ROUND_OVR_SCORE_FROM = THREE_STAT_RATINGS_FROM;
+
+/** Nota da rodada (escala da carta, 0–99) de quem recebeu essas avaliações numa rodada jogada em `matchDate`. */
+export function getRoundScore(matchDate: string, evaluations: readonly Evaluation[]): number | null {
+  return matchDate >= ROUND_OVR_SCORE_FROM ? computeOvr(evaluations) : averageEvaluations(evaluations);
 }
 
 /** Soma e quantidade de notas de cada atributo, para o OVR acumulado. */
@@ -68,7 +82,7 @@ export function ovrFromTotals(totals: OvrTotals): number | null {
  * 2026-10-29; antes era a média dos 5 melhores atributos e, no mesmo dia, a das 3). Sempre sobre o histórico
  * inteiro (só rodadas fechadas). As avaliações chegam já sem a maior e a menor de
  * cada rodada (`getGroupEvaluations`); quem chama tira as de fora da posição.
- * A nota da rodada (`averageEvaluations`) continua com os 6 atributos.
+ * A nota da rodada (`getRoundScore`) segue a mesma regra a partir de `ROUND_OVR_SCORE_FROM`.
  */
 export function computeOvr(evaluations: readonly Evaluation[]): number | null {
   const totals: OvrTotals = new Map();

@@ -1,4 +1,4 @@
-import { averageEvaluations } from "@/lib/ovr";
+import { getRoundScore } from "@/lib/ovr";
 import { getClosedMatches } from "@/lib/players";
 import { submissionKey, type ProgressionAward } from "@/lib/progression";
 import type { AwardKind } from "@/types/award";
@@ -11,7 +11,10 @@ import type { Evaluation, Match } from "@/types/match";
  * então quem vai mais soma mais; presença não dá ponto fixo (a nota já vale).
  */
 
-/** Pontos da rodada = nota da rodada na escala 0–99 (7,43 → 74), mais os extras abaixo. */
+/**
+ * Pontos da rodada = nota da rodada na escala 0–99 (`getRoundScore`: o OVR da rodada a partir de 2026-11-02, e a
+ * média dos 6 atributos x10 nas de antes), mais os extras abaixo.
+ */
 export const POINTS_BEST_PLAYER = 40;
 export const POINTS_OTHER_AWARD = 20;
 export const POINTS_PER_GOAL = 10;
@@ -24,7 +27,7 @@ const NON_POINT_AWARDS: ReadonlySet<AwardKind> = new Set(["bola_murcha", "fominh
 
 /** As regras como aparecem para o jogador, tiradas das mesmas constantes. */
 export const POINTS_RULES = [
-  { label: "Nota da rodada × 10", value: "7,4 → 74" },
+  { label: "OVR da rodada", value: "74 → 74" },
   { label: "Melhor Jogador", value: `+${POINTS_BEST_PLAYER}` },
   { label: "Outros prêmios individuais", value: `+${POINTS_OTHER_AWARD}` },
   { label: "Gol confirmado", value: `+${POINTS_PER_GOAL} cada` },
@@ -80,7 +83,7 @@ export function computeRankingPoints({
       const total = totals.get(playerId);
       if (!total) continue;
       const key = submissionKey(match.id, playerId);
-      const score = averageEvaluations(evaluationsByKey.get(key) ?? []);
+      const score = getRoundScore(match.date, evaluationsByKey.get(key) ?? []);
       total.rounds += 1;
       total.points += Math.round(score ?? 0) + (awardPointsByKey.get(key) ?? 0) + (confirmedGoals.get(key) ?? 0) * POINTS_PER_GOAL;
     }

@@ -701,6 +701,25 @@ export type Database = {
         }
         Returns: undefined
       }
+      round_score: {
+        Args: {
+          chu: number
+          def: number
+          dri: number
+          ela: number
+          fis: number
+          legacy_score: number
+          match_date: string
+          pas: number
+          pes: number
+          pos: number
+          ref: number
+          rep: number
+          sai: number
+          vel: number
+        }
+        Returns: number
+      }
       set_member_active: {
         Args: { active: boolean; target_member: string }
         Returns: undefined

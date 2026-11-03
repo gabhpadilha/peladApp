@@ -1,7 +1,7 @@
 import { getCurrentCardEvent, type CardThemeKey, type CurrentCardEvent } from "@/lib/card-themes";
 import { getActiveSale, type ShopSale } from "@/lib/shop-sale";
 import { getLeague } from "@/lib/league";
-import { averageEvaluations } from "@/lib/ovr";
+import { getRoundScore } from "@/lib/ovr";
 import { getMatchPerformances, type PendingEvaluation } from "@/lib/players";
 import { rankByPoints, type RankedByPoints } from "@/lib/ranking-points";
 import { createClient } from "@/lib/supabase/server";
@@ -107,7 +107,7 @@ export async function getHomeData(): Promise<HomeData> {
             (evaluation) =>
               evaluation.matchId === latestMatch.id && evaluation.playerId === player.id,
           );
-          const score = averageEvaluations(received);
+          const score = getRoundScore(latestMatch.date, received);
           return score === null ? [] : [{ player, score }];
         })
         .toSorted((a, b) => b.score - a.score)

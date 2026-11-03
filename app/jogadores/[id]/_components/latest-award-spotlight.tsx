@@ -51,7 +51,7 @@ export function LatestAwardSpotlight({ award, isShareable, groupName }: LatestAw
 
         <dl className="grid grid-cols-3 gap-2 text-left">
           <div className="rounded-lg bg-muted/50 px-3 py-2">
-            <dt className="text-xs text-muted-foreground">{isScored ? scoreLabel : award.kind === "campeao_do_mes" ? "Pontos no mês" : "Votos"}</dt>
+            <dt className="text-xs text-muted-foreground">{isScored ? scoreLabel : award.kind === "campeao_do_mes" || award.kind === "jogador_do_mes" ? "Pontos no mês" : "Votos"}</dt>
             <dd className="font-display text-2xl font-bold tabular-nums">
               {isScored ? (award.score === null ? "–" : formatRoundScore(award.score)) : award.votes}
             </dd>

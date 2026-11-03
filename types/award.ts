@@ -220,7 +220,7 @@ export const AWARD_LABELS: Record<
   jogador_do_mes: {
     title: "Time do Mês",
     question: "",
-    hint: `As 4 maiores notas médias do mês na linha e a maior do gol (com pelo menos ${PLAYER_OF_THE_MONTH_MIN_RATINGS} notas), ao fechar a rodada da última quinta. Sem voto.`,
+    hint: "Os 5 primeiros do ranking de pontos do mês (linha e gol juntos), ao fechar a rodada da última quinta. Sem voto. A carta vem com +1 em cada atributo.",
     eligibility: "all",
   },
   campeao_do_mes: {
@@ -281,7 +281,9 @@ export function formatAwardResult(award: Pick<Award, "kind" | "votes" | "score">
     return award.score === null ? "Time da Semana" : `nota ${formatRoundScore(award.score)}`;
   }
   if (award.kind === "jogador_do_mes") {
-    return award.score === null ? "Time do Mês" : `média ${formatRoundScore(award.score)} no mês`;
+    // Cartas de outubro guardam a média do mês; a partir de novembro, os pontos do ranking do mês.
+    if (award.score !== null) return `média ${formatRoundScore(award.score)} no mês`;
+    return award.votes > 0 ? `${award.votes} pontos no mês` : "Time do Mês";
   }
   if (award.kind === "campeao_do_mes") {
     return award.votes === 0 ? "Campeão do Mês" : `${award.votes} pontos no mês`;

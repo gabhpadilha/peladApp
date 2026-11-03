@@ -12,7 +12,7 @@ import { CARD_THEME_LABELS, type CardThemeKey, type CurrentCardEvent } from "@/l
 import { formatShortDate } from "@/lib/format-date";
 import { POINTS_RULES } from "@/lib/ranking-points";
 import { getNextPlayerOfTheMonthDate } from "@/lib/player-of-the-month";
-import { PLAYER_OF_THE_MONTH_MIN_RATINGS, type AwardKind } from "@/types/award";
+import type { AwardKind } from "@/types/award";
 import { CARD_SKINS, isCardSkinOnSale, type CardSkinKey } from "@/types/card-skin";
 import { getSalePrice, type ShopSale } from "@/lib/shop-sale";
 import type { Player } from "@/types/player";
@@ -186,12 +186,12 @@ const MONTH_CARDS: readonly { kind: AwardKind; title: string; text: string }[] =
   {
     kind: "jogador_do_mes",
     title: "Time do Mês",
-    text: `As 4 maiores médias de notas do mês na linha e a maior do gol (mínimo ${PLAYER_OF_THE_MONTH_MIN_RATINGS} notas).`,
+    text: "Os 5 primeiros do ranking de pontos do mês, linha e gol juntos.",
   },
   {
     kind: "campeao_do_mes",
     title: "Campeão do Mês",
-    text: "Quem terminar o mês com mais pontos no ranking. Empate no topo: todos levam.",
+    text: "O 1º do ranking de pontos do mês. Empate no topo: todos levam.",
   },
 ];
 

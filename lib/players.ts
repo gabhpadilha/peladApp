@@ -1,4 +1,4 @@
-import { averageEvaluations, computeAttributes, computeOvr } from "@/lib/ovr";
+import { computeAttributes, computeOvr, getRoundScore } from "@/lib/ovr";
 import { isOvrEvaluation, type Evaluation, type Match } from "@/types/match";
 import {
   GOALKEEPER_ATTRIBUTES,
@@ -100,7 +100,7 @@ export function getMatchPerformances(
     return {
       match,
       wasPresent: match.presentPlayerIds.includes(playerId),
-      score: averageEvaluations(received),
+      score: getRoundScore(match.date, received),
       evaluationCount: received.length,
       offPosition: received.some((evaluation) => evaluation.offPosition),
     };

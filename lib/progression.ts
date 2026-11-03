@@ -1,4 +1,4 @@
-import { addToOvrTotals, averageEvaluations, ovrFromTotals, type OvrTotals } from "@/lib/ovr";
+import { addToOvrTotals, getRoundScore, ovrFromTotals, type OvrTotals } from "@/lib/ovr";
 import { getClosedMatches } from "@/lib/players";
 import { AWARD_LABELS, type AwardKind } from "@/types/award";
 import { isOvrEvaluation, type Evaluation, type Match } from "@/types/match";
@@ -199,7 +199,7 @@ function* walkRounds({ playerId, matches, evaluations, awards, submissions, conf
     const otherAwardXp = isLegacyRound ? LEGACY_XP_OTHER_POSITIVE_AWARD : XP_OTHER_POSITIVE_AWARD;
 
     if (match.presentPlayerIds.includes(playerId)) {
-      const score = averageEvaluations(received);
+      const score = getRoundScore(match.date, received);
       if (score !== null) {
         const xpBonus = pickBonus(score, XP_HIGH_SCORE_BONUS);
         const bonusLabel = score >= 90 ? " + bônus nota 9+" : score >= 80 ? " + bônus nota 8+" : "";
@@ -252,7 +252,7 @@ function* walkRounds({ playerId, matches, evaluations, awards, submissions, conf
     }
     const ovrBefore = previousOvr;
     if (ovr !== null) previousOvr = ovr;
-    yield { match, gains, ovrBefore, ovrAfter: ovr, score: averageEvaluations(received), ratings: received.length };
+    yield { match, gains, ovrBefore, ovrAfter: ovr, score: getRoundScore(match.date, received), ratings: received.length };
   }
 }
 
