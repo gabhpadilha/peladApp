@@ -1,7 +1,7 @@
 import { CalendarCheckIcon, FlameIcon, TrendingDownIcon, TrendingUpIcon, type LucideIcon } from "lucide-react";
-import { getAttributeExtremes } from "@/lib/athlete-insights";
+import { getStatExtremes } from "@/lib/athlete-insights";
 import type { MatchPerformance } from "@/lib/players";
-import { ATTRIBUTE_LABELS, type Player } from "@/types/player";
+import type { Player } from "@/types/player";
 
 type AthleteHighlightsProps = {
   player: Player;
@@ -11,13 +11,13 @@ type AthleteHighlightsProps = {
 
 type Highlight = { label: string; icon: LucideIcon; value: string; detail: string };
 
-/** Quatro destaques rápidos: melhor rodada, ponto forte, a melhorar e presença. */
+/** Quatro destaques rápidos: melhor rodada, ponto forte e a melhorar (entre as 3 estatísticas da carta) e presença. */
 export function AthleteHighlights({ player, performances, gamesPlayed }: AthleteHighlightsProps) {
   const best = performances
     .filter((performance) => performance.score !== null)
     .toSorted((a, b) => (b.score ?? 0) - (a.score ?? 0))
     .at(0);
-  const extremes = getAttributeExtremes(player);
+  const extremes = getStatExtremes(player);
   const closedRounds = performances.length;
 
   const highlights: Highlight[] = [
@@ -31,13 +31,13 @@ export function AthleteHighlights({ player, performances, gamesPlayed }: Athlete
       label: "Ponto forte",
       icon: TrendingUpIcon,
       value: extremes ? String(extremes.strongest.value) : "–",
-      detail: extremes ? ATTRIBUTE_LABELS[extremes.strongest.key].name : "sem notas ainda",
+      detail: extremes ? extremes.strongest.label : "sem notas ainda",
     },
     {
       label: "A melhorar",
       icon: TrendingDownIcon,
       value: extremes ? String(extremes.weakest.value) : "–",
-      detail: extremes ? ATTRIBUTE_LABELS[extremes.weakest.key].name : "sem notas ainda",
+      detail: extremes ? extremes.weakest.label : "sem notas ainda",
     },
     {
       label: "Presença",

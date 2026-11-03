@@ -1,30 +1,24 @@
 import { SectionTitle } from "@/components/section-title";
-import {
-  ATTRIBUTE_LABELS,
-  GOALKEEPER_ATTRIBUTES,
-  OUTFIELD_ATTRIBUTES,
-  type Player,
-  type PlayerAttribute,
-} from "@/types/player";
+import { getCardStats } from "@/lib/card-stats";
+import type { Player } from "@/types/player";
 
-type AttributeBarsProps = {
+type StatBarsProps = {
   player: Player;
-  /** Média da pelada em cada atributo (mesma função), marcada como um traço na barra. */
-  groupAverages: Partial<Record<PlayerAttribute, number>>;
+  /** Média da pelada em cada estatística (mesma função), pelo nome, marcada como um traço na barra. */
+  groupAverages: Record<string, number>;
 };
 
 /**
- * Média de cada atributo em todas as avaliações recebidas (0–99), com a média
- * da pelada como referência. A diferença também vem em texto (nunca só visual).
+ * As 3 estatísticas da carta (Ataque, Criação e Defesa; no gol, Paredão, Leitura e Saída), a média de cada uma em
+ * todas as avaliações recebidas (0–99), com a média da pelada como referência. A diferença também vem em texto
+ * (nunca só visual). Mostra o que a carta mostra e o que se vota (decisão do dono do app em 2026-11-02).
  */
-export function AttributeBars({ player, groupAverages }: AttributeBarsProps) {
-  const keys: readonly PlayerAttribute[] =
-    player.role === "goalkeeper" ? GOALKEEPER_ATTRIBUTES : OUTFIELD_ATTRIBUTES;
-  const values: Partial<Record<PlayerAttribute, number | null>> = player.attributes;
+export function StatBars({ player, groupAverages }: StatBarsProps) {
+  const stats = getCardStats(player);
 
   return (
     <section aria-labelledby="attributes-title" className="flex flex-col gap-4 rounded-xl border bg-card p-4">
-      <SectionTitle id="attributes-title">Atributos</SectionTitle>
+      <SectionTitle id="attributes-title">Estatísticas da carta</SectionTitle>
 
       <p className="flex items-center gap-4 text-xs text-muted-foreground">
         <span className="inline-flex items-center gap-1.5">
@@ -38,13 +32,12 @@ export function AttributeBars({ player, groupAverages }: AttributeBarsProps) {
       </p>
 
       <dl className="flex flex-col gap-3">
-        {keys.map((key) => {
-          const value = values[key] ?? null;
-          const average = groupAverages[key];
+        {stats.map(({ label, value }) => {
+          const average = groupAverages[label];
           const difference = value !== null && average !== undefined ? value - average : null;
           return (
-            <div key={key} className="grid grid-cols-[6.5rem_1fr_3.5rem] items-center gap-3 text-sm">
-              <dt className="truncate text-muted-foreground">{ATTRIBUTE_LABELS[key].name}</dt>
+            <div key={label} className="grid grid-cols-[6.5rem_1fr_3.5rem] items-center gap-3 text-sm">
+              <dt className="truncate text-muted-foreground">{label}</dt>
               <div aria-hidden className="relative h-2 rounded-full bg-muted">
                 <div
                   className="h-full rounded-full bg-primary"
@@ -66,11 +59,7 @@ export function AttributeBars({ player, groupAverages }: AttributeBarsProps) {
                     {difference > 0 ? `+${difference}` : difference}
                   </span>
                 )}
-                {average !== undefined && (
-                  <span className="sr-only">
-                    , média da pelada {average}
-                  </span>
-                )}
+                {average !== undefined && <span className="sr-only">, média da pelada {average}</span>}
               </dd>
             </div>
           );

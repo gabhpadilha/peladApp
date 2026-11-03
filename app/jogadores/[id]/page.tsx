@@ -10,7 +10,7 @@ import { AthleteHero } from "./_components/athlete-hero";
 import { GoalStats } from "./_components/goal-stats";
 import { AthleteHighlights } from "./_components/athlete-highlights";
 import { AthleteTabs } from "./_components/athlete-tabs";
-import { AttributeBars } from "./_components/attribute-bars";
+import { StatBars } from "./_components/stat-bars";
 import { MatchHistory } from "./_components/match-history";
 import { PerformanceChart } from "./_components/performance-chart";
 import { TierProgress } from "./_components/tier-progress";
@@ -59,7 +59,7 @@ async function AthleteContent({ params }: { params: PageProps<"/jogadores/[id]">
         />
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
           <PerformanceChart performances={profile.performances} bestScore={profile.bestScore} />
-          <AttributeBars player={profile.player} groupAverages={profile.groupAverages} />
+          <StatBars player={profile.player} groupAverages={profile.groupAverages} />
         </div>
         {profile.goalStats && <GoalStats stats={profile.goalStats} />}
         <MatchHistory performances={profile.performances} goalsByMatch={profile.goalStats ? profile.goalsByMatch : null} />

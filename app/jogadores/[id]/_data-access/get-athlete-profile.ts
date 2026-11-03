@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { getGroupAttributeAverages } from "@/lib/athlete-insights";
+import { getGroupStatAverages } from "@/lib/athlete-insights";
 import { getShareableAwardIds } from "@/lib/award-share";
 import { getCurrentCardEvent, type CardThemeKey } from "@/lib/card-themes";
 import { getLeague } from "@/lib/league";
@@ -12,7 +12,7 @@ import {
 } from "@/lib/players";
 import type { LevelProgress } from "@/lib/progression";
 import type { Award } from "@/types/award";
-import type { Player, PlayerAttribute } from "@/types/player";
+import type { Player } from "@/types/player";
 
 /** "Hoje" no fuso da pelada, `AAAA-MM-DD` (o servidor roda em UTC). */
 const todayFormatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" });
@@ -39,7 +39,7 @@ export type AthleteProfile = {
   /** Só preenchido no perfil do próprio jogador logado. */
   pending: PendingEvaluation[];
   /** Média da pelada em cada atributo, só da mesma função (linha ou gol). */
-  groupAverages: Partial<Record<PlayerAttribute, number>>;
+  groupAverages: Record<string, number>;
   /** Tema das cartas especiais deste mês (prévia na coleção vazia). */
   currentTheme: CardThemeKey;
   /** Nível e XP do atleta (públicos para a pelada). */
@@ -105,7 +105,7 @@ export async function getAthleteProfile(memberId: string): Promise<AthleteProfil
     bestScore: scores.length > 0 ? Math.max(...scores) : null,
     performances,
     pending: isOwnProfile ? league.pending : [],
-    groupAverages: getGroupAttributeAverages(league.activePlayers, player.role),
+    groupAverages: getGroupStatAverages(league.activePlayers, player.role),
     currentTheme: getCurrentCardEvent(todayFormatter.format(new Date())).theme,
     levelProgress: league.getProgression(player.id),
     goalsByMatch,
