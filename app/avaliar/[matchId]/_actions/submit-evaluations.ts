@@ -6,6 +6,7 @@ import { requireActiveMembership } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 import { VOTE_AWARD_KINDS, canReceiveVote } from "@/types/award";
 import type { TablesInsert } from "@/types/database";
+import { hasEqualPairs, usesThreeStats } from "@/lib/rating-stats";
 import { getRatingSession } from "../_data-access/get-rating-session";
 import { submitEvaluationsSchema, type SubmitEvaluationsInput } from "../_schemas/evaluation-schema";
 
@@ -58,6 +59,10 @@ export async function submitEvaluations(input: SubmitEvaluationsInput): Promise<
     // O papel vem do banco, não do navegador.
     if (roleByTarget.get(evaluation.playerId) !== evaluation.role) {
       return { success: false, message: "Algum jogador avaliado não estava nessa rodada." };
+    }
+    // Rodada de 3 notas: as duas notas de cada estatística são a mesma (o app grava o par igual).
+    if (usesThreeStats(session.match.date) && !hasEqualPairs(evaluation.role, evaluation.scores)) {
+      return { success: false, message: "Notas inválidas. Confira e tente de novo." };
     }
     evaluationRows.push({
       match_id: matchId,

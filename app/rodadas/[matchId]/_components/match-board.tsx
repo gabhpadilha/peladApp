@@ -12,7 +12,8 @@ import {
 import type { RatingTarget } from "@/app/avaliar/[matchId]/_data-access/get-rating-session";
 import { Button } from "@/components/ui/button";
 import { getThemeForDate } from "@/lib/card-themes";
-import { countFilled, draftAverage, isDraftComplete, type ScoreDraft } from "@/lib/rating-drafts";
+import { draftAverage, isDraftComplete, type ScoreDraft } from "@/lib/rating-drafts";
+import { countFilledRatings, ratingSize, usesThreeStats } from "@/lib/rating-stats";
 import type { VoteAwardKind } from "@/types/award";
 import { GOALKEEPER_ATTRIBUTES, OUTFIELD_ATTRIBUTES, type PlayerAttribute } from "@/types/player";
 import type { BoardPlayer, MatchBoard } from "../_data-access/get-match-board";
@@ -41,6 +42,7 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  const isThreeStats = usesThreeStats(board.match.date);
   const everyone: BoardPlayer[] = board.teams.flatMap((team) => [...team.starters, ...team.reserves]);
   // Quem ainda falta: a troca de posição pelo organizador devolve uma nota já enviada.
   const ratable = everyone.filter((entry) => !entry.isSelf && !entry.isRatedByMe);
@@ -62,8 +64,8 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
     const draft = drafts[playerId];
     if (!entry || !draft) return { kind: "idle" };
     if (isDraftComplete(entry.role, draft)) return { kind: "done", average: draftAverage(draft) ?? 0 };
-    const filled = countFilled(entry.role, draft);
-    return filled > 0 ? { kind: "partial", filled } : { kind: "idle" };
+    const filled = countFilledRatings(entry.role, draft, isThreeStats);
+    return filled > 0 ? { kind: "partial", filled, total: ratingSize(isThreeStats) } : { kind: "idle" };
   }
 
   function handleScore(playerId: string, key: PlayerAttribute, value: number) {
@@ -210,6 +212,7 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
         memberId={board.memberId}
         goals={board.goals}
         entry={canRate ? ratingEntry : null}
+        isThreeStats={isThreeStats}
         draft={ratingEntry ? drafts[ratingEntry.player.id] : undefined}
         onScore={handleScore}
         onClear={handleClear}

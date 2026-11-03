@@ -12,7 +12,6 @@ import { teamRoleLabel } from "@/lib/teams";
 import { cn } from "@/lib/utils";
 import { AWARD_LABELS, VOTE_AWARD_KINDS, type VoteAwardKind } from "@/types/award";
 import {
-  ATTRIBUTE_LABELS,
   GOALKEEPER_ATTRIBUTES,
   OUTFIELD_ATTRIBUTES,
   POSITION_LABELS,
@@ -28,7 +27,8 @@ import {
   type PlayerEvaluationInput,
   type RoundVotesInput,
 } from "../_schemas/evaluation-schema";
-import { AttributeSlider } from "./attribute-slider";
+import { RatingSliders } from "@/components/rating-sliders";
+import { usesThreeStats } from "@/lib/rating-stats";
 import { VoteStep } from "./vote-step";
 
 type Draft = {
@@ -76,6 +76,7 @@ export function RatingWizard({ match, targets, goals, memberId }: RatingWizardPr
     ...VOTE_AWARD_KINDS.map((kind) => ({ type: "vote" as const, kind })),
     { type: "review" },
   ];
+  const isThreeStats = usesThreeStats(match.date);
   const reviewIndex = steps.length - 1;
   const firstVoteIndex = targets.length;
 
@@ -94,9 +95,9 @@ export function RatingWizard({ match, targets, goals, memberId }: RatingWizardPr
   const isAllRated = ratedTargets.length === targets.length;
   const nameById = new Map(targets.map((target) => [target.player.id, target.player.nickname]));
 
-  function setScore(playerId: string, key: PlayerAttribute, value: number) {
+  function setScores(playerId: string, updates: Partial<Record<PlayerAttribute, number>>) {
     const draft = form.getValues(`drafts.${playerId}`) ?? { scores: {} };
-    form.setValue(`drafts.${playerId}`, { scores: { ...draft.scores, [key]: value } });
+    form.setValue(`drafts.${playerId}`, { scores: { ...draft.scores, ...updates } });
   }
 
   function setVote(kind: VoteAwardKind, playerId: string | undefined) {
@@ -229,16 +230,13 @@ export function RatingWizard({ match, targets, goals, memberId }: RatingWizardPr
             )}
 
             <div className="flex flex-col gap-5">
-              {getAttributeKeys(step.target.role).map((key) => (
-                <AttributeSlider
-                  key={`${step.target.player.id}-${key}`}
-                  id={`score-${step.target.player.id}-${key}`}
-                  abbreviation={ATTRIBUTE_LABELS[key].abbreviation}
-                  name={ATTRIBUTE_LABELS[key].name}
-                  value={currentDraft?.scores[key] ?? null}
-                  onChange={(value) => setScore(step.target.player.id, key, value)}
-                />
-              ))}
+              <RatingSliders
+                idPrefix={`score-${step.target.player.id}`}
+                role={step.target.role}
+                isThreeStats={isThreeStats}
+                draft={currentDraft?.scores}
+                onChange={(updates) => setScores(step.target.player.id, updates)}
+              />
             </div>
           </>
         )}
@@ -306,7 +304,7 @@ export function RatingWizard({ match, targets, goals, memberId }: RatingWizardPr
             </div>
           )}
           {step.type === "player" && !canAdvance && (
-            <p className="text-center text-xs text-muted-foreground">Dê nota nos 6 atributos para seguir: todo mundo leva a sua nota.</p>
+            <p className="text-center text-xs text-muted-foreground">Dê nota nas {isThreeStats ? "3 estatísticas" : "6 atributos"} para seguir: todo mundo leva a sua nota.</p>
           )}
         </div>
       </footer>

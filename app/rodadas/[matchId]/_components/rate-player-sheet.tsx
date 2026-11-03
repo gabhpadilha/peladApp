@@ -1,15 +1,16 @@
 "use client";
 
-import { AttributeSlider } from "@/app/avaliar/[matchId]/_components/attribute-slider";
+import { RatingSliders } from "@/components/rating-sliders";
 import { GoalsConfirm } from "@/components/goals-confirm";
 import { OffPositionBadge } from "@/components/off-position-badge";
 import { PlayerCard } from "@/components/player-card";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import type { RoundGoalsState } from "@/lib/goal-rules";
-import { countFilled, getAttributeKeys, isDraftComplete, type ScoreDraft } from "@/lib/rating-drafts";
+import { isDraftComplete, type ScoreDraft } from "@/lib/rating-drafts";
+import { countFilledRatings, ratingSize } from "@/lib/rating-stats";
 import { teamRoleLabel } from "@/lib/teams";
-import { ATTRIBUTE_LABELS, POSITION_LABELS, type PlayerAttribute } from "@/types/player";
+import { POSITION_LABELS, type PlayerAttribute } from "@/types/player";
 import type { BoardPlayer } from "../_data-access/get-match-board";
 
 type RatePlayerSheetProps = {
@@ -18,6 +19,8 @@ type RatePlayerSheetProps = {
   /** Gols de cada um, para confirmar na nota. */
   goals: RoundGoalsState;
   entry: BoardPlayer | null;
+  /** Rodada de 3 notas (3 estatísticas) ou de 6 atributos. */
+  isThreeStats: boolean;
   draft: ScoreDraft | undefined;
   onScore: (playerId: string, key: PlayerAttribute, value: number) => void;
   onClear: (playerId: string) => void;
@@ -25,10 +28,11 @@ type RatePlayerSheetProps = {
 };
 
 /** Notas de um jogador (6 sliders), aberta ao tocar na carta da mesa tática. */
-export function RatePlayerSheet({ matchId, memberId, goals, entry, draft, onScore, onClear, onClose }: RatePlayerSheetProps) {
+export function RatePlayerSheet({ matchId, memberId, goals, entry, isThreeStats, draft, onScore, onClear, onClose }: RatePlayerSheetProps) {
   const player = entry?.player;
   // Papel da rodada: quem jogou no gol recebe notas de goleiro.
-  const filled = entry ? countFilled(entry.role, draft) : 0;
+  const filled = entry ? countFilledRatings(entry.role, draft, isThreeStats) : 0;
+  const total = ratingSize(isThreeStats);
   const isComplete = entry ? isDraftComplete(entry.role, draft) : false;
 
   return (
@@ -45,7 +49,7 @@ export function RatePlayerSheet({ matchId, memberId, goals, entry, draft, onScor
                   {teamRoleLabel(entry.team, entry.isReserve)} · {POSITION_LABELS[player.position]}
                 </SheetDescription>
                 <SheetTitle className="truncate font-display text-3xl font-bold">{player.nickname}</SheetTitle>
-                <p className="text-sm text-muted-foreground tabular-nums">{filled}/6 atributos</p>
+                <p className="text-sm text-muted-foreground tabular-nums">{filled}/{total} {isThreeStats ? "estatísticas" : "atributos"}</p>
                 {entry.playsInGoal !== null && <OffPositionBadge role={entry.role} withHint className="mt-1" />}
               </div>
             </SheetHeader>
@@ -61,16 +65,15 @@ export function RatePlayerSheet({ matchId, memberId, goals, entry, draft, onScor
                   isReporter={goals.byMember[player.id].reportedBy === memberId}
                 />
               )}
-              {getAttributeKeys(entry.role).map((key) => (
-                <AttributeSlider
-                  key={`${player.id}-${key}`}
-                  id={`board-score-${player.id}-${key}`}
-                  abbreviation={ATTRIBUTE_LABELS[key].abbreviation}
-                  name={ATTRIBUTE_LABELS[key].name}
-                  value={draft?.[key] ?? null}
-                  onChange={(value) => onScore(player.id, key, value)}
-                />
-              ))}
+              <RatingSliders
+                idPrefix={`board-score-${player.id}`}
+                role={entry.role}
+                isThreeStats={isThreeStats}
+                draft={draft}
+                onChange={(updates) => {
+                  for (const [key, value] of Object.entries(updates) as [PlayerAttribute, number][]) onScore(player.id, key, value);
+                }}
+              />
             </div>
 
             <div className="flex gap-2 border-t bg-background px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))]">
@@ -85,7 +88,7 @@ export function RatePlayerSheet({ matchId, memberId, goals, entry, draft, onScor
                 Limpar
               </Button>
               <Button type="button" size="lg" className="h-12 flex-1 text-base" disabled={!isComplete} onClick={onClose}>
-                {isComplete ? "Pronto" : `Faltam ${6 - filled} atributos`}
+                {isComplete ? "Pronto" : `Faltam ${total - filled} ${isThreeStats ? "notas" : "atributos"}`}
               </Button>
             </div>
           </>

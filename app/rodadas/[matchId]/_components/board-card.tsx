@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import type { BoardPlayer } from "../_data-access/get-match-board";
 
 /** Estado da nota do jogador logado para essa carta. */
-export type RatingState = { kind: "idle" } | { kind: "partial"; filled: number } | { kind: "done"; average: number };
+export type RatingState = { kind: "idle" } | { kind: "partial"; filled: number; total: number } | { kind: "done"; average: number };
 
 type BoardCardProps = {
   entry: BoardPlayer;
@@ -60,7 +60,7 @@ function Badge({ entry, mode, rating }: Pick<BoardCardProps, "entry" | "mode" | 
     );
   }
   if (rating.kind === "partial") {
-    return <span className={cn(base, "border-primary/60 bg-background text-primary")}>{rating.filled}/6</span>;
+    return <span className={cn(base, "border-primary/60 bg-background text-primary")}>{rating.filled}/{rating.total}</span>;
   }
   return (
     <span className={cn(base, "border-border bg-background/90 text-muted-foreground")}>
@@ -73,7 +73,7 @@ function Badge({ entry, mode, rating }: Pick<BoardCardProps, "entry" | "mode" | 
 /** Mesmo selo? `RatingState` é recriado a cada render da mesa, então compara pelo valor. */
 function isSameRating(a: RatingState, b: RatingState): boolean {
   if (a.kind !== b.kind) return false;
-  if (a.kind === "partial" && b.kind === "partial") return a.filled === b.filled;
+  if (a.kind === "partial" && b.kind === "partial") return a.filled === b.filled && a.total === b.total;
   if (a.kind === "done" && b.kind === "done") return a.average === b.average;
   return true;
 }

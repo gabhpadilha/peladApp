@@ -167,6 +167,8 @@ A tela da partida, estilo squad builder do EA FC. **Abre sozinha depois de "Cria
 
 ## 📱 Tela de notas (vestiário, mobile) — `/avaliar/[matchId]`
 
+**Desde as rodadas de 2026-11-02 (decisão do dono do app em 2026-11-02): 3 sliders em vez de 6** (Ataque, Criação, Defesa; no gol, Paredão, Leitura, Saída), cada um com a dica de uma linha ("Pense em chute e velocidade"), "Dê nota nas 3 estatísticas para seguir" e "N/3 estatísticas" na folha da mesa tática (selo "N/3" na carta). Os 6 atributos continuam nas rodadas de antes. Componente `RatingSliders` (`components/rating-sliders.tsx`).
+
 Implementada em `app/avaliar/[matchId]/` (sem navbar). Aberta pelo botão "Avaliar" do aviso de pendência. Ordem: time a time, depois apelido. "—" + polegar cinza no meio (6) até o primeiro toque; tocar no polegar parado já conta como nota. Rodapé: anterior / Próximo (último vira "Revisar"); "Pular" só nos votos (= "Ninguém"). Revisão lista média (1 casa) ou "Falta", toque para editar; "Enviar notas (N)" exige **nota para todos** (decisão do dono do app em 2026-10-23: envio incompleto não existe). Depois: "Notas enviadas!" e volta ao início. Estados sem formulário: rodada fechada, não jogou, já enviou.
 
 
