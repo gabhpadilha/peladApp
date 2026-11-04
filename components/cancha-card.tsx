@@ -77,6 +77,10 @@ export type Roupa = {
   innerBolts?: string;
   /** Os raios (`innerBolts` e `overflowBolts`) ficam parados, sem animação. */
   still?: boolean;
+  /** Sobe e afasta das laterais os números das estatísticas (em cqw), para a moldura da arte não passar por cima deles. */
+  statsInset?: { bottom: number; side: number };
+  /** Energia correndo em volta da moldura: `${prefixo}-0` a `${prefixo}-(N-1)`, setores em ordem horária que acendem um depois do outro. */
+  runners?: { prefix: string; count: number; seconds: number };
   /** Os raios acendem forte e esmaecem devagar (`cc-thunder-glow`), em vez do estalo curto. */
   glow?: boolean;
 };
@@ -146,18 +150,18 @@ const HIGHLIGHT_COLORS: Record<CardThemeKey, AwardColors> = {
 const HIGHLIGHT_ART = new Set<AwardKind>(["atacante", "criativo", "defensor", "goleiro", "gol", "foguete", "garcom", "drible", "motor"]);
 
 /**
- * Time do Mês: a arte do dono do app de 2026-11-02 (tubo de neon roxo com a coroa, painel de vidro e tempestade roxa).
+ * Time do Mês: fundo de padrão art déco roxo e moldura de neon com a coroa e raios do Gemini por cima do conteúdo (2026-11-04).
  * Não veste o tema do mês (`hasSeasonalTheme`). As cartas de outubro seguem no cristal (`MONTH_ROUPA_CRISTAL`).
  */
 const MONTH_ROUPA: Roupa = {
-  // Arte do dono do app em camadas (2026-11-02): neon roxo com a coroa, tempestade roxa e um aglomerado de raios por cima da moldura
-  // que muda de intensidade, sem apagar (`prototipos/premio-time-do-mes.cjs`).
+  // Versão simples (2026-11-04): neon roxo com a coroa sobre um fundo de padrão geométrico art déco, sem render nem animação
+  // (`prototipos/premio-time-do-mes-v3.cjs`).
   background: "premium-time-do-mes",
   overflow: "premium-time-do-mes-vaza",
-  overflowWidth: 790 / 714,
-  overflowBolts: "premium-time-do-mes-raios",
-  innerBolts: "premium-time-do-mes-raios-dentro",
-  still: true,
+  window: "ring",
+  windowRadius: 7,
+  statsInset: { bottom: 3.2, side: 3.5 },
+  runners: { prefix: "premium-time-do-mes-corre", count: 24, seconds: 3.2 },
   artFrame: true,
   clean: true,
   metal: ["#b8902f", "#b8902f", "#fff1c2"],
@@ -201,6 +205,10 @@ const MONTH_ROUPA_CRISTAL: Roupa = {
   overflowBolts: undefined,
   innerBolts: undefined,
   still: false,
+  window: undefined,
+  windowRadius: undefined,
+  statsInset: undefined,
+  runners: undefined,
   artFrame: false,
   clean: false,
 };
@@ -824,7 +832,10 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
           {band}
         </span>
 
-        <dl className="absolute inset-x-0 bottom-0 z-[8] grid h-[12%] grid-cols-3 border-t-[0.6cqw] border-(--cc-accent) bg-(--cc-bar)">
+        <dl
+          className="absolute inset-x-0 bottom-0 z-[8] grid h-[12%] grid-cols-3 border-t-[0.6cqw] border-(--cc-accent) bg-(--cc-bar)"
+          style={roupa.statsInset ? { paddingBottom: `${roupa.statsInset.bottom}cqw`, paddingInline: `${roupa.statsInset.side}cqw` } : undefined}
+        >
           {stats.map((stat, index) => (
             <div
               key={stat.label}
@@ -862,6 +873,11 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
         // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da caixa, sem otimizar
         <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflow}.webp`} className={cn("pointer-events-none absolute top-0 left-0 z-[11] h-full select-none", roupa.overflowWidth ? "max-w-none" : "w-full")} style={roupa.overflowWidth ? { width: `${roupa.overflowWidth * 100}%`, left: `${-(roupa.overflowLeft ?? 0) * 100}%` } : undefined} />
       )}
+      {roupa.runners && Array.from({ length: roupa.runners.count }, (_, index) => (
+        // Energia em volta da moldura: cada setor acende no seu tempo (só `opacity`; com movimento reduzido, fica apagado).
+        // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da caixa, sem otimizar
+        <img key={index} aria-hidden alt="" src={`/cartas/fundos/${roupa.runners!.prefix}-${index}.webp`} className="pointer-events-none absolute top-0 left-0 z-[12] h-full w-full opacity-0 select-none motion-reduce:hidden" style={{ animation: `cc-energy-run ${roupa.runners!.seconds}s linear infinite`, animationDelay: `${(index / roupa.runners!.count) * roupa.runners!.seconds}s` }} />
+      ))}
       {roupa.overflowBolts && (
         // Os raios das decorações estalam como trovão (só `opacity`; com movimento reduzido, ficam acesos).
         // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da caixa, sem otimizar
