@@ -149,7 +149,7 @@ const ROUPAS = {
   esmeralda: { background: "premium-esmeralda", overflow: "premium-esmeralda-vaza", overflowWidth: 774 / 714, artFrame: true, trim: null, metal: ["#0f6b45", "#0f6b45", "#5fd39a"], accent: "#5fd39a", light: "160 255 200", bar: "#03140c", muted: "#9fffc8", sparkles: false, neon: "#2dffa0" },
   safira: { background: "premium-safira", overflow: "premium-safira-vaza", overflowWidth: 774 / 714, artFrame: true, trim: null, metal: ["#1d4fa8", "#1d4fa8", "#7fb0ff"], accent: "#7fb0ff", light: "170 200 255", bar: "#040a1c", muted: "#a9c8ff", sparkles: false, neon: "#36a6ff" },
   ametista: { background: "premium-ametista", overflow: "premium-ametista-vaza", overflowWidth: 774 / 714, artFrame: true, trim: null, metal: ["#5b2fa0", "#5b2fa0", "#b99bff"], accent: "#b99bff", light: "220 190 255", bar: "#0e0620", muted: "#d2bcff", sparkles: false, neon: "#c46bff" },
-  rubi: { background: "premium-rubi-fino", overflow: "premium-rubi-fino-vaza", artInset: { x: 3.81, y: 2.72, radius: 6.2 }, window: "ring", windowInset: { x: 3.81, y: 2.72 }, windowRadius: 6.2, contentPad: 3.87, artFrame: true, trim: null, metal: ["#9b1530", "#9b1530", "#ff8fa3"], accent: "#ff8fa3", light: "255 190 200", bar: "#1a0309", muted: "#ffb3c0", sparkles: false, neon: "#ff2f66" },
+  rubi: { background: "premium-rubi-fino", overflow: "premium-rubi-fino-vaza", artInset: { x: 3.33, y: 2.38, radius: 6.6 }, window: "ring", windowInset: { x: 3.33, y: 2.38 }, windowRadius: 6.6, contentPad: 4.35, artFrame: true, trim: null, metal: ["#9b1530", "#9b1530", "#ff8fa3"], accent: "#ff8fa3", light: "255 190 200", bar: "#1a0309", muted: "#ffb3c0", sparkles: false, neon: "#ff2f66" },
   // Ícone: branco creme com moldura de ouro claro, lembrando a carta Icon do FIFA (2026-10-29).
   // Voltagem (2026-11-05, pedido do dono do app: o estilo da borda da referência dele no nosso retângulo): fio duplo de ouro pálido por dentro e
   // linhas de neon por fora, com o degrau onde se dividem (`prototipos/voltagem.cjs`). Janela `ring` recuada até o fio de dentro.
@@ -158,7 +158,7 @@ const ROUPAS = {
   // Maré (2026-11-05, teste do kit em camadas: fundo e borda feitos no Gemini com o gabarito 5:7, montados por `prototipos/montar-carta.cjs`):
   // tromba-d'água num mar de enchente e moldura de ouro com a "capa" de lâminas nos cantos de baixo. Janela padrão (`ring`, 64,5 px da caixa).
   mare: { background: "premium-mare", overflow: "premium-mare-vaza", artInset: { x: 3.69, y: 2.64, radius: 4.5 }, window: "ring", windowInset: { x: 3.69, y: 2.64 }, windowRadius: 4.5, contentPad: 3.99, artFrame: true, clean: true, trim: null, metal: ["#b8902f", "#b8902f", "#fff1c2"], accent: "#f3d27a", light: "120 230 255", bar: "#031018", muted: "#bfeeff", sparkles: false, neon: "#f3d27a" },
-  icone: { background: "premium-icone-fino", clean: true, overflow: "premium-icone-fino-vaza", artInset: { x: 3.81, y: 2.72, radius: 6.2 }, window: "ring", windowInset: { x: 3.81, y: 2.72 }, windowRadius: 6.2, contentPad: 3.87, artFrame: true, trim: null, metal: ["#c9a24e", "#c9a24e", "#fff4d6"], accent: "#e2c06e", light: "255 240 200", bar: "#1a140a", muted: "#f0dfb5", sparkles: false, neon: "#ffcf4d" },
+  icone: { background: "premium-icone-fino", clean: true, overflow: "premium-icone-fino-vaza", artInset: { x: 3.33, y: 2.38, radius: 6.6 }, window: "ring", windowInset: { x: 3.33, y: 2.38 }, windowRadius: 6.6, contentPad: 4.35, artFrame: true, trim: null, metal: ["#c9a24e", "#c9a24e", "#fff4d6"], accent: "#e2c06e", light: "255 240 200", bar: "#1a140a", muted: "#f0dfb5", sparkles: false, neon: "#ffcf4d" },
   // Aurora (2026-11-04, GUARDADA: o dono gostou mas pediu para não aplicar ainda; não está em `CARD_SKINS`, então não aparece na Loja.
   // Para usar: entrada em `CARD_SKINS` (sugestão nível 14, 1600 CC), `case` em `skinRoupa` e `SKIN_CLASSES`): aurora boreal renderizada pixel a pixel em código (`prototipos/premium-aurora.cjs`), fio de ouro, respiro preto,
   // tubo de neon verde-água por fora e a Estrela Polar no topo; a luz da aurora vaza sobre a moldura. Concêntrica: windowRadius = raio da carta − o aro.
@@ -871,6 +871,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
         {!roupa.clean && (
         <div
           aria-hidden
+          style={roupa.contentPad ? { top: `calc(16% + ${roupa.contentPad}cqw)` } : undefined}
           className={cn(
             "absolute inset-x-0 top-[16%] bottom-0 z-[6]",
             roupa.matte
@@ -895,7 +896,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
           />
         ))}
         {!roupa.clean && (
-          <div aria-hidden className={cn("absolute inset-x-0 bottom-[12%] z-[7] bg-linear-to-b from-transparent to-(--cc-bar)", frame.fade)} />
+          <div aria-hidden style={roupa.contentPad ? { bottom: `calc(12% + ${roupa.contentPad - 0.8}cqw)` } : undefined} className={cn("absolute inset-x-0 bottom-[12%] z-[7] bg-linear-to-b from-transparent to-(--cc-bar)", frame.fade)} />
         )}
 
         <div
