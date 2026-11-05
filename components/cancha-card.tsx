@@ -81,9 +81,47 @@ export type Roupa = {
   statsInset?: { bottom: number; side: number };
   /** Energia correndo em volta da moldura: `${prefixo}-0` a `${prefixo}-(N-1)`, setores em ordem horária que acendem um depois do outro. */
   runners?: { prefix: string; count: number; seconds: number };
+  /** Gotas de água escorrendo pela carta, desenhadas em código (só `transform` e `opacity`); ficam por cima do conteúdo e por baixo da moldura. */
+  drops?: boolean;
   /** Os raios acendem forte e esmaecem devagar (`cc-thunder-glow`), em vez do estalo curto. */
   glow?: boolean;
 };
+
+/** Gotas que escorrem (x e y em % da carta; `drip` = quantas alturas da gota ela desce; `size` = largura em % da carta). */
+const DRIPS = [
+  { x: 9, y: 27, size: 2.6, drip: 9, seconds: 7.5, delay: 0 },
+  { x: 20, y: 33, size: 1.8, drip: 7, seconds: 6.2, delay: 2.4 },
+  { x: 32, y: 24, size: 2.1, drip: 8, seconds: 8.4, delay: 4.6 },
+  { x: 66, y: 29, size: 2.2, drip: 10, seconds: 7, delay: 1.2 },
+  { x: 78, y: 36, size: 1.7, drip: 7, seconds: 6.6, delay: 3.4 },
+  { x: 90, y: 26, size: 2.5, drip: 9, seconds: 8, delay: 5.6 },
+  { x: 14, y: 52, size: 2, drip: 6, seconds: 7.8, delay: 6.4 },
+  { x: 86, y: 55, size: 2.3, drip: 6, seconds: 7.2, delay: 0.8 },
+] as const;
+
+/** Gotas d'água escorrendo (feitas em código: degradê com reflexo e um rastro fino; param e escorrem de novo). */
+function WaterDrops() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-x-[0.9%] inset-y-[0.65%] z-[10] overflow-hidden rounded-[7cqw] motion-reduce:hidden">
+      {DRIPS.map((drop, index) => (
+        <span
+          key={index}
+          className="absolute block rounded-[50%_50%_50%_50%/60%_60%_40%_40%] border border-white/45 bg-[radial-gradient(circle_at_34%_28%,rgb(255_255_255/0.95)_0_12%,rgb(200_232_255/0.5)_30%,rgb(120_190_255/0.22)_65%,rgb(20_60_110/0.35))] opacity-0"
+          style={{
+            left: `${drop.x}%`,
+            top: `${drop.y}%`,
+            width: `${drop.size}%`,
+            aspectRatio: "0.78",
+            ["--drip" as string]: drop.drip,
+            animation: `cc-drip ${drop.seconds}s ease-in-out ${drop.delay}s infinite`,
+          }}
+        >
+          <span className="absolute bottom-full left-1/2 h-[260%] w-[26%] -translate-x-1/2 bg-linear-to-t from-white/35 to-transparent" />
+        </span>
+      ))}
+    </div>
+  );
+}
 
 const GOLD = ["#7a5512", "#e9c86a", "#fff4c8"] as const;
 const SILVER = ["#3b4450", "#c9d1d6", "#ffffff"] as const;
@@ -244,13 +282,19 @@ const CRAQUE_FOGO: Roupa = {
 };
 
 /**
- * Destaques fora do Halloween (2026-11-02, arte do dono do app): um redemoinho de água num cartão de fio de ouro com neon ciano por fora e
- * gotas em volta, sem render em 3D (`prototipos/destaques-agua-arte.cjs`). Um fundo só para todos; o que distingue o prêmio é a faixa com o nome.
+ * Destaques fora do Halloween (2026-11-04, arte do dono do app no Gemini): uma tempestade no mar fotorrealista até o tubo de neon ciano,
+ * com respingos de água por cima e gotas escorrendo em código (`prototipos/destaques-mar.cjs`). Um fundo só para todos; o que distingue
+ * o prêmio é a faixa com o nome.
  */
 const HIGHLIGHT_AGUA: Roupa = {
-  background: "premio-destaque-agua-arte",
-  overflow: "premio-destaque-agua-arte-vaza",
+  // Versão "mar" (2026-11-04): tempestade fotorrealista até o tubo de neon ciano, com a moldura e os respingos por cima e gotas
+  // escorrendo em código (`prototipos/destaques-mar.cjs`).
+  background: "premio-destaque-mar",
+  overflow: "premio-destaque-mar-vaza",
+  drops: true,
   window: "ring",
+  windowRadius: 7,
+  statsInset: { bottom: 3.2, side: 3.5 },
   artFrame: true,
   clean: true,
   metal: ["#2f6fd6", "#2f6fd6", "#cfe2ff"],
@@ -873,6 +917,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
         // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da caixa, sem otimizar
         <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflow}.webp`} className={cn("pointer-events-none absolute top-0 left-0 z-[11] h-full select-none", roupa.overflowWidth ? "max-w-none" : "w-full")} style={roupa.overflowWidth ? { width: `${roupa.overflowWidth * 100}%`, left: `${-(roupa.overflowLeft ?? 0) * 100}%` } : undefined} />
       )}
+      {roupa.drops && <WaterDrops />}
       {roupa.runners && Array.from({ length: roupa.runners.count }, (_, index) => (
         // Energia em volta da moldura: cada setor acende no seu tempo (só `opacity`; com movimento reduzido, fica apagado).
         // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da caixa, sem otimizar

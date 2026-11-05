@@ -357,6 +357,15 @@
   10% { opacity: 1; }
   40% { opacity: 0; }
 }
+/* Gota escorrendo (destaque do mar): aparece, desce devagar, para, escorre rápido e some; `--drip` = alturas da gota que ela percorre. */
+@keyframes cc-drip {
+  0% { opacity: 0; transform: translateY(0); }
+  6% { opacity: 1; }
+  28% { transform: translateY(calc(var(--drip) * 14%)); }
+  46% { transform: translateY(calc(var(--drip) * 16%)); }
+  80% { opacity: 1; transform: translateY(calc(var(--drip) * 82%)); }
+  96%, 100% { opacity: 0; transform: translateY(calc(var(--drip) * 100%)); }
+}
 @keyframes cc-thunder-glow {
   0%, 100% { opacity: 0; }
   3% { opacity: 1; }
