@@ -4,6 +4,7 @@ import { ArrowRightIcon } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
 import { GroupGate } from "@/components/group-gate";
 import { PendingEvaluationsBanner } from "@/components/pending-evaluations-banner";
+import { EmptyState } from "@/components/state-panels";
 import { NewsSlider } from "./_components/news-slider";
 import { LatestRoundCard } from "./_components/latest-round-card";
 import { MyCardSummary } from "./_components/my-card-summary";
@@ -101,20 +102,21 @@ async function HomeContent() {
             )}
 
             {!hasRounds && (
-              <section className="flex flex-col gap-2 rounded-xl border border-dashed bg-card/50 p-4">
-                <h2 className="font-display text-lg font-bold tracking-wide uppercase">Ainda não rolou nenhuma rodada</h2>
-                <p className="text-sm text-muted-foreground">
-                  Depois do primeiro jogo, o organizador cria a rodada e cada um avalia quem jogou. As cartas e o
-                  ranking aparecem quando a rodada fecha.
-                </p>
-                <Link
-                  href="/rodadas"
-                  className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-primary hover:underline"
-                >
-                  Ir para as rodadas
-                  <ArrowRightIcon aria-hidden className="size-4" />
-                </Link>
-              </section>
+              <EmptyState
+                title="Ainda não rolou nenhuma rodada"
+                action={
+                  <Link
+                    href="/rodadas"
+                    className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-primary hover:underline"
+                  >
+                    Ir para as rodadas
+                    <ArrowRightIcon aria-hidden className="size-4" />
+                  </Link>
+                }
+              >
+                Depois do primeiro jogo, o organizador cria a rodada e cada um avalia quem jogou. As cartas e o ranking
+                aparecem quando a rodada fecha.
+              </EmptyState>
             )}
           </div>
         </div>
