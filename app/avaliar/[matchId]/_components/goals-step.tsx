@@ -66,7 +66,7 @@ export function GoalsStep({ match, memberId }: GoalsStepProps) {
         <div className="mx-auto flex w-full max-w-md flex-col gap-2 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           <Button size="lg" className="h-12 text-base" disabled={isPending} onClick={handleSubmit}>
-            {isPending ? "Enviando…" : "Continuar para as notas"}
+            {isPending ? "Enviando…" : "Salvar gols e ir para as notas"}
           </Button>
         </div>
       </footer>

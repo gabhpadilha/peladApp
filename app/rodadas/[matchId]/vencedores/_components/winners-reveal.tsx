@@ -64,7 +64,7 @@ function buildSteps(revealed: Award[], hasTeam: boolean, hasRewards: boolean): S
 function nextLabel(steps: Step[], index: number): string {
   const current = steps[index];
   const next = steps[index + 1];
-  if (!next || current.type === "rewards") return "Ver todos os vencedores";
+  if (!next || current.type === "rewards") return "Ver quem ganhou";
   switch (next.type) {
     case "highlights":
       return "Ver os destaques da rodada";

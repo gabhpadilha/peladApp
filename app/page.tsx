@@ -61,7 +61,7 @@ async function HomeContent() {
         )}
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="flex flex-col gap-6">
+          <div className="order-1 flex flex-col gap-6">
             <MyCardSummary
               player={data.currentPlayer}
               delta={data.currentDelta}
@@ -72,7 +72,17 @@ async function HomeContent() {
             />
           </div>
 
-          <div className="flex flex-col gap-6">
+          {/* Novidades logo depois da minha carta no celular (a promoção da Loja precisa de destaque); em tela grande ocupa a largura toda, embaixo. */}
+          <div className="order-2 min-w-0 lg:order-3 lg:col-span-2">
+            <NewsSlider
+              event={data.cardEvent}
+              today={data.today}
+              shopSale={data.shopSale}
+              player={data.currentPlayer}
+            />
+          </div>
+
+          <div className="order-3 flex flex-col gap-6 lg:order-2">
             <Scoreboard
               pointsMonth={data.monthRanking}
               pointsAllTime={data.allTimeRanking}
@@ -109,13 +119,6 @@ async function HomeContent() {
           </div>
         </div>
 
-        {/* As novidades por último: informam, não pedem nada (o primeiro slide é a promoção, quando houver). */}
-        <NewsSlider
-          event={data.cardEvent}
-          today={data.today}
-          shopSale={data.shopSale}
-          player={data.currentPlayer}
-        />
       </main>
     </>
   );

@@ -82,7 +82,7 @@ export function CollectionGallery({ awards, shareableIds, groupName }: Collectio
       </div>
 
       {groups.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Nenhuma carta desse tipo ainda.</p>
+        <p className="text-sm text-muted-foreground">Ainda sem cartas desse prêmio. Quem sabe na próxima rodada.</p>
       ) : (
         groups.map((group) => (
           <div key={group.key} className="flex flex-col gap-3 border-t pt-4 first-of-type:border-t-0 first-of-type:pt-0">

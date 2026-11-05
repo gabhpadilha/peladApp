@@ -94,7 +94,9 @@ export function MainNavPlaceholder(props: Omit<MainNavProps, "isOwner">) {
 
 /** Sem rota (`pathname` vazio): aparece sem destaque enquanto o `<Suspense>` carrega. */
 export function MainNavView({ variant, isOwner, currentPlayer, pathname }: MainNavProps & { pathname: string }) {
-  const items = NAV_ITEMS.filter((item) => isOwner || !item.ownerOnly);
+  // Computador: o Administrador ganha o Elenco no cabeçalho. Celular: 5 botões fixos para todos (limite da barra de baixo);
+  // o Administrador chega ao Elenco por Eu → "Gerenciar elenco" e o botão Eu fica aceso lá (revisão de 2026-11-04).
+  const items = NAV_ITEMS.filter((item) => variant === "top" ? isOwner || !item.ownerOnly : !item.ownerOnly);
 
   if (variant === "top") {
     return (
@@ -129,17 +131,16 @@ export function MainNavView({ variant, isOwner, currentPlayer, pathname }: MainN
       data-bottom-nav
       className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur sm:hidden"
     >
-      <ul className={cn("grid h-16", items.length > 5 ? "grid-cols-6" : "grid-cols-5")}>
+      <ul className="grid h-16 grid-cols-5">
         {items.map(({ href, label, icon: Icon, isActive }) => {
-          const isCurrent = isActive(pathname);
+          const isCurrent = isActive(pathname) || (href === "/eu" && pathname.startsWith("/elenco"));
           return (
             <li key={href}>
               <Link
                 href={href}
                 aria-current={isCurrent ? "page" : undefined}
                 className={cn(
-                  "flex h-full flex-col items-center justify-center gap-1",
-                  "text-xs",
+                  "flex h-full flex-col items-center justify-center gap-1 text-xs",
                   isCurrent ? "font-semibold text-primary" : "text-muted-foreground",
                 )}
               >

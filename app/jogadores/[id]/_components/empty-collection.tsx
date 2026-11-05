@@ -20,12 +20,12 @@ export function EmptyCollection({ player, isOwnProfile, theme }: EmptyCollection
     <section aria-labelledby="empty-collection-title" className="flex flex-col gap-4 rounded-xl border border-dashed bg-card/50 p-4">
       <div>
         <h2 id="empty-collection-title" className="font-display text-lg font-bold tracking-wide uppercase">
-          {isOwnProfile ? "Sua coleção começa aqui" : "Nenhuma carta ainda"}
+          {isOwnProfile ? "Sua coleção começa aqui" : "Ainda sem carta especial"}
         </h2>
         <p className="text-sm text-muted-foreground">
           {isOwnProfile
-            ? `Essas são as cartas que você pode ganhar ${theme === "default" ? "agora" : `no tema ${CARD_THEME_LABELS[theme]}`}. Quando a rodada fecha, as notas decidem quase tudo: Melhor Jogador, um prêmio por atributo, Goleiro, Time da Semana e, na zoeira, a Bola Murcha (a menor nota). Só o Gol da Rodada é no voto.`
-            : `Quando ${player.nickname} ganhar uma carta especial, ela aparece aqui.`}
+            ? `Essas são as cartas que você pode ganhar ${theme === "default" ? "agora" : `no tema ${CARD_THEME_LABELS[theme]}`}. Quando a rodada fecha, as notas decidem quase tudo: Melhor Jogador, Atacante, Criativo, Defensor, Goleiro, Goleador (gols confirmados), Time do Mês e, na zoeira, a Bola Murcha (a menor nota). Só o Gol da Rodada é no voto.`
+            : `${player.nickname} ainda não ganhou carta especial. Quando ganhar, ela aparece aqui.`}
         </p>
       </div>
 

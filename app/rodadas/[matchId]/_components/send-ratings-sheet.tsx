@@ -58,7 +58,7 @@ function VoteSteps({
       <SheetHeader className="border-b pb-4 text-left">
         {/* pr-9: o contador não encosta no X de fechar a folha. */}
         <div className="flex items-center justify-between gap-3 pr-9">
-          <SheetTitle className="font-display text-2xl font-bold">Votar e enviar</SheetTitle>
+          <SheetTitle className="font-display text-2xl font-bold">Revisar e enviar</SheetTitle>
           {hasManyVotes && (
             <span className="text-sm text-muted-foreground tabular-nums">
               Voto {step + 1} de {VOTE_AWARD_KINDS.length}

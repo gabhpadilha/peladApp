@@ -188,7 +188,7 @@ export function RevealRewards({ round, rewards, onDone }: RevealRewardsProps) {
 
         <div className="flex animate-[reveal-fade_0.4s_ease-out_1.1s_both] flex-col gap-2.5 pt-1">
           <Button size="lg" className="h-11 text-base" onClick={onDone}>
-            Ver todos os vencedores
+            Ver quem ganhou
           </Button>
           <Button asChild size="lg" variant="outline" className="h-11 text-base">
             <Link href="/loja">Gastar na Loja</Link>

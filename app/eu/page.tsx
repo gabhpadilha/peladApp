@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
-import { LogOutIcon } from "lucide-react";
+import Link from "next/link";
+import { ChevronRightIcon, LogOutIcon, UsersIcon } from "lucide-react";
 import { signOut } from "@/app/_actions/sign-out";
 import { AppHeader } from "@/components/app-header";
 import { CoinPill } from "@/components/coin-pill";
 import { GroupGate } from "@/components/group-gate";
 import { PlayerCard } from "@/components/player-card";
+import { getActiveMembership, getUserId } from "@/lib/session";
 import { Button } from "@/components/ui/button";
 import { POSITION_LABELS } from "@/types/player";
 import { AccountDisclosure } from "./_components/account-disclosure";
@@ -20,7 +22,7 @@ export const metadata: Metadata = {
   title: "Eu · Cancha Club",
 };
 
-/** A própria conta: carta, Minhas cartas, foto, nome e apelido, senha e sair. */
+/** A própria conta: carta, Minhas cartas, Gerenciar elenco (Administrador), foto, nome e apelido, senha e sair. */
 export default function MePage() {
   return (
     // Tudo aqui depende da sessão: faz streaming atrás do Suspense.
@@ -36,6 +38,9 @@ async function MeContent() {
   const data = await getMe();
   if (!data) notFound();
   const { me } = data;
+  // Só o Administrador: o Elenco saiu da barra de baixo do celular e mora aqui.
+  const userId = await getUserId();
+  const isOwner = userId ? ((await getActiveMembership(userId))?.isOwner ?? false) : false;
 
   return (
     <>
@@ -59,6 +64,20 @@ async function MeContent() {
         </div>
 
         <MyCards me={me} cards={data.cards} />
+
+        {isOwner && (
+          <Link
+            href="/elenco"
+            className="flex min-h-16 items-center gap-3 rounded-xl border bg-card px-4 transition-colors hover:bg-muted"
+          >
+            <UsersIcon aria-hidden className="size-5 shrink-0 text-primary" />
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="text-base font-medium">Gerenciar elenco</span>
+              <span className="text-sm text-muted-foreground">Cadastrar jogadores, redefinir senhas e dar acesso de organizador.</span>
+            </span>
+            <ChevronRightIcon aria-hidden className="size-5 shrink-0 text-muted-foreground" />
+          </Link>
+        )}
 
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:items-start">
           <OwnPhotoCard member={data.photoMember} />

@@ -17,7 +17,7 @@ export function MatchHistory({ performances, goalsByMatch }: MatchHistoryProps) 
     <section aria-labelledby="history-title" className="flex flex-col gap-3 rounded-xl border bg-card p-4">
       <SectionTitle id="history-title">Histórico</SectionTitle>
       {rows.length === 0 ? (
-        <p className="text-sm text-muted-foreground">Nenhuma rodada fechada ainda.</p>
+        <p className="text-sm text-muted-foreground">O histórico começa quando a primeira rodada fechar.</p>
       ) : (
         <table className="w-full text-sm">
           <thead>

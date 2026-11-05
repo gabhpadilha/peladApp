@@ -193,7 +193,7 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
                 disabled={!isAllRated}
                 onClick={() => setIsSendOpen(true)}
               >
-                Votar e enviar
+                Revisar e enviar
               </Button>
             </div>
           </div>

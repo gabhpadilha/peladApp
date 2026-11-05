@@ -9,6 +9,7 @@ import { PendingEvaluationsBanner } from "@/components/pending-evaluations-banne
 import { AthleteHero } from "./_components/athlete-hero";
 import { GoalStats } from "./_components/goal-stats";
 import { AthleteHighlights } from "./_components/athlete-highlights";
+import { AthleteSections } from "./_components/athlete-sections";
 import { AthleteTabs } from "./_components/athlete-tabs";
 import { StatBars } from "./_components/stat-bars";
 import { MatchHistory } from "./_components/match-history";
@@ -47,22 +48,31 @@ async function AthleteContent({ params }: { params: PageProps<"/jogadores/[id]">
         <AthleteTabs memberId={profile.player.id} awardCount={profile.awards.length} active="stats" />
         <AthleteHero profile={profile} />
         <PendingEvaluationsBanner pending={profile.pending} />
-        <LevelProgressBar
-          progress={profile.levelProgress}
-          hint={profile.isOwnProfile ? "troque o visual da carta na Loja" : undefined}
+        {/* Revisão de 2026-11-04: três partes em vez de uns 8 blocos empilhados. */}
+        <AthleteSections
+          summary={
+            <>
+              <LevelProgressBar
+                progress={profile.levelProgress}
+                hint={profile.isOwnProfile ? "troque o visual da carta na Loja" : undefined}
+              />
+              {profile.player.ovr !== null && <TierProgress ovr={profile.player.ovr} />}
+              <AthleteHighlights
+                player={profile.player}
+                performances={profile.performances}
+                gamesPlayed={profile.gamesPlayed}
+              />
+              <StatBars player={profile.player} groupAverages={profile.groupAverages} />
+            </>
+          }
+          goals={<GoalStats stats={profile.goalStats} />}
+          history={
+            <>
+              <PerformanceChart performances={profile.performances} bestScore={profile.bestScore} />
+              <MatchHistory performances={profile.performances} goalsByMatch={profile.goalStats.games > 0 ? profile.goalsByMatch : null} />
+            </>
+          }
         />
-        {profile.player.ovr !== null && <TierProgress ovr={profile.player.ovr} />}
-        <AthleteHighlights
-          player={profile.player}
-          performances={profile.performances}
-          gamesPlayed={profile.gamesPlayed}
-        />
-        <GoalStats stats={profile.goalStats} />
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-          <PerformanceChart performances={profile.performances} bestScore={profile.bestScore} />
-          <StatBars player={profile.player} groupAverages={profile.groupAverages} />
-        </div>
-        <MatchHistory performances={profile.performances} goalsByMatch={profile.goalStats.games > 0 ? profile.goalsByMatch : null} />
       </main>
     </>
   );

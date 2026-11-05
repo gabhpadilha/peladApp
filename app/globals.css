@@ -480,7 +480,7 @@
 }
 
 /*
- * Mesa tática: enquanto a barra "Votar e enviar" (`data-rate-bar`) aparece, o menu
+ * Mesa tática: enquanto a barra "Revisar e enviar" (`data-rate-bar`) aparece, o menu
  * de baixo sai do caminho e o <body> não reserva o espaço dele. Fora do @layer de
  * propósito: vence as classes do Tailwind sem depender de especificidade.
  */
