@@ -112,11 +112,17 @@ function morph(m, w, h, r, grow) { // dilata (grow) ou erode, separável
   const aSmall = await oneChannel(alphaRaw, rw, rh, (i) => i.resize(tw2, th2).blur(9).linear(0.5, 0));
   const shBuf = Buffer.alloc(tw2 * th2 * 4); for (let i = 0; i < tw2 * th2; i++) { shBuf[i * 4] = 0; shBuf[i * 4 + 1] = 6; shBuf[i * 4 + 2] = 13; shBuf[i * 4 + 3] = aSmall[i]; }
   const shadowRgba = await sharp(shBuf, { raw: { width: tw2, height: th2, channels: 4 } }).png().toBuffer();
+  // O jogador fica POR CIMA do render (pedido do dono do app, 2026-11-05): a parte do aglomerado que cai dentro da janela vai para uma camada
+  // ATRÁS da foto (`premium-voltagem-dentro.webp`, do tamanho da janela, parada: `innerBolts` + `still`) e a de fora da janela (sobre o fio,
+  // o neon e a sobra) fica na camada de cima junto com a moldura.
+  const WIN = 64.5, WR = 41.5, wx = OX + WIN, wy = OY + WIN, ww = BW - 2 * WIN, wh = BH - 2 * WIN;
+  const clusterCanvas = await sharp({ create: { width: OUT_W, height: CH, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+    .composite([...(shadowRgba ? [{ input: shadowRgba, left: PLACE.x - 6, top: PLACE.y + 10 }] : []), { input: cluster, left: PLACE.x, top: PLACE.y }]).png().toBuffer();
+  const winMask = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${OUT_W}" height="${CH}"><rect x="${wx}" y="${wy}" width="${ww}" height="${wh}" rx="${WR}" fill="#fff"/></svg>`);
+  const outer = await sharp(clusterCanvas).composite([{ input: winMask, blend: "dest-out" }]).png().toBuffer();
   const frame = await sharp(Buffer.from(svg)).png().toBuffer();
-  const layers = [{ input: frame, left: 0, top: 0 }];
-  if (shadowRgba) layers.push({ input: shadowRgba, left: PLACE.x - 6, top: PLACE.y + 10 });
-  layers.push({ input: cluster, left: PLACE.x, top: PLACE.y });
-  await sharp({ create: { width: OUT_W, height: CH, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } }).composite(layers).webp({ quality: 90, alphaQuality: 95 }).toFile(path.join(OUT, "premium-voltagem-vaza.webp"));
+  await sharp({ create: { width: OUT_W, height: CH, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } }).composite([{ input: frame, left: 0, top: 0 }, { input: outer, left: 0, top: 0 }]).webp({ quality: 90, alphaQuality: 95 }).toFile(path.join(OUT, "premium-voltagem-vaza.webp"));
+  await sharp(clusterCanvas).extract({ left: Math.round(wx), top: Math.round(wy), width: Math.round(ww), height: Math.round(wh) }).webp({ quality: 90, alphaQuality: 95 }).toFile(path.join(OUT, "premium-voltagem-dentro.webp"));
 
   // fundo: o miolo da arte sem o aglomerado (o lado esquerdo espelhado sobre o direito, com a emenda esmaecida)
   const IW = 886, IH = 1284, IX = 228, IY = 358, MIRROR = 760 - IX;
