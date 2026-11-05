@@ -10,6 +10,7 @@
 // o fundo sai como a arte inteira da caixa menos essa faixa fina (`premium-<nome>.webp`, 700 × 1004), para a arte chegar até a moldura.
 // Gemas (2026-11-05, Rubi e Ícone com a moldura da Maré): `GEM="matiz,saturação,luz"` na variável de ambiente troca a cor dos cristais cravejados
 // (os pixels mais azuis que vermelhos; o ouro fica); fundo "-" pula o fundo.
+// Peças escuras (pano, ferro) viravam translúcidas pelo brilho: `OPAQUE="rampa baixa,rampa alta,limiar da silhueta"` (padrão 14,110,55; para o Destino 12,45,30) deixa opacos os pixels acima do preto.
 // Uso: node montar-carta.cjs <nome> <fundo> <borda> <pasta de saída> <raiz do repo> <x0,y0,x1,y1 da caixa da carta nas imagens> [holeRect] [artInset]
 const path = require("path");
 const sharp = require(path.resolve(process.argv[6], "node_modules/sharp"));
@@ -19,6 +20,7 @@ const HOLE = process.argv[8] && process.argv[8] !== "-" ? process.argv[8].split(
 const ART_INSET = process.argv[9] ? Number(process.argv[9]) : null;
 const [FX0, FY0, FX1, FY1] = (process.argv[10] || process.argv[7]).split(",").map(Number); // caixa da carta na imagem do FUNDO (se diferir da borda)
 const CELL = { w: 1000, h: 1400 }, BOX = { x: 80, y: 112, w: 840, h: 1176 }, WIN = 64.5;
+const [RLO, RHI, SIL] = (process.env.OPAQUE || "14,110,55").split(",").map(Number);
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const smooth = (a, b, t) => { t = clamp((t - a) / (b - a)); return t * t * (3 - 2 * t); };
 const one = async (buf, w, h, fn) => (await fn(sharp(buf, { raw: { width: w, height: h, channels: 1 } })).extractChannel(0).raw().toBuffer());
@@ -68,15 +70,17 @@ const one = async (buf, w, h, fn) => (await fn(sharp(buf, { raw: { width: w, hei
       hole[y * W + x] = Math.hypot(qx, qy) <= hr ? 1 : 0;
     }
   }
-  const metal = Buffer.alloc(N); for (let i = 0; i < N; i++) metal[i] = lum[i] > 55 && !hole[i] ? 255 : 0;
+  const metal = Buffer.alloc(N); for (let i = 0; i < N; i++) metal[i] = lum[i] > SIL && !hole[i] ? 255 : 0;
   const sil = await one(metal, W, H, (i) => i.blur(10).threshold(60).blur(10).threshold(150));
   const holeSoft = await one(Buffer.from(hole.map((v) => (v ? 255 : 0))), W, H, (i) => i.blur(1.4));
   const silSoft = await one(sil, W, H, (i) => i.blur(1.2));
   const rgba = Buffer.alloc(N * 4);
   for (let i = 0; i < N; i++) {
     const l = lum[i], s = silSoft[i] / 255, hsoft = holeSoft[i] / 255;
-    const glow = smooth(14, 110, l);
-    const a = Math.max(glow, s) * (1 - hsoft);
+    const glow = smooth(RLO, RHI, l);
+    const x = i % W, y = (i / W) | 0;
+    const edge = smooth(0, 24, x) * smooth(0, 24, W - 1 - x) * smooth(0, 24, y) * smooth(0, 24, H - 1 - y); // o que a arte do Gemini corta na borda da imagem (pano, folhas) esmaece, sem corte reto
+    const a = Math.max(glow, s) * (1 - hsoft) * edge;
     // sobre a silhueta, o relevo escuro do metal fica num marrom-ouro escuro em vez de furar
     const under = s * (1 - glow);
     rgba[i * 4] = data[i * 3] * (1 - under) + 26 * under;
