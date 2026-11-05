@@ -124,3 +124,8 @@ const CLUBS: Club[] = [
   { name: "Vitória", kit: "listras vermelhas e pretas largas", crest: "#c8102e", vars: { ...dark("#8a0d1c", "#140205", "#ff5468"), "--skin-pattern": stripesH("#c4161f", "#0c0c0c", 12) } },
 ];
 ```
+
+## Carta guardada: Aurora (2026-11-04, aprovada pelo dono do app, ainda não aplicada)
+- Skin premium feita **só em código** (sem IA de imagem): aurora boreal pixel a pixel (cortinas de ruído fractal, céu com Via Láctea, montanhas em névoa, neve caindo), fio de ouro, respiro preto, tubo de neon verde-água, Estrela Polar no topo, uma camada de luz que desliza devagar atrás do jogador (`cc-aurora-drift`, só `transform`) e um **monte de neve** vazando sobre o canto de cima à direita (mapa de altura iluminado, cristais de gelo).
+- Já no código, sem uso: roupa `auroraBoreal` em `components/cancha-card.tsx`, keyframe no `globals.css`, script `prototipos/premium-aurora.cjs` e as imagens `public/cartas/fundos/premium-aurora{,-vaza,-luz}.webp`.
+- Para ligar: entrada `{ key: "aurora", name: "Aurora", level: 14, price: 1600 }` em `CARD_SKINS` (sugestão), `case "aurora": return "auroraBoreal"` em `skinRoupa` e `aurora: "card-skin-icone"` em `SKIN_CLASSES` (`player-card.tsx`). `card_skin` no banco é texto livre: sem migration. Boa para a Loja de dezembro (inverno) ou como prêmio de prestígio.

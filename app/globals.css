@@ -360,6 +360,11 @@
   80% { opacity: 1; transform: translateY(calc(var(--drip) * 82%)); }
   96%, 100% { opacity: 0; transform: translateY(calc(var(--drip) * 100%)); }
 }
+/* Aurora: a camada de luz desliza de um lado a outro da janela (só transform). */
+@keyframes cc-aurora-drift {
+  from { transform: translateX(-4.5%); }
+  to { transform: translateX(4.5%); }
+}
 @keyframes cc-thunder-glow {
   0%, 100% { opacity: 0; }
   3% { opacity: 1; }

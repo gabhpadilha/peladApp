@@ -81,6 +81,11 @@ export type Roupa = {
   statsInset?: { bottom: number; side: number };
   /** Gotas de água escorrendo pela carta, desenhadas em código (só `transform` e `opacity`); ficam por cima do conteúdo e por baixo da moldura. */
   drops?: boolean;
+  /**
+   * Camada de luz que desliza devagar atrás do jogador (WebP 12% mais larga que a janela; só `transform`, a Aurora):
+   * as cortinas dela passam sobre as do fundo. Parada com movimento reduzido.
+   */
+  drift?: string;
   /** Os raios acendem forte e esmaecem devagar (`cc-thunder-glow`), em vez do estalo curto. */
   glow?: boolean;
 };
@@ -135,6 +140,10 @@ const ROUPAS = {
   rubi: { background: "premium-rubi", overflow: "premium-rubi-vaza", overflowWidth: 774 / 714, artFrame: true, trim: null, metal: ["#9b1530", "#9b1530", "#ff8fa3"], accent: "#ff8fa3", light: "255 190 200", bar: "#1a0309", muted: "#ffb3c0", sparkles: false, neon: "#ff2f66" },
   // Ícone: branco creme com moldura de ouro claro, lembrando a carta Icon do FIFA (2026-10-29).
   icone: { background: "premium-icone", clean: true, overflow: "premium-icone-vaza", overflowWidth: 774 / 714, artFrame: true, trim: null, metal: ["#c9a24e", "#c9a24e", "#fff4d6"], accent: "#e2c06e", light: "255 240 200", bar: "#1a140a", muted: "#f0dfb5", sparkles: false, neon: "#ffcf4d" },
+  // Aurora (2026-11-04, GUARDADA: o dono gostou mas pediu para não aplicar ainda; não está em `CARD_SKINS`, então não aparece na Loja.
+  // Para usar: entrada em `CARD_SKINS` (sugestão nível 14, 1600 CC), `case` em `skinRoupa` e `SKIN_CLASSES`): aurora boreal renderizada pixel a pixel em código (`prototipos/premium-aurora.cjs`), fio de ouro, respiro preto,
+  // tubo de neon verde-água por fora e a Estrela Polar no topo; a luz da aurora vaza sobre a moldura. Concêntrica: windowRadius = raio da carta − o aro.
+  auroraBoreal: { background: "premium-aurora", drift: "premium-aurora-luz", overflow: "premium-aurora-vaza", window: "ring", windowRadius: 8.1, artFrame: true, clean: true, trim: null, metal: ["#b8902f", "#b8902f", "#f3d27a"], accent: "#e6c677", light: "120 255 200", bar: "#02100f", muted: "#bfffe9", sparkles: false, neon: "#2dffc4" },
   // Halloween 2026 (aprovadas pelo dono do app em 2026-10-29): fundo que conta o evento, sem estrelinhas,
   // e o tubo de neon das premium com enfeite do bicho (azul-luar com garras e presas; vermelho-sangue com morcego e asa).
   lobisomem: { background: "skin-lobisomem", metal: ["#5f6b78", "#5f6b78", "#e2e8ef"], accent: "#e2e8ef", light: "207 226 255", bar: "#03070d", muted: "#cfe2ff", sparkles: false, neon: "#8fd0ff", trim: "lobisomem" },
@@ -782,6 +791,10 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
         className={cn("absolute overflow-hidden bg-cover bg-center", roupa.window === "inner" ? INNER_WINDOW : roupa.window === "ring" ? RING_WINDOW : isNeon ? NEON_WINDOW : METAL_WINDOW)}
         style={{ backgroundImage: `url(/cartas/fundos/${roupa.background}.webp)`, ...(roupa.window === "ring" ? { borderRadius: `${roupa.windowRadius ?? 8}cqw` } : null) }}
       >
+        {roupa.drift && (
+          // eslint-disable-next-line @next/next/no-img-element -- arte decorativa, sem otimizar
+          <img aria-hidden alt="" src={`/cartas/fundos/${roupa.drift}.webp`} className="pointer-events-none absolute inset-y-0 -left-[6%] z-[2] h-full w-[112%] max-w-none animate-[cc-aurora-drift_17s_ease-in-out_infinite_alternate] opacity-40 select-none motion-reduce:animate-none" />
+        )}
         {roupa.innerBolts && (
           // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da janela, sem otimizar
           <img aria-hidden alt="" src={`/cartas/fundos/${roupa.innerBolts}.webp`} className={cn("pointer-events-none absolute inset-0 z-[2] size-full select-none motion-reduce:animate-none", !roupa.still && (roupa.glow ? "animate-[cc-thunder-glow_3.6s_ease-out_infinite]" : "animate-[cc-thunder-flash_3.2s_linear_infinite]"))} />
