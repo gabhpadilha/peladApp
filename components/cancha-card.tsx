@@ -836,7 +836,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
             "absolute inset-x-0 top-0 z-[3] flex h-[16%] flex-col justify-center border-b-[0.6cqw] border-(--cc-accent) pt-[2.6cqw] pr-[26cqw] pl-[8cqw] leading-none whitespace-nowrap",
             roupa.bareName ? "" : roupa.matte ? "bg-(--cc-bar)" : "bg-linear-to-b from-black/80 to-black/40",
           )}
-          style={roupa.contentPad ? { paddingLeft: `${8 + roupa.contentPad}cqw`, paddingTop: `${2.6 + roupa.contentPad}cqw` } : undefined}
+          style={roupa.contentPad ? { height: `calc(16% + ${roupa.contentPad}cqw)`, paddingLeft: `${8 + roupa.contentPad}cqw`, paddingTop: `${2.6 + roupa.contentPad}cqw` } : undefined}
         >
           <span className="truncate text-[10.5cqw] font-extrabold">{player.nickname}</span>
           <span className="mt-[1cqw] truncate text-[3.8cqw] font-bold tracking-[0.2em] text-(--cc-muted) uppercase">{subtitle}</span>
@@ -908,13 +908,13 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
           <RankInsignia rank={rank} />
         </div>
 
-        <span style={roupa.contentPad ? { bottom: `calc(13.5% + ${roupa.contentPad}cqw)` } : undefined} className="absolute inset-x-0 bottom-[13.5%] z-[8] truncate px-[4cqw] text-center text-[3.9cqw] font-extrabold tracking-[0.35em] text-(--cc-accent) uppercase">
+        <span style={roupa.contentPad ? { bottom: `calc(13.5% + ${roupa.contentPad + 2}cqw)` } : undefined} className="absolute inset-x-0 bottom-[13.5%] z-[8] truncate px-[4cqw] text-center text-[3.9cqw] font-extrabold tracking-[0.35em] text-(--cc-accent) uppercase">
           {band}
         </span>
 
         <dl
           className="absolute inset-x-0 bottom-0 z-[8] grid h-[12%] grid-cols-3 border-t-[0.6cqw] border-(--cc-accent) bg-(--cc-bar)"
-          style={roupa.contentPad ? { height: `calc(12% + ${roupa.contentPad}cqw)`, paddingBottom: `${roupa.contentPad}cqw`, paddingInline: `${roupa.contentPad}cqw` } : roupa.statsInset ? { paddingBottom: `${roupa.statsInset.bottom}cqw`, paddingInline: `${roupa.statsInset.side}cqw` } : undefined}
+          style={roupa.contentPad ? { height: `calc(12% + ${roupa.contentPad + 2}cqw)`, paddingBottom: `${roupa.contentPad + 2}cqw`, paddingInline: `${roupa.contentPad}cqw` } : roupa.statsInset ? { paddingBottom: `${roupa.statsInset.bottom}cqw`, paddingInline: `${roupa.statsInset.side}cqw` } : undefined}
         >
           {stats.map((stat, index) => (
             <div
