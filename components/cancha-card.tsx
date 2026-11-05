@@ -60,6 +60,8 @@ export type Roupa = {
   clean?: boolean;
   /** O conteúdo (foto, nome e estatísticas) fica dentro de uma janela mais recuada: por dentro do fio fino de dentro da borda da arte. */
   window?: "inner" | "ring";
+  /** Recuo da janela `ring` em % da carta (padrão 0,9 e 0,65): quando a caixa é o lado de fora do neon e o conteúdo vai até o ouro (Campeão do Mês). */
+  windowInset?: { x: number; y: number };
   /** Raio do canto da janela `ring`, em cqw (padrão 8: o do fio de ouro dos destaques; a Lenda tem 5,2). */
   windowRadius?: number;
   /** Barra do nome sem o fundo escuro (só a linha embaixo): as letras ficam direto sobre a arte. */
@@ -318,12 +320,12 @@ const HIGHLIGHT_AGUA: Roupa = {
 const CAMPEAO_MES: Roupa = {
   background: "campeao-mes",
   overflow: "campeao-mes-vaza",
-  overflowWidth: 774 / 714,
   overflowBolts: "campeao-mes-raios",
   innerBolts: "campeao-mes-raios-dentro",
   glow: true,
   window: "ring",
-  windowRadius: 8.6,
+  windowInset: { x: 6.7, y: 4.8 },
+  windowRadius: 7.6,
   artFrame: true,
   clean: true,
   metal: ["#2f6fd6", "#2f6fd6", "#cfe2ff"],
@@ -789,7 +791,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
     >
       <div
         className={cn("absolute overflow-hidden bg-cover bg-center", roupa.window === "inner" ? INNER_WINDOW : roupa.window === "ring" ? RING_WINDOW : isNeon ? NEON_WINDOW : METAL_WINDOW)}
-        style={{ backgroundImage: `url(/cartas/fundos/${roupa.background}.webp)`, ...(roupa.window === "ring" ? { borderRadius: `${roupa.windowRadius ?? 8}cqw` } : null) }}
+        style={{ backgroundImage: `url(/cartas/fundos/${roupa.background}.webp)`, ...(roupa.window === "ring" ? { borderRadius: `${roupa.windowRadius ?? 8}cqw` } : null), ...(roupa.window === "ring" && roupa.windowInset ? { left: `${roupa.windowInset.x}%`, right: `${roupa.windowInset.x}%`, top: `${roupa.windowInset.y}%`, bottom: `${roupa.windowInset.y}%` } : null) }}
       >
         {roupa.drift && (
           // eslint-disable-next-line @next/next/no-img-element -- arte decorativa, sem otimizar

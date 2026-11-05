@@ -13,20 +13,25 @@ const sharp = require(path.resolve(process.argv[3], "node_modules/sharp"));
 const OUT = process.argv[2];
 const SRC = path.join(__dirname, "campeao-mes-dono.jpg");
 
-// Caixa da carta = o lado de DENTRO do fio de ouro (medido: x 177 a 1165, y 309 a 1695) aberto 0,9% da largura e 0,65% da altura
+// (histórico) antes a caixa da carta era o lado de DENTRO do fio de ouro (medido: x 177 a 1165, y 309 a 1695) aberto 0,9% da largura e 0,65% da altura
 // (as folgas da janela "ring"); o ouro fino e o neon ficam por fora, na sobra.
-const EDGE = { left: 168, right: 1174, top: 300, bottom: 1704 };
-const RADIUS = 100; // raio do canto da caixa (px da arte; o de dentro do ouro mede ~87)
+// REFEITO em 2026-11-04: a caixa da carta passou a ser o lado de FORA do tubo de neon (medido: x 100 a 1242, y 236 a 1770), como no Time do
+// Mês, para as duas cartas terem o mesmo tamanho lado a lado (antes o ouro e o neon ficavam por fora da caixa e ela parecia ~8% maior).
+// O conteúdo vai até o lado de dentro do ouro (janela "ring" com `windowInset` 6,7% e 4,8%); a arte cabe inteira na caixa de 714 px (sem
+// `overflowWidth`). A arte não é 5:7 exata por fora do neon (0,744), então estica ~4% na vertical.
+const EDGE = { left: 100, right: 1242, top: 236, bottom: 1770 };
+const RADIUS = 150; // raio do canto do tubo (px da arte)
 const BG = 12; // o preto da arte não é puro
 
-const BW = 714, BH = 1000, OUT_W = 774;
+const BW = 714, BH = 1000, OUT_W = 714;
 const CW = BW * 0.84, CH = BH * 0.84, CX0 = BW * 0.08, CY0 = BH * 0.08;
 const SX = CW / (EDGE.right - EDGE.left), SY = CH / (EDGE.bottom - EDGE.top);
 const CORNER = RADIUS * SX;
 // Janela "ring" (onde fica a foto): 0,9% da largura e 0,65% da altura para dentro, canto de ~8,6% da largura (o raio de dentro do ouro).
 // Por dentro da carta, a camada de fora cobre só o que está fora da janela (o ouro, o neon e os cantos).
-const WIN = { l: CX0 + CW * 0.009, t: CY0 + CH * 0.0065, r: CX0 + CW * 0.991, b: CY0 + CH * 0.9935 };
-const WIN_RADIUS = CW * 0.0865;
+const INSET = { x: 0.067, y: 0.048 };
+const WIN = { l: CX0 + CW * INSET.x, t: CY0 + CH * INSET.y, r: CX0 + CW * (1 - INSET.x), b: CY0 + CH * (1 - INSET.y) };
+const WIN_RADIUS = CW * 0.076;
 
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
 const smooth = (a, b, t) => { t = clamp((t - a) / (b - a)); return t * t * (3 - 2 * t); };
@@ -66,8 +71,8 @@ function boxBlur(a, W, H, r, passes) {
 
   // Fundo: a janela da carta.
   const w = EDGE.right - EDGE.left, h = EDGE.bottom - EDGE.top;
-  const win = { left: EDGE.left + w * 0.009, top: EDGE.top + h * 0.0065, width: w * 0.982, height: h * 0.987 };
-  const FW = 600, FH = 860;
+  const win = { left: EDGE.left + w * INSET.x, top: EDGE.top + h * INSET.y, width: w * (1 - 2 * INSET.x), height: h * (1 - 2 * INSET.y) };
+  const FW = 600, FH = Math.round((600 * CH * (1 - 2 * INSET.y)) / (CW * (1 - 2 * INSET.x)));
   const bg = Buffer.alloc(FW * FH * 3);
   for (let y = 0; y < FH; y++) {
     for (let x = 0; x < FW; x++) {
