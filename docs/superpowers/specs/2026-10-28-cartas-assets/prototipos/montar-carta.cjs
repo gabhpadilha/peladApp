@@ -1,0 +1,60 @@
+// Montador do kit de carta (2026-11-05): pega as peças do Gemini feitas no gabarito 5:7 (`gabarito-carta-5x7.png`) e gera as camadas do app,
+// sem recortar à mão. Padrão fixo (a identidade): caixa da carta de 840 × 1176 na célula 1000 × 1400 (84% do meio), janela do conteúdo 64,5 px
+// para dentro da caixa (`window: "ring"`, `windowInset` 7,68% e 5,48%, `windowRadius` 4,94).
+//   fundo:  arte da carta inteira sobre preto → `premium-<nome>.webp` (só a janela, 600 × 860)
+//   borda:  moldura sobre preto, miolo preto    → `premium-<nome>-vaza.webp` (1000 × 1400): o miolo preto (achado por inundação a partir
+//           do centro) fica transparente, o que o brilho da moldura mostra fica opaco por cima de um fundo escuro da silhueta (os vãos
+//           escuros do metal não viram buracos) e por fora só a luz (alfa pelo brilho).
+// Uso: node montar-carta.cjs <nome> <fundo> <borda> <pasta de saída> <raiz do repo> <x0,y0,x1,y1 da caixa da carta nas imagens>
+const path = require("path");
+const sharp = require(path.resolve(process.argv[6], "node_modules/sharp"));
+const [NAME, FUNDO, BORDA, OUT, , ROOT_UNUSED] = [process.argv[2], process.argv[3], process.argv[4], process.argv[5], process.argv[6], 0];
+const [BX0, BY0, BX1, BY1] = process.argv[7].split(",").map(Number); // caixa da carta (lado de fora da moldura), em px da arte
+const CELL = { w: 1000, h: 1400 }, BOX = { x: 80, y: 112, w: 840, h: 1176 }, WIN = 64.5;
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const smooth = (a, b, t) => { t = clamp((t - a) / (b - a)); return t * t * (3 - 2 * t); };
+const one = async (buf, w, h, fn) => (await fn(sharp(buf, { raw: { width: w, height: h, channels: 1 } })).extractChannel(0).raw().toBuffer());
+
+(async () => {
+  const sx = BOX.w / (BX1 - BX0), sy = BOX.h / (BY1 - BY0);
+  // ---- fundo: a janela da caixa
+  const wl = BX0 + WIN / sx, wt = BY0 + WIN / sy, ww = (BX1 - BX0) - 2 * WIN / sx, wh = (BY1 - BY0) - 2 * WIN / sy;
+  await sharp(FUNDO).extract({ left: Math.round(wl), top: Math.round(wt), width: Math.round(ww), height: Math.round(wh) }).resize(600, 860, { fit: "fill" }).webp({ quality: 88 }).toFile(path.join(OUT, `premium-${NAME}.webp`));
+
+  // ---- borda
+  const { data, info } = await sharp(BORDA).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  const W = info.width, H = info.height, N = W * H;
+  const lum = new Uint8Array(N); for (let i = 0; i < N; i++) lum[i] = Math.max(data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
+  // miolo: o preto ligado ao centro da caixa
+  const hole = new Uint8Array(N), st = [];
+  const cx = Math.round((BX0 + BX1) / 2), cy = Math.round((BY0 + BY1) / 2);
+  const push = (x, y) => { if (x < 0 || y < 0 || x >= W || y >= H) return; const i = y * W + x; if (hole[i] || lum[i] > 28) return; hole[i] = 1; st.push(i); };
+  push(cx, cy);
+  while (st.length) { const i = st.pop(), x = i % W, y = (i / W) | 0; push(x + 1, y); push(x - 1, y); push(x, y + 1); push(x, y - 1); }
+  // silhueta do metal: o que brilha, fechado (os vãos escuros do relevo ficam dentro)
+  const metal = Buffer.alloc(N); for (let i = 0; i < N; i++) metal[i] = lum[i] > 55 && !hole[i] ? 255 : 0;
+  const sil = await one(metal, W, H, (i) => i.blur(10).threshold(60).blur(10).threshold(150));
+  const holeSoft = await one(Buffer.from(hole.map((v) => (v ? 255 : 0))), W, H, (i) => i.blur(1.4));
+  const silSoft = await one(sil, W, H, (i) => i.blur(1.2));
+  const rgba = Buffer.alloc(N * 4);
+  for (let i = 0; i < N; i++) {
+    const l = lum[i], s = silSoft[i] / 255, hsoft = holeSoft[i] / 255;
+    const glow = smooth(14, 110, l);
+    const a = Math.max(glow, s) * (1 - hsoft);
+    // sobre a silhueta, o relevo escuro do metal fica num marrom-ouro escuro em vez de furar
+    const under = s * (1 - glow);
+    rgba[i * 4] = data[i * 3] * (1 - under) + 26 * under;
+    rgba[i * 4 + 1] = data[i * 3 + 1] * (1 - under) + 19 * under;
+    rgba[i * 4 + 2] = data[i * 3 + 2] * (1 - under) + 6 * under;
+    rgba[i * 4 + 3] = Math.round(a * 255);
+  }
+  const tw = Math.round(W * sx), th = Math.round(H * sy);
+  const placed = await sharp(rgba, { raw: { width: W, height: H, channels: 4 } }).resize(tw, th, { kernel: "lanczos3" }).png().toBuffer();
+  const left = Math.round(BOX.x - BX0 * sx), top = Math.round(BOX.y - BY0 * sy);
+  const base = sharp({ create: { width: CELL.w, height: CELL.h, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } });
+  // recorta o que cair fora da célula antes de compor
+  const cl = Math.max(0, -left), ct = Math.max(0, -top), cw = Math.min(tw - cl, CELL.w - Math.max(0, left)), ch = Math.min(th - ct, CELL.h - Math.max(0, top));
+  const piece = await sharp(placed).extract({ left: cl, top: ct, width: cw, height: ch }).png().toBuffer();
+  await base.composite([{ input: piece, left: Math.max(0, left), top: Math.max(0, top) }]).webp({ quality: 88, alphaQuality: 95 }).toFile(path.join(OUT, `premium-${NAME}-vaza.webp`));
+  console.log("ok", { sx: sx.toFixed(4), sy: sy.toFixed(4), left, top });
+})().catch((e) => { console.error(e); process.exit(1); });
