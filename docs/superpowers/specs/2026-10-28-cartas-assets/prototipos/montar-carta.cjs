@@ -8,6 +8,8 @@
 // Moldura fina com enfeites (2026-11-05): com `holeRect` (x0,y0,x1,y1,raio do lado de dentro da faixa, em px da arte) tudo o que cai por dentro
 // da faixa vira transparente, mesmo enfeite: "os enfeites ficam sempre por fora, para não atrapalhar o conteúdo". Com `artInset` (px da célula),
 // o fundo sai como a arte inteira da caixa menos essa faixa fina (`premium-<nome>.webp`, 700 × 1004), para a arte chegar até a moldura.
+// Gemas (2026-11-05, Rubi e Ícone com a moldura da Maré): `GEM="matiz,saturação,luz"` na variável de ambiente troca a cor dos cristais cravejados
+// (os pixels mais azuis que vermelhos; o ouro fica); fundo "-" pula o fundo.
 // Uso: node montar-carta.cjs <nome> <fundo> <borda> <pasta de saída> <raiz do repo> <x0,y0,x1,y1 da caixa da carta nas imagens> [holeRect] [artInset]
 const path = require("path");
 const sharp = require(path.resolve(process.argv[6], "node_modules/sharp"));
@@ -23,10 +25,12 @@ const one = async (buf, w, h, fn) => (await fn(sharp(buf, { raw: { width: w, hei
 
 (async () => {
   const sx = BOX.w / (BX1 - BX0), sy = BOX.h / (BY1 - BY0);
-  // ---- fundo: a janela da caixa
-  const fsx = BOX.w / (FX1 - FX0), fsy = BOX.h / (FY1 - FY0);
+  // ---- fundo: a janela da caixa (pulado com "-")
+  const fsx = FUNDO === "-" ? 1 : BOX.w / (FX1 - FX0), fsy = FUNDO === "-" ? 1 : BOX.h / (FY1 - FY0);
   const wl = FX0 + WIN / fsx, wt = FY0 + WIN / fsy, ww = (FX1 - FX0) - 2 * WIN / fsx, wh = (FY1 - FY0) - 2 * WIN / fsy;
-  if (ART_INSET !== null) {
+  if (FUNDO === "-") {
+    // sem fundo novo
+  } else if (ART_INSET !== null) {
     const al = FX0 + ART_INSET / fsx, at = FY0 + ART_INSET / fsy, aw = (FX1 - FX0) - 2 * ART_INSET / fsx, ah = (FY1 - FY0) - 2 * ART_INSET / fsy;
     await sharp(FUNDO).extract({ left: Math.round(al), top: Math.round(at), width: Math.round(aw), height: Math.round(ah) }).resize(700, 1004, { fit: "fill" }).webp({ quality: 88 }).toFile(path.join(OUT, `premium-${NAME}.webp`));
   } else {
@@ -36,6 +40,19 @@ const one = async (buf, w, h, fn) => (await fn(sharp(buf, { raw: { width: w, hei
   // ---- borda
   const { data, info } = await sharp(BORDA).removeAlpha().raw().toBuffer({ resolveWithObject: true });
   const W = info.width, H = info.height, N = W * H;
+  if (process.env.GEM) { // cristais: pixels mais azuis que vermelhos (o ouro é r > g > b)
+    const [gh, gs, gl] = process.env.GEM.split(",").map(Number);
+    for (let i = 0; i < N; i++) {
+      const r = data[i * 3] / 255, g = data[i * 3 + 1] / 255, b = data[i * 3 + 2] / 255;
+      if (b <= r + 0.05) continue;
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+      const sat = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1));
+      const S = Math.min(1, sat * gs), L = Math.min(1, l * gl), H = gh / 360;
+      const q = L < 0.5 ? L * (1 + S) : L + S - L * S, pp = 2 * L - q;
+      const hue = (t) => { t = (t + 1) % 1; return t < 1 / 6 ? pp + (q - pp) * 6 * t : t < 1 / 2 ? q : t < 2 / 3 ? pp + (q - pp) * (2 / 3 - t) * 6 : pp; };
+      data[i * 3] = hue(H + 1 / 3) * 255; data[i * 3 + 1] = hue(H) * 255; data[i * 3 + 2] = hue(H - 1 / 3) * 255;
+    }
+  }
   const lum = new Uint8Array(N); for (let i = 0; i < N; i++) lum[i] = Math.max(data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
   // miolo: o preto ligado ao centro da caixa
   const hole = new Uint8Array(N), st = [];
