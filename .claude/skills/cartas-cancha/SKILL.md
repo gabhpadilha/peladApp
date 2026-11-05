@@ -49,3 +49,19 @@ O dono do app aprova tudo por prévia (print no tamanho do celular). **Sempre** 
 - Gradiente de cor da arte com pontos pretos: meça o piso do preto antes de calcular alfa.
 - Peso: cada camada WebP deve ficar abaixo de ~150 KB; 24 imagens de animação (924 KB) foram vistas como pesadas.
 - A carta aparece em muitos lugares (ranking, Coleção, mesa tática): teste em tamanho pequeno também.
+
+## Bordas: a especialidade (2026-11-05, pedido do dono do app)
+O dono quer **várias bordas, sempre diferentes**: umas em neon, outras mais metálicas (referência dele: moldura de ouro escovado com lâminas em leque nas laterais, estilo TOTY do EA FC), sempre com **render 3D vazando por cima da moldura** quando fizer sentido.
+
+**Regra inegociável: o formato é o NOSSO retângulo arredondado 5:7.** Nunca escudo, entalhe no topo, ombros chanfrados, ponta embaixo ou cantos em ponta (a primeira tentativa, `Escudo`, foi recusada por isso). As referências do EA FC servem só para o **estilo** (materiais, fios, neon, degraus, brilho, render que vaza), nunca para a silhueta. Nunca use arte do EA no app: reinterprete.
+
+**Anatomia de uma borda** (de fora para dentro): brilho e linhas de neon → painel azul-noite/escuro opaco → fio (ouro pálido duplo, metal escovado, prata) → janela do conteúdo. Ornamentos (leques, lâminas, degraus) ficam do lado de fora, dentro da sobra de 8% da caixa. O que vaza (render) fica por cima de tudo, sem cobrir nome, selo do OVR nem estatísticas.
+
+**Receita técnica (modelo: `prototipos/voltagem.cjs`, carta `voltagem`):**
+1. Desenhe a moldura em **SVG** no sistema da caixa (840 × 1176 dentro da célula 1000 × 1400, a caixa nos 84% do meio) e asse em WebP com `sharp`. Brilho = cópia desfocada dentro do SVG (`feGaussianBlur`), nunca `filter` CSS (iPhone).
+2. Raios **concêntricos**: `R(d) = 40 + (66 − d)` para o recuo `d` da borda (40 na borda de dentro do fio). Linhas de neon com degradê vertical (ciano no topo, azul embaixo) e um **degrau diagonal** onde a linha se divide em duas nos lados, com um pedaço solto acima.
+3. O miolo do painel é furado (`evenodd`) 1,5 px por dentro da janela, e o fio por cima cobre a emenda. Roupa: `window: "ring"`, `windowInset` e `windowRadius` (em cqw) medidos da mesma conta; `artFrame: true`, `clean: true`, `trim: null`.
+4. **Render que vaza:** recorte o aglomerado da arte do Gemini (`premium-v2-dono.jpg`): máscara por brilho (mais claro que o azul-noite) mais o azul-escuro que o fundo não tem, fechamento com caixa de 12 px e suavização por desfoque + limiar, tire o fio e o neon da arte por faixas, gire o tom, ponha uma sombra suave e componha **por cima** da moldura numa imagem mais larga (`overflowWidth`: 1,25). O fundo é o miolo da mesma arte sem o aglomerado (lado esquerdo espelhado). **Armadilhas:** `sharp(...).raw()` de 1 canal pode voltar com 3 (use `extractChannel(0)`); `resize` roda antes de `composite` (faça em dois passos); dilatar com caixa deixa degraus.
+5. Prévia no celular, comparando com a Safira ao lado, e só então o ok do dono.
+
+**Catálogo de estilos:** `voltagem` (neon duplo + fio duplo de ouro pálido + cristais 3D vazando). Próximos a propor: metálica de ouro escovado com lâminas em leque nas laterais e render de vidro dourado; prata e gelo; bronze e fogo; cromada holográfica. Cada uma: um estilo de fio, um de neon (ou nenhum), um ornamento lateral e um render. **Desenhar linha em código funcionou aqui porque o dono pediu o estilo da referência dele; o render, porém, sempre vem de arte dele no Gemini.**
