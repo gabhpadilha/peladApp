@@ -17,10 +17,6 @@ export const CARD_SKINS = [
   { key: "rubi", name: "Rubi", level: 8, price: 450 },
   // Turquesa e Ônix saíram em 2026-10-29 (decisão do dono do app; ninguém tinha comprado).
   { key: "icone", name: "Ícone", level: 11, price: 1200 },
-  // Maré (2026-11-05, em prévia: nível e preço de teste, a combinar com o dono do app).
-  { key: "mare", name: "Maré", level: 8, price: 700 },
-  // Voltagem (2026-11-05, em prévia: nível e preço de teste, a combinar com o dono do app).
-  { key: "voltagem", name: "Voltagem", level: 8, price: 700 },
   // Evento de Halloween de 2026: à venda só em outubro de 2026.
   { key: "lobisomem", name: "Lobisomem", level: 3, price: 200, event: { theme: "halloween", year: 2026 } },
   { key: "vampiro", name: "Vampiro", level: 3, price: 200, event: { theme: "halloween", year: 2026 } },
