@@ -79,8 +79,6 @@ export type Roupa = {
   still?: boolean;
   /** Sobe e afasta das laterais os números das estatísticas (em cqw), para a moldura da arte não passar por cima deles. */
   statsInset?: { bottom: number; side: number };
-  /** Energia correndo em volta da moldura: `${prefixo}-0` a `${prefixo}-(N-1)`, setores em ordem horária que acendem um depois do outro. */
-  runners?: { prefix: string; count: number; seconds: number };
   /** Gotas de água escorrendo pela carta, desenhadas em código (só `transform` e `opacity`); ficam por cima do conteúdo e por baixo da moldura. */
   drops?: boolean;
   /** Os raios acendem forte e esmaecem devagar (`cc-thunder-glow`), em vez do estalo curto. */
@@ -188,18 +186,15 @@ const HIGHLIGHT_COLORS: Record<CardThemeKey, AwardColors> = {
 const HIGHLIGHT_ART = new Set<AwardKind>(["atacante", "criativo", "defensor", "goleiro", "gol", "foguete", "garcom", "drible", "motor"]);
 
 /**
- * Time do Mês: fundo de padrão art déco roxo e moldura de neon com a coroa e raios do Gemini por cima do conteúdo (2026-11-04).
+ * Time do Mês: tempestade roxa num cartão de fio de ouro com neon roxo e coroa, no estilo das cartas da Loja (2026-11-04).
  * Não veste o tema do mês (`hasSeasonalTheme`). As cartas de outubro seguem no cristal (`MONTH_ROUPA_CRISTAL`).
  */
 const MONTH_ROUPA: Roupa = {
-  // Versão simples (2026-11-04): neon roxo com a coroa sobre um fundo de padrão geométrico art déco, sem render nem animação
-  // (`prototipos/premio-time-do-mes-v3.cjs`).
+  // Versão de 2026-11-04 (arte do dono do app no Gemini): tempestade roxa com raios e poeira dourada num cartão com fio de ouro, respiro
+  // preto e tubo de neon roxo com a coroa (a nuvem que o Gemini pôs no canto saiu), sem animação (`prototipos/premio-time-do-mes-v4.cjs`).
   background: "premium-time-do-mes",
   overflow: "premium-time-do-mes-vaza",
-  window: "ring",
-  windowRadius: 7,
-  statsInset: { bottom: 3.2, side: 3.5 },
-  runners: { prefix: "premium-time-do-mes-corre", count: 24, seconds: 3.2 },
+  window: "inner",
   artFrame: true,
   clean: true,
   metal: ["#b8902f", "#b8902f", "#fff1c2"],
@@ -246,7 +241,6 @@ const MONTH_ROUPA_CRISTAL: Roupa = {
   window: undefined,
   windowRadius: undefined,
   statsInset: undefined,
-  runners: undefined,
   artFrame: false,
   clean: false,
 };
@@ -918,11 +912,6 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
         <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflow}.webp`} className={cn("pointer-events-none absolute top-0 left-0 z-[11] h-full select-none", roupa.overflowWidth ? "max-w-none" : "w-full")} style={roupa.overflowWidth ? { width: `${roupa.overflowWidth * 100}%`, left: `${-(roupa.overflowLeft ?? 0) * 100}%` } : undefined} />
       )}
       {roupa.drops && <WaterDrops />}
-      {roupa.runners && Array.from({ length: roupa.runners.count }, (_, index) => (
-        // Energia em volta da moldura: cada setor acende no seu tempo (só `opacity`; com movimento reduzido, fica apagado).
-        // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da caixa, sem otimizar
-        <img key={index} aria-hidden alt="" src={`/cartas/fundos/${roupa.runners!.prefix}-${index}.webp`} className="pointer-events-none absolute top-0 left-0 z-[12] h-full w-full opacity-0 select-none motion-reduce:hidden" style={{ animation: `cc-energy-run ${roupa.runners!.seconds}s linear infinite`, animationDelay: `${(index / roupa.runners!.count) * roupa.runners!.seconds}s` }} />
-      ))}
       {roupa.overflowBolts && (
         // Os raios das decorações estalam como trovão (só `opacity`; com movimento reduzido, ficam acesos).
         // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da caixa, sem otimizar

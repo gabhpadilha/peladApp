@@ -351,12 +351,6 @@
   14% { opacity: 0; }
 }
 /* Lenda do Trovão: a camada extra dos raios acende forte, dá um segundo clarão e vai esmaecendo devagar (fica visível quase metade do ciclo). */
-/* Energia correndo em volta da moldura do Time do Mês (efeito LED): cada setor sobe e desce devagar, sem piscar; o atraso de cada um faz o brilho dar a volta, com cauda. */
-@keyframes cc-energy-run {
-  0%, 100% { opacity: 0; }
-  10% { opacity: 1; }
-  40% { opacity: 0; }
-}
 /* Gota escorrendo (destaque do mar): aparece, desce devagar, para, escorre rápido e some; `--drip` = alturas da gota que ela percorre. */
 @keyframes cc-drip {
   0% { opacity: 0; transform: translateY(0); }
