@@ -847,7 +847,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
         {player.photo && !roupa.clean && <PhotoShadow />}
 
         {/* Foto grande, presa embaixo: o peito some no degradê antes do rodapé. */}
-        <div className={cn("absolute z-[5]", frame.box)}>
+        <div className={cn("absolute z-[5]", frame.box)} style={roupa.contentPad && roupa.windowInset ? { bottom: `${22.6 - roupa.windowInset.y * 1.4}cqw`, height: "99cqw" } : undefined}>
           {player.photo ? (
             <Image
               src={player.photo.url}
