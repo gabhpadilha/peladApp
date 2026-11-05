@@ -908,13 +908,13 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
           <RankInsignia rank={rank} />
         </div>
 
-        <span style={roupa.contentPad ? { bottom: `calc(13.5% + ${roupa.contentPad + 2}cqw)` } : undefined} className="absolute inset-x-0 bottom-[13.5%] z-[8] truncate px-[4cqw] text-center text-[3.9cqw] font-extrabold tracking-[0.35em] text-(--cc-accent) uppercase">
+        <span style={roupa.contentPad ? { bottom: `calc(13.5% + ${roupa.contentPad - 0.8}cqw)` } : undefined} className="absolute inset-x-0 bottom-[13.5%] z-[8] truncate px-[4cqw] text-center text-[3.9cqw] font-extrabold tracking-[0.35em] text-(--cc-accent) uppercase">
           {band}
         </span>
 
         <dl
           className="absolute inset-x-0 bottom-0 z-[8] grid h-[12%] grid-cols-3 border-t-[0.6cqw] border-(--cc-accent) bg-(--cc-bar)"
-          style={roupa.contentPad ? { height: `calc(12% + ${roupa.contentPad + 2}cqw)`, paddingBottom: `${roupa.contentPad + 2}cqw`, paddingInline: `${roupa.contentPad}cqw` } : roupa.statsInset ? { paddingBottom: `${roupa.statsInset.bottom}cqw`, paddingInline: `${roupa.statsInset.side}cqw` } : undefined}
+          style={roupa.contentPad ? { height: `calc(12% + ${roupa.contentPad - 0.8}cqw)`, paddingBottom: "1cqw", paddingInline: `${roupa.contentPad}cqw` } : roupa.statsInset ? { paddingBottom: `${roupa.statsInset.bottom}cqw`, paddingInline: `${roupa.statsInset.side}cqw` } : undefined}
         >
           {stats.map((stat, index) => (
             <div
