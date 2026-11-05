@@ -65,3 +65,9 @@ O dono quer **várias bordas, sempre diferentes**: umas em neon, outras mais met
 5. Prévia no celular, comparando com a Safira ao lado, e só então o ok do dono.
 
 **Catálogo de estilos:** `voltagem` (neon duplo + fio duplo de ouro pálido + cristais 3D vazando). Próximos a propor: metálica de ouro escovado com lâminas em leque nas laterais e render de vidro dourado; prata e gelo; bronze e fogo; cromada holográfica. Cada uma: um estilo de fio, um de neon (ou nenhum), um ornamento lateral e um render. **Desenhar linha em código funcionou aqui porque o dono pediu o estilo da referência dele; o render, porém, sempre vem de arte dele no Gemini.**
+
+## Camadas e encaixe (decisão do dono do app, 2026-11-05)
+- **A borda fica por cima de tudo; o conteúdo vai por baixo dela.** A arte do fundo e a janela do conteúdo (barras do nome e das estatísticas) seguem até quase a borda da carta (`artInset` e `windowInset` de ~1,4% e ~1%) e a moldura, com o miolo vazado, corta tudo na borda de dentro. Nunca pare o conteúdo rente à borda de dentro: dava linha preta e emenda. O recuo do nome, do OVR e das estatísticas é devolvido por `contentPad` (cqw), para as informações ficarem no lugar padrão.
+- **O elemento 3D que enfeita faz parte da borda** (louros, gemas, folhas, capas): vem na mesma imagem da moldura, por fora, e a moldura é uma peça só. Isso dispensa recortar um "aglomerado" à parte, que dava Frankenstein.
+- **Moldura do Gemini:** o miolo é cortado por um retângulo arredondado (`holeRect` do `montar-carta.cjs`), 3 px da arte para dentro da borda de dentro do ouro, porque o filete da moldura escurece até o preto e vira uma linha preta. Troca de cor das gemas com `GEM="matiz,saturação,luz"`.
+- **Vazar para fora da carta** só com peça própria do Gemini (elemento sozinho sobre preto, bem iluminado, sem partes escuras); recorte de arte achatada foi recusado duas vezes.
