@@ -61,8 +61,10 @@ async function HomeContent() {
           </section>
         )}
 
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="order-1 flex flex-col gap-6">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start">
+          {/* Esquerda: minha carta e, logo embaixo, as novidades (no celular a ordem é a mesma: carta, novidades, Placar).
+              No computador o slider ocupava a largura toda no fim e deixava um buraco embaixo da carta (2026-11-04). */}
+          <div className="flex min-w-0 flex-col gap-6">
             <MyCardSummary
               player={data.currentPlayer}
               delta={data.currentDelta}
@@ -71,10 +73,6 @@ async function HomeContent() {
               evaluationsReceived={data.evaluationsReceived}
               awardCount={data.myAwardCount}
             />
-          </div>
-
-          {/* Novidades logo depois da minha carta no celular (a promoção da Loja precisa de destaque); em tela grande ocupa a largura toda, embaixo. */}
-          <div className="order-2 min-w-0 lg:order-3 lg:col-span-2">
             <NewsSlider
               event={data.cardEvent}
               today={data.today}
@@ -83,7 +81,7 @@ async function HomeContent() {
             />
           </div>
 
-          <div className="order-3 flex flex-col gap-6 lg:order-2">
+          <div className="flex min-w-0 flex-col gap-6">
             <Scoreboard
               pointsMonth={data.monthRanking}
               pointsAllTime={data.allTimeRanking}
