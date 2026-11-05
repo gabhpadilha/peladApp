@@ -152,6 +152,9 @@ const ROUPAS = {
   ametista: { background: "premium-ametista", overflow: "premium-ametista-vaza", overflowWidth: 774 / 714, artFrame: true, trim: null, metal: ["#5b2fa0", "#5b2fa0", "#b99bff"], accent: "#b99bff", light: "220 190 255", bar: "#0e0620", muted: "#d2bcff", sparkles: false, neon: "#c46bff" },
   rubi: { background: "premium-rubi-fino", overflow: "premium-rubi-fino-vaza", artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#9b1530", "#9b1530", "#ff8fa3"], accent: "#ff8fa3", light: "255 190 200", bar: "#1a0309", muted: "#ffb3c0", sparkles: false, neon: "#ff2f66" },
   // Ícone: branco creme com moldura de ouro claro, lembrando a carta Icon do FIFA (2026-10-29).
+  // Natal (2026-11-05, em desenvolvimento para dezembro; GUARDADA até o tema de dezembro existir em `CARD_THEMES`): malha de tricô natalina no fundo e moldura de ouro com pinheiro,
+  // laços, sinos e azevinho por fora (arte do dono do app; `prototipos/natal-*-dono.jpg`, montada por `montar-carta.cjs`). Mesmo padrão da Rubi e da Ícone.
+  natal: { background: "premium-natal", overflow: "premium-natal-vaza", artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#b8902f", "#b8902f", "#fff1c2"], accent: "#f3d27a", light: "255 215 150", bar: "#08170d", muted: "#ffe9b8", sparkles: false, neon: "#f3d27a" },
   // GUARDADAS, fora da Loja (sem entrada em `CARD_SKINS`; para usar: entrada lá, `case` em `skinRoupa` e `SKIN_CLASSES`): Voltagem e Maré.
   // Voltagem (2026-11-05, pedido do dono do app: o estilo da borda da referência dele no nosso retângulo): fio duplo de ouro pálido por dentro e
   // linhas de neon por fora, com o degrau onde se dividem (`prototipos/voltagem.cjs`). Janela `ring` recuada até o fio de dentro.
