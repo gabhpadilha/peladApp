@@ -90,6 +90,12 @@ export type Roupa = {
    * do OVR, à faixa e às estatísticas, para as informações ficarem onde sempre ficam.
    */
   contentPad?: number;
+  /** Sobe as estatísticas, a faixa e o fim da foto (em cqw) quando enfeites da moldura cobrem a parte de baixo (Natal gelo: os montes de neve). */
+  statsLift?: number;
+  /** Afasta as 3 estatísticas das laterais (em cqw), para enfeites da moldura que entram na carta não cobrirem os números. */
+  statsPadX?: number;
+  /** Afasta o nome e o selo do OVR das laterais (em cqw), quando enfeites da moldura entram na carta pelo alto. */
+  namePadX?: number;
   /** Sobe e afasta das laterais os números das estatísticas (em cqw), para a moldura da arte não passar por cima deles. */
   statsInset?: { bottom: number; side: number };
   /** Gotas de água escorrendo pela carta, desenhadas em código (só `transform` e `opacity`); ficam por cima do conteúdo e por baixo da moldura. */
@@ -157,7 +163,7 @@ const ROUPAS = {
   natal: { background: "premium-natal", overflow: "premium-natal-vaza", artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#b8902f", "#b8902f", "#fff1c2"], accent: "#f3d27a", light: "255 215 150", bar: "#08170d", muted: "#ffe9b8", sparkles: false, neon: "#f3d27a" },
   // Natal gelo = carta de PRÊMIO DA RODADA de dezembro de 2026 (decisão do dono do app em 2026-11-05; GUARDADA, ainda não ligada em `awardRoupa`): tricô azul-gelo com renas e flocos e moldura de ouro
   // com boneco de neve, pinheiro com neve, laços azuis e montes de neve por fora (arte do dono em `prototipos/natal-gelo-*-dono.jpg`). Mesmo padrão da Rubi e da Ícone.
-  natalGelo: { background: "premium-natal-gelo", overflow: "premium-natal-gelo-vaza", artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#b8902f", "#b8902f", "#fff1c2"], accent: "#f3d27a", light: "190 225 255", bar: "#07182a", muted: "#d4ebff", sparkles: false, neon: "#f3d27a" },
+  natalGelo: { background: "premium-natal-gelo", overflow: "premium-natal-gelo-vaza", statsLift: 8, statsPadX: 9, namePadX: 4, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#b8902f", "#b8902f", "#fff1c2"], accent: "#f3d27a", light: "190 225 255", bar: "#07182a", muted: "#d4ebff", sparkles: false, neon: "#f3d27a" },
   // GUARDADAS, fora da Loja (sem entrada em `CARD_SKINS`; para usar: entrada lá, `case` em `skinRoupa` e `SKIN_CLASSES`): Voltagem e Maré.
   // Voltagem (2026-11-05, pedido do dono do app: o estilo da borda da referência dele no nosso retângulo): fio duplo de ouro pálido por dentro e
   // linhas de neon por fora, com o degrau onde se dividem (`prototipos/voltagem.cjs`). Janela `ring` recuada até o fio de dentro.
@@ -789,6 +795,7 @@ export function getCanchaCardLook(player: Player, award?: CanchaCardAward) {
 
 export function CanchaCard({ player, award, className, photoSizes, photoFrame = "atual" }: CanchaCardProps) {
   const { roupa, rank, stats, band, subtitle } = getCanchaCardLook(player, award);
+  const lift = roupa.statsLift ?? 0;
   const frame = PHOTO_FRAMES[roupa.photoFrame ?? photoFrame];
 
   const vars = {
@@ -843,7 +850,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
             "absolute inset-x-0 top-0 z-[3] flex h-[16%] flex-col justify-center border-b-[0.6cqw] border-(--cc-accent) pt-[2.6cqw] pr-[26cqw] pl-[8cqw] leading-none whitespace-nowrap",
             roupa.bareName ? "" : roupa.matte ? "bg-(--cc-bar)" : "bg-linear-to-b from-black/80 to-black/40",
           )}
-          style={roupa.contentPad ? { height: `calc(16% + ${roupa.contentPad}cqw)`, paddingLeft: `${8 + roupa.contentPad}cqw`, paddingTop: `${2.6 + roupa.contentPad}cqw` } : undefined}
+          style={roupa.contentPad ? { height: `calc(16% + ${roupa.contentPad}cqw)`, paddingLeft: `${8 + roupa.contentPad + (roupa.namePadX ?? 0)}cqw`, paddingTop: `${2.6 + roupa.contentPad}cqw` } : undefined}
         >
           <span className="truncate text-[10.5cqw] font-extrabold">{player.nickname}</span>
           <span className="mt-[1cqw] truncate text-[3.8cqw] font-bold tracking-[0.2em] text-(--cc-muted) uppercase">{subtitle}</span>
@@ -854,7 +861,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
         {player.photo && !roupa.clean && <PhotoShadow />}
 
         {/* Foto grande, presa embaixo: o peito some no degradê antes do rodapé. */}
-        <div className={cn("absolute z-[5]", frame.box)} style={roupa.contentPad && roupa.windowInset ? { bottom: `${22.6 - roupa.windowInset.y * 1.4}cqw`, height: "99cqw" } : undefined}>
+        <div className={cn("absolute z-[5]", frame.box)} style={roupa.contentPad && roupa.windowInset ? { bottom: `${22.6 - roupa.windowInset.y * 1.4 + lift}cqw`, height: `${99 - lift}cqw` } : undefined}>
           {player.photo ? (
             <Image
               src={player.photo.url}
@@ -902,7 +909,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
           />
         ))}
         {!roupa.clean && (
-          <div aria-hidden style={roupa.contentPad ? { bottom: `calc(12% + ${roupa.contentPad - 0.8}cqw)` } : undefined} className={cn("absolute inset-x-0 bottom-[12%] z-[7] bg-linear-to-b from-transparent to-(--cc-bar)", frame.fade)} />
+          <div aria-hidden style={roupa.contentPad ? { bottom: `calc(12% + ${roupa.contentPad - 0.8 + lift}cqw)` } : undefined} className={cn("absolute inset-x-0 bottom-[12%] z-[7] bg-linear-to-b from-transparent to-(--cc-bar)", frame.fade)} />
         )}
 
         <div
@@ -910,19 +917,19 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
             "absolute top-[5cqw] right-[5.5cqw] z-[8] flex h-[24cqw] w-[19cqw] flex-col items-center pt-[2.3cqw] leading-none text-[#0b130f] [clip-path:polygon(0_0,100%_0,100%_76%,50%_100%,0_76%)]",
             roupa.matte ? RANK_FLAT_CLASSES[rank] : RANK_CREST[rank],
           )}
-          style={roupa.contentPad ? { top: `${5 + roupa.contentPad}cqw`, right: `${5.5 + roupa.contentPad}cqw` } : undefined}
+          style={roupa.contentPad ? { top: `${5 + roupa.contentPad}cqw`, right: `${5.5 + roupa.contentPad + (roupa.namePadX ?? 0) / 2}cqw` } : undefined}
         >
           <span className="text-[9cqw] font-extrabold tabular-nums">{player.ovr ?? EMPTY_VALUE}</span>
           <RankInsignia rank={rank} />
         </div>
 
-        <span style={roupa.contentPad ? { bottom: `calc(13.5% + ${roupa.contentPad - 0.8}cqw)` } : undefined} className="absolute inset-x-0 bottom-[13.5%] z-[8] truncate px-[4cqw] text-center text-[3.9cqw] font-extrabold tracking-[0.35em] text-(--cc-accent) uppercase">
+        <span style={roupa.contentPad ? { bottom: `calc(13.5% + ${roupa.contentPad - 0.8 + lift}cqw)` } : undefined} className="absolute inset-x-0 bottom-[13.5%] z-[8] truncate px-[4cqw] text-center text-[3.9cqw] font-extrabold tracking-[0.35em] text-(--cc-accent) uppercase">
           {band}
         </span>
 
         <dl
           className="absolute inset-x-0 bottom-0 z-[8] grid h-[12%] grid-cols-3 border-t-[0.6cqw] border-(--cc-accent) bg-(--cc-bar)"
-          style={roupa.contentPad ? { height: `calc(12% + ${roupa.contentPad - 0.8}cqw)`, paddingBottom: "1cqw", paddingInline: `${roupa.contentPad}cqw` } : roupa.statsInset ? { paddingBottom: `${roupa.statsInset.bottom}cqw`, paddingInline: `${roupa.statsInset.side}cqw` } : undefined}
+          style={roupa.contentPad ? { height: `calc(12% + ${roupa.contentPad - 0.8 + lift}cqw)`, paddingBottom: `${1 + lift}cqw`, paddingInline: `${roupa.contentPad + (roupa.statsPadX ?? 0)}cqw` } : roupa.statsInset ? { paddingBottom: `${roupa.statsInset.bottom}cqw`, paddingInline: `${roupa.statsInset.side}cqw` } : undefined}
         >
           {stats.map((stat, index) => (
             <div
