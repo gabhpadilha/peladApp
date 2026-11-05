@@ -3,6 +3,7 @@ import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { PHOTO_SHADOW_GRADIENT_ID } from "@/lib/card-svg-ids";
 import { getCardRank, CARD_RANK_LABELS, RANK_FLAT_CLASSES, type CardRank } from "@/lib/card-rank";
+import { SHIELD_CLIP } from "@/lib/card-shield";
 import { getCardStats } from "@/lib/card-stats";
 import { getInitials } from "@/lib/get-initials";
 import type { CardThemeKey } from "@/lib/card-themes";
@@ -79,6 +80,12 @@ export type Roupa = {
   innerBolts?: string;
   /** Os raios (`innerBolts` e `overflowBolts`) ficam parados, sem animação. */
   still?: boolean;
+  /**
+   * Borda em escudo, ao estilo do EA FC (topo com entalhe, ombros chanfrados, ponta embaixo e asas de neon): a janela do conteúdo é a
+   * caixa toda recortada pelo contorno do escudo (`SHIELD_CLIP`, `lib/card-shield.ts`), e o nome, o selo do OVR e as estatísticas descem
+   * e entram para fugir dos chanfros e da ponta (`SHIELD_LAYOUT`).
+   */
+  shield?: boolean;
   /** Sobe e afasta das laterais os números das estatísticas (em cqw), para a moldura da arte não passar por cima deles. */
   statsInset?: { bottom: number; side: number };
   /** Gotas de água escorrendo pela carta, desenhadas em código (só `transform` e `opacity`); ficam por cima do conteúdo e por baixo da moldura. */
@@ -141,6 +148,9 @@ const ROUPAS = {
   ametista: { background: "premium-ametista", overflow: "premium-ametista-vaza", overflowWidth: 774 / 714, artFrame: true, trim: null, metal: ["#5b2fa0", "#5b2fa0", "#b99bff"], accent: "#b99bff", light: "220 190 255", bar: "#0e0620", muted: "#d2bcff", sparkles: false, neon: "#c46bff" },
   rubi: { background: "premium-rubi", overflow: "premium-rubi-vaza", overflowWidth: 774 / 714, artFrame: true, trim: null, metal: ["#9b1530", "#9b1530", "#ff8fa3"], accent: "#ff8fa3", light: "255 190 200", bar: "#1a0309", muted: "#ffb3c0", sparkles: false, neon: "#ff2f66" },
   // Ícone: branco creme com moldura de ouro claro, lembrando a carta Icon do FIFA (2026-10-29).
+  // Escudo (2026-11-05, a pedido do dono do app: "uma borda mais personalizada, no estilo do EA FC"): a moldura que ele montou (fio duplo de
+  // ouro pálido em escudo com entalhe no topo e asas de neon ciano e azul) sobre cristais ciano (`prototipos/escudo.cjs`).
+  escudo: { background: "premium-escudo", overflow: "premium-escudo-vaza", shield: true, artFrame: true, clean: true, bareName: true, trim: null, metal: ["#c9b84e", "#c9b84e", "#fff7b0"], accent: "#f5ee9c", light: "150 230 255", bar: "#03121c", muted: "#bfeeff", sparkles: false, neon: "#36d6ff" },
   icone: { background: "premium-icone", clean: true, overflow: "premium-icone-vaza", overflowWidth: 774 / 714, artFrame: true, trim: null, metal: ["#c9a24e", "#c9a24e", "#fff4d6"], accent: "#e2c06e", light: "255 240 200", bar: "#1a140a", muted: "#f0dfb5", sparkles: false, neon: "#ffcf4d" },
   // Aurora (2026-11-04, GUARDADA: o dono gostou mas pediu para não aplicar ainda; não está em `CARD_SKINS`, então não aparece na Loja.
   // Para usar: entrada em `CARD_SKINS` (sugestão nível 14, 1600 CC), `case` em `skinRoupa` e `SKIN_CLASSES`): aurora boreal renderizada pixel a pixel em código (`prototipos/premium-aurora.cjs`), fio de ouro, respiro preto,
@@ -380,6 +390,7 @@ function skinRoupa(skin: CardSkinKey): RoupaKey {
     case "ametista": return "ametista";
     case "rubi": return "rubi";
     case "icone": return "icone";
+    case "escudo": return "escudo";
     case "lobisomem": return "lobisomem";
     case "nuvem": return "nuvem";
     case "relampago": return "relampago";
@@ -693,6 +704,12 @@ export const NEON_HALO_DIM_STROKES = [
 const TRIMMED_CARD = "absolute inset-[8%]";
 
 /**
+ * Medidas (em cqw, 100 = largura da caixa) da carta em escudo: o nome e o selo do OVR começam abaixo dos chanfros do topo, e as
+ * estatísticas ficam numa faixa mais alta, com os números acima da curva que desce até a ponta (`prototipos/escudo.cjs`).
+ */
+const SHIELD_LAYOUT = { headerTop: 17, nameLeft: 13.5, crestRight: 12, crestTop: 19, statsHeight: 30, statsLift: 15, statsSide: 20 } as const;
+
+/**
  * Sombra atrás da foto ("A · Halo escuro", aprovada pelo dono do app em 2026-10-29): escura,
  * logo atrás da cabeça e dos ombros. Em SVG (degradê `PHOTO_SHADOW_GRADIENT_ID` de
  * `PlayerCardDefs`), não em `radial-gradient` do CSS: na captura do story no iPhone, o CSS
@@ -790,8 +807,8 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
       )}
     >
       <div
-        className={cn("absolute overflow-hidden bg-cover bg-center", roupa.window === "inner" ? INNER_WINDOW : roupa.window === "ring" ? RING_WINDOW : isNeon ? NEON_WINDOW : METAL_WINDOW)}
-        style={{ backgroundImage: `url(/cartas/fundos/${roupa.background}.webp)`, ...(roupa.window === "ring" ? { borderRadius: `${roupa.windowRadius ?? 8}cqw` } : null), ...(roupa.window === "ring" && roupa.windowInset ? { left: `${roupa.windowInset.x}%`, right: `${roupa.windowInset.x}%`, top: `${roupa.windowInset.y}%`, bottom: `${roupa.windowInset.y}%` } : null) }}
+        className={cn("absolute overflow-hidden bg-cover bg-center", roupa.shield ? "inset-0" : roupa.window === "inner" ? INNER_WINDOW : roupa.window === "ring" ? RING_WINDOW : isNeon ? NEON_WINDOW : METAL_WINDOW)}
+        style={{ backgroundImage: `url(/cartas/fundos/${roupa.background}.webp)`, ...(roupa.shield ? { clipPath: SHIELD_CLIP } : null), ...(roupa.window === "ring" ? { borderRadius: `${roupa.windowRadius ?? 8}cqw` } : null), ...(roupa.window === "ring" && roupa.windowInset ? { left: `${roupa.windowInset.x}%`, right: `${roupa.windowInset.x}%`, top: `${roupa.windowInset.y}%`, bottom: `${roupa.windowInset.y}%` } : null) }}
       >
         {roupa.drift && (
           // eslint-disable-next-line @next/next/no-img-element -- arte decorativa, sem otimizar
@@ -811,6 +828,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
             "absolute inset-x-0 top-0 z-[3] flex h-[16%] flex-col justify-center border-b-[0.6cqw] border-(--cc-accent) pt-[2.6cqw] pr-[26cqw] pl-[8cqw] leading-none whitespace-nowrap",
             roupa.bareName ? "" : roupa.matte ? "bg-(--cc-bar)" : "bg-linear-to-b from-black/80 to-black/40",
           )}
+          style={roupa.shield ? { zIndex: 9, top: `${SHIELD_LAYOUT.headerTop}cqw`, paddingLeft: `${SHIELD_LAYOUT.nameLeft}cqw`, paddingRight: `${SHIELD_LAYOUT.crestRight + 20}cqw` } : undefined}
         >
           <span className="truncate text-[10.5cqw] font-extrabold">{player.nickname}</span>
           <span className="mt-[1cqw] truncate text-[3.8cqw] font-bold tracking-[0.2em] text-(--cc-muted) uppercase">{subtitle}</span>
@@ -821,7 +839,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
         {player.photo && !roupa.clean && <PhotoShadow />}
 
         {/* Foto grande, presa embaixo: o peito some no degradê antes do rodapé. */}
-        <div className={cn("absolute z-[5]", frame.box)}>
+        <div className={cn("absolute z-[5]", frame.box)} style={roupa.shield ? { bottom: `${SHIELD_LAYOUT.statsHeight - 2}cqw`, height: "64%" } : undefined}>
           {player.photo ? (
             <Image
               src={player.photo.url}
@@ -876,18 +894,19 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
             "absolute top-[5cqw] right-[5.5cqw] z-[8] flex h-[24cqw] w-[19cqw] flex-col items-center pt-[2.3cqw] leading-none text-[#0b130f] [clip-path:polygon(0_0,100%_0,100%_76%,50%_100%,0_76%)]",
             roupa.matte ? RANK_FLAT_CLASSES[rank] : RANK_CREST[rank],
           )}
+          style={roupa.shield ? { top: `${SHIELD_LAYOUT.crestTop}cqw`, right: `${SHIELD_LAYOUT.crestRight}cqw` } : undefined}
         >
           <span className="text-[9cqw] font-extrabold tabular-nums">{player.ovr ?? EMPTY_VALUE}</span>
           <RankInsignia rank={rank} />
         </div>
 
-        <span className="absolute inset-x-0 bottom-[13.5%] z-[8] truncate px-[4cqw] text-center text-[3.9cqw] font-extrabold tracking-[0.35em] text-(--cc-accent) uppercase">
+        <span style={roupa.shield ? { bottom: `${SHIELD_LAYOUT.statsHeight + 1.5}cqw` } : undefined} className="absolute inset-x-0 bottom-[13.5%] z-[8] truncate px-[4cqw] text-center text-[3.9cqw] font-extrabold tracking-[0.35em] text-(--cc-accent) uppercase">
           {band}
         </span>
 
         <dl
           className="absolute inset-x-0 bottom-0 z-[8] grid h-[12%] grid-cols-3 border-t-[0.6cqw] border-(--cc-accent) bg-(--cc-bar)"
-          style={roupa.statsInset ? { paddingBottom: `${roupa.statsInset.bottom}cqw`, paddingInline: `${roupa.statsInset.side}cqw` } : undefined}
+          style={roupa.shield ? { height: `${SHIELD_LAYOUT.statsHeight}cqw`, paddingBottom: `${SHIELD_LAYOUT.statsLift}cqw`, paddingInline: `${SHIELD_LAYOUT.statsSide}cqw` } : roupa.statsInset ? { paddingBottom: `${roupa.statsInset.bottom}cqw`, paddingInline: `${roupa.statsInset.side}cqw` } : undefined}
         >
           {stats.map((stat, index) => (
             <div

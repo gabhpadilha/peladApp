@@ -537,6 +537,7 @@ const SKIN_CLASSES: Record<CardSkinKey, string> = {
   nuvem: "card-skin-icone",
   lenda: "card-skin-icone",
   relampago: "card-skin-icone",
+  escudo: "card-skin-icone",
 };
 
 const GOLD_FILL = "[background:var(--card-gold)]";
