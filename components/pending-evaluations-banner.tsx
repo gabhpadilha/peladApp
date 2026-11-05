@@ -26,7 +26,7 @@ export function PendingEvaluationsBanner({ pending }: PendingEvaluationsBannerPr
       <ClipboardListIcon aria-hidden className="size-5 shrink-0 text-primary" />
       <div className="flex min-w-0 flex-1 flex-col">
         <p className="font-medium">{title}</p>
-        <p className="truncate text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground">
           Rodada {next.match.round} · {formatWeekdayDate(next.match.date)} ·{" "}
           {next.playersToRate} jogadores para avaliar
         </p>

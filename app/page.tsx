@@ -4,7 +4,6 @@ import { ArrowRightIcon } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
 import { GroupGate } from "@/components/group-gate";
 import { PendingEvaluationsBanner } from "@/components/pending-evaluations-banner";
-import { SectionTitle } from "@/components/section-title";
 import { NewsSlider } from "./_components/news-slider";
 import { LatestRoundCard } from "./_components/latest-round-card";
 import { MyCardSummary } from "./_components/my-card-summary";
@@ -12,8 +11,7 @@ import { OpenRoundCard } from "./_components/open-round-card";
 import { WinnersBanner } from "./_components/winners-banner";
 import { WelcomeBonusDialog } from "./_components/welcome-bonus-dialog";
 import { WELCOME_BONUS_COINS } from "@/lib/progression";
-import { ExpandableRanking } from "./_components/expandable-ranking";
-import { ScorersRanking } from "./_components/scorers-ranking";
+import { Scoreboard } from "./_components/scoreboard";
 import { getHomeData } from "./_data-access/get-home-data";
 
 export default function Home() {
@@ -31,27 +29,36 @@ async function HomeContent() {
   const data = await getHomeData();
   const hasRounds = data.latestRound !== null || data.openRound !== null;
 
+  const hasNow = data.pending.length > 0 || data.winnersAlert !== null || data.openRound !== null;
+
   return (
     <>
       <AppHeader currentPlayer={data.currentPlayer} />
       <main className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-6">
         <div>
           <p className="text-sm text-muted-foreground">{data.groupName}</p>
-          <h1 className="font-display text-3xl font-bold">Fala, {data.currentPlayer.nickname}</h1>
+          <h1 className="font-display text-xl font-bold">Fala, {data.currentPlayer.nickname}</h1>
         </div>
 
         {data.showWelcomeBonus && <WelcomeBonusDialog coins={WELCOME_BONUS_COINS} />}
 
-        <PendingEvaluationsBanner pending={data.pending} />
-
-        {data.winnersAlert && <WinnersBanner alert={data.winnersAlert} />}
-
-        <NewsSlider
-          event={data.cardEvent}
-          today={data.today}
-          shopSale={data.shopSale}
-          player={data.currentPlayer}
-        />
+        {/* Revisão de 2026-11-04: o que pede uma ação vem primeiro, antes das novidades. */}
+        {hasNow && (
+          <section aria-labelledby="now-title" className="flex flex-col gap-3">
+            <h2 id="now-title" className="text-xs font-semibold tracking-[0.2em] text-primary uppercase">
+              Agora
+            </h2>
+            <PendingEvaluationsBanner pending={data.pending} />
+            {data.winnersAlert && <WinnersBanner alert={data.winnersAlert} />}
+            {data.openRound && (
+              <OpenRoundCard
+                match={data.openRound.match}
+                submitted={data.openRound.submitted}
+                expected={data.openRound.expected}
+              />
+            )}
+          </section>
+        )}
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
           <div className="flex flex-col gap-6">
@@ -63,16 +70,18 @@ async function HomeContent() {
               evaluationsReceived={data.evaluationsReceived}
               awardCount={data.myAwardCount}
             />
-            {data.openRound && (
-              <OpenRoundCard
-                match={data.openRound.match}
-                submitted={data.openRound.submitted}
-                expected={data.openRound.expected}
-              />
-            )}
           </div>
 
           <div className="flex flex-col gap-6">
+            <Scoreboard
+              pointsMonth={data.monthRanking}
+              pointsAllTime={data.allTimeRanking}
+              goalsMonth={data.monthScorers}
+              goalsAllTime={data.allTimeScorers}
+              monthLabel={data.monthLabel}
+              currentPlayerId={data.currentPlayer.id}
+            />
+
             {data.latestRound && (
               <LatestRoundCard
                 match={data.latestRound.match}
@@ -83,46 +92,30 @@ async function HomeContent() {
 
             {!hasRounds && (
               <section className="flex flex-col gap-2 rounded-xl border border-dashed bg-card/50 p-4">
-                <h2 className="font-display text-lg font-bold tracking-wide uppercase">Nenhuma rodada ainda</h2>
+                <h2 className="font-display text-lg font-bold tracking-wide uppercase">Ainda não rolou nenhuma rodada</h2>
                 <p className="text-sm text-muted-foreground">
                   Depois do primeiro jogo, o organizador cria a rodada e cada um avalia quem jogou. As cartas e o
                   ranking aparecem quando a rodada fecha.
                 </p>
                 <Link
                   href="/rodadas"
-                  className="inline-flex w-fit items-center gap-1 text-sm font-medium text-primary hover:underline"
+                  className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-primary hover:underline"
                 >
                   Ir para as rodadas
                   <ArrowRightIcon aria-hidden className="size-4" />
                 </Link>
               </section>
             )}
-
-            <section aria-labelledby="ranking-title" className="flex flex-col gap-3 rounded-xl border bg-card p-4">
-              <SectionTitle id="ranking-title" aside="por pontos">
-                Ranking
-              </SectionTitle>
-              <ExpandableRanking
-                month={data.monthRanking}
-                allTime={data.allTimeRanking}
-                monthLabel={data.monthLabel}
-                currentPlayerId={data.currentPlayer.id}
-              />
-            </section>
-
-            <section aria-labelledby="scorers-title" className="flex flex-col gap-3 rounded-xl border bg-card p-4">
-              <SectionTitle id="scorers-title" aside="gols confirmados">
-                Artilharia
-              </SectionTitle>
-              <ScorersRanking
-                month={data.monthScorers}
-                allTime={data.allTimeScorers}
-                monthLabel={data.monthLabel}
-                currentPlayerId={data.currentPlayer.id}
-              />
-            </section>
           </div>
         </div>
+
+        {/* As novidades por último: informam, não pedem nada (o primeiro slide é a promoção, quando houver). */}
+        <NewsSlider
+          event={data.cardEvent}
+          today={data.today}
+          shopSale={data.shopSale}
+          player={data.currentPlayer}
+        />
       </main>
     </>
   );
@@ -131,11 +124,12 @@ async function HomeContent() {
 function HomeSkeleton() {
   return (
     <main aria-busy className="mx-auto flex w-full max-w-5xl flex-col gap-6 px-4 py-20">
-      <div className="h-20 animate-pulse rounded-xl bg-card" />
+      <div className="h-14 animate-pulse rounded-xl bg-card" />
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <div className="h-72 animate-pulse rounded-xl bg-card" />
-        <div className="h-72 animate-pulse rounded-xl bg-card" />
+        <div className="h-96 animate-pulse rounded-xl bg-card" />
+        <div className="h-96 animate-pulse rounded-xl bg-card" />
       </div>
+      <div className="h-80 animate-pulse rounded-xl bg-card" />
     </main>
   );
 }

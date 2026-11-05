@@ -64,12 +64,12 @@ export function NewsCarousel({ label, slides }: NewsCarouselProps) {
         ))}
       </ul>
 
-      <div className="flex items-center justify-between gap-3">
+      <div className="flex items-center justify-center gap-3 sm:justify-between">
         <button
           type="button"
           onClick={() => goTo(active - 1)}
           aria-label="Novidade anterior"
-          className="flex size-11 items-center justify-center rounded-full border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="hidden size-11 items-center justify-center rounded-full border text-muted-foreground sm:flex transition-colors hover:bg-muted hover:text-foreground"
         >
           <ChevronLeftIcon aria-hidden className="size-4" />
         </button>
@@ -96,7 +96,7 @@ export function NewsCarousel({ label, slides }: NewsCarouselProps) {
           type="button"
           onClick={() => goTo(active + 1)}
           aria-label="Próxima novidade"
-          className="flex size-11 items-center justify-center rounded-full border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="hidden size-11 items-center justify-center rounded-full border text-muted-foreground sm:flex transition-colors hover:bg-muted hover:text-foreground"
         >
           <ChevronRightIcon aria-hidden className="size-4" />
         </button>

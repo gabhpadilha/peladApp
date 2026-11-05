@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronDownIcon, PackageOpenIcon } from "lucide-react";
 import { PlayerCard } from "@/components/player-card";
+import { SectionTitle } from "@/components/section-title";
 import { formatShortDate } from "@/lib/format-date";
 import { AWARD_LABELS, formatAwardResult, type Award } from "@/types/award";
 import type { Match } from "@/types/match";
@@ -60,14 +61,9 @@ export function LatestRoundCard({ match, topPerformers, awards }: LatestRoundCar
   const others = awards.filter((award) => award !== featured);
   return (
     <section aria-labelledby="latest-round-title" className="flex flex-col gap-4 rounded-xl border bg-card p-4">
-      <div className="flex items-baseline justify-between gap-4">
-        <h2 id="latest-round-title" className="font-display text-lg font-bold tracking-wide uppercase">
-          Rodada {match.round}
-        </h2>
-        <p className="text-sm text-muted-foreground">
-          {formatShortDate(match.date)} · {match.presentPlayerIds.length} jogadores
-        </p>
-      </div>
+      <SectionTitle id="latest-round-title" aside={`${formatShortDate(match.date)} · ${match.presentPlayerIds.length} jogadores`}>
+        Rodada {match.round}
+      </SectionTitle>
 
       {featured === undefined ? (
         <p className="text-sm text-muted-foreground">Ninguém ganhou carta especial nessa rodada.</p>
