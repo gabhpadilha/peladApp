@@ -384,6 +384,21 @@
   from { transform: translateX(-4.5%); }
   to { transform: translateX(4.5%); }
 }
+/* Peças flutuantes da Destino: só transform. */
+@keyframes cc-float {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -7%, 0); }
+}
+@keyframes cc-orbit {
+  0% { transform: translate3d(0, 0, 0); }
+  25% { transform: translate3d(6%, -6%, 0); }
+  50% { transform: translate3d(0, -10%, 0); }
+  75% { transform: translate3d(-6%, -5%, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+@keyframes cc-spin {
+  to { transform: rotate(360deg); }
+}
 @keyframes cc-thunder-glow {
   0%, 100% { opacity: 0; }
   3% { opacity: 1; }

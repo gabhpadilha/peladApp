@@ -21,6 +21,25 @@ import type { Player } from "@/types/player";
  * camadas de degradê empilhadas.
  */
 
+/**
+ * Peça que flutua em volta da carta (carta Destino, 2026-11-05): arte do Gemini sobre transparência, posicionada em % da caixa da carta
+ * (`x`, `y` = centro; `w` = largura), por trás (`back`) ou por cima (`front`) da moldura. Só `transform` e `opacity` (iPhone); some nas
+ * cartas pequenas (miniaturas) e fica parada com movimento reduzido.
+ */
+export type Floater = {
+  src: string;
+  x: number;
+  y: number;
+  w: number;
+  layer: "back" | "front";
+  anim: "float" | "orbit" | "spin";
+  /** Duração do ciclo, em segundos. */
+  dur: number;
+  delay?: number;
+  /** Inclinação fixa, em graus. */
+  rot?: number;
+};
+
 export type Roupa = {
   /** Fundo artístico em `public/cartas/fundos/`. */
   background: string;
@@ -96,6 +115,8 @@ export type Roupa = {
   statsPadX?: number;
   /** Afasta o nome e o selo do OVR das laterais (em cqw), quando enfeites da moldura entram na carta pelo alto. */
   namePadX?: number;
+  /** Peças que flutuam em volta da carta (animação lenta, só nas cartas grandes). */
+  floaters?: readonly Floater[];
   /** Sobe e afasta das laterais os números das estatísticas (em cqw), para a moldura da arte não passar por cima deles. */
   statsInset?: { bottom: number; side: number };
   /** Gotas de água escorrendo pela carta, desenhadas em código (só `transform` e `opacity`); ficam por cima do conteúdo e por baixo da moldura. */
@@ -148,6 +169,18 @@ function WaterDrops() {
 const GOLD = ["#7a5512", "#e9c86a", "#fff4c8"] as const;
 const SILVER = ["#3b4450", "#c9d1d6", "#ffffff"] as const;
 
+/** Runas e cacos de esmeralda que flutuam em volta da Destino (`prototipos/destino-runas.cjs`); o círculo arcano gira atrás da carta e só aparece nas laterais. */
+const DESTINO_FLOATERS: readonly Floater[] = [
+  { src: "destino-circulo", x: 50, y: 50, w: 100, layer: "back", anim: "spin", dur: 90 },
+  { src: "destino-runa", x: 10, y: 30, w: 17, layer: "front", anim: "float", dur: 7, rot: -8 },
+  { src: "destino-runa", x: 91, y: 58, w: 14, layer: "front", anim: "orbit", dur: 9, delay: 1, rot: 10 },
+  { src: "destino-runa", x: 9, y: 79, w: 12, layer: "front", anim: "float", dur: 8, delay: 2.5, rot: 6 },
+  { src: "destino-runa", x: 90, y: 13, w: 11, layer: "front", anim: "orbit", dur: 10, delay: 0.5, rot: -12 },
+  { src: "destino-caco-a", x: 94, y: 84, w: 9, layer: "front", anim: "float", dur: 6, delay: 1.2 },
+  { src: "destino-caco-b", x: 5, y: 54, w: 7, layer: "front", anim: "orbit", dur: 7, delay: 3 },
+  { src: "destino-caco-c", x: 52, y: 3.5, w: 8, layer: "back", anim: "float", dur: 8, delay: 0.8 },
+];
+
 const ROUPAS = {
   // Grafite fosco (aprovado pelo dono do app em 2026-10-29): menos premium que as skins, de propósito.
   padrao: { background: "fosco-grafite", metal: ["#2a312d", "#2a312d", "rgb(255 255 255 / 0.1)"], accent: "#8fa197", light: "255 255 255", bar: "#121714", muted: "#9fb0a4", matte: true },
@@ -175,7 +208,7 @@ const ROUPAS = {
   natalTimeDoMes: { background: "premium-natal-timedomes", overflow: "premium-natal-timedomes-vaza", statsLift: 4, statsPadX: 12, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#b8902f", "#b8902f", "#fff1c2"], accent: "#f3d27a", light: "220 180 255", bar: "#1a0a26", muted: "#f1dcc0", sparkles: false, neon: "#f3d27a" },
   // Destino (2026-11-05, evento "Destino" da Loja de dezembro, carta de prestígio, nível 5, 600 CC; design original que só alude a um vilão de cinema, sem nome, logo ou traje): ferro forjado e aço com runas
   // de um alfabeto inventado brilhando em verde-esmeralda, pano verde-musgo e cristais, e moldura de aço escovado com runas verdes, cristais nos cantos de cima e um capuz verde no topo (arte do dono em `prototipos/destino-fundo-dono.jpg` e `destino-borda-capuz-dono.jpg`).
-  destino: { background: "premium-destino", overflow: "premium-destino-vaza", artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#6b6f73", "#6b6f73", "#d6c07a"], accent: "#c9a85c", light: "120 255 170", bar: "#06100b", muted: "#b9e8c8", sparkles: false, neon: "#3dffa0" },
+  destino: { background: "premium-destino", overflow: "premium-destino-vaza", floaters: DESTINO_FLOATERS, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#6b6f73", "#6b6f73", "#d6c07a"], accent: "#c9a85c", light: "120 255 170", bar: "#06100b", muted: "#b9e8c8", sparkles: false, neon: "#3dffa0" },
   // GUARDADAS, fora da Loja (sem entrada em `CARD_SKINS`; para usar: entrada lá, `case` em `skinRoupa` e `SKIN_CLASSES`): Voltagem e Maré.
   // Voltagem (2026-11-05, pedido do dono do app: o estilo da borda da referência dele no nosso retângulo): fio duplo de ouro pálido por dentro e
   // linhas de neon por fora, com o degrau onde se dividem (`prototipos/voltagem.cjs`). Janela `ring` recuada até o fio de dentro.
@@ -805,6 +838,27 @@ export function getCanchaCardLook(player: Player, award?: CanchaCardAward) {
   return { roupa, rank, stats, band, subtitle, trim };
 }
 
+function FloaterPieces({ items, layer }: { items: readonly Floater[]; layer: "back" | "front" }) {
+  return items
+    .filter((item) => item.layer === layer)
+    .map((item) => (
+      <span
+        key={`${item.src}-${item.x}-${item.y}`}
+        aria-hidden
+        className={cn("pointer-events-none absolute aspect-square -translate-1/2 @max-[150px]:hidden", layer === "back" ? "z-0" : "z-[13]")}
+        style={{ left: `${item.x}%`, top: `${item.y}%`, width: `${item.w}%`, rotate: item.rot ? `${item.rot}deg` : undefined }}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element -- arte decorativa pequena, sem otimizar */}
+        <img
+          alt=""
+          src={`/cartas/fundos/${item.src}.webp`}
+          className="size-full select-none motion-reduce:animate-none"
+          style={{ animation: `cc-${item.anim} ${item.dur}s ${item.anim === "spin" ? "linear" : "ease-in-out"} ${item.delay ?? 0}s infinite` }}
+        />
+      </span>
+    ));
+}
+
 export function CanchaCard({ player, award, className, photoSizes, photoFrame = "atual" }: CanchaCardProps) {
   const { roupa, rank, stats, band, subtitle } = getCanchaCardLook(player, award);
   const lift = roupa.statsLift ?? 0;
@@ -973,13 +1027,15 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
   // Carta de neon: o enfeite e o brilho cabem dentro da própria caixa (mesmo tamanho e
   // proporção das outras), para não encostar em margem nem na carta do lado em nenhuma tela.
   return isNeon ? (
-    <div style={vars} className={cn("relative aspect-[5/7] shrink-0", className)}>
+    <div style={vars} className={cn("@container relative aspect-[5/7] shrink-0", className)}>
+      {roupa.floaters && <FloaterPieces items={roupa.floaters} layer="back" />}
       {card}
       {!roupa.artFrame && <NeonOverlay kind={hasTrim ? (roupa.trim ?? "base") : null} isDim={roupa.neonDim === true} />}
       {roupa.overflow && (
         // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da caixa, sem otimizar
         <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflow}.webp`} className={cn("pointer-events-none absolute top-0 left-0 z-[11] h-full select-none", roupa.overflowWidth ? "max-w-none" : "w-full")} style={roupa.overflowWidth ? { width: `${roupa.overflowWidth * 100}%`, left: `${-(roupa.overflowLeft ?? 0) * 100}%` } : undefined} />
       )}
+      {roupa.floaters && <FloaterPieces items={roupa.floaters} layer="front" />}
       {roupa.drops && <WaterDrops />}
       {roupa.overflowBolts && (
         // Os raios das decorações estalam como trovão (só `opacity`; com movimento reduzido, ficam acesos).
