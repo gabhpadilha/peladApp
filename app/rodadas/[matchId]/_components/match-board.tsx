@@ -208,9 +208,6 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
       )}
 
       <RatePlayerSheet
-        matchId={board.match.id}
-        memberId={board.memberId}
-        goals={board.goals}
         entry={canRate ? ratingEntry : null}
         isThreeStats={isThreeStats}
         draft={ratingEntry ? drafts[ratingEntry.player.id] : undefined}

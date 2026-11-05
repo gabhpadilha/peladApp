@@ -18,8 +18,6 @@ import {
   type PlayerAttribute,
 } from "@/types/player";
 import { OffPositionBadge } from "@/components/off-position-badge";
-import { GoalsConfirm } from "@/components/goals-confirm";
-import type { RoundGoalsState } from "@/lib/goal-rules";
 import { submitEvaluations } from "../_actions/submit-evaluations";
 import type { RatingTarget } from "../_data-access/get-rating-session";
 import {
@@ -44,8 +42,6 @@ type RatingWizardProps = {
   match: { id: string; round: number; date: string };
   targets: RatingTarget[];
   /** Gols de cada um, para confirmar na nota (etapa dos gols já feita). */
-  goals: RoundGoalsState;
-  memberId: string;
 };
 
 /** Passo atual: um jogador, um prêmio para votar ou a revisão. */
@@ -70,7 +66,7 @@ function averageScore(draft: Draft): number {
  * Depois, um voto por prêmio (só o Gol da Rodada; o resto sai das notas), revisão
  * e envio de tudo de uma vez.
  */
-export function RatingWizard({ match, targets, goals, memberId }: RatingWizardProps) {
+export function RatingWizard({ match, targets }: RatingWizardProps) {
   const steps: Step[] = [
     ...targets.map((target) => ({ type: "player" as const, target })),
     ...VOTE_AWARD_KINDS.map((kind) => ({ type: "vote" as const, kind })),
@@ -186,7 +182,7 @@ export function RatingWizard({ match, targets, goals, memberId }: RatingWizardPr
           </Button>
           <div className="flex flex-1 flex-col">
             <p className="text-sm font-medium">Rodada {match.round}</p>
-            <p className="text-xs text-muted-foreground first-letter:uppercase">{formatWeekdayDate(match.date)}</p>
+            <p className="text-xs text-muted-foreground first-letter:uppercase">{formatWeekdayDate(match.date)} · Etapa 2 de 2: notas</p>
           </div>
           <p className="font-display text-lg font-bold tabular-nums" aria-live="polite">
             {progressLabel}
@@ -217,17 +213,6 @@ export function RatingWizard({ match, targets, goals, memberId }: RatingWizardPr
                 {step.target.isOffPosition && <OffPositionBadge role={step.target.role} withHint className="mt-1" />}
               </div>
             </div>
-
-            {goals.byMember[step.target.player.id] && (
-              <GoalsConfirm
-                key={step.target.player.id}
-                matchId={match.id}
-                nickname={step.target.player.nickname}
-                goal={goals.byMember[step.target.player.id]}
-                myVote={goals.myVotes[step.target.player.id]}
-                isReporter={goals.byMember[step.target.player.id].reportedBy === memberId}
-              />
-            )}
 
             <div className="flex flex-col gap-5">
               <RatingSliders

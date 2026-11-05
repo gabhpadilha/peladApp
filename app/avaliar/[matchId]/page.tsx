@@ -3,6 +3,8 @@ import { Suspense } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { goalsToCheck } from "@/lib/goal-rules";
+import { GoalsCheckStep } from "./_components/goals-check-step";
 import { GoalsStep } from "./_components/goals-step";
 import { GoalsWaiting } from "./_components/goals-waiting";
 import { RatingWizard } from "./_components/rating-wizard";
@@ -47,15 +49,27 @@ async function RateContent({ params }: { params: PageProps<"/avaliar/[matchId]">
     if (session.targets.length === 0) {
       return <StatusScreen title="Ninguém para avaliar" text="Só você esteve nessa rodada." />;
     }
-    // Etapa dos gols antes das notas: primeiro os seus, depois a espera pelos dos outros.
+    // Duas votações separadas (decisão do dono do app em 2026-11-04). Etapa 1, gols: informar os seus, esperar todos
+    // informarem, conferir os gols dos colegas e esperar todos concluírem. Etapa 2, notas: só depois que a 1 fecha.
     const { goals } = session;
-    if (!goals.ratingsOpen && !(session.memberId in goals.byMember)) {
-      return <GoalsStep match={session.match} memberId={session.memberId} />;
-    }
     if (!goals.ratingsOpen) {
-      return <GoalsWaiting matchId={session.match.id} missingNicknames={session.missingNicknames} isOrganizer={session.isOrganizer} />;
+      if (!(session.memberId in goals.byMember)) {
+        return <GoalsStep match={session.match} memberId={session.memberId} />;
+      }
+      if (goals.missingIds.length > 0) {
+        return <GoalsWaiting matchId={session.match.id} kind="report" waitingNicknames={session.missingNicknames} isOrganizer={session.isOrganizer} />;
+      }
+      if (!goals.myChecked) {
+        const items = goalsToCheck(goals, session.memberId).map((goal) => ({
+          goal,
+          nickname: session.nicknames[goal.memberId] ?? "Jogador",
+          myVote: goals.myVotes[goal.memberId],
+        }));
+        return <GoalsCheckStep match={session.match} items={items} />;
+      }
+      return <GoalsWaiting matchId={session.match.id} kind="check" waitingNicknames={session.pendingCheckNicknames} isOrganizer={session.isOrganizer} />;
     }
-    return <RatingWizard match={session.match} targets={session.targets} goals={goals} memberId={session.memberId} />;
+    return <RatingWizard match={session.match} targets={session.targets} />;
   }
 
   const message = STATUS_MESSAGES[session.status];

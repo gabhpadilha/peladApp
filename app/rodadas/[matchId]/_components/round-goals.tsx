@@ -2,12 +2,14 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { HourglassIcon, UserRoundXIcon } from "lucide-react";
+import Link from "next/link";
+import { ClipboardCheckIcon, HourglassIcon, UserRoundXIcon } from "lucide-react";
 import { reportGoals, unlockRatings } from "@/app/_actions/match-goals";
 import { GoalBall, formatGoals } from "@/components/goal-ball";
 import { GoalStepper } from "@/components/goal-stepper";
+import { GoalsVoteList } from "@/components/goals-vote-list";
 import { Button } from "@/components/ui/button";
-import { GOALS_MIN_CONFIRMATIONS } from "@/lib/goal-rules";
+import { GOALS_MIN_CONFIRMATIONS, goalsToCheck } from "@/lib/goal-rules";
 import type { MatchBoard } from "../_data-access/get-match-board";
 
 /** Informa (ou corrige) os gols de alguém e atualiza a mesa. */
@@ -35,6 +37,8 @@ function MyGoals({ board }: { board: MatchBoard }) {
   const [value, setValue] = useState(mine?.goals ?? 0);
   const [isEditing, setIsEditing] = useState(false);
   const { report, error, isPending } = useReportGoals(board.match.id);
+  // Depois que as notas abrem, só o organizador corrige gols já informados (etapa dos gols fechada).
+  const canEdit = board.isOrganizer || !board.goals.ratingsOpen;
 
   if (!mine || isEditing) {
     return (
@@ -81,9 +85,13 @@ function MyGoals({ board }: { board: MatchBoard }) {
           </p>
         )}
       </div>
-      <button type="button" className="text-sm font-medium text-primary" onClick={() => setIsEditing(true)}>
-        Corrigir
-      </button>
+      {canEdit ? (
+        <button type="button" className="min-h-11 px-2 text-sm font-medium text-primary" onClick={() => setIsEditing(true)}>
+          Corrigir
+        </button>
+      ) : (
+        <p className="max-w-32 text-right text-xs text-muted-foreground">Etapa dos gols fechada. Para corrigir, fale com o organizador.</p>
+      )}
     </div>
   );
 }
@@ -99,6 +107,7 @@ function OrganizerGoals({ board }: { board: MatchBoard }) {
   const [isUnlocking, startUnlock] = useTransition();
 
   if (missing.length === 0 && board.goals.ratingsOpen) return null;
+  const pendingCheck = board.goals.pendingCheckIds.length;
 
   function handleUnlock() {
     setUnlockError(null);
@@ -116,9 +125,13 @@ function OrganizerGoals({ board }: { board: MatchBoard }) {
           <UserRoundXIcon className="size-5" />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-sm font-medium">Ainda não informaram os gols</span>
+          <span className="block text-sm font-medium">
+            {missing.length > 0 ? "Ainda não informaram os gols" : "Ainda não concluíram a conferência dos gols"}
+          </span>
           <span className="block text-xs text-muted-foreground">
-            {missing.length === 1 ? "1 jogador" : `${missing.length} jogadores`} · você pode marcar por eles
+            {missing.length > 0
+              ? `${missing.length === 1 ? "1 jogador" : `${missing.length} jogadores`} · você pode marcar por eles`
+              : `${pendingCheck === 1 ? "1 jogador" : `${pendingCheck} jogadores`} · você pode liberar as notas`}
           </span>
         </span>
         <span className="text-sm font-medium text-primary group-open:hidden">Marcar</span>
@@ -162,22 +175,61 @@ function OrganizerGoals({ board }: { board: MatchBoard }) {
  */
 export function RoundGoals({ board }: { board: MatchBoard }) {
   if (board.match.status !== "open") return null;
-  const missingNames = board.teams
-    .flatMap((team) => [...team.starters, ...team.reserves])
-    .filter((entry) => board.goals.missingIds.includes(entry.player.id))
-    .map((entry) => entry.player.nickname);
+  const everyone = board.teams.flatMap((team) => [...team.starters, ...team.reserves]);
+  const nameById = new Map(everyone.map((entry) => [entry.player.id, entry.player.nickname]));
+  const namesOf = (ids: string[]) => ids.flatMap((id) => (nameById.has(id) ? [nameById.get(id) as string] : []));
   const mine = board.goals.byMember[board.memberId];
+  const { missingIds, pendingCheckIds, myChecked, ratingsOpen } = board.goals;
+  // Gols dos colegas que ainda não respondi (depois que as notas abrem, só sobra isso se o organizador corrigiu um número).
+  const lateItems = ratingsOpen
+    ? goalsToCheck(board.goals, board.memberId).filter((goal) => board.goals.myVotes[goal.memberId] === undefined)
+    : [];
 
   return (
     <div className="flex flex-col gap-3">
       {board.isPresent && <MyGoals board={board} />}
-      {board.isPresent && !board.goals.ratingsOpen && mine && (
+      {board.isPresent && !ratingsOpen && mine && missingIds.length > 0 && (
         <p className="flex items-start gap-2 rounded-xl bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
           <HourglassIcon aria-hidden className="mt-0.5 size-4 shrink-0" />
           <span>
-            As notas abrem quando todo mundo informar os gols. Falta {formatGoalsMissing(missingNames)}.
+            Etapa 1 de 2, gols. Falta {formatGoalsMissing(namesOf(missingIds))} informar. Depois vocês conferem os números e as notas abrem.
           </span>
         </p>
+      )}
+      {board.isPresent && !ratingsOpen && mine && missingIds.length === 0 && !myChecked && (
+        <div className="flex flex-col gap-3 rounded-xl border border-primary/30 bg-primary/10 p-4">
+          <p className="flex items-start gap-2 text-sm">
+            <ClipboardCheckIcon aria-hidden className="mt-0.5 size-4 shrink-0 text-primary" />
+            <span>Todos informaram os gols. Confira os números dos colegas para as notas abrirem.</span>
+          </p>
+          <Button asChild size="lg" className="h-11 text-base">
+            <Link href={`/avaliar/${board.match.id}`}>Conferir os gols</Link>
+          </Button>
+        </div>
+      )}
+      {board.isPresent && !ratingsOpen && mine && missingIds.length === 0 && myChecked && (
+        <p className="flex items-start gap-2 rounded-xl bg-muted/50 px-4 py-3 text-sm text-muted-foreground">
+          <HourglassIcon aria-hidden className="mt-0.5 size-4 shrink-0" />
+          <span>Sua conferência está feita. Falta {formatGoalsMissing(namesOf(pendingCheckIds))} concluir para as notas abrirem.</span>
+        </p>
+      )}
+      {board.isPresent && lateItems.length > 0 && (
+        <details className="group rounded-xl border bg-card">
+          <summary className="flex min-h-14 cursor-pointer list-none items-center gap-3 px-4">
+            <span className="min-w-0 flex-1 text-sm font-medium">
+              Gols para confirmar ({lateItems.length})
+              <span className="block text-xs font-normal text-muted-foreground">O organizador corrigiu um número: confirme de novo.</span>
+            </span>
+            <span className="text-sm font-medium text-primary group-open:hidden">Abrir</span>
+          </summary>
+          <div className="border-t p-3">
+            <GoalsVoteList
+              key={lateItems.map((goal) => `${goal.memberId}:${goal.goals}`).join("|")}
+              matchId={board.match.id}
+              items={lateItems.map((goal) => ({ goal, nickname: nameById.get(goal.memberId) ?? "Jogador", myVote: board.goals.myVotes[goal.memberId] }))}
+            />
+          </div>
+        </details>
       )}
       {board.isOrganizer && <OrganizerGoals board={board} />}
     </div>

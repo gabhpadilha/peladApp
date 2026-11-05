@@ -53,9 +53,10 @@ export function GoalsStep({ match, memberId }: GoalsStepProps) {
           <GoalBall className="size-9" />
         </span>
         <div>
-          <h1 className="font-display text-3xl font-bold uppercase">Quantos gols você fez?</h1>
+          <p className="text-xs font-semibold tracking-[0.2em] text-primary uppercase">Etapa 1 de 2 · Gols</p>
+          <h1 className="mt-1 font-display text-3xl font-bold uppercase">Quantos gols você fez?</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {GOALS_MIN_CONFIRMATIONS} colegas confirmam e eles entram nas suas estatísticas.
+            Depois todo mundo confere os números, e {GOALS_MIN_CONFIRMATIONS} confirmações validam os seus gols. As notas vêm em seguida.
           </p>
         </div>
         <GoalStepper value={goals} onChange={setGoals} label="Seus gols na rodada" />
@@ -66,7 +67,7 @@ export function GoalsStep({ match, memberId }: GoalsStepProps) {
         <div className="mx-auto flex w-full max-w-md flex-col gap-2 px-4 pt-3 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
           {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
           <Button size="lg" className="h-12 text-base" disabled={isPending} onClick={handleSubmit}>
-            {isPending ? "Enviando…" : "Salvar gols e ir para as notas"}
+            {isPending ? "Enviando…" : "Salvar meus gols"}
           </Button>
         </div>
       </footer>

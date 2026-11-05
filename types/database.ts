@@ -310,6 +310,7 @@ export type Database = {
       }
       match_attendance: {
         Row: {
+          goals_checked_at: string | null
           group_id: string
           match_id: string
           member_id: string
@@ -318,6 +319,7 @@ export type Database = {
           team: number
         }
         Insert: {
+          goals_checked_at?: string | null
           group_id: string
           match_id: string
           member_id: string
@@ -326,6 +328,7 @@ export type Database = {
           team: number
         }
         Update: {
+          goals_checked_at?: string | null
           group_id?: string
           match_id?: string
           member_id?: string
@@ -578,6 +581,7 @@ export type Database = {
       }
       confirm_goals: {
         Args: {
+          expected_goals?: number
           is_confirmed: boolean
           target_match: string
           target_member: string
@@ -628,6 +632,7 @@ export type Database = {
         Returns: string
       }
       current_member_id: { Args: { target_group: string }; Returns: string }
+      finish_goal_check: { Args: { target_match: string }; Returns: undefined }
       get_group_goals: {
         Args: { target_group: string }
         Returns: {

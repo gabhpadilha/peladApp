@@ -35,6 +35,10 @@ export type RatingSession =
       isOrganizer: boolean;
       /** Apelido de quem ainda não informou os gols (tela de espera). */
       missingNicknames: string[];
+      /** Apelido de quem ainda não concluiu a conferência dos gols (tela de espera). */
+      pendingCheckNicknames: string[];
+      /** Apelidos por id de jogador (lista de conferência dos gols). */
+      nicknames: Record<string, string>;
     };
 
 /**
@@ -102,5 +106,7 @@ export async function getRatingSession(matchId: string): Promise<RatingSession> 
     memberId: league.currentMemberId,
     isOrganizer: league.membership.role === "organizer",
     missingNicknames: goals.missingIds.flatMap((id) => (nicknameById.has(id) ? [nicknameById.get(id) as string] : [])),
+    pendingCheckNicknames: goals.pendingCheckIds.flatMap((id) => (nicknameById.has(id) ? [nicknameById.get(id) as string] : [])),
+    nicknames: Object.fromEntries(nicknameById),
   };
 }

@@ -34,7 +34,18 @@ export type RoundGoalsState = {
   myVotes: Record<string, boolean>;
   /** Presentes que ainda não informaram. */
   missingIds: string[];
-  /** Notas liberadas: todos informaram ou o organizador liberou. */
+  /** Presentes que informaram mas ainda não concluíram a conferência dos gols dos colegas. */
+  pendingCheckIds: string[];
+  /** Quem está logado já concluiu a conferência. */
+  myChecked: boolean;
+  /** Notas liberadas: todos informaram e conferiram (etapa dos gols fechada) ou o organizador liberou. */
   ratingsOpen: boolean;
 };
+
+/** Gols dos colegas que quem está logado pode conferir (1 gol ou mais, informados por outra pessoa). */
+export function goalsToCheck(state: RoundGoalsState, memberId: string): MatchGoal[] {
+  return Object.values(state.byMember).filter(
+    (goal) => goal.goals > 0 && goal.memberId !== memberId && goal.reportedBy !== memberId,
+  );
+}
 

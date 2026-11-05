@@ -41,7 +41,7 @@ export async function submitEvaluations(input: SubmitEvaluationsInput): Promise<
   }
   // Etapa dos gols antes das notas (o banco também recusa, com o código PA006).
   if (!session.goals.ratingsOpen) {
-    return { success: false, message: "Notas travadas até todo mundo informar os gols. Peça ao organizador para liberar." };
+    return { success: false, message: "As notas abrem quando todo mundo informar e conferir os gols. Peça ao organizador para liberar." };
   }
 
   // Envio só completo: nota para todos os outros presentes (o banco só fecha a
