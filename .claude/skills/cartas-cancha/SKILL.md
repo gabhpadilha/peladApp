@@ -1,0 +1,51 @@
+---
+name: cartas-cancha
+description: Criar, redesenhar ou ajustar o visual das cartas do Cancha Club (cartas especiais, premium da Loja, prêmios e eventos). Use quando o dono do app pedir uma carta nova, um redesign, um prompt para o Gemini, montar peças de arte (fundo, borda, render), animação de raios ou gotas, ou quando uma carta aparecer errada no celular. Cobre o fluxo de camadas, os scripts com sharp, a roupa em `components/cancha-card.tsx`, as regras do iPhone e o que o dono já aprovou ou recusou.
+---
+
+# Cartas do Cancha Club
+
+Leia antes: `.claude/rules/design-system.md` (decisões por carta) e `components/cancha-card.tsx` (`Roupa`, `ROUPAS`, `skinRoupa`, `awardRoupa`). Scripts e fontes ficam em `docs/superpowers/specs/2026-10-28-cartas-assets/prototipos/`; as imagens prontas, em `public/cartas/fundos/`.
+
+## Quem decide
+O dono do app aprova tudo por prévia (print no tamanho do celular). **Sempre** mande uma prévia antes de commitar e espere o ok. Responda em pt-BR. Projeto sem custos: nada pago, e os créditos do Gemini dele acabam (2026-11-04), então prefira reaproveitar arte já gerada.
+
+## O que o dono já aprovou (repita a receita)
+- **Fio de ouro fino por dentro + respiro preto + tubo de neon contínuo por fora**, miolo em arte fotorrealista, coroa ou ícone no topo. É a linguagem das cartas da Loja e do Time do Mês.
+- **Fundo é o que mais pesa.** Tempestade, mármore, cristal, água, mar: texturas reais, não desenho em código.
+- **O que vaza** (render) passa **por cima** da moldura, de forma sutil, e nunca cobre nome, selo do OVR nem estatísticas.
+- Neon simétrico e concêntrico, sem aberturas irregulares.
+
+## O que o dono já recusou (não repita)
+- Cartas **3D** (Three.js/R3F) e render de pedra rachando.
+- **Raios e linhas desenhados em código** ("ficou muito ruim"): parecem desenho. Para render de vazamento, ele quer **arte do Gemini**.
+- Nuvem solta do Gemini no canto (aparecia como mancha), animações de pulsar/apagar raio nas cartas de prêmio, energia em LED em volta da moldura.
+- Preto e dourado fora do Melhor Jogador, cantos em ponta (formato de escudo), logos e bandeiras de clube.
+
+## Fluxo de uma carta nova
+1. **Prompt para o Gemini** (o dono gera; você escreve). Primeiro a carta inteira para ele escolher; depois **uma camada por mensagem**: fundo, borda e, só se houver, o render.
+   - Formato 5:7, cantos arredondados, simétrica; imagem 2:3 com a carta em ~70% da largura e fundo da imagem **preto puro**, sem contorno branco e sem xadrez.
+   - Layout dentro da carta: nome e posição em cima à esquerda, selo vertical "88" em cima à direita, foto grande, faixa "PRÊMIO · R12" e 3 estatísticas no rodapé (ATAQUE, CRIAÇÃO, DEFESA). Nada de bandeira, escudo, preço, estrelas.
+   - Borda e render: luz sobre **preto puro** (metal escuro some, porque a transparência sai do brilho). Render pequeno, mais da metade para fora da carta, sem corte na borda da imagem.
+   - Para inspirar-se em carta da EA: pedir "reinterprete, não copie" e proibir logos e marcas.
+2. **Medir** as imagens recebidas com sharp (colunas e linhas de pixels claros): borda de fora do tubo (`EDGE`), lado de dentro do fio de ouro, raio do canto, caixa do cartão do fundo. Imagens do mesmo tamanho alinham direto; se vierem com tamanhos diferentes, cheque a proporção (848 × 1264 e 687 × 1024 têm a mesma).
+3. **Script** `prototipos/<nome>.cjs` (modelo: `premio-time-do-mes-v4.cjs`, `premio-time-do-mes-v3`/`destaques-mar.cjs` no histórico). Saídas:
+   - `<nome>.webp` (janela, 600 × 860) e `<nome>-vaza.webp` (714 × 1000, a carta ocupa os 84% do meio, 8% de sobra por lado).
+   - Alfa de luz sobre preto: `smooth(14, 120, max(r, g, b))`, cor como está. O preto das artes **não é 0** (piso 15 a 26): descontar, senão aparece retângulo escuro.
+   - A moldura é **opaca** na faixa dentro da carta e por fora da carta só luz; a rampa de alfa rente à borda evita emenda.
+   - Se um elemento indesejado tem simetria (nuvem em um canto), refaça espelhando o outro lado e esmaeça a emenda.
+4. **Roupa** em `cancha-card.tsx`: `background`, `overflow`, `window` (`"inner"` = conteúdo até o fio de ouro; `"ring"` = até o tubo, com `windowRadius`), `artFrame`, `clean`, `statsInset` (sobe as estatísticas do rodapé), `overflowBolts`/`innerBolts` + `glow` (raios que acendem), `drops` (gotas em código). Cartas ganhas antes mantêm o desenho antigo pelo tema gravado (`MONTH_ROUPA_CRISTAL`): zere os campos novos nelas.
+5. **Prévia**: página temporária `app/auth/previa/<nome>/page.tsx` com `PlayerCard` e `SAMPLE_PLAYER` (nunca o rosto de quem está logado); copie `.env.local` do repo principal; `npx next dev -p 3111`; Playwright em `/home/gabriellinux/node_modules/playwright` (viewport 390 × 640, escala 2). Vídeo com `recordVideo`; confira o que anima com `document.getAnimations().length`.
+6. **Limpeza antes de commitar**: apague a rota de prévia, o `.env.local` copiado, vídeos e arquivos de versões descartadas; rode `rm -rf .next && npx next typegen`, `npm run type-check` e `npm run lint`; atualize `CLAUDE.md` e `design-system.md`; pergunte "Faço push direto na main?" e a versão. Commits em inglês, no imperativo.
+
+## Regras do iPhone (o WebKit quebra isto)
+- Na carta: **sem `filter`, `mix-blend-mode`, `backdrop-filter`** nem máscara com a URL da foto. Brilho é traço do contorno ou degradê assado na imagem; sombra atrás da pessoa usa SVG, não `radial-gradient`.
+- Animações só com `transform` e `opacity`; com `motion-reduce`, parada ou escondida. Raios acendem com `cc-thunder-glow` (3,6 s).
+- Borda com opacidade parcial vira fio no Safari: as quatro bordas de camadas encaixadas terminam transparentes ou opacas, nunca meio-tom.
+- Teste no WebKit do Playwright quando o problema for só do iPhone (ver CLAUDE.md, "Common Gotchas").
+
+## Armadilhas conhecidas
+- O `next dev` serve `globals.css` velho: `@keyframes` novo não aparece, `getAnimations()` volta 0. Apague `.next` e reinicie (nunca `pkill -f "next dev"` sem o truque dos colchetes `[n]ext`, que mata o próprio shell; use `setsid nohup`).
+- Gradiente de cor da arte com pontos pretos: meça o piso do preto antes de calcular alfa.
+- Peso: cada camada WebP deve ficar abaixo de ~150 KB; 24 imagens de animação (924 KB) foram vistas como pesadas.
+- A carta aparece em muitos lugares (ranking, Coleção, mesa tática): teste em tamanho pequeno também.
