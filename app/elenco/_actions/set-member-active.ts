@@ -22,13 +22,14 @@ export async function setMemberActive(memberId: string, active: boolean): Promis
     return { success: false, message: "Só o administrador da pelada desativa jogadores." };
   }
   if (!z.uuid().safeParse(memberId).success) {
-    return { success: false, message: "Jogador inválido." };
+    return { success: false, message: "Não achei esse jogador. Recarregue a página e tente de novo." };
   }
   if (memberId === membership.memberId) {
     return { success: false, message: "Você não pode desativar a si mesmo." };
   }
   if (!hasAdminEnv()) {
-    return { success: false, message: "Falta a SUPABASE_SECRET_KEY no .env.local." };
+    console.error("Falta a SUPABASE_SECRET_KEY no .env.local (cliente admin indisponível).");
+    return { success: false, message: "Algo falhou do nosso lado, não foi você. Tente de novo em instantes." };
   }
 
   const supabase = await createClient();

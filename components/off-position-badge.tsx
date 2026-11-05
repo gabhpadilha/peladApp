@@ -29,7 +29,7 @@ export function OffPositionBadge({ role, withHint = false, className }: OffPosit
     <span
       className={cn(
         "inline-flex w-fit items-center gap-1 rounded-full font-semibold whitespace-nowrap",
-        withHint ? "bg-amber-400/15 px-2 py-0.5 text-xs text-amber-400" : "bg-amber-400 px-1.5 py-px text-[10px] text-black",
+        withHint ? "bg-amber-400/15 px-2 py-0.5 text-xs text-amber-400" : "bg-amber-400 px-1.5 py-px text-xs text-black",
         className,
       )}
     >

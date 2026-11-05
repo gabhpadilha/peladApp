@@ -47,7 +47,7 @@ export function PerformanceChart({ performances: allPerformances, bestScore }: P
             aria-hidden
             className={cn("absolute inset-x-0 border-t border-dashed border-border", GRID_POSITION[line])}
           >
-            <span className="absolute -top-2 -left-6 w-5 text-right text-[10px] text-muted-foreground tabular-nums">
+            <span className="absolute -top-2 -left-6 w-5 text-right text-xs text-muted-foreground tabular-nums">
               {line}
             </span>
           </div>

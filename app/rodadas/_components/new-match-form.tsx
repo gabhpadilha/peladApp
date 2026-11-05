@@ -251,7 +251,7 @@ export function NewMatchForm({ members, today }: NewMatchFormProps) {
                             id={`team-of-${member.id}`}
                             value={slotValue}
                             onChange={(event) => handleMovePlayer(member.id, event.target.value)}
-                            className="h-8 rounded-md border bg-background px-1.5 text-xs"
+                            className="h-11 rounded-md border bg-background px-2 text-base text-foreground"
                           >
                             {SLOTS.map((slot) => (
                               <option key={slot.value} value={slot.value}>

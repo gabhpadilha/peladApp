@@ -13,10 +13,11 @@ export async function removePlayerPhoto(memberId: string): Promise<RemovePlayerP
   const userId = await requireUserId("/elenco");
   const membership = await requireActiveMembership("/elenco");
   if (!z.uuid().safeParse(memberId).success) {
-    return { success: false, message: "Jogador inválido." };
+    return { success: false, message: "Não achei esse jogador. Recarregue a página e tente de novo." };
   }
   if (!hasAdminEnv()) {
-    return { success: false, message: "Falta a SUPABASE_SECRET_KEY no .env.local." };
+    console.error("Falta a SUPABASE_SECRET_KEY no .env.local (cliente admin indisponível).");
+    return { success: false, message: "Algo falhou do nosso lado, não foi você. Tente de novo em instantes." };
   }
 
   const admin = createAdminClient();

@@ -26,18 +26,19 @@ export async function editPlayer(memberId: string, input: EditPlayerInput): Prom
     return { success: false, message: "Só o administrador da pelada edita o cadastro dos jogadores." };
   }
   if (!z.uuid().safeParse(memberId).success) {
-    return { success: false, message: "Jogador inválido." };
+    return { success: false, message: "Não achei esse jogador. Recarregue a página e tente de novo." };
   }
   const validation = editPlayerSchema.safeParse(input);
   if (!validation.success) {
     return {
       success: false,
-      message: "Confira os campos.",
+      message: "Tem campo com problema. Veja os avisos em vermelho.",
       errors: z.flattenError(validation.error).fieldErrors,
     };
   }
   if (!hasAdminEnv()) {
-    return { success: false, message: "Falta a SUPABASE_SECRET_KEY no .env.local." };
+    console.error("Falta a SUPABASE_SECRET_KEY no .env.local (cliente admin indisponível).");
+    return { success: false, message: "Algo falhou do nosso lado, não foi você. Tente de novo em instantes." };
   }
 
   // Confere com a sessão do organizador (RLS) que o jogador é da pelada dele.

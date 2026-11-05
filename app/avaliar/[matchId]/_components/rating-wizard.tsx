@@ -161,7 +161,7 @@ export function RatingWizard({ match, targets, goals, memberId }: RatingWizardPr
           da rodada saem.
         </p>
         <Button asChild size="lg" className="h-11 w-full text-base">
-          <Link href="/">Voltar ao início</Link>
+          <Link href="/">Voltar ao Início</Link>
         </Button>
       </main>
     );

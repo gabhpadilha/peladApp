@@ -329,6 +329,25 @@
   }
   html {
     @apply font-sans;
+    /* Celular: toque sem espera de duplo toque e sem o clarão cinza do WebKit nos botões. */
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  /* Foco visível para quem navega pelo teclado (os botões do shadcn já têm o próprio anel). */
+  :where(a, button, summary, [role="button"], [role="tab"], select, input, textarea):focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  /* Movimento reduzido: as animações e transições viram instantâneas (as cartas e a revelação têm as próprias regras). */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
   }
 }
 /*

@@ -47,7 +47,7 @@ export function CreateGroupForm({ defaultFullName }: CreateGroupFormProps) {
               <Input
                 {...field}
                 id="create-group-name"
-                placeholder="Pelada de Sábado"
+                placeholder="Pelada de Quinta"
                 aria-invalid={fieldState.invalid}
                 className="h-11 text-base"
               />
@@ -70,7 +70,7 @@ export function CreateGroupForm({ defaultFullName }: CreateGroupFormProps) {
                 aria-invalid={fieldState.invalid}
                 className="h-11 text-base"
               />
-              <FieldDescription>Para entrar de outros aparelhos. Mínimo de 8 caracteres.</FieldDescription>
+              <FieldDescription>Você vai usar essa senha para entrar. Mínimo de 8 caracteres.</FieldDescription>
               {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}

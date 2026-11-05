@@ -28,7 +28,7 @@ export async function submitEvaluations(input: SubmitEvaluationsInput): Promise<
   const validation = submitEvaluationsSchema.safeParse(input);
   if (!validation.success) {
     const [firstIssue] = z.flattenError(validation.error).formErrors;
-    return { success: false, message: firstIssue ?? "Notas inválidas. Confira e tente de novo." };
+    return { success: false, message: firstIssue ?? "Alguma nota ficou fora do lugar. Volte à revisão e confira todas." };
   }
   const { matchId, evaluations, votes } = validation.data;
 
@@ -41,14 +41,14 @@ export async function submitEvaluations(input: SubmitEvaluationsInput): Promise<
   }
   // Etapa dos gols antes das notas (o banco também recusa, com o código PA006).
   if (!session.goals.ratingsOpen) {
-    return { success: false, message: "As notas abrem quando todo mundo informar os gols (ou o organizador liberar)." };
+    return { success: false, message: "Notas travadas até todo mundo informar os gols. Peça ao organizador para liberar." };
   }
 
   // Envio só completo: nota para todos os outros presentes (o banco só fecha a
   // rodada com envios completos).
   const ratedIds = new Set(evaluations.map((evaluation) => evaluation.playerId));
   if (session.targets.some((target) => !ratedIds.has(target.player.id))) {
-    return { success: false, message: "Dê nota para todos os jogadores da rodada antes de enviar." };
+    return { success: false, message: "Faltam notas. Dê nota para todos os outros que jogaram para enviar." };
   }
 
   // Papel da rodada (quem jogou no gol é avaliado como goleiro), não o do cadastro.
@@ -58,11 +58,11 @@ export async function submitEvaluations(input: SubmitEvaluationsInput): Promise<
   for (const evaluation of evaluations) {
     // O papel vem do banco, não do navegador.
     if (roleByTarget.get(evaluation.playerId) !== evaluation.role) {
-      return { success: false, message: "Algum jogador avaliado não estava nessa rodada." };
+      return { success: false, message: "A lista da rodada mudou. Recarregue a tela e envie de novo." };
     }
     // Rodada de 3 notas: as duas notas de cada estatística são a mesma (o app grava o par igual).
     if (usesThreeStats(session.match.date) && !hasEqualPairs(evaluation.role, evaluation.scores)) {
-      return { success: false, message: "Notas inválidas. Confira e tente de novo." };
+      return { success: false, message: "Alguma nota ficou fora do lugar. Volte à revisão e confira todas." };
     }
     evaluationRows.push({
       match_id: matchId,
@@ -79,11 +79,11 @@ export async function submitEvaluations(input: SubmitEvaluationsInput): Promise<
     // Só quem jogou e não é você (os alvos já excluem o próprio jogador).
     const nomineeRole = roleByTarget.get(nomineeId);
     if (!nomineeRole) {
-      return { success: false, message: "Algum voto foi para quem não estava nessa rodada." };
+      return { success: false, message: "A lista da rodada mudou. Recarregue a tela e envie de novo." };
     }
     // Melhor Goleiro só para goleiros; Drible, Atacante e Defensor só para a linha.
     if (!canReceiveVote(kind, nomineeRole)) {
-      return { success: false, message: "Algum voto foi para quem não pode receber esse prêmio." };
+      return { success: false, message: "Esse voto não vale para esse prêmio. Escolha outro jogador ou toque em Ninguém." };
     }
     voteRows.push({ match_id: matchId, voter_id: membership.memberId, kind, nominee_id: nomineeId });
   }
@@ -96,7 +96,7 @@ export async function submitEvaluations(input: SubmitEvaluationsInput): Promise<
       .from("round_votes")
       .upsert(voteRows, { onConflict: "match_id,voter_id,kind" });
     if (voteError) {
-      return { success: false, message: "Não foi possível registrar seus votos. Tente de novo." };
+      return { success: false, message: "Não deu para salvar seus votos. Confira a conexão e toque em Enviar de novo." };
     }
   }
 

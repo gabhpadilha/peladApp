@@ -35,7 +35,7 @@ function Badge({ entry, mode, rating }: Pick<BoardCardProps, "entry" | "mode" | 
     return (
       <span className={cn(base, "border-border bg-background font-display text-sm font-bold")}>
         {entry.roundScore}
-        <span className="font-sans text-[10px] font-normal text-muted-foreground">na rodada</span>
+        <span className="font-sans text-xs font-normal text-muted-foreground">na rodada</span>
       </span>
     );
   }
@@ -96,7 +96,7 @@ export const BoardCard = memo(function BoardCard({ entry, mode, rating, onRate }
       {(isSelf || isOffPosition) && (
         <span className="absolute -top-2 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1">
           {isSelf && (
-            <span className="rounded-full bg-primary px-1.5 py-px text-[10px] font-semibold text-primary-foreground">
+            <span className="rounded-full bg-primary px-1.5 py-px text-xs font-semibold text-primary-foreground">
               Você
             </span>
           )}

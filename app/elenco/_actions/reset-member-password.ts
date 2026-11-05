@@ -21,10 +21,11 @@ export async function resetMemberPassword(memberId: string): Promise<ResetMember
     return { success: false, message: "Só o administrador da pelada redefine senhas." };
   }
   if (!z.uuid().safeParse(memberId).success) {
-    return { success: false, message: "Jogador inválido." };
+    return { success: false, message: "Não achei esse jogador. Recarregue a página e tente de novo." };
   }
   if (!hasAdminEnv()) {
-    return { success: false, message: "Falta a SUPABASE_SECRET_KEY no .env.local." };
+    console.error("Falta a SUPABASE_SECRET_KEY no .env.local (cliente admin indisponível).");
+    return { success: false, message: "Algo falhou do nosso lado, não foi você. Tente de novo em instantes." };
   }
 
   // Confere com a sessão do organizador (RLS) que o jogador é da pelada dele.

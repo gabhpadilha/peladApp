@@ -52,7 +52,7 @@ export function AttributeSlider({ id, abbreviation, name, value, onChange }: Att
           aria-live="polite"
           className={cn(
             "w-10 text-right font-display text-3xl leading-none font-extrabold tabular-nums",
-            !isTouched && "text-muted-foreground/60",
+            !isTouched && "text-muted-foreground",
           )}
         >
           {value ?? "—"}
@@ -75,7 +75,7 @@ export function AttributeSlider({ id, abbreviation, name, value, onChange }: Att
             "[&_[data-slot=slider-range]]:opacity-0 [&_[data-slot=slider-thumb]]:border-muted-foreground [&_[data-slot=slider-thumb]]:bg-muted",
         )}
       />
-      <div aria-hidden className="flex justify-between text-[11px] text-muted-foreground tabular-nums">
+      <div aria-hidden className="flex justify-between text-xs text-muted-foreground tabular-nums">
         <span>{SCORE_MIN}</span>
         <span>{SCORE_MAX}</span>
       </div>

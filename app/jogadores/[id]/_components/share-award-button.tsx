@@ -75,7 +75,7 @@ export function ShareAwardButton({ award, groupName, variant = "full" }: ShareAw
         onClick={() => handleOpenChange(true)}
         className={cn(
           "inline-flex items-center justify-center gap-2 bg-primary font-semibold text-primary-foreground transition-colors hover:bg-primary/90",
-          variant === "full" ? "h-11 w-full rounded-lg text-base" : "h-9 rounded-full px-3 text-sm",
+          variant === "full" ? "h-11 w-full rounded-lg text-base" : "h-11 rounded-full px-4 text-sm",
         )}
       >
         <Share2Icon aria-hidden className={variant === "full" ? "size-4" : "size-3.5"} />

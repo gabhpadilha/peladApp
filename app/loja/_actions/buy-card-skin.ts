@@ -14,7 +14,7 @@ const todayFormatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao
 export type ShopActionResult = { success: true; message: string } | { success: false; message: string };
 
 const inputSchema = z.object({
-  skin: z.string().refine(isCardSkinKey, "Carta inválida."),
+  skin: z.string().refine(isCardSkinKey, "Não achei essa carta. Recarregue a Loja e tente de novo."),
   equip: z.boolean(),
 });
 
@@ -26,21 +26,22 @@ export async function buyCardSkin(input: { skin: string; equip: boolean }): Prom
   const membership = await requireActiveMembership("/loja");
   const parsed = inputSchema.safeParse(input);
   if (!parsed.success || !isCardSkinKey(parsed.data.skin)) {
-    return { success: false, message: "Carta inválida." };
+    return { success: false, message: "Não achei essa carta. Recarregue a Loja e tente de novo." };
   }
   if (!hasAdminEnv()) {
-    return { success: false, message: "Falta a SUPABASE_SECRET_KEY no .env.local." };
+    console.error("Falta a SUPABASE_SECRET_KEY no .env.local (cliente admin indisponível).");
+    return { success: false, message: "Algo falhou do nosso lado, não foi você. Tente de novo em instantes." };
   }
 
   const skin = getCardSkin(parsed.data.skin);
   const today = todayFormatter.format(new Date());
   if (!isCardSkinOnSale(skin, today)) {
-    return { success: false, message: `A ${skin.name} saiu da Loja com o fim do evento.` };
+    return { success: false, message: `A ${skin.name} saiu da Loja junto com o evento. Quem comprou continua usando.` };
   }
   const league = await getLeague("/loja");
   const progression = league.getProgression(membership.memberId);
   if (progression.level < skin.level) {
-    return { success: false, message: `A ${skin.name} libera no nível ${skin.level}.` };
+    return { success: false, message: `A ${skin.name} libera no nível ${skin.level}. Ganhe XP jogando e dando nota.` };
   }
 
   const admin = createAdminClient();
@@ -59,7 +60,7 @@ export async function buyCardSkin(input: { skin: string; equip: boolean }): Prom
   // Promoção (ex.: Black Friday) calculada aqui, nunca vinda do aparelho; a compra grava o preço pago.
   const price = getSalePrice(skin.price, getActiveSale(today));
   if (balance < price) {
-    return { success: false, message: `Faltam ${price - balance} CanchaCoins para a ${skin.name}.` };
+    return { success: false, message: `Faltam ${price - balance} CanchaCoins para a ${skin.name}. Jogue e dê nota para ganhar mais.` };
   }
 
   const { error: insertError } = await admin.from("card_skin_purchases").insert({

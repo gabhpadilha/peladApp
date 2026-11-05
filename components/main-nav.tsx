@@ -139,8 +139,7 @@ export function MainNavView({ variant, isOwner, currentPlayer, pathname }: MainN
                 aria-current={isCurrent ? "page" : undefined}
                 className={cn(
                   "flex h-full flex-col items-center justify-center gap-1",
-                  // Com 6 botões (Administrador), letra um pouco menor para caber.
-                  items.length > 5 ? "text-[11px]" : "text-xs",
+                  "text-xs",
                   isCurrent ? "font-semibold text-primary" : "text-muted-foreground",
                 )}
               >

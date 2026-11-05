@@ -35,7 +35,7 @@ export async function segmentPhoto(formData: FormData): Promise<SegmentPhotoResu
 
   const photo = formData.get("photo");
   if (!(photo instanceof File) || photo.size === 0 || photo.size > MAX_UPLOAD_BYTES || !ACCEPTED_TYPES.includes(photo.type)) {
-    return { success: false, message: "Envie uma imagem PNG, JPEG ou WebP de até 3MB." };
+    return { success: false, message: "Use uma foto PNG, JPEG ou WebP de até 3 MB." };
   }
   const image = Buffer.from(await photo.arrayBuffer());
 
@@ -51,5 +51,5 @@ export async function segmentPhoto(formData: FormData): Promise<SegmentPhotoResu
       console.error(`segmentPhoto: ${provider.name} falhou em ${Date.now() - startedAt}ms`, error);
     }
   }
-  return { success: false, message: "Não foi possível tirar o fundo da foto." };
+  return { success: false, message: "Não consegui recortar essa foto. Tente outra, com boa luz e o rosto de frente." };
 }

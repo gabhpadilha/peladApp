@@ -47,7 +47,7 @@ export async function uploadPlayerPhoto(formData: FormData): Promise<UploadPlaye
     kind: formData.get("kind"),
   });
   if (!validation.success) {
-    return { success: false, message: "Dados inválidos." };
+    return { success: false, message: "Não consegui ler o pedido. Recarregue a página e tente de novo." };
   }
   const cutout = formData.get("cutout");
   const original = formData.get("original");
@@ -56,10 +56,11 @@ export async function uploadPlayerPhoto(formData: FormData): Promise<UploadPlaye
       cutout: cutout instanceof File ? { type: cutout.type, size: cutout.size } : typeof cutout,
       original: original instanceof File ? { type: original.type, size: original.size } : typeof original,
     });
-    return { success: false, message: "Envie uma imagem PNG, JPEG ou WebP de até 3MB." };
+    return { success: false, message: "Use uma foto PNG, JPEG ou WebP de até 3 MB." };
   }
   if (!hasAdminEnv()) {
-    return { success: false, message: "Falta a SUPABASE_SECRET_KEY no .env.local." };
+    console.error("Falta a SUPABASE_SECRET_KEY no .env.local (cliente admin indisponível).");
+    return { success: false, message: "Algo falhou do nosso lado, não foi você. Tente de novo em instantes." };
   }
 
   const { memberId, kind } = validation.data;

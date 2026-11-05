@@ -60,7 +60,7 @@ export function GoalsConfirm({ matchId, nickname, goal, myVote, isReporter }: Go
             aria-pressed={vote === true}
             onClick={() => handleVote(true)}
             className={cn(
-              "flex h-10 items-center justify-center gap-1.5 rounded-lg border text-sm font-medium",
+              "flex h-11 items-center justify-center gap-1.5 rounded-lg border text-sm font-medium",
               vote === true ? "border-primary bg-primary text-primary-foreground" : "bg-background",
             )}
           >
@@ -71,7 +71,7 @@ export function GoalsConfirm({ matchId, nickname, goal, myVote, isReporter }: Go
             disabled={isPending}
             aria-pressed={vote === false}
             onClick={() => handleVote(false)}
-            className={cn("flex h-10 items-center justify-center rounded-lg border text-sm", vote === false ? "border-destructive text-destructive" : "bg-background")}
+            className={cn("flex h-11 items-center justify-center rounded-lg border text-sm", vote === false ? "border-destructive text-destructive" : "bg-background")}
           >
             Não foi isso
           </button>

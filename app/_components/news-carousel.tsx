@@ -69,7 +69,7 @@ export function NewsCarousel({ label, slides }: NewsCarouselProps) {
           type="button"
           onClick={() => goTo(active - 1)}
           aria-label="Novidade anterior"
-          className="flex size-9 items-center justify-center rounded-full border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="flex size-11 items-center justify-center rounded-full border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <ChevronLeftIcon aria-hidden className="size-4" />
         </button>
@@ -81,11 +81,11 @@ export function NewsCarousel({ label, slides }: NewsCarouselProps) {
               onClick={() => goTo(index)}
               aria-label={`Ver ${slide.title}`}
               aria-current={index === active}
-              className="flex h-6 items-center px-0.5"
+              className="flex h-11 min-w-4 items-center justify-center px-0.5"
             >
               <span
                 className={cn(
-                  "h-1.5 rounded-full transition-all",
+                  "h-1.5 rounded-full transition-[width,background-color]",
                   index === active ? "w-6 bg-primary" : "w-1.5 bg-muted-foreground/40",
                 )}
               />
@@ -96,7 +96,7 @@ export function NewsCarousel({ label, slides }: NewsCarouselProps) {
           type="button"
           onClick={() => goTo(active + 1)}
           aria-label="Próxima novidade"
-          className="flex size-9 items-center justify-center rounded-full border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="flex size-11 items-center justify-center rounded-full border text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <ChevronRightIcon aria-hidden className="size-4" />
         </button>

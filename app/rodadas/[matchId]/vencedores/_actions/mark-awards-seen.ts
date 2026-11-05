@@ -16,7 +16,7 @@ export async function markAwardsSeen(matchId: string): Promise<MarkAwardsSeenRes
 
   const parsedMatchId = z.uuid().safeParse(matchId);
   if (!parsedMatchId.success) {
-    return { success: false, message: "Rodada inválida." };
+    return { success: false, message: "Não achei essa rodada. Recarregue a página e tente de novo." };
   }
 
   const supabase = await createClient();

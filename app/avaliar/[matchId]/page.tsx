@@ -68,7 +68,7 @@ function StatusScreen({ title, text }: { title: string; text: string }) {
       <h1 className="font-display text-3xl font-bold">{title}</h1>
       <p className="text-muted-foreground">{text}</p>
       <Button asChild size="lg" className="h-11 w-full text-base">
-        <Link href="/">Voltar ao início</Link>
+        <Link href="/">Voltar ao Início</Link>
       </Button>
     </main>
   );

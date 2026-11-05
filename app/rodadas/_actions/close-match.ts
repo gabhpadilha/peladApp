@@ -21,12 +21,12 @@ export type CloseMatchResult =
 export async function closeMatch(matchId: string): Promise<CloseMatchResult> {
   const membership = await requireActiveMembership("/rodadas");
   if (membership.role !== "organizer") {
-    return { success: false, message: "Só o organizador fecha rodadas." };
+    return { success: false, message: "Só quem organiza a pelada pode fechar a rodada. Chame o organizador." };
   }
 
   const parsedMatchId = z.uuid().safeParse(matchId);
   if (!parsedMatchId.success) {
-    return { success: false, message: "Rodada inválida." };
+    return { success: false, message: "Não achei essa rodada. Recarregue a página e tente de novo." };
   }
 
   const supabase = await createClient();

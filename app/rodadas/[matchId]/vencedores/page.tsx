@@ -41,7 +41,7 @@ async function WinnersContent({ params }: { params: PageProps<"/rodadas/[matchId
           da Semana.
         </p>
         <Button asChild size="lg" className="h-11 text-base">
-          <Link href="/">Voltar para o início</Link>
+          <Link href="/">Voltar ao Início</Link>
         </Button>
       </main>
     );

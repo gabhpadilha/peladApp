@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Cancha Club",
     short_name: "Cancha Club",
-    description: "Avaliações pós-jogo, cartinhas e sorteio equilibrado para a pelada semanal.",
+    description: "Avaliações pós-jogo, cartas com OVR e sorteio de times equilibrado para a sua pelada.",
     lang: "pt-BR",
     id: "/",
     start_url: "/",

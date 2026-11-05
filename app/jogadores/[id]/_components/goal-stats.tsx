@@ -121,7 +121,7 @@ export function GoalStats({ stats }: { stats: GoalStatsData }) {
                 <FeatBall mark={feat.mark} earned={count > 0} />
                 <span className={cn("font-display text-2xl leading-none font-bold tabular-nums", count === 0 && "text-muted-foreground")}>{count}</span>
                 <span className="text-xs leading-tight font-medium">{feat.label}</span>
-                <span className="text-[10px] leading-none text-muted-foreground">{feat.detail}</span>
+                <span className="text-xs leading-none text-muted-foreground">{feat.detail}</span>
               </li>
             );
           })}
@@ -154,7 +154,7 @@ export function GoalStats({ stats }: { stats: GoalStatsData }) {
           </ol>
           <ol className="flex gap-1.5 sm:gap-3">
             {recent.map((entry) => (
-              <li key={entry.round} className="min-w-0 flex-1 text-center text-[10px] text-muted-foreground tabular-nums">
+              <li key={entry.round} className="min-w-0 flex-1 text-center text-xs text-muted-foreground tabular-nums">
                 R{entry.round}
               </li>
             ))}

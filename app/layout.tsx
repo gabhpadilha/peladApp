@@ -22,7 +22,7 @@ const barlowCondensed = Barlow_Condensed({
 
 export const metadata: Metadata = {
   title: "Cancha Club",
-  description: "Avaliações pós-jogo, cartinhas e sorteio equilibrado para a pelada semanal.",
+  description: "Avaliações pós-jogo, cartas com OVR e sorteio de times equilibrado para a sua pelada.",
   // iPhone: "Adicionar à Tela de Início" abre em tela cheia, com o nome curto embaixo do ícone.
   appleWebApp: { capable: true, title: "Cancha Club", statusBarStyle: "black" },
 };

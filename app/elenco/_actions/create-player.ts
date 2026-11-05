@@ -33,15 +33,13 @@ export async function createPlayer(input: CreatePlayerInput): Promise<CreatePlay
   if (!validation.success) {
     return {
       success: false,
-      message: "Confira os campos.",
+      message: "Tem campo com problema. Veja os avisos em vermelho.",
       errors: z.flattenError(validation.error).fieldErrors,
     };
   }
   if (!hasAdminEnv()) {
-    return {
-      success: false,
-      message: "Falta a SUPABASE_SECRET_KEY no .env.local para cadastrar jogadores.",
-    };
+    console.error("Falta a SUPABASE_SECRET_KEY no .env.local (cliente admin indisponível).");
+    return { success: false, message: "Algo falhou do nosso lado, não foi você. Tente de novo em instantes." };
   }
 
   const { username, fullName, nickname, position } = validation.data;

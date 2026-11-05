@@ -17,6 +17,16 @@ Decisões visuais e de UX do projeto. Os tokens ficam no `app/globals.css`; este
 - **Ícone do PWA:** `app/icon.svg` (fundo `#0b130f` e a marca no centro), a fonte dos PNGs; mudou, rode `node scripts/generate-pwa-icons.mjs`. O "maskable" do Android leva o desenho nos 80% do meio.
 - **Moeda:** **CanchaCoins**, sigla **CC**.
 
+## 🧰 Base de usabilidade (Fase 1 da revisão geral, 2026-11-04)
+
+Resultado da revisão crítica de UI/UX e de textos (relatórios por tela e prioridades nas conversas daquele dia). Regras que valem para toda tela nova:
+- **Toque de 44 px no celular:** `Button` tem `h-11` (default, lg e icon), `h-10` (sm) e `h-9` com área estendida de 44 px (xs); do `sm:` em diante voltam aos tamanhos compactos. Chips, seletores e passos de contagem também: `h-11`. `<select>` com `text-base` (menos de 16 px faz o iPhone dar zoom).
+- **Piso de 12 px** em texto que o usuário precisa ler (`text-xs`); nada de `text-[10px]`/`[11px]` fora da carta, e não use `text-muted-foreground` com transparência (`/60`) em valores.
+- **Globais no `globals.css`:** anel de foco visível, `prefers-reduced-motion` (animações e transições viram instantâneas), `touch-action: manipulation` e sem o realce cinza do toque.
+- **Erros de ação:** nunca técnicos (chave, "inválido", "servidor"); o detalhe vai para `console.error` e o usuário recebe a saída ("Confira a conexão", "Chame o organizador").
+- **Vocabulário:** nota (o que se dá ao colega; "voto" só no Gol da Rodada), carta (nunca "cartinha"), rodada, "Voltar ao Início", Administrador (quem cria conta e redefine senha), organizador (cria e fecha rodadas).
+- **Ainda não feito (fases seguintes):** Home com um cartão "Agora" e Placar unificado, barra de baixo com 5 itens (Elenco dentro de Eu), segmentos na aba Estatísticas, componentes de Seção, estado vazio e erro padrão, `loading.tsx`/`error.tsx`.
+
 ## 🔤 Tipografia
 
 - `font-display` (Barlow Condensed 600/700/800): OVR, apelidos, siglas de atributo, títulos curtos, números grandes.

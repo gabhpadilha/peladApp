@@ -10,10 +10,11 @@ import type { ShopActionResult } from "./buy-card-skin";
 export async function equipCardSkin(skin: string | null): Promise<ShopActionResult> {
   const membership = await requireActiveMembership("/loja");
   if (skin !== null && !isCardSkinKey(skin)) {
-    return { success: false, message: "Carta inválida." };
+    return { success: false, message: "Não achei essa carta. Recarregue a Loja e tente de novo." };
   }
   if (!hasAdminEnv()) {
-    return { success: false, message: "Falta a SUPABASE_SECRET_KEY no .env.local." };
+    console.error("Falta a SUPABASE_SECRET_KEY no .env.local (cliente admin indisponível).");
+    return { success: false, message: "Algo falhou do nosso lado, não foi você. Tente de novo em instantes." };
   }
 
   const admin = createAdminClient();

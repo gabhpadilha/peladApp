@@ -24,13 +24,14 @@ export async function signIn(input: SignInInput, next?: string): Promise<SignInR
   if (!validation.success) {
     return {
       success: false,
-      message: "Confira os campos.",
+      message: "Preencha usuário e senha para entrar.",
       errors: z.flattenError(validation.error).fieldErrors,
     };
   }
 
   if (!hasSupabaseEnv()) {
-    return { success: false, message: "Supabase ainda não configurado (.env.local)." };
+    console.error("Supabase ainda não configurado (.env.local).");
+    return { success: false, message: "O login está fora do ar do nosso lado. Tente de novo em instantes." };
   }
 
   const { login, password } = validation.data;
@@ -42,7 +43,7 @@ export async function signIn(input: SignInInput, next?: string): Promise<SignInR
   if (error) {
     // Jogador desativado pelo organizador: a conta fica bloqueada no Auth.
     if (error.code === "user_banned") {
-      return { success: false, message: "Sua conta foi desativada. Fale com o organizador da pelada." };
+      return { success: false, message: "Sua conta foi desativada. Fale com o Administrador da pelada." };
     }
     return {
       success: false,

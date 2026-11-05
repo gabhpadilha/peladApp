@@ -36,7 +36,7 @@ export function RankingList({ players, currentPlayerId }: RankingListProps) {
             <OvrBadge ovr={player.ovr} />
             <span className="flex w-14 flex-col items-end leading-none">
               <span className="font-display text-xl font-bold tabular-nums">{points}</span>
-              <span className="text-[10px] text-muted-foreground uppercase">pontos</span>
+              <span className="text-xs text-muted-foreground uppercase">pontos</span>
             </span>
           </Link>
         </li>

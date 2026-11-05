@@ -25,7 +25,7 @@ function friendlyMessage(message: string): string {
   if (message.includes("no goals to confirm")) return "Esse jogador não informou gols para confirmar.";
   if (message.includes("between 0 and 15")) return `Informe de 0 a ${GOALS_MAX} gols.`;
   if (message.includes("not in this round") || message.includes("only players of this round")) return "Só quem jogou a rodada participa.";
-  return "Não deu certo. Tente de novo.";
+  return "Não salvou. Confira a conexão e toque de novo.";
 }
 
 function refresh(matchId: string) {
@@ -55,7 +55,7 @@ export async function reportGoals(input: z.infer<typeof reportSchema>): Promise<
 /** Confirma ("sim") ou não os gols de um colega. */
 export async function confirmGoals(input: z.infer<typeof confirmSchema>): Promise<GoalsActionResult> {
   const parsed = confirmSchema.safeParse(input);
-  if (!parsed.success) return { success: false, message: "Não deu certo. Tente de novo." };
+  if (!parsed.success) return { success: false, message: "Não salvou. Confira a conexão e toque de novo." };
   await requireActiveMembership(`/rodadas/${parsed.data.matchId}`);
   const supabase = await createClient();
   const { error } = await supabase.rpc("confirm_goals", {
@@ -74,7 +74,7 @@ export async function confirmGoals(input: z.infer<typeof confirmSchema>): Promis
 /** O organizador libera as notas sem esperar os gols de todo mundo (quem não informou fica com 0). */
 export async function unlockRatings(input: z.infer<typeof unlockSchema>): Promise<GoalsActionResult> {
   const parsed = unlockSchema.safeParse(input);
-  if (!parsed.success) return { success: false, message: "Não deu certo. Tente de novo." };
+  if (!parsed.success) return { success: false, message: "Não salvou. Confira a conexão e toque de novo." };
   await requireActiveMembership(`/rodadas/${parsed.data.matchId}`);
   const supabase = await createClient();
   const { error } = await supabase.rpc("unlock_ratings", { target_match: parsed.data.matchId });

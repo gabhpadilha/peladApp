@@ -15,7 +15,7 @@ export type CreateMatchResult =
 export async function createMatch(input: NewMatchInput): Promise<CreateMatchResult> {
   const membership = await requireActiveMembership("/rodadas");
   if (membership.role !== "organizer") {
-    return { success: false, message: "Só o organizador cria rodadas." };
+    return { success: false, message: "Só quem organiza a pelada pode criar a rodada. Chame o organizador." };
   }
 
   const validation = newMatchSchema.safeParse(input);

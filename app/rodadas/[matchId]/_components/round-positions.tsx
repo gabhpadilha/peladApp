@@ -155,7 +155,7 @@ export function RoundPositions({ matchId, teams }: RoundPositionsProps) {
                                   setInGoalById((current) => ({ ...current, [entry.player.id]: option.inGoal }))
                                 }
                                 className={cn(
-                                  "h-9 min-w-14 rounded-md px-3 font-medium transition-colors",
+                                  "h-11 min-w-14 rounded-md px-3 font-medium transition-colors",
                                   isActive
                                     ? isOff
                                       ? "bg-amber-400 text-black"

@@ -27,12 +27,12 @@ export type SetRoundPositionsResult =
 export async function setRoundPositions(input: SetRoundPositionsInput): Promise<SetRoundPositionsResult> {
   const membership = await requireActiveMembership(`/rodadas/${input.matchId}`);
   if (membership.role !== "organizer") {
-    return { success: false, message: "Só o organizador muda as posições da rodada." };
+    return { success: false, message: "Só quem organiza a pelada pode mudar as posições. Chame o organizador." };
   }
 
   const validation = setRoundPositionsSchema.safeParse(input);
   if (!validation.success) {
-    return { success: false, message: "Posições inválidas. Confira e tente de novo." };
+    return { success: false, message: "Alguma posição ficou fora do lugar. Reabra a tela e tente de novo." };
   }
   const { matchId, changes } = validation.data;
 
@@ -46,7 +46,7 @@ export async function setRoundPositions(input: SetRoundPositionsInput): Promise<
     });
     if (error) {
       revalidatePath("/", "layout");
-      return { success: false, message: "Não foi possível salvar as posições. A rodada ainda está aberta?" };
+      return { success: false, message: "Não deu para salvar as posições. Só dá para ajustar com a rodada aberta." };
     }
     removedRatings += data ?? 0;
   }

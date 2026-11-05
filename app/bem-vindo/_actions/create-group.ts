@@ -25,7 +25,7 @@ export async function createGroup(input: CreateGroupInput): Promise<CreateGroupR
   if (!validation.success) {
     return {
       success: false,
-      message: "Confira os campos.",
+      message: "Tem campo com problema. Veja os avisos em vermelho.",
       errors: z.flattenError(validation.error).fieldErrors,
     };
   }

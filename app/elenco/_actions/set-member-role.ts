@@ -27,7 +27,7 @@ export async function setMemberRole(
 
   const validation = inputSchema.safeParse({ memberId, role });
   if (!validation.success) {
-    return { success: false, message: "Dados inválidos." };
+    return { success: false, message: "Não consegui ler o pedido. Recarregue a página e tente de novo." };
   }
 
   const supabase = await createClient();

@@ -17,7 +17,7 @@ export function GoalStepper({ value, onChange, size = "lg", label }: GoalStepper
   const isLarge = size === "lg";
   const button = cn(
     "flex items-center justify-center rounded-full border transition-colors disabled:opacity-30",
-    isLarge ? "size-16" : "size-10",
+    isLarge ? "size-16" : "size-11",
   );
   return (
     <div role="group" aria-label={label} className={cn("flex items-center", isLarge ? "gap-6" : "gap-3")}>
