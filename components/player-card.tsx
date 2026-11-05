@@ -538,6 +538,7 @@ const SKIN_CLASSES: Record<CardSkinKey, string> = {
   lenda: "card-skin-icone",
   relampago: "card-skin-icone",
   voltagem: "card-skin-icone",
+  mare: "card-skin-icone",
 };
 
 const GOLD_FILL = "[background:var(--card-gold)]";
