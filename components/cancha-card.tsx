@@ -79,6 +79,11 @@ export type Roupa = {
   innerBolts?: string;
   /** Os raios (`innerBolts` e `overflowBolts`) ficam parados, sem animação. */
   still?: boolean;
+  /**
+   * A arte do fundo cobre a caixa toda menos esta faixa fina (em % da carta), por baixo de uma moldura fina: o conteúdo continua na janela
+   * padrão (`window`), mas a arte chega até a moldura (a janela fica sem fundo).
+   */
+  artInset?: { x: number; y: number; radius: number };
   /** Sobe e afasta das laterais os números das estatísticas (em cqw), para a moldura da arte não passar por cima deles. */
   statsInset?: { bottom: number; side: number };
   /** Gotas de água escorrendo pela carta, desenhadas em código (só `transform` e `opacity`); ficam por cima do conteúdo e por baixo da moldura. */
@@ -146,7 +151,7 @@ const ROUPAS = {
   voltagem: { background: "premium-voltagem", overflow: "premium-voltagem-vaza", overflowWidth: 1.25, innerBolts: "premium-voltagem-dentro", still: true, window: "ring", windowInset: { x: 7.68, y: 5.48 }, windowRadius: 4.94, artFrame: true, clean: true, trim: null, metal: ["#c9b84e", "#c9b84e", "#fff7b0"], accent: "#f5ee9c", light: "150 230 255", bar: "#03121c", muted: "#bfeeff", sparkles: false, neon: "#36d6ff" },
   // Maré (2026-11-05, teste do kit em camadas: fundo e borda feitos no Gemini com o gabarito 5:7, montados por `prototipos/montar-carta.cjs`):
   // tromba-d'água num mar de enchente e moldura de ouro com a "capa" de lâminas nos cantos de baixo. Janela padrão (`ring`, 64,5 px da caixa).
-  mare: { background: "premium-mare", overflow: "premium-mare-vaza", window: "ring", windowInset: { x: 7.68, y: 5.48 }, windowRadius: 4.94, artFrame: true, clean: true, trim: null, metal: ["#b8902f", "#b8902f", "#fff1c2"], accent: "#f3d27a", light: "120 230 255", bar: "#031018", muted: "#bfeeff", sparkles: false, neon: "#f3d27a" },
+  mare: { background: "premium-mare", overflow: "premium-mare-vaza", artInset: { x: 3.93, y: 2.81, radius: 4.8 }, window: "ring", windowInset: { x: 7.68, y: 5.48 }, windowRadius: 4.94, artFrame: true, clean: true, trim: null, metal: ["#b8902f", "#b8902f", "#fff1c2"], accent: "#f3d27a", light: "120 230 255", bar: "#031018", muted: "#bfeeff", sparkles: false, neon: "#f3d27a" },
   icone: { background: "premium-icone", clean: true, overflow: "premium-icone-vaza", overflowWidth: 774 / 714, artFrame: true, trim: null, metal: ["#c9a24e", "#c9a24e", "#fff4d6"], accent: "#e2c06e", light: "255 240 200", bar: "#1a140a", muted: "#f0dfb5", sparkles: false, neon: "#ffcf4d" },
   // Aurora (2026-11-04, GUARDADA: o dono gostou mas pediu para não aplicar ainda; não está em `CARD_SKINS`, então não aparece na Loja.
   // Para usar: entrada em `CARD_SKINS` (sugestão nível 14, 1600 CC), `case` em `skinRoupa` e `SKIN_CLASSES`): aurora boreal renderizada pixel a pixel em código (`prototipos/premium-aurora.cjs`), fio de ouro, respiro preto,
@@ -797,9 +802,16 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
         isNeon ? TRIMMED_CARD : className,
       )}
     >
+      {roupa.artInset && (
+        <div
+          aria-hidden
+          className="absolute overflow-hidden bg-cover bg-center"
+          style={{ backgroundImage: `url(/cartas/fundos/${roupa.background}.webp)`, left: `${roupa.artInset.x}%`, right: `${roupa.artInset.x}%`, top: `${roupa.artInset.y}%`, bottom: `${roupa.artInset.y}%`, borderRadius: `${roupa.artInset.radius}cqw` }}
+        />
+      )}
       <div
         className={cn("absolute overflow-hidden bg-cover bg-center", roupa.window === "inner" ? INNER_WINDOW : roupa.window === "ring" ? RING_WINDOW : isNeon ? NEON_WINDOW : METAL_WINDOW)}
-        style={{ backgroundImage: `url(/cartas/fundos/${roupa.background}.webp)`, ...(roupa.window === "ring" ? { borderRadius: `${roupa.windowRadius ?? 8}cqw` } : null), ...(roupa.window === "ring" && roupa.windowInset ? { left: `${roupa.windowInset.x}%`, right: `${roupa.windowInset.x}%`, top: `${roupa.windowInset.y}%`, bottom: `${roupa.windowInset.y}%` } : null) }}
+        style={{ ...(roupa.artInset ? null : { backgroundImage: `url(/cartas/fundos/${roupa.background}.webp)` }), ...(roupa.window === "ring" ? { borderRadius: `${roupa.windowRadius ?? 8}cqw` } : null), ...(roupa.window === "ring" && roupa.windowInset ? { left: `${roupa.windowInset.x}%`, right: `${roupa.windowInset.x}%`, top: `${roupa.windowInset.y}%`, bottom: `${roupa.windowInset.y}%` } : null) }}
       >
         {roupa.drift && (
           // eslint-disable-next-line @next/next/no-img-element -- arte decorativa, sem otimizar
