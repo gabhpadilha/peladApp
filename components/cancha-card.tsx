@@ -84,6 +84,11 @@ export type Roupa = {
    * padrão (`window`), mas a arte chega até a moldura (a janela fica sem fundo).
    */
   artInset?: { x: number; y: number; radius: number };
+  /**
+   * Janela mais larga (até a moldura fina, sem faixa de arte aparente em volta das barras): a mesma folga, em cqw, é devolvida ao nome, ao selo
+   * do OVR, à faixa e às estatísticas, para as informações ficarem onde sempre ficam.
+   */
+  contentPad?: number;
   /** Sobe e afasta das laterais os números das estatísticas (em cqw), para a moldura da arte não passar por cima deles. */
   statsInset?: { bottom: number; side: number };
   /** Gotas de água escorrendo pela carta, desenhadas em código (só `transform` e `opacity`); ficam por cima do conteúdo e por baixo da moldura. */
@@ -151,7 +156,7 @@ const ROUPAS = {
   voltagem: { background: "premium-voltagem", overflow: "premium-voltagem-vaza", overflowWidth: 1.25, innerBolts: "premium-voltagem-dentro", still: true, window: "ring", windowInset: { x: 7.68, y: 5.48 }, windowRadius: 4.94, artFrame: true, clean: true, trim: null, metal: ["#c9b84e", "#c9b84e", "#fff7b0"], accent: "#f5ee9c", light: "150 230 255", bar: "#03121c", muted: "#bfeeff", sparkles: false, neon: "#36d6ff" },
   // Maré (2026-11-05, teste do kit em camadas: fundo e borda feitos no Gemini com o gabarito 5:7, montados por `prototipos/montar-carta.cjs`):
   // tromba-d'água num mar de enchente e moldura de ouro com a "capa" de lâminas nos cantos de baixo. Janela padrão (`ring`, 64,5 px da caixa).
-  mare: { background: "premium-mare", overflow: "premium-mare-vaza", artInset: { x: 3.93, y: 2.81, radius: 4.8 }, window: "ring", windowInset: { x: 7.68, y: 5.48 }, windowRadius: 4.94, artFrame: true, clean: true, trim: null, metal: ["#b8902f", "#b8902f", "#fff1c2"], accent: "#f3d27a", light: "120 230 255", bar: "#031018", muted: "#bfeeff", sparkles: false, neon: "#f3d27a" },
+  mare: { background: "premium-mare", overflow: "premium-mare-vaza", artInset: { x: 3.93, y: 2.81, radius: 4.8 }, window: "ring", windowInset: { x: 3.93, y: 2.81 }, windowRadius: 4.8, contentPad: 3.75, artFrame: true, clean: true, trim: null, metal: ["#b8902f", "#b8902f", "#fff1c2"], accent: "#f3d27a", light: "120 230 255", bar: "#031018", muted: "#bfeeff", sparkles: false, neon: "#f3d27a" },
   icone: { background: "premium-icone", clean: true, overflow: "premium-icone-vaza", overflowWidth: 774 / 714, artFrame: true, trim: null, metal: ["#c9a24e", "#c9a24e", "#fff4d6"], accent: "#e2c06e", light: "255 240 200", bar: "#1a140a", muted: "#f0dfb5", sparkles: false, neon: "#ffcf4d" },
   // Aurora (2026-11-04, GUARDADA: o dono gostou mas pediu para não aplicar ainda; não está em `CARD_SKINS`, então não aparece na Loja.
   // Para usar: entrada em `CARD_SKINS` (sugestão nível 14, 1600 CC), `case` em `skinRoupa` e `SKIN_CLASSES`): aurora boreal renderizada pixel a pixel em código (`prototipos/premium-aurora.cjs`), fio de ouro, respiro preto,
@@ -831,6 +836,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
             "absolute inset-x-0 top-0 z-[3] flex h-[16%] flex-col justify-center border-b-[0.6cqw] border-(--cc-accent) pt-[2.6cqw] pr-[26cqw] pl-[8cqw] leading-none whitespace-nowrap",
             roupa.bareName ? "" : roupa.matte ? "bg-(--cc-bar)" : "bg-linear-to-b from-black/80 to-black/40",
           )}
+          style={roupa.contentPad ? { paddingLeft: `${8 + roupa.contentPad}cqw`, paddingTop: `${2.6 + roupa.contentPad}cqw` } : undefined}
         >
           <span className="truncate text-[10.5cqw] font-extrabold">{player.nickname}</span>
           <span className="mt-[1cqw] truncate text-[3.8cqw] font-bold tracking-[0.2em] text-(--cc-muted) uppercase">{subtitle}</span>
@@ -896,18 +902,19 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
             "absolute top-[5cqw] right-[5.5cqw] z-[8] flex h-[24cqw] w-[19cqw] flex-col items-center pt-[2.3cqw] leading-none text-[#0b130f] [clip-path:polygon(0_0,100%_0,100%_76%,50%_100%,0_76%)]",
             roupa.matte ? RANK_FLAT_CLASSES[rank] : RANK_CREST[rank],
           )}
+          style={roupa.contentPad ? { top: `${5 + roupa.contentPad}cqw`, right: `${5.5 + roupa.contentPad}cqw` } : undefined}
         >
           <span className="text-[9cqw] font-extrabold tabular-nums">{player.ovr ?? EMPTY_VALUE}</span>
           <RankInsignia rank={rank} />
         </div>
 
-        <span className="absolute inset-x-0 bottom-[13.5%] z-[8] truncate px-[4cqw] text-center text-[3.9cqw] font-extrabold tracking-[0.35em] text-(--cc-accent) uppercase">
+        <span style={roupa.contentPad ? { bottom: `calc(13.5% + ${roupa.contentPad}cqw)` } : undefined} className="absolute inset-x-0 bottom-[13.5%] z-[8] truncate px-[4cqw] text-center text-[3.9cqw] font-extrabold tracking-[0.35em] text-(--cc-accent) uppercase">
           {band}
         </span>
 
         <dl
           className="absolute inset-x-0 bottom-0 z-[8] grid h-[12%] grid-cols-3 border-t-[0.6cqw] border-(--cc-accent) bg-(--cc-bar)"
-          style={roupa.statsInset ? { paddingBottom: `${roupa.statsInset.bottom}cqw`, paddingInline: `${roupa.statsInset.side}cqw` } : undefined}
+          style={roupa.contentPad ? { height: `calc(12% + ${roupa.contentPad}cqw)`, paddingBottom: `${roupa.contentPad}cqw`, paddingInline: `${roupa.contentPad}cqw` } : roupa.statsInset ? { paddingBottom: `${roupa.statsInset.bottom}cqw`, paddingInline: `${roupa.statsInset.side}cqw` } : undefined}
         >
           {stats.map((stat, index) => (
             <div
