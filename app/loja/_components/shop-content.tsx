@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { CloudLightningIcon, CoinsIcon, GhostIcon, SparklesIcon, type LucideIcon } from "lucide-react";
+import { CloudLightningIcon, CoinsIcon, CrownIcon, GhostIcon, SparklesIcon, type LucideIcon } from "lucide-react";
 import { CardSkinTile } from "@/components/card-skin-tile";
-import type { CardThemeKey } from "@/lib/card-themes";
+import type { ShopEventKey } from "@/lib/shop-events";
 import { PlayerCard } from "@/components/player-card";
 import { SAMPLE_PLAYER } from "@/lib/sample-player";
 import { Button } from "@/components/ui/button";
@@ -23,11 +23,11 @@ type ShopContentProps = {
   sale: ShopSale | null;
 };
 
-/** Ícone da vitrine de evento, pelo tema (tema novo: entre aqui). */
-const EVENT_ICONS: Record<CardThemeKey, LucideIcon> = {
-  default: SparklesIcon,
+/** Ícone da vitrine de evento, pelo evento da Loja (evento novo: entre aqui). */
+const EVENT_ICONS: Record<ShopEventKey, LucideIcon> = {
   halloween: GhostIcon,
   temporal: CloudLightningIcon,
+  destino: CrownIcon,
 };
 
 /** Preço com o de tabela riscado ao lado quando há promoção. */
@@ -141,7 +141,7 @@ export function ShopContent({ sections, balance, sale }: ShopContentProps) {
       {sections.map((section) => (
         <section key={section.key} aria-label={section.title} className="flex flex-col gap-3">
           <SectionHeader
-            icon={section.event ? EVENT_ICONS[section.event.theme] : SparklesIcon}
+            icon={section.event?.key ? EVENT_ICONS[section.event.key] : SparklesIcon}
             title={section.title}
             text={
               section.event?.endDate && section.event.daysLeft !== null

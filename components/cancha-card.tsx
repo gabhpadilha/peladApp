@@ -206,7 +206,7 @@ const ROUPAS = {
   // Natal time do mês = carta do TIME DO MÊS de dezembro de 2026 (decisão do dono do app em 2026-11-05; GUARDADA, ainda não ligada em `MONTH_ROUPA`): tricô roxo com presentes e flocos em ouro e creme
   // e moldura fina de ouro com presentes roxos e dourados, laços, bolas de Natal e ametistas (arte do dono em `prototipos/natal-timedomes-*-dono.jpg`).
   natalTimeDoMes: { background: "premium-natal-timedomes", overflow: "premium-natal-timedomes-vaza", statsLift: 4, statsPadX: 12, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#b8902f", "#b8902f", "#fff1c2"], accent: "#f3d27a", light: "220 180 255", bar: "#1a0a26", muted: "#f1dcc0", sparkles: false, neon: "#f3d27a" },
-  // Destino (2026-11-05, evento "Destino" da Loja de dezembro, carta de prestígio, nível 5, 600 CC; design original que só alude a um vilão de cinema, sem nome, logo ou traje): ferro forjado e aço com runas
+  // Destino (2026-11-05, evento "Destino" da Loja de dezembro, carta de prestígio, nível 5, 600 CC, em `CARD_SKINS` só para dezembro de 2026; design original que só alude a um vilão de cinema, sem nome, logo ou traje): ferro forjado e aço com runas
   // de um alfabeto inventado brilhando em verde-esmeralda, pano verde-musgo e cristais, e moldura de aço escovado com runas verdes, cristais nos cantos de cima e um capuz verde no topo (arte do dono em `prototipos/destino-fundo-dono.jpg` e `destino-borda-capuz-dono.jpg`).
   destino: { background: "premium-destino", overflow: "premium-destino-vaza", floaters: DESTINO_FLOATERS, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#6b6f73", "#6b6f73", "#d6c07a"], accent: "#c9a85c", light: "120 255 170", bar: "#06100b", muted: "#b9e8c8", sparkles: false, neon: "#3dffa0" },
   // GUARDADAS, fora da Loja (sem entrada em `CARD_SKINS`; para usar: entrada lá, `case` em `skinRoupa` e `SKIN_CLASSES`): Voltagem e Maré.
@@ -456,6 +456,7 @@ function skinRoupa(skin: CardSkinKey): RoupaKey {
     case "ametista": return "ametista";
     case "rubi": return "rubi";
     case "icone": return "icone";
+    case "destino": return "destino";
     case "lobisomem": return "lobisomem";
     case "nuvem": return "nuvem";
     case "relampago": return "relampago";

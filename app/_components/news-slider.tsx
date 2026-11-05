@@ -8,7 +8,8 @@ import { CARD_RANK_LABELS, getCardRank, RANK_FLAT_CLASSES, type CardRank } from 
 import { CARD_TIER_MIN_OVR, getTierProgress } from "@/lib/card-tier";
 import { SAMPLE_PLAYER } from "@/lib/sample-player";
 import { withAwardBonus } from "@/lib/award-bonus";
-import { CARD_THEME_LABELS, type CardThemeKey, type CurrentCardEvent } from "@/lib/card-themes";
+import { type CardThemeKey, type CurrentCardEvent } from "@/lib/card-themes";
+import { getCurrentShopEvent } from "@/lib/shop-events";
 import { formatShortDate } from "@/lib/format-date";
 import { getNextPlayerOfTheMonthDate } from "@/lib/player-of-the-month";
 import type { AwardKind } from "@/types/award";
@@ -228,8 +229,10 @@ export function NewsSlider({ event, today, shopSale, player }: NewsSliderProps) 
   const eventCopy = EVENT_COPY[event.theme];
   // Com evento na Loja, as cartas dele vão no leque (a primeira no meio).
   const eventSkins = getEventSkins(today);
+  // O evento da Loja é separado do tema dos prêmios (dezembro: Natal nos prêmios, "Destino" na Loja).
+  const shopEvent = getCurrentShopEvent(today);
   // A carta de prestígio do evento (a Lenda do Trovão, a mais cara) vai no meio, maior; as outras duas dos lados (pedido do dono do app em 2026-11-02).
-  const flagship = eventSkins.find((skin) => skin.key === "lenda") ?? eventSkins.reduce<(typeof eventSkins)[number] | null>((best, skin) => (best === null || skin.price > best.price ? skin : best), null);
+  const flagship = eventSkins.reduce<(typeof eventSkins)[number] | null>((best, skin) => (best === null || skin.price > best.price ? skin : best), null);
   const sideSkins = eventSkins.filter((skin) => skin !== flagship);
   const shopFan: [CardSkinKey, CardSkinKey, CardSkinKey] =
     flagship && sideSkins.length >= 2 ? [sideSkins[1].key, flagship.key, sideSkins[0].key] : SHOP_FAN;
@@ -325,13 +328,13 @@ export function NewsSlider({ event, today, shopSale, player }: NewsSliderProps) 
       content: (
         <Slide
           icon={StoreIcon}
-          eyebrow={eventSkins.length > 0 ? `Novidade · ${CARD_THEME_LABELS[event.theme]}` : "Novidade"}
+          eyebrow={eventSkins.length > 0 && shopEvent.label ? `Novidade · ${shopEvent.label}` : "Novidade"}
           title="Loja de cartas"
           meta={
             shopSale
               ? `${shopSale.label}: -${shopSale.percent}% em tudo até ${formatShortDate(shopSale.end)}`
-              : eventSkins.length > 0 && event.endDate !== null && event.daysLeft !== null
-                ? `Cartas de evento até ${formatShortDate(event.endDate)} · ${formatDaysLeft(event.daysLeft)}`
+              : eventSkins.length > 0 && shopEvent.endDate !== null && shopEvent.daysLeft !== null
+                ? `Cartas de evento até ${formatShortDate(shopEvent.endDate)} · ${formatDaysLeft(shopEvent.daysLeft)}`
                 : undefined
           }
           text={

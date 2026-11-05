@@ -2,7 +2,7 @@ import "server-only";
 import { getLeague } from "@/lib/league";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveSale, getSalePrice, type ShopSale } from "@/lib/shop-sale";
-import { CARD_THEME_LABELS, getCurrentCardEvent, type CurrentCardEvent } from "@/lib/card-themes";
+import { getCurrentShopEvent, type CurrentShopEvent } from "@/lib/shop-events";
 import { CARD_SKINS, isCardSkinKey, isCardSkinOnSale, type CardSkin, type CardSkinKey } from "@/types/card-skin";
 import type { Player } from "@/types/player";
 import type { Progression } from "@/lib/progression";
@@ -26,7 +26,7 @@ export type ShopSection = {
   key: "event" | "premium";
   title: string;
   /** Ex.: "Até 31 de out. · faltam 10 dias". */
-  event: CurrentCardEvent | null;
+  event: CurrentShopEvent | null;
   items: ShopItem[];
 };
 
@@ -102,13 +102,13 @@ export async function getShop(): Promise<Shop | null> {
 
   // À venda: o que o jogador ainda não tem (carta de evento só durante o evento).
   const forSale = CARD_SKINS.filter((skin) => !owned.has(skin.key) && isCardSkinOnSale(skin, today));
-  const event = getCurrentCardEvent(today);
+  const event = getCurrentShopEvent(today);
   const eventSkins = forSale.filter((skin) => "event" in skin);
   const premiumSkins = forSale.filter((skin) => !("event" in skin));
 
   const sections: ShopSection[] = [
     ...(eventSkins.length > 0
-      ? [{ key: "event" as const, title: `Evento · ${CARD_THEME_LABELS[event.theme]}`, event, items: eventSkins.map(toItem) }]
+      ? [{ key: "event" as const, title: `Evento · ${event.label}`, event, items: eventSkins.map(toItem) }]
       : []),
     ...(premiumSkins.length > 0 ? [{ key: "premium" as const, title: "Personalização premium", event: null, items: premiumSkins.map(toItem) }] : []),
   ];

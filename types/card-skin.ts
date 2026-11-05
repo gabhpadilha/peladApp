@@ -1,4 +1,4 @@
-import { getThemeForDate } from "@/lib/card-themes";
+import { getCurrentShopEvent } from "@/lib/shop-events";
 
 /**
  * Personalizações de carta vendidas na Loja (CanchaCoins). Cada uma aparece a
@@ -6,7 +6,7 @@ import { getThemeForDate } from "@/lib/card-themes";
  * Sem personalização, a carta é a padrão (Bronze, Prata ou Ouro pelo OVR).
  * Carta nova: entre aqui + tokens `card-skin-<chave>` no `app/globals.css` +
  * `SKIN_CLASSES` no `player-card.tsx`. O banco guarda só a chave (`group_members.card_skin`).
- * Carta de evento (`event`): só fica à venda durante o tema daquele ano; quem
+ * Carta de evento (`event`: evento da Loja em `lib/shop-events.ts` e ano): só fica à venda durante o evento daquele ano; quem
  * comprou continua usando depois (decisão do dono do app).
  */
 export const CARD_SKINS = [
@@ -26,6 +26,9 @@ export const CARD_SKINS = [
   { key: "relampago", name: "Relâmpago", level: 3, price: 200, event: { theme: "temporal", year: 2026 } },
   // Carta de prestígio do evento (decisão do dono do app em 2026-10-31): a moldura de metal do concept dele.
   { key: "lenda", name: "Lenda do Trovão", level: 5, price: 600, event: { theme: "temporal", year: 2026 } },
+  // Evento "Destino" de dezembro de 2026 (decisão do dono do app em 2026-11-05; alude a um vilão de cinema sem copiar nada): à venda só em dezembro de 2026.
+  // Carta de prestígio, como a Lenda do Trovão. Reator e Fúria (nível 3, 200 CC) entram aqui quando as artes chegarem.
+  { key: "destino", name: "Destino", level: 5, price: 600, event: { theme: "destino", year: 2026 } },
 ] as const;
 
 export type CardSkin = (typeof CARD_SKINS)[number];
@@ -42,5 +45,5 @@ export function getCardSkin(key: CardSkinKey): CardSkin {
 /** Carta de evento ainda à venda em `today` (`AAAA-MM-DD`, horário de Brasília)? As outras, sempre. */
 export function isCardSkinOnSale(skin: CardSkin, today: string): boolean {
   if (!("event" in skin)) return true;
-  return today.startsWith(`${skin.event.year}-`) && getThemeForDate(today) === skin.event.theme;
+  return today.startsWith(`${skin.event.year}-`) && getCurrentShopEvent(today).key === skin.event.theme;
 }
