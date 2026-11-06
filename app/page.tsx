@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { ArrowRightIcon, GlobeIcon } from "lucide-react";
+import { ArrowRightIcon, GlobeIcon, ShieldIcon } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
 import { GroupGate } from "@/components/group-gate";
 import { PendingEvaluationsBanner } from "@/components/pending-evaluations-banner";
@@ -11,7 +11,9 @@ import { MyCardSummary } from "./_components/my-card-summary";
 import { OpenRoundCard } from "./_components/open-round-card";
 import { WinnersBanner } from "./_components/winners-banner";
 import { WelcomeBonusDialog } from "./_components/welcome-bonus-dialog";
+import { isPlatformAdmin } from "@/lib/platform-admin";
 import { WELCOME_BONUS_COINS } from "@/lib/progression";
+import { getUserId } from "@/lib/session";
 import { Scoreboard } from "./_components/scoreboard";
 import { getHomeData } from "./_data-access/get-home-data";
 
@@ -28,6 +30,9 @@ export default function Home() {
 
 async function HomeContent() {
   const data = await getHomeData();
+  // Atalho do admin da plataforma: o app instalado no iPhone não tem barra de endereço para digitar /admin.
+  const userId = await getUserId();
+  const isAdmin = userId ? await isPlatformAdmin(userId) : false;
   const hasRounds = data.latestRound !== null || data.openRound !== null;
 
   const hasNow = data.pending.length > 0 || data.winnersAlert !== null || data.openRound !== null;
@@ -90,6 +95,19 @@ async function HomeContent() {
               </span>
               <ArrowRightIcon aria-hidden className="size-5 shrink-0 text-muted-foreground" />
             </Link>
+            {isAdmin && (
+              <Link
+                href="/admin"
+                className="flex min-h-16 items-center gap-3 rounded-xl border bg-card px-4 transition-colors hover:bg-muted"
+              >
+                <ShieldIcon aria-hidden className="size-5 shrink-0 text-primary" />
+                <span className="flex min-w-0 flex-1 flex-col">
+                  <span className="text-base font-medium">Painel da plataforma</span>
+                  <span className="text-sm text-muted-foreground">Peladas, planos, suspensão e novas peladas.</span>
+                </span>
+                <ArrowRightIcon aria-hidden className="size-5 shrink-0 text-muted-foreground" />
+              </Link>
+            )}
           </div>
 
           <div className="flex min-w-0 flex-col gap-6">
