@@ -33,14 +33,14 @@ async function CommunityContent() {
           <p className="text-xs font-bold tracking-widest text-primary uppercase">Entre peladas</p>
           <h1 className="font-display text-4xl leading-none font-extrabold uppercase">Comunidade</h1>
           <p className="max-w-prose text-sm text-muted-foreground">
-            Veja outras peladas e as conquistas que a galera publicou. Só aparece quem escolheu aparecer.
+            Veja outras peladas, os rankings e as conquistas que a galera publicou. Notas e nomes completos nunca aparecem.
           </p>
         </div>
         <CommunityTabs
           groups={
             groups.length === 0 ? (
               <p className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
-                Nenhuma pelada na comunidade agora. As peladas aparecem sozinhas, a não ser que o administrador desligue em Elenco.
+                Nenhuma pelada na comunidade agora. Assim que alguma estiver ativa, ela aparece aqui.
               </p>
             ) : (
               <div className="flex flex-col gap-3">

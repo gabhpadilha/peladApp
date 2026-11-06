@@ -10,7 +10,6 @@ import { CollectionGallery } from "../_components/collection-gallery";
 import { CollectionSummary } from "../_components/collection-summary";
 import { EmptyCollection } from "../_components/empty-collection";
 import { LatestAwardSpotlight } from "../_components/latest-award-spotlight";
-import { getCommunityStatus } from "@/app/comunidade/_data-access/community-data";
 import { getAthleteProfile } from "../_data-access/get-athlete-profile";
 
 export const metadata: Metadata = {
@@ -36,9 +35,8 @@ async function CollectionContent({ params }: { params: PageProps<"/jogadores/[id
 
   const { player, awards } = profile;
   const latest = awards.at(0);
-  // Publicar no feed: só o dono das cartas, com a pelada e o perfil na comunidade, nas cartas da rodada mais recente.
-  const community = profile.isOwnProfile ? await getCommunityStatus() : null;
-  const publishableIds = community?.groupListed && community.publicProfile ? profile.shareableAwardIds : [];
+  // Publicar no feed: só o dono das cartas, nas cartas da rodada mais recente (mesma regra do compartilhar nos stories).
+  const publishableIds = profile.shareableAwardIds;
 
   return (
     <>

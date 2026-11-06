@@ -132,24 +132,26 @@ await db.query("insert into public.card_skin_purchases (member_id, group_id, ski
   const S = "9 comunidade";
   const aw = async (member, group, match, kind) => (await db.query("insert into public.awards (group_id, match_id, member_id, kind, position, ovr, votes, score, attributes) values ($1,$2,$3,$4,'ALA',80,3,8.5,'{}'::jsonb) returning id", [group, match, member, kind])).rows[0].id;
   const aMatch = (await db.query("select id from public.matches where group_id=$1 limit 1", [A.group])).rows[0].id;
-  // As peladas nascem ligadas (migration 20261107130000); aqui o teste parte das desligadas.
-  check(S, "pelada nova nasce ligada por padrão", (await db.query("select count(*)::int c from public.groups where listed_at is null")).rows[0].c === 0);
+  // Peladas e jogadores nascem ligados (migrations 20261107130000 e 20261107140000).
+  check(S, "pelada nova nasce ligada", (await db.query("select count(*)::int c from public.groups where listed_at is null")).rows[0].c === 0);
+  check(S, "jogador novo nasce ligado", (await db.query("select count(*)::int c from public.group_members where public_profile_at is null")).rows[0].c === 0);
+  // Daqui em diante o teste parte do cenário "desligado" (por SQL, como o admin faria) para provar os filtros.
   await db.query("update public.groups set listed_at = null");
+  await db.query("update public.group_members set public_profile_at = null");
   const award = await aw(A.ids[1], A.group, aMatch, "craque");
   const countOf = count;
 
   check(S, "pelada desligada não aparece na vitrine", (await countOf(B.users[1], "select * from public.get_listed_groups()")) === 0);
   check(S, "vitrine de pelada desligada vem vazia", (await countOf(B.users[1], "select * from public.get_group_showcase($1)", [A.group])) === 0);
-  fail(S, "jogador não liga a pelada (só o dono)", await attempt(A.users[1], "select public.set_group_listed($1, true)", [A.group]), "42501");
-  fail(S, "dono de outra pelada não liga a minha", await attempt(B.users[0], "select public.set_group_listed($1, true)", [A.group]), "42501");
-  pass(S, "dono liga a pelada", await attempt(A.users[0], "select public.set_group_listed($1, true)", [A.group]));
+  fail(S, "não existe mais função para desligar a pelada", await attempt(A.users[0], "select public.set_group_listed($1, false)", [A.group]), "42883");
+  fail(S, "não existe mais função para desligar o perfil", await attempt(A.users[1], "select public.set_public_profile($1, false)", [A.ids[1]]), "42883");
+  await db.query("update public.groups set listed_at = now() where id = $1", [A.group]);
   check(S, "pelada ligada aparece para outra pelada", (await countOf(B.users[1], "select * from public.get_listed_groups()")) === 1);
 
   await db.query("insert into public.group_showcase (group_id, players) values ($1, $2::jsonb)", [A.group, JSON.stringify([{ id: A.ids[1], nickname: "x" }, { id: A.ids[2], nickname: "y" }])]);
   const shown = async (who) => (await attempt(who, "select jsonb_array_length(players)::int n from public.get_group_showcase($1)", [A.group])).rows?.[0]?.n;
   check(S, "ranking público vem sem ninguém antes do aceite", (await shown(B.users[1])) === 0);
-  fail(S, "ninguém aceita por outra pessoa", await attempt(A.users[2], "select public.set_public_profile($1, true)", [A.ids[1]]), "42501");
-  pass(S, "jogador aceita aparecer", await attempt(A.users[1], "select public.set_public_profile($1, true)", [A.ids[1]]));
+  await db.query("update public.group_members set public_profile_at = now() where id = $1", [A.ids[1]]);
   check(S, "só quem aceitou entra no ranking público", (await shown(B.users[1])) === 1);
 
   check(S, "galeria vem só de quem aceitou", (await countOf(B.users[1], "select * from public.get_public_awards($1)", [A.ids[1]])) === 1);
@@ -185,7 +187,7 @@ await db.query("insert into public.card_skin_purchases (member_id, group_id, ski
   check(S, "pelada suspensa some do feed", (await countOf(B.users[1], "select * from public.get_feed(20, null)")) === 0);
   await db.query("update public.groups set suspended_at = null where id=$1", [A.group]);
   // Jogador desliga: some do feed e do ranking.
-  await attempt(A.users[1], "select public.set_public_profile($1, false)", [A.ids[1]]);
+  await db.query("update public.group_members set public_profile_at = null where id = $1", [A.ids[1]]);
   check(S, "quem desligou some do feed", (await countOf(B.users[1], "select * from public.get_feed(20, null)")) === 0);
   check(S, "quem desligou some da galeria", (await countOf(B.users[1], "select * from public.get_public_awards($1)", [A.ids[1]])) === 0);
 }

@@ -192,14 +192,3 @@ export async function getFeed(): Promise<FeedPost[]> {
     };
   });
 }
-
-/** A pelada ativa está na comunidade e o jogador logado aceitou aparecer? (liga/desliga e "Publicar no feed") */
-export async function getCommunityStatus(): Promise<{ groupListed: boolean; publicProfile: boolean }> {
-  const membership = await requireActiveMembership("/comunidade");
-  const supabase = await createClient();
-  const [group, member] = await Promise.all([
-    supabase.from("groups").select("listed_at").eq("id", membership.groupId).maybeSingle(),
-    supabase.from("group_members").select("public_profile_at").eq("id", membership.memberId).maybeSingle(),
-  ]);
-  return { groupListed: group.data?.listed_at != null, publicProfile: member.data?.public_profile_at != null };
-}

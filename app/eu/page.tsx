@@ -2,16 +2,13 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronRightIcon, LogOutIcon, ShieldIcon, UsersIcon } from "lucide-react";
+import { ChevronRightIcon, GlobeIcon, LogOutIcon, ShieldIcon, UsersIcon } from "lucide-react";
 import { signOut } from "@/app/_actions/sign-out";
 import { AppHeader } from "@/components/app-header";
 import { CoinPill } from "@/components/coin-pill";
 import { GroupGate } from "@/components/group-gate";
 import { PlayerCard } from "@/components/player-card";
 import { getActiveMembership, getUserId } from "@/lib/session";
-import { setPublicProfile } from "@/app/comunidade/_actions/community-actions";
-import { CommunityToggle } from "@/app/comunidade/_components/community-toggle";
-import { getCommunityStatus } from "@/app/comunidade/_data-access/community-data";
 import { isPlatformAdmin } from "@/lib/platform-admin";
 import { Button } from "@/components/ui/button";
 import { POSITION_LABELS } from "@/types/player";
@@ -46,7 +43,6 @@ async function MeContent() {
   const userId = await getUserId();
   const isOwner = userId ? ((await getActiveMembership(userId))?.isOwner ?? false) : false;
   const isAdmin = userId ? await isPlatformAdmin(userId) : false;
-  const community = await getCommunityStatus();
 
   return (
     <>
@@ -99,16 +95,16 @@ async function MeContent() {
           </Link>
         )}
 
-        <CommunityToggle
-          title="Mostrar meu perfil para outras peladas"
-          description={
-            community.groupListed
-              ? "Aparece no ranking público da sua pelada, no seu perfil e permite publicar conquistas no feed. Não mostra suas notas nem seu nome completo."
-              : "Funciona quando o administrador ligar a sua pelada na comunidade."
-          }
-          initialEnabled={community.publicProfile}
-          action={setPublicProfile}
-        />
+        <section className="flex items-start gap-3 rounded-xl border bg-card p-4">
+          <GlobeIcon aria-hidden className="mt-0.5 size-5 shrink-0 text-primary" />
+          <div className="min-w-0">
+            <p className="text-base font-medium">Você faz parte da Comunidade</p>
+            <p className="text-sm text-muted-foreground">
+              Sua carta, seu apelido, seus pontos, gols e suas conquistas aparecem para outras peladas. Suas notas, seu nome
+              completo e seu usuário nunca aparecem.
+            </p>
+          </div>
+        </section>
 
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:items-start">
           <OwnPhotoCard member={data.photoMember} />

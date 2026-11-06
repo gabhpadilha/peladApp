@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { AppHeader } from "@/components/app-header";
-import { setGroupListed } from "@/app/comunidade/_actions/community-actions";
-import { CommunityToggle } from "@/app/comunidade/_components/community-toggle";
-import { getCommunityStatus } from "@/app/comunidade/_data-access/community-data";
 import { CreatePlayerForm } from "./_components/create-player-form";
 import { MembersList } from "./_components/members-list";
 import { getRoster } from "./_data-access/get-roster";
@@ -28,7 +25,7 @@ export default function RosterPage() {
 }
 
 async function RosterContent() {
-  const [roster, community] = await Promise.all([getRoster(), getCommunityStatus()]);
+  const roster = await getRoster();
 
   return (
     <>
@@ -39,13 +36,6 @@ async function RosterContent() {
           Cadastre a galera, corrija dados, redefina senhas e desative quem saiu da pelada.
         </p>
       </div>
-
-      <CommunityToggle
-        title="Aparecer na comunidade"
-        description="Sua pelada entra na vitrine para outras peladas verem o ranking. Cada jogador ainda escolhe se mostra o próprio perfil (Eu)."
-        initialEnabled={community.groupListed}
-        action={setGroupListed}
-      />
 
       {/*
         Celular: cadastro e, embaixo, a lista. Desktop: lado a lado.
