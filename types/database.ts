@@ -987,10 +987,6 @@ export type Database = {
         }
         Returns: number
       }
-      set_group_listed: {
-        Args: { listed: boolean; target_group: string }
-        Returns: undefined
-      }
       set_member_active: {
         Args: { active: boolean; target_member: string }
         Returns: undefined
@@ -1000,10 +996,6 @@ export type Database = {
           new_role: Database["public"]["Enums"]["member_role"]
           target_member: string
         }
-        Returns: undefined
-      }
-      set_public_profile: {
-        Args: { target_member: string; visible: boolean }
         Returns: undefined
       }
       set_reaction: {
