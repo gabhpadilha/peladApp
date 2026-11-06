@@ -10,7 +10,7 @@ O banco expõe esses recortes por funções `security definer` que só devolvem 
 
 ## Dados (migration futura)
 - `groups.listed_at timestamptz`: a pelada aparece na vitrine (nulo = não aparece). Só o Administrador da pelada liga, por função `set_group_listed`; suspensa não aparece.
-- `group_members.public_profile_at timestamptz`: o jogador aceita aparecer fora da pelada (no ranking público e no feed). Por função `set_public_profile`. Sem aceite, o ranking público mostra "Jogador" sem apelido nem carta? **Decisão:** quem não aceitou simplesmente não aparece na lista pública.
+- `group_members.public_profile_at timestamptz`: o jogador aceita aparecer fora da pelada (no ranking público e no feed). Por função `set_public_profile`. Quem não aceitou não aparece em nenhuma lista pública.
 - `group_showcase (group_id pk, updated_at, ranking jsonb, scorers jsonb)`: sem policy; só função `get_group_showcase(group)` lê, e só se a pelada estiver listada.
 - `feed_posts (id, award_id unique, group_id, member_id, created_at)`: o conteúdo vem de `awards` (kind, theme, ovr, position, score, votes) + apelido e foto da carta. `publish_award(award)`: só o dono da carta, só se `public_profile_at` ligado, só pelada listada, uma vez. `unpublish_post` apaga.
 - `feed_reactions (post_id, user_id, emoji)` com `unique (post_id, user_id)`; emojis fixos (👏 🔥 🧤 😂), sem texto livre.
