@@ -48,6 +48,14 @@ export type MatchBoard = {
   canRate: boolean;
   /** Organizador com a rodada aberta: pode marcar quem jogou fora da posição. */
   canEditPositions: boolean;
+  /**
+   * Organizador, rodada aberta e notas ainda não abertas (etapa dos gols): pode corrigir quem jogou e os times.
+   * `null` fora disso. `slots`: vaga atual de cada presente (`1:s`, `1:r`, `2:s`, `2:r`).
+   */
+  rosterEditor: {
+    members: { id: string; nickname: string; position: PlayerPosition; ovr: number | null }[];
+    slots: Record<string, string>;
+  } | null;
   /** O logado já enviou as notas dessa rodada. */
   hasSubmitted: boolean;
   /** Rodada aberta e o logado não foi escalado: só vê os times. */
@@ -144,6 +152,15 @@ export async function getMatchBoard(matchId: string): Promise<MatchBoard | null>
     // Notas só depois da etapa dos gols (todos informaram ou o organizador liberou).
     canRate: match.status === "open" && isPresent && isPending && goals.ratingsOpen,
     canEditPositions: match.status === "open" && league.membership.role === "organizer",
+    rosterEditor:
+      match.status === "open" && league.membership.role === "organizer" && !goals.ratingsOpen
+        ? {
+            members: league.activePlayers
+              .map((player) => ({ id: player.id, nickname: player.nickname, position: player.position, ovr: player.ovr }))
+              .toSorted((a, b) => a.nickname.localeCompare(b.nickname, "pt-BR")),
+            slots: Object.fromEntries(onBoard.map((entry) => [entry.player.id, `${entry.team}:${entry.isReserve ? "r" : "s"}`])),
+          }
+        : null,
     hasSubmitted: match.status === "open" && isPresent && !isPending,
     isOutOfRound: match.status === "open" && !isPresent,
     ratableCount: onBoard.filter((entry) => !entry.isSelf && !entry.isRatedByMe).length,

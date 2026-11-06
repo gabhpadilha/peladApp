@@ -14,7 +14,7 @@ await db.query("insert into public.card_skin_purchases (member_id, group_id, ski
 // 1. Leitura: quem é da pelada A não enxerga nada da B (e vice-versa)
 {
   const S = "1 leitura isolada";
-  for (const [who, mine, other, label] of [[A.users[1], A, B, "A"], [B.users[1], B, A, "B"]]) {
+  for (const [who, , other, label] of [[A.users[1], A, B, "A"], [B.users[1], B, A, "B"]]) {
     check(S, `${label}: só vê a própria pelada`, (await count(who, "select 1 from public.groups")) === 1);
     check(S, `${label}: não vê elenco da outra`, (await count(who, "select 1 from public.group_members where group_id = $1", [other.group])) === 0);
     check(S, `${label}: não vê rodadas da outra`, (await count(who, "select 1 from public.matches where group_id = $1", [other.group])) === 0);
@@ -190,6 +190,46 @@ await db.query("insert into public.card_skin_purchases (member_id, group_id, ski
   await db.query("update public.group_members set public_profile_at = null where id = $1", [A.ids[1]]);
   check(S, "quem desligou some do feed", (await countOf(B.users[1], "select * from public.get_feed(20, null)")) === 0);
   check(S, "quem desligou some da galeria", (await countOf(B.users[1], "select * from public.get_public_awards($1)", [A.ids[1]])) === 0);
+}
+
+// 10. Corrigir presença e times da rodada aberta (antes das notas abrirem)
+{
+  const S = "10 lista";
+  const call = (who, match, ids, teams, res) => attempt(who, "select public.update_match_roster($1,$2::uuid[],$3::smallint[],$4::boolean[])", [match, ids, teams, res]);
+  const mid = (await attempt(A.users[0], "select public.create_match($1,'2027-02-01',$2::uuid[],$3::smallint[],$4::boolean[]) as id", [A.group, A.ids.slice(0, 4), [1, 2, 1, 2], [false, false, false, false]])).rows[0].id;
+  const present = async () => (await db.query("select member_id, team, reserve from public.match_attendance where match_id=$1 order by member_id", [mid])).rows;
+
+  fail(S, "jogador comum não edita a lista", await call(A.users[5], mid, A.ids.slice(0, 5), [1, 2, 1, 2, 1], [false, false, false, false, false]), "42501");
+  fail(S, "organizador de outra pelada não edita", await call(B.users[0], mid, A.ids.slice(0, 5), [1, 2, 1, 2, 1], [false, false, false, false, false]), "42501");
+  pass(S, "organizador adiciona um jogador e muda os times", await call(A.users[0], mid, A.ids.slice(0, 5), [2, 1, 1, 2, 1], [false, false, false, false, true]));
+  const rows = await present();
+  check(S, "agora são 5 presentes", rows.length === 5);
+  check(S, "o 1º mudou para o time Preto", rows.find((r) => r.member_id === A.ids[0])?.team === 2);
+  check(S, "o 5º entrou como reserva", rows.find((r) => r.member_id === A.ids[4])?.reserve === true);
+  pass(S, "organizador tira dois jogadores", await call(A.users[0], mid, [A.ids[0], A.ids[1], A.ids[2]], [1, 2, 1], [false, false, false]));
+  check(S, "sobraram 3", (await present()).length === 3);
+  fail(S, "menos de 2 presentes é recusado", await call(A.users[0], mid, [A.ids[0]], [1], [false]), "P0001");
+  fail(S, "time inválido é recusado", await call(A.users[0], mid, [A.ids[0], A.ids[1]], [1, 3], [false, false]), "P0001");
+  fail(S, "jogador de fora da pelada é recusado", await call(A.users[0], mid, [A.ids[0], B.ids[1]], [1, 2], [false, false]), "P0001");
+  fail(S, "jogador repetido é recusado", await call(A.users[0], mid, [A.ids[0], A.ids[0]], [1, 2], [false, false]), "P0001");
+  // Gols de quem sai somem; conferência recomeça.
+  await db.query("insert into public.match_goals (group_id, match_id, member_id, goals, reported_by) values ($1,$2,$3,2,$3)", [A.group, mid, A.ids[2]]);
+  await db.query("update public.match_attendance set goals_checked_at = now() where match_id=$1", [mid]);
+  pass(S, "tira quem informou gols", await call(A.users[0], mid, [A.ids[0], A.ids[1]], [1, 2], [false, false]));
+  check(S, "os gols dele saíram junto", (await db.query("select 1 from public.match_goals where match_id=$1", [mid])).rows.length === 0);
+  check(S, "a conferência dos gols recomeçou", (await db.query("select count(*)::int c from public.match_attendance where match_id=$1 and goals_checked_at is not null", [mid])).rows[0].c === 0);
+  // Notas abertas travam a lista.
+  await db.query("update public.matches set ratings_unlocked_at = now() where id=$1", [mid]);
+  fail(S, "com as notas abertas a lista fica travada (PA012)", await call(A.users[0], mid, [A.ids[0], A.ids[1], A.ids[2]], [1, 2, 1], [false, false, false]), "PA012");
+  // Alguém com nota não sai (mesmo se a trava das notas fosse driblada).
+  await db.query("update public.matches set ratings_unlocked_at = null where id=$1", [mid]);
+  await db.query("insert into public.match_goals (group_id, match_id, member_id, goals, reported_by) select $1, $2, member_id, 0, member_id from public.match_attendance where match_id=$2", [A.group, mid]);
+  await db.query("update public.match_attendance set goals_checked_at = now() where match_id=$1", [mid]);
+  await db.query("insert into public.evaluations (match_id, evaluator_id, player_id, vel, chu, pas, dri, def, fis) values ($1,$2,$3,7,7,7,7,7,7)", [mid, A.ids[0], A.ids[1]]);
+  fail(S, "quem já tem nota não sai (PA012)", await call(A.users[0], mid, [A.ids[0]], [1], [false]), "PA012");
+  // Rodada fechada trava.
+  await db.query("update public.matches set status='closed' where id=$1", [mid]);
+  fail(S, "rodada fechada não aceita edição (PA012)", await call(A.users[0], mid, [A.ids[0], A.ids[1]], [1, 2], [false, false]), "PA012");
 }
 
 const bad = results.filter((r) => !r.ok);

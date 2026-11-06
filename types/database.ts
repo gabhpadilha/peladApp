@@ -1008,6 +1008,15 @@ export type Database = {
       }
       unlock_ratings: { Args: { target_match: string }; Returns: undefined }
       unpublish_post: { Args: { target_post: string }; Returns: undefined }
+      update_match_roster: {
+        Args: {
+          present_member_ids: string[]
+          reserve_flags: boolean[]
+          target_match: string
+          team_numbers: number[]
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       award_kind:

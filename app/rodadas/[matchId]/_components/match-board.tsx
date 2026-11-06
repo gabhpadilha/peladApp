@@ -21,6 +21,7 @@ import type { RatingState } from "./board-card";
 import { RatePlayerSheet } from "./rate-player-sheet";
 import { RoundGoals } from "./round-goals";
 import { RoundPositions } from "./round-positions";
+import { RosterEditor } from "./roster-editor";
 import { SendRatingsSheet } from "./send-ratings-sheet";
 import { TeamPitch } from "./team-pitch";
 
@@ -152,6 +153,8 @@ export function MatchBoardView({ board }: MatchBoardViewProps) {
       )}
 
       <RoundGoals board={board} />
+
+      {board.rosterEditor && <RosterEditor matchId={board.match.id} editor={board.rosterEditor} />}
 
       {board.canEditPositions && <RoundPositions matchId={board.match.id} teams={board.teams} />}
 
