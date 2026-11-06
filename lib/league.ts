@@ -35,7 +35,7 @@ import {
 } from "@/types/player";
 
 /** Lê os atributos congelados (jsonb) da carta especial; o que faltar vira `null`. */
-function readFrozenAttributes<Key extends PlayerAttribute>(
+export function readFrozenAttributes<Key extends PlayerAttribute>(
   value: Json,
   keys: readonly Key[],
 ): Record<Key, number | null> {

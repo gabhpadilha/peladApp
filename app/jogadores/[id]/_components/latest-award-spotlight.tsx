@@ -4,17 +4,20 @@ import { CARD_THEME_LABELS } from "@/lib/card-themes";
 import { formatWeekdayDate } from "@/lib/format-date";
 import { AWARD_LABELS, formatRoundScore, hasSeasonalTheme, STAT_AWARD_SOURCES, type Award } from "@/types/award";
 import { AWARD_ICONS } from "@/components/award-icons";
+import { PublishAwardButton } from "@/app/comunidade/_components/publish-award-button";
 import { ShareAwardButton } from "./share-award-button";
 
 type LatestAwardSpotlightProps = {
   award: Award;
   /** Só o dono da carta, e só até a próxima rodada ser criada. */
   isShareable: boolean;
+  /** O dono pode publicar a carta no feed da comunidade (pelada e perfil ligados). */
+  canPublish?: boolean;
   groupName: string;
 };
 
 /** A conquista mais recente em destaque, com a carta grande. */
-export function LatestAwardSpotlight({ award, isShareable, groupName }: LatestAwardSpotlightProps) {
+export function LatestAwardSpotlight({ award, isShareable, canPublish = false, groupName }: LatestAwardSpotlightProps) {
   const Icon = AWARD_ICONS[award.kind];
   const isBoosted = BOOSTED_AWARDS.includes(award.kind);
   // Prêmios das notas (sem voto) mostram a média que decidiu no lugar dos votos.
@@ -73,6 +76,8 @@ export function LatestAwardSpotlight({ award, isShareable, groupName }: LatestAw
             ? "Foto congelada do dia, com +1 em cada atributo e no OVR. Essa carta nunca muda."
             : "Foto congelada do dia, sem bônus. Essa carta nunca muda (para o bem e para o mal)."}
         </p>
+
+        {canPublish && <PublishAwardButton awardId={award.id} />}
 
         {isShareable && (
           <div className="flex flex-col gap-1.5">

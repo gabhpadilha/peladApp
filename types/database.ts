@@ -231,6 +231,84 @@ export type Database = {
           },
         ]
       }
+      feed_posts: {
+        Row: {
+          author_id: string
+          award_id: string
+          created_at: string
+          group_id: string
+          id: string
+          member_id: string
+        }
+        Insert: {
+          author_id: string
+          award_id: string
+          created_at?: string
+          group_id: string
+          id?: string
+          member_id: string
+        }
+        Update: {
+          author_id?: string
+          award_id?: string
+          created_at?: string
+          group_id?: string
+          id?: string
+          member_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_posts_award_id_fkey"
+            columns: ["award_id"]
+            isOneToOne: true
+            referencedRelation: "awards"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_posts_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "feed_posts_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "group_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      feed_reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feed_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "feed_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       group_members: {
         Row: {
           card_skin: string | null
@@ -242,6 +320,7 @@ export type Database = {
           photo_kind: string | null
           photo_path: string | null
           position: Database["public"]["Enums"]["player_position"]
+          public_profile_at: string | null
           role: Database["public"]["Enums"]["member_role"]
           user_id: string
           welcome_bonus_seen_at: string | null
@@ -256,6 +335,7 @@ export type Database = {
           photo_kind?: string | null
           photo_path?: string | null
           position: Database["public"]["Enums"]["player_position"]
+          public_profile_at?: string | null
           role?: Database["public"]["Enums"]["member_role"]
           user_id: string
           welcome_bonus_seen_at?: string | null
@@ -270,6 +350,7 @@ export type Database = {
           photo_kind?: string | null
           photo_path?: string | null
           position?: Database["public"]["Enums"]["player_position"]
+          public_profile_at?: string | null
           role?: Database["public"]["Enums"]["member_role"]
           user_id?: string
           welcome_bonus_seen_at?: string | null
@@ -313,6 +394,32 @@ export type Database = {
           },
         ]
       }
+      group_showcase: {
+        Row: {
+          group_id: string
+          players: Json
+          updated_at: string
+        }
+        Insert: {
+          group_id: string
+          players?: Json
+          updated_at?: string
+        }
+        Update: {
+          group_id?: string
+          players?: Json
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_showcase_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: true
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       groups: {
         Row: {
           city: string | null
@@ -320,6 +427,7 @@ export type Database = {
           created_by: string
           id: string
           invite_code: string
+          listed_at: string | null
           name: string
           name_key: string
           plan: string
@@ -338,6 +446,7 @@ export type Database = {
           created_by: string
           id?: string
           invite_code?: string
+          listed_at?: string | null
           name: string
           name_key: string
           plan?: string
@@ -356,6 +465,7 @@ export type Database = {
           created_by?: string
           id?: string
           invite_code?: string
+          listed_at?: string | null
           name?: string
           name_key?: string
           plan?: string
@@ -708,6 +818,35 @@ export type Database = {
       }
       current_member_id: { Args: { target_group: string }; Returns: string }
       finish_goal_check: { Args: { target_match: string }; Returns: undefined }
+      get_feed: {
+        Args: { before?: string; max_rows?: number }
+        Returns: {
+          attributes: Json
+          award_id: string
+          card_position: Database["public"]["Enums"]["player_position"]
+          card_skin: string
+          city: string
+          created_at: string
+          group_id: string
+          group_name: string
+          is_mine: boolean
+          kind: Database["public"]["Enums"]["award_kind"]
+          member_id: string
+          my_reaction: string
+          nickname: string
+          ovr: number
+          photo_kind: string
+          photo_path: string
+          played_on: string
+          post_id: string
+          reactions: Json
+          round: number
+          score: number
+          state: string
+          theme: string
+          votes: number
+        }[]
+      }
       get_group_goals: {
         Args: { target_group: string }
         Returns: {
@@ -740,11 +879,37 @@ export type Database = {
           vel: number
         }[]
       }
+      get_group_showcase: {
+        Args: { target_group: string }
+        Returns: {
+          city: string
+          group_id: string
+          name: string
+          play_time: string
+          play_weekday: number
+          players: Json
+          state: string
+          updated_at: string
+        }[]
+      }
       get_invite: {
         Args: { code: string }
         Returns: {
           group_id: string
           group_name: string
+        }[]
+      }
+      get_listed_groups: {
+        Args: never
+        Returns: {
+          active_players: number
+          city: string
+          group_id: string
+          name: string
+          play_time: string
+          play_weekday: number
+          public_players: number
+          state: string
         }[]
       }
       get_match_submissions: {
@@ -761,6 +926,22 @@ export type Database = {
           member_id: string
         }[]
       }
+      get_public_awards: {
+        Args: { target_member: string }
+        Returns: {
+          attributes: Json
+          award_id: string
+          card_position: Database["public"]["Enums"]["player_position"]
+          created_at: string
+          kind: Database["public"]["Enums"]["award_kind"]
+          ovr: number
+          played_on: string
+          round: number
+          score: number
+          theme: string
+          votes: number
+        }[]
+      }
       group_name_key: { Args: { group_name: string }; Returns: string }
       is_group_member: { Args: { target_group: string }; Returns: boolean }
       is_group_organizer: { Args: { target_group: string }; Returns: boolean }
@@ -773,6 +954,7 @@ export type Database = {
         }
         Returns: string
       }
+      publish_award: { Args: { target_award: string }; Returns: string }
       ratings_open: { Args: { target_match: string }; Returns: boolean }
       rename_group: {
         Args: { new_name: string; target_group: string }
@@ -805,6 +987,10 @@ export type Database = {
         }
         Returns: number
       }
+      set_group_listed: {
+        Args: { listed: boolean; target_group: string }
+        Returns: undefined
+      }
       set_member_active: {
         Args: { active: boolean; target_member: string }
         Returns: undefined
@@ -816,11 +1002,20 @@ export type Database = {
         }
         Returns: undefined
       }
+      set_public_profile: {
+        Args: { target_member: string; visible: boolean }
+        Returns: undefined
+      }
+      set_reaction: {
+        Args: { reaction: string; target_post: string }
+        Returns: undefined
+      }
       set_round_position: {
         Args: { in_goal: boolean; target_match: string; target_member: string }
         Returns: number
       }
       unlock_ratings: { Args: { target_match: string }; Returns: undefined }
+      unpublish_post: { Args: { target_post: string }; Returns: undefined }
     }
     Enums: {
       award_kind:

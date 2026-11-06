@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { saveShowcase } from "@/lib/community-showcase";
+import { getLeague } from "@/lib/league";
 import { getThemeForDate } from "@/lib/card-themes";
 import { MIN_SUBMISSIONS_TO_CLOSE } from "@/lib/round-rules";
 import { requireActiveMembership } from "@/lib/session";
@@ -53,6 +55,14 @@ export async function closeMatch(matchId: string): Promise<CloseMatchResult> {
           ? `Para fechar, pelo menos ${MIN_SUBMISSIONS_TO_CLOSE} jogadores precisam enviar as notas de todos.`
           : "Não foi possível fechar a rodada.",
     };
+  }
+
+  // Pelada na comunidade: atualiza o recorte público (ranking e gols). Falhar aqui não desfaz o fechamento.
+  try {
+    const { data: group } = await supabase.from("groups").select("listed_at").eq("id", membership.groupId).maybeSingle();
+    if (group?.listed_at) await saveShowcase(membership.groupId, await getLeague("/rodadas"));
+  } catch (showcaseError) {
+    console.error("closeMatch: recorte da comunidade", showcaseError);
   }
 
   revalidatePath("/", "layout");

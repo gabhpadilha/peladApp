@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { ArrowRightIcon } from "lucide-react";
+import { ArrowRightIcon, GlobeIcon } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
 import { GroupGate } from "@/components/group-gate";
 import { PendingEvaluationsBanner } from "@/components/pending-evaluations-banner";
@@ -79,6 +79,17 @@ async function HomeContent() {
               shopSale={data.shopSale}
               player={data.currentPlayer}
             />
+            <Link
+              href="/comunidade"
+              className="flex min-h-16 items-center gap-3 rounded-xl border bg-card px-4 transition-colors hover:bg-muted"
+            >
+              <GlobeIcon aria-hidden className="size-5 shrink-0 text-primary" />
+              <span className="flex min-w-0 flex-1 flex-col">
+                <span className="text-base font-medium">Comunidade</span>
+                <span className="text-sm text-muted-foreground">Veja outras peladas e as conquistas da galera.</span>
+              </span>
+              <ArrowRightIcon aria-hidden className="size-5 shrink-0 text-muted-foreground" />
+            </Link>
           </div>
 
           <div className="flex min-w-0 flex-col gap-6">

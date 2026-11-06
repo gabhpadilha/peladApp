@@ -9,6 +9,9 @@ import { CoinPill } from "@/components/coin-pill";
 import { GroupGate } from "@/components/group-gate";
 import { PlayerCard } from "@/components/player-card";
 import { getActiveMembership, getUserId } from "@/lib/session";
+import { setPublicProfile } from "@/app/comunidade/_actions/community-actions";
+import { CommunityToggle } from "@/app/comunidade/_components/community-toggle";
+import { getCommunityStatus } from "@/app/comunidade/_data-access/community-data";
 import { isPlatformAdmin } from "@/lib/platform-admin";
 import { Button } from "@/components/ui/button";
 import { POSITION_LABELS } from "@/types/player";
@@ -43,6 +46,7 @@ async function MeContent() {
   const userId = await getUserId();
   const isOwner = userId ? ((await getActiveMembership(userId))?.isOwner ?? false) : false;
   const isAdmin = userId ? await isPlatformAdmin(userId) : false;
+  const community = await getCommunityStatus();
 
   return (
     <>
@@ -94,6 +98,17 @@ async function MeContent() {
             <ChevronRightIcon aria-hidden className="size-5 shrink-0 text-muted-foreground" />
           </Link>
         )}
+
+        <CommunityToggle
+          title="Mostrar meu perfil para outras peladas"
+          description={
+            community.groupListed
+              ? "Aparece no ranking público da sua pelada, no seu perfil e permite publicar conquistas no feed. Não mostra suas notas nem seu nome completo."
+              : "Funciona quando o administrador ligar a sua pelada na comunidade."
+          }
+          initialEnabled={community.publicProfile}
+          action={setPublicProfile}
+        />
 
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-2 lg:items-start">
           <OwnPhotoCard member={data.photoMember} />
