@@ -23,12 +23,14 @@ export async function boot() {
     alter table storage.objects enable row level security;
     grant usage on schema public, auth, extensions to anon, authenticated, service_role;
     grant execute on function auth.uid() to anon, authenticated, service_role;
+    -- Como no Supabase: tabelas novas já nascem com os privilégios padrão; as migrations revogam o que precisam.
+    alter default privileges in schema public grant select, insert, update, delete on tables to authenticated;
+    alter default privileges in schema public grant usage on sequences to authenticated;
   `);
   const dir = path.join(REPO, "supabase/migrations");
   for (const file of readdirSync(dir).sort()) {
     try { await db.exec(readFileSync(path.join(dir, file), "utf8")); }
     catch (e) { console.error("MIGRATION FALHOU", file, e.message); throw e; }
   }
-  await db.exec(`grant select, insert, update, delete on all tables in schema public to authenticated; grant usage on all sequences in schema public to authenticated;`);
   return db;
 }
