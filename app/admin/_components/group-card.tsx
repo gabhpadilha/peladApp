@@ -12,6 +12,7 @@ import { setGroupSuspended } from "../_actions/set-group-suspended";
 import { updateAdminGroup } from "../_actions/update-admin-group";
 import type { AdminGroup } from "../_data-access/get-overview";
 import { GroupDetailsFields } from "./group-details-fields";
+import { GroupRounds } from "./group-rounds";
 
 function formatDate(isoDate: string | null): string {
   if (!isoDate) return "nenhuma ainda";
@@ -114,6 +115,8 @@ export function GroupCard({ group }: { group: AdminGroup }) {
           {[group.ownerContact, group.adminNotes].filter(Boolean).join(" · ")}
         </p>
       )}
+
+      {!isEditing && <GroupRounds rounds={group.rounds} />}
 
       {isEditing ? (
         <form onSubmit={form.handleSubmit(handleSave)} noValidate>

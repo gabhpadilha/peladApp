@@ -8,9 +8,9 @@ import { createClient } from "@/lib/supabase/server";
 export type DeleteMatchResult = { success: true } | { success: false; message: string };
 
 /**
- * Exclui uma rodada criada errada, aberta ou fechada: presenças, notas, votos
- * e cartas especiais dela saem junto (cascata no banco), e o OVR de todos é
- * recalculado sem essa rodada. Qualquer organizador da pelada pode.
+ * Exclui uma rodada ABERTA criada errada: presenças, notas e votos dela saem junto
+ * (cascata no banco). Rodada fechada é definitiva (decisão do dono do app em 2026-11-06):
+ * só o admin da plataforma exclui, pelo painel. A policy do banco também exige rodada aberta.
  */
 export async function deleteMatch(matchId: string): Promise<DeleteMatchResult> {
   const membership = await requireActiveMembership("/rodadas");
@@ -29,12 +29,16 @@ export async function deleteMatch(matchId: string): Promise<DeleteMatchResult> {
     .delete()
     .eq("id", parsedMatchId.data)
     .eq("group_id", membership.groupId)
+    .eq("status", "open")
     .select("id");
   if (error) {
     return { success: false, message: "Não foi possível excluir a rodada. Tente de novo." };
   }
   if (!data || data.length === 0) {
-    return { success: false, message: "Rodada não encontrada." };
+    return {
+      success: false,
+      message: "Rodada fechada não pode ser excluída. Se ficou errada, fale com o administrador da plataforma.",
+    };
   }
 
   // Home, ranking, perfis e coleções dependem das notas e cartas dessa rodada.

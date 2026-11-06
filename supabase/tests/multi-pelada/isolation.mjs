@@ -109,6 +109,24 @@ await db.query("insert into public.card_skin_purchases (member_id, group_id, ski
   check(S, "jogador lê cidade e dia do jogo da própria pelada", (await count(B.users[2], "select city, play_weekday from public.groups where id=$1", [B.group])) === 1);
 }
 
+// 8. Exclusão de rodada: organizador só apaga rodada aberta
+{
+  const S = "8 exclusão";
+  const ids = (await db.query("select id from public.matches where group_id=$1 and status='open' order by played_on limit 2", [A.group])).rows.map((r) => r.id);
+  const [open, closed] = ids;
+  await db.query("update public.matches set status='closed' where id=$1", [closed]);
+  check(S, "há rodada aberta e fechada para testar", Boolean(open) && Boolean(closed));
+  const del = async (id) => (await db.query("with d as (delete from public.matches where id=$1 returning 1) select count(*)::int c from d", [id])).rows[0].c;
+  // O teste roda como o papel do jogador pelas helpers: usa attempt + contagem depois.
+  await attempt(A.users[0], "delete from public.matches where id = $1", [closed]);
+  check(S, "organizador não apaga rodada fechada", (await db.query("select 1 from public.matches where id=$1", [closed])).rows.length === 1);
+  await attempt(A.users[0], "delete from public.matches where id = $1", [open]);
+  check(S, "organizador apaga rodada aberta", (await db.query("select 1 from public.matches where id=$1", [open])).rows.length === 0);
+  await attempt(B.users[0], "delete from public.matches where id = $1", [closed]);
+  check(S, "organizador de outra pelada não apaga", (await db.query("select 1 from public.matches where id=$1", [closed])).rows.length === 1);
+  check(S, "chave secreta (dono do banco) apaga a fechada", (await del(closed)) === 1);
+}
+
 const bad = results.filter((r) => !r.ok);
 console.log(`\n${results.length - bad.length}/${results.length} verificações passaram`);
 if (bad.length) { console.log("FALHARAM:\n" + bad.map((b) => `- [${b.scenario}] ${b.name} ${b.detail}`).join("\n")); process.exit(1); }
