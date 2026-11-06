@@ -291,6 +291,9 @@ export type Database = {
           id: string
           invite_code: string
           name: string
+          name_key: string
+          slug: string | null
+          suspended_at: string | null
         }
         Insert: {
           created_at?: string
@@ -298,6 +301,9 @@ export type Database = {
           id?: string
           invite_code?: string
           name: string
+          name_key: string
+          slug?: string | null
+          suspended_at?: string | null
         }
         Update: {
           created_at?: string
@@ -305,6 +311,9 @@ export type Database = {
           id?: string
           invite_code?: string
           name?: string
+          name_key?: string
+          slug?: string | null
+          suspended_at?: string | null
         }
         Relationships: []
       }
@@ -506,18 +515,27 @@ export type Database = {
           created_at: string
           full_name: string | null
           id: string
+          is_platform_admin: boolean
+          terms_accepted_at: string | null
+          terms_version: string | null
           username: string | null
         }
         Insert: {
           created_at?: string
           full_name?: string | null
           id: string
+          is_platform_admin?: boolean
+          terms_accepted_at?: string | null
+          terms_version?: string | null
           username?: string | null
         }
         Update: {
           created_at?: string
           full_name?: string | null
           id?: string
+          is_platform_admin?: boolean
+          terms_accepted_at?: string | null
+          terms_version?: string | null
           username?: string | null
         }
         Relationships: []
@@ -566,6 +584,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      accept_terms: {
+        Args: { terms_version_accepted: string }
+        Returns: undefined
+      }
       award_card_value: {
         Args: { average: number; bonus: number }
         Returns: number
@@ -686,6 +708,7 @@ export type Database = {
           member_id: string
         }[]
       }
+      group_name_key: { Args: { group_name: string }; Returns: string }
       is_group_member: { Args: { target_group: string }; Returns: boolean }
       is_group_organizer: { Args: { target_group: string }; Returns: boolean }
       is_group_owner: { Args: { target_group: string }; Returns: boolean }
@@ -698,6 +721,10 @@ export type Database = {
         Returns: string
       }
       ratings_open: { Args: { target_match: string }; Returns: boolean }
+      rename_group: {
+        Args: { new_name: string; target_group: string }
+        Returns: undefined
+      }
       report_goals: {
         Args: {
           goal_count: number
