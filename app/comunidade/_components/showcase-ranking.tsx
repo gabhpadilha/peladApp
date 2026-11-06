@@ -63,7 +63,7 @@ export function ShowcaseRanking({ groupId, players }: { groupId: string; players
       />
       {rows.length === 0 ? (
         <p className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
-          Ninguém pontuou nesse período, ou ninguém dessa pelada liberou o perfil ainda.
+          Ninguém pontuou nesse período ainda. Os gols entram depois que a rodada fecha com os gols confirmados.
         </p>
       ) : (
         <ol className="flex flex-col gap-2">

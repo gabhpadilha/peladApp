@@ -22,7 +22,7 @@ export function CommunityGroupCard({ group }: { group: CommunityGroup }) {
         <ChevronRightIcon aria-hidden className="mt-1 size-5 shrink-0 text-muted-foreground" />
       </div>
       <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
-        <span>{group.publicPlayers} de {group.activePlayers} jogadores no ranking público</span>
+        <span>{group.activePlayers} {group.activePlayers === 1 ? "jogador" : "jogadores"}</span>
         {group.isOwnGroup && <span className="rounded-full bg-primary/15 px-2 py-0.5 text-xs font-bold text-primary">Sua pelada</span>}
       </p>
       {group.leader && (

@@ -42,7 +42,7 @@ async function PublicGroupContent({ params }: { params: PageProps<"/comunidade/[
         <div className="flex flex-col gap-1">
           <p className="text-sm text-muted-foreground">{[where, when].filter(Boolean).join(" · ")}</p>
           <h1 className="font-display text-4xl leading-none font-extrabold uppercase">{group.name}</h1>
-          <p className="text-sm text-muted-foreground">Só jogadores que escolheram aparecer. Toque num nome para ver o perfil.</p>
+          <p className="text-sm text-muted-foreground">Toque num nome para ver o perfil. Notas e nomes completos nunca aparecem.</p>
         </div>
         <ShowcaseRanking groupId={group.id} players={group.players} />
       </main>
