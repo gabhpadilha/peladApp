@@ -96,7 +96,7 @@ export function MatchesList({ matches, isOrganizer }: MatchesListProps) {
                   </Button>
                 )}
                 {isOrganizer && isOpen && <CloseMatchButton matchId={match.id} round={match.round} submittedCount={match.submittedCount} />}
-                {isOrganizer && <DeleteMatchButton matchId={match.id} round={match.round} isClosed={!isOpen} />}
+                {isOrganizer && isOpen && <DeleteMatchButton matchId={match.id} round={match.round} isClosed={!isOpen} />}
               </li>
             );
           })}

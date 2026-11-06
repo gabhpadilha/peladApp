@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireActiveMembership } from "@/lib/session";
+import { GROUP_SUSPENDED_MESSAGE, WEEKLY_LIMIT_MESSAGE } from "@/lib/platform";
 import { getDatabaseErrorMessage } from "@/lib/supabase/errors";
 import { createClient } from "@/lib/supabase/server";
 import { newMatchSchema, type NewMatchInput } from "../_schemas/new-match-schema";
@@ -33,6 +34,8 @@ export async function createMatch(input: NewMatchInput): Promise<CreateMatchResu
     team_numbers: players.map((player) => player.team),
     reserve_flags: players.map((player) => player.reserve),
   });
+  if (error?.code === "PA009") return { success: false, message: GROUP_SUSPENDED_MESSAGE };
+  if (error?.code === "PA011") return { success: false, message: WEEKLY_LIMIT_MESSAGE };
   if (error || !matchId) {
     return {
       success: false,
