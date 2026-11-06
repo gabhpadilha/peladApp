@@ -5,11 +5,11 @@ import type { GroupDetailsInput } from "@/types/group-schema";
 export function toGroupColumns(input: GroupDetailsInput) {
   return {
     name: input.groupName,
-    slug: input.slug,
+    slug: input.slug === "" ? null : input.slug,
     city: input.city,
     state: input.state,
-    play_weekday: Number(input.playWeekday),
-    play_time: input.playTime,
+    play_weekday: input.playWeekday === "" ? null : Number(input.playWeekday),
+    play_time: input.playTime === "" ? null : input.playTime,
     venue: input.venue === "" ? null : input.venue,
     usual_players: input.usualPlayers === "" ? null : Number(input.usualPlayers),
     weekly_round_limit: input.weeklyRoundLimit === "" ? null : Number(input.weeklyRoundLimit),

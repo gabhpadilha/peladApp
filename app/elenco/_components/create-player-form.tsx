@@ -8,7 +8,7 @@ import { MemberProfileFields } from "@/components/member-profile-fields";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { suggestUsername, USERNAME_RULE } from "@/lib/username";
+import { maxBaseUsernameLength, suggestUsername, USERNAME_RULE } from "@/lib/username";
 import { createPlayerSchema, type CreatePlayerInput } from "@/types/member-schema";
 import { createPlayer } from "../_actions/create-player";
 import { AccessCard } from "./access-card";
@@ -18,6 +18,8 @@ type CreatedPlayer = { username: string; nickname: string; tempPassword: string 
 type CreatePlayerFormProps = {
   /** Link da tela de login, para a mensagem do WhatsApp. */
   loginUrl: string;
+  /** Código curto da pelada: os usuários novos terminam com `.codigo`. `null` na pelada antiga. */
+  groupSlug: string | null;
 };
 
 const EMPTY_FORM: CreatePlayerInput = { fullName: "", nickname: "", username: "", position: "ALA" };
@@ -26,7 +28,7 @@ const EMPTY_FORM: CreatePlayerInput = { fullName: "", nickname: "", username: ""
  * Organizador cadastra o jogador por usuário (sem e-mail) e repassa o acesso
  * com a senha gerada. O usuário é sugerido a partir do apelido.
  */
-export function CreatePlayerForm({ loginUrl }: CreatePlayerFormProps) {
+export function CreatePlayerForm({ loginUrl, groupSlug }: CreatePlayerFormProps) {
   const [created, setCreated] = useState<CreatedPlayer | null>(null);
   const [isUsernameEdited, setIsUsernameEdited] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
@@ -36,11 +38,13 @@ export function CreatePlayerForm({ loginUrl }: CreatePlayerFormProps) {
     defaultValues: { ...EMPTY_FORM, position: undefined },
   });
   const nickname = useWatch({ control: form.control, name: "nickname" });
+  const typedUsername = useWatch({ control: form.control, name: "username" });
+  const maxUsernameLength = maxBaseUsernameLength(groupSlug);
 
   // Enquanto o organizador não mexer no usuário, ele acompanha o apelido.
   useEffect(() => {
-    if (!isUsernameEdited) form.setValue("username", suggestUsername(nickname ?? ""));
-  }, [nickname, isUsernameEdited, form]);
+    if (!isUsernameEdited) form.setValue("username", suggestUsername(nickname ?? "").slice(0, maxUsernameLength));
+  }, [nickname, isUsernameEdited, form, maxUsernameLength]);
 
   function handleSubmit(data: CreatePlayerInput) {
     setFormError(null);
@@ -105,12 +109,21 @@ export function CreatePlayerForm({ loginUrl }: CreatePlayerFormProps) {
                     autoCapitalize="none"
                     autoCorrect="off"
                     spellCheck={false}
-                    maxLength={20}
+                    maxLength={maxUsernameLength}
                     placeholder="magrao"
                     aria-invalid={fieldState.invalid}
                     className="h-11 font-mono text-base"
                   />
-                  <FieldDescription>{USERNAME_RULE}</FieldDescription>
+                  <FieldDescription>
+                    {groupSlug ? (
+                      <>
+                        Ele entra como <span className="font-mono">{typedUsername || "usuario"}.{groupSlug}</span> (o código da pelada
+                        entra sozinho, para não repetir com outras peladas).
+                      </>
+                    ) : (
+                      USERNAME_RULE
+                    )}
+                  </FieldDescription>
                   {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
                 </Field>
               )}

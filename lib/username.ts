@@ -30,3 +30,17 @@ export function suggestUsername(nickname: string): string {
     .replace(/^\.+|\.+$/g, "")
     .slice(0, USERNAME_MAX_LENGTH);
 }
+
+/**
+ * Pelada com código curto (`groups.slug`): os usuários novos levam o código no fim (`joao.bairro`), para dois
+ * "joao" de peladas diferentes não colidirem (o usuário é único no app inteiro). Pelada sem código (a antiga): sem sufixo.
+ */
+export function withGroupSuffix(base: string, slug: string | null): string {
+  if (!slug || base.endsWith(`.${slug}`)) return base;
+  return `${base}.${slug}`;
+}
+
+/** Quantos caracteres o usuário digitado pode ter, para caber o sufixo dentro do limite de 20. */
+export function maxBaseUsernameLength(slug: string | null): number {
+  return slug ? USERNAME_MAX_LENGTH - slug.length - 1 : USERNAME_MAX_LENGTH;
+}

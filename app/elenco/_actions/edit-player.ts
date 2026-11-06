@@ -78,6 +78,15 @@ export async function editPlayer(memberId: string, input: EditPlayerInput): Prom
   // Conta com e-mail não tem usuário; o campo vem vazio e é ignorado.
   const nextUsername = currentUsername && username ? username : currentUsername;
 
+  // Pelada com código curto: usuário novo ou trocado precisa terminar com o código (`joao.codigo`).
+  if (nextUsername && nextUsername !== currentUsername) {
+    const { data: group } = await supabase.from("groups").select("slug").eq("id", membership.groupId).maybeSingle();
+    if (group?.slug && !nextUsername.endsWith(`.${group.slug}`)) {
+      const message = `O usuário dessa pelada termina com .${group.slug} (ex.: joao.${group.slug}).`;
+      return { success: false, message, errors: { username: [message] } };
+    }
+  }
+
   if (nextUsername && nextUsername !== currentUsername) {
     const { data: taken } = await admin.from("profiles").select("id").eq("username", nextUsername).maybeSingle();
     if (taken) {

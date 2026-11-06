@@ -41,6 +41,8 @@ export type Roster = {
   inactiveMembers: InactiveMemberSummary[];
   /** Tela de login, para a mensagem de acesso dos jogadores cadastrados. */
   loginUrl: string;
+  /** Código curto da pelada (sufixo dos usuários novos); `null` na pelada antiga. */
+  groupSlug: string | null;
 };
 
 /** Elenco para o Administrador; quem não é volta para o Início (a página é só de gestão). */
@@ -94,5 +96,6 @@ export async function getRoster(): Promise<Roster> {
       .filter((member) => member.deactivated_at !== null)
       .map((member) => ({ id: member.id, nickname: member.nickname, position: member.position })),
     loginUrl: `${siteUrl}/entrar`,
+    groupSlug: (await supabase.from("groups").select("slug").eq("id", membership.groupId).maybeSingle()).data?.slug ?? null,
   };
 }

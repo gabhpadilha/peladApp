@@ -48,7 +48,7 @@ async function RosterContent() {
         key={roster.membership.memberId}
         className="grid grid-cols-1 gap-6 lg:grid-cols-2 lg:items-start"
       >
-        <CreatePlayerForm loginUrl={roster.loginUrl} />
+        <CreatePlayerForm loginUrl={roster.loginUrl} groupSlug={roster.groupSlug} />
         <MembersList
           members={roster.members}
           inactiveMembers={roster.inactiveMembers}

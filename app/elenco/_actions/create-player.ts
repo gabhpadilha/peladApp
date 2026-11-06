@@ -5,7 +5,8 @@ import { z } from "zod";
 import { requireActiveMembership } from "@/lib/session";
 import { createAdminClient, hasAdminEnv } from "@/lib/supabase/admin";
 import { generateTempPassword } from "@/lib/temp-password";
-import { usernameToEmail } from "@/lib/username";
+import { createClient } from "@/lib/supabase/server";
+import { maxBaseUsernameLength, USERNAME_PATTERN, usernameToEmail, withGroupSuffix } from "@/lib/username";
 import {
   createPlayerSchema,
   type CreatePlayerInput,
@@ -42,8 +43,17 @@ export async function createPlayer(input: CreatePlayerInput): Promise<CreatePlay
     return { success: false, message: "Algo falhou do nosso lado, não foi você. Tente de novo em instantes." };
   }
 
-  const { username, fullName, nickname, position } = validation.data;
+  const { username: typedUsername, fullName, nickname, position } = validation.data;
   const admin = createAdminClient();
+
+  // Pelada com código curto: o usuário vira `joao.codigo` (único no app inteiro).
+  const { data: group } = await (await createClient()).from("groups").select("slug").eq("id", membership.groupId).maybeSingle();
+  const slug = group?.slug ?? null;
+  const username = withGroupSuffix(typedUsername, slug);
+  if (!USERNAME_PATTERN.test(username)) {
+    const message = `Com o código da pelada (.${slug}), o usuário passa de 20 caracteres. Use até ${maxBaseUsernameLength(slug)}.`;
+    return { success: false, message, errors: { username: [message] } };
+  }
 
   const { data: taken } = await admin.from("profiles").select("id").eq("username", username).maybeSingle();
   if (taken) {

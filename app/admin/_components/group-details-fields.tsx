@@ -66,7 +66,7 @@ export function GroupDetailsFields<Values extends FieldValues & GroupDetailsInpu
   return (
     <>
       <TextField {...text} name="groupName" id={`${idPrefix}-name`} label="Nome da pelada" placeholder="Racha do Bairro" maxLength={60} hint="Não pode repetir o nome de outra pelada." />
-      <TextField {...text} name="slug" id={`${idPrefix}-slug`} label="Código curto (3 a 6 letras)" placeholder="bairro" mono maxLength={6} lower hint="Vira o sufixo dos usuários novos: joao.bairro." />
+      <TextField {...text} name="slug" id={`${idPrefix}-slug`} label="Código curto (3 a 6 letras)" placeholder="bairro" mono maxLength={6} lower hint="Vira o sufixo dos usuários novos: joao.bairro. Vazio = sem sufixo (pelada antiga)." />
       <div className="grid grid-cols-[1fr_5.5rem] gap-3">
         <TextField {...text} name="city" id={`${idPrefix}-city`} label="Cidade" placeholder="Curitiba" maxLength={60} />
         <Controller
@@ -94,7 +94,7 @@ export function GroupDetailsFields<Values extends FieldValues & GroupDetailsInpu
             <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor={`${idPrefix}-weekday`}>Dia do jogo</FieldLabel>
               <select {...field} id={`${idPrefix}-weekday`} aria-invalid={fieldState.invalid} className={SELECT_CLASS}>
-                <option value="">Escolha</option>
+                <option value="">Qualquer dia</option>
                 {WEEKDAY_LABELS.map((label, index) => (
                   <option key={label} value={String(index)}>{label}</option>
                 ))}
@@ -103,7 +103,7 @@ export function GroupDetailsFields<Values extends FieldValues & GroupDetailsInpu
             </Field>
           )}
         />
-        <TextField {...text} name="playTime" id={`${idPrefix}-time`} label="Horário" type="time" />
+        <TextField {...text} name="playTime" id={`${idPrefix}-time`} label="Horário (opcional)" type="time" />
       </div>
       <TextField {...text} name="venue" id={`${idPrefix}-venue`} label="Local ou quadra (opcional)" placeholder="Quadra do Clube" maxLength={80} />
       <div className="grid grid-cols-2 gap-3">
