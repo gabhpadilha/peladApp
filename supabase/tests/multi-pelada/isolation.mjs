@@ -90,6 +90,25 @@ await db.query("insert into public.card_skin_purchases (member_id, group_id, ski
   check(S, "ninguém mais foi marcado", other === 0, `${other} outros`);
 }
 
+// 7. Plano: limite de rodadas por semana e dados privados do admin
+{
+  const S = "7 plano";
+  const mk = (g, ids, d) => ["select public.create_match($1,$2::date,$3::uuid[],$4::smallint[],$5::boolean[])", [g, d, ids.slice(0, 4), [1, 2, 1, 2], [false, false, false, false]]];
+  await db.query("update public.groups set weekly_round_limit = 1 where id = $1", [B.group]);
+  // 2026-12-07 é segunda; 2026-12-13 é domingo da mesma semana; 2026-12-14 é a segunda seguinte.
+  pass(S, "1ª rodada da semana passa", await attempt(B.users[0], ...mk(B.group, B.ids, "2026-12-07")));
+  fail(S, "2ª rodada na mesma semana (domingo) é recusada (PA011)", await attempt(B.users[0], ...mk(B.group, B.ids, "2026-12-13")), "PA011");
+  pass(S, "semana seguinte passa", await attempt(B.users[0], ...mk(B.group, B.ids, "2026-12-14")));
+  pass(S, "outra pelada sem limite não é afetada", await attempt(A.users[0], ...mk(A.group, A.ids, "2026-12-07")));
+  pass(S, "outra pelada sem limite cria 2ª na semana", await attempt(A.users[0], ...mk(A.group, A.ids, "2026-12-08")));
+  await db.query("insert into public.group_private (group_id, owner_contact, admin_notes) values ($1,'(41) 99999-0000','amigo do Zé')", [B.group]);
+  fail(S, "jogador não lê contato e observações", await attempt(B.users[0], "select * from public.group_private"), "42501");
+  fail(S, "jogador não grava em group_private", await attempt(B.users[0], "insert into public.group_private (group_id) values ($1)", [A.group]), "42501");
+  fail(S, "jogador não muda o limite da pelada", await attempt(B.users[0], "update public.groups set weekly_round_limit = null where id = $1", [B.group]), "42501");
+  fail(S, "jogador não muda o plano", await attempt(B.users[0], "update public.groups set plan = 'x' where id = $1", [B.group]), "42501");
+  check(S, "jogador lê cidade e dia do jogo da própria pelada", (await count(B.users[2], "select city, play_weekday from public.groups where id=$1", [B.group])) === 1);
+}
+
 const bad = results.filter((r) => !r.ok);
 console.log(`\n${results.length - bad.length}/${results.length} verificações passaram`);
 if (bad.length) { console.log("FALHARAM:\n" + bad.map((b) => `- [${b.scenario}] ${b.name} ${b.detail}`).join("\n")); process.exit(1); }

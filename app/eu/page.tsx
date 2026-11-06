@@ -2,13 +2,14 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronRightIcon, LogOutIcon, UsersIcon } from "lucide-react";
+import { ChevronRightIcon, LogOutIcon, ShieldIcon, UsersIcon } from "lucide-react";
 import { signOut } from "@/app/_actions/sign-out";
 import { AppHeader } from "@/components/app-header";
 import { CoinPill } from "@/components/coin-pill";
 import { GroupGate } from "@/components/group-gate";
 import { PlayerCard } from "@/components/player-card";
 import { getActiveMembership, getUserId } from "@/lib/session";
+import { isPlatformAdmin } from "@/lib/platform-admin";
 import { Button } from "@/components/ui/button";
 import { POSITION_LABELS } from "@/types/player";
 import { AccountDisclosure } from "./_components/account-disclosure";
@@ -41,6 +42,7 @@ async function MeContent() {
   // Só o Administrador: o Elenco saiu da barra de baixo do celular e mora aqui.
   const userId = await getUserId();
   const isOwner = userId ? ((await getActiveMembership(userId))?.isOwner ?? false) : false;
+  const isAdmin = userId ? await isPlatformAdmin(userId) : false;
 
   return (
     <>
@@ -74,6 +76,20 @@ async function MeContent() {
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="text-base font-medium">Gerenciar elenco</span>
               <span className="text-sm text-muted-foreground">Cadastrar jogadores, redefinir senhas e dar acesso de organizador.</span>
+            </span>
+            <ChevronRightIcon aria-hidden className="size-5 shrink-0 text-muted-foreground" />
+          </Link>
+        )}
+
+        {isAdmin && (
+          <Link
+            href="/admin"
+            className="flex min-h-16 items-center gap-3 rounded-xl border bg-card px-4 transition-colors hover:bg-muted"
+          >
+            <ShieldIcon aria-hidden className="size-5 shrink-0 text-primary" />
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="text-base font-medium">Painel da plataforma</span>
+              <span className="text-sm text-muted-foreground">Peladas, planos, suspensão e novas peladas.</span>
             </span>
             <ChevronRightIcon aria-hidden className="size-5 shrink-0 text-muted-foreground" />
           </Link>

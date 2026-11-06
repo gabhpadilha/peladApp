@@ -284,36 +284,89 @@ export type Database = {
           },
         ]
       }
+      group_private: {
+        Row: {
+          admin_notes: string | null
+          group_id: string
+          owner_contact: string | null
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          group_id: string
+          owner_contact?: string | null
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          group_id?: string
+          owner_contact?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "group_private_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: true
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       groups: {
         Row: {
+          city: string | null
           created_at: string
           created_by: string
           id: string
           invite_code: string
           name: string
           name_key: string
+          plan: string
+          play_time: string | null
+          play_weekday: number | null
           slug: string | null
+          state: string | null
           suspended_at: string | null
+          usual_players: number | null
+          venue: string | null
+          weekly_round_limit: number | null
         }
         Insert: {
+          city?: string | null
           created_at?: string
           created_by: string
           id?: string
           invite_code?: string
           name: string
           name_key: string
+          plan?: string
+          play_time?: string | null
+          play_weekday?: number | null
           slug?: string | null
+          state?: string | null
           suspended_at?: string | null
+          usual_players?: number | null
+          venue?: string | null
+          weekly_round_limit?: number | null
         }
         Update: {
+          city?: string | null
           created_at?: string
           created_by?: string
           id?: string
           invite_code?: string
           name?: string
           name_key?: string
+          plan?: string
+          play_time?: string | null
+          play_weekday?: number | null
           slug?: string | null
+          state?: string | null
           suspended_at?: string | null
+          usual_players?: number | null
+          venue?: string | null
+          weekly_round_limit?: number | null
         }
         Relationships: []
       }
