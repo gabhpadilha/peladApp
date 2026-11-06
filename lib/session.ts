@@ -3,6 +3,7 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { TERMS_VERSION } from "@/lib/terms";
 import type { Database } from "@/types/database";
 
 /** Cookie com o grupo ativo, para quem está em mais de uma pelada. */
@@ -93,12 +94,29 @@ export const getActiveMembership = cache(async (userId: string): Promise<ActiveM
   };
 });
 
-/** Exige login e grupo; sem grupo, manda para o onboarding. */
+/** Tela de aceite dos termos, para quem ainda não aceitou a versão atual. */
+export const TERMS_PATH = "/aceitar-termos";
+
+/** O usuário já aceitou a versão atual dos Termos e da Política de Privacidade? (deduplicada por requisição) */
+export const hasAcceptedTerms = cache(async (userId: string): Promise<boolean> => {
+  const { data } = await (await createClient())
+    .from("profiles")
+    .select("terms_version")
+    .eq("id", userId)
+    .maybeSingle();
+  return data?.terms_version === TERMS_VERSION;
+});
+
+/** Exige login, aceite dos termos e grupo; sem grupo, manda para o onboarding. */
 export async function requireActiveMembership(nextPath = "/"): Promise<ActiveMembership> {
   const userId = await requireUserId(nextPath);
   const membership = await getActiveMembership(userId);
   if (!membership) {
     redirect("/bem-vindo");
+  }
+  // Comunidade entre peladas: todo mundo aceita os termos no primeiro acesso e a cada nova versão.
+  if (!(await hasAcceptedTerms(userId))) {
+    redirect(`${TERMS_PATH}?next=${encodeURIComponent(nextPath)}`);
   }
   return membership;
 }

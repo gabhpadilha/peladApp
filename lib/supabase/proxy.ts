@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getSupabaseEnv, hasSupabaseEnv } from "./env";
 
 /** Rotas abertas sem login. Todo o resto exige sessão (contas são criadas pelo organizador). */
-const PUBLIC_PATH_PREFIXES = ["/entrar", "/auth"];
+const PUBLIC_PATH_PREFIXES = ["/entrar", "/auth", "/termos", "/privacidade"];
 
 function isPublicPath(pathname: string): boolean {
   return PUBLIC_PATH_PREFIXES.some(
