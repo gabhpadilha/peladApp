@@ -12,6 +12,7 @@ import { setGroupSuspended } from "../_actions/set-group-suspended";
 import { updateAdminGroup } from "../_actions/update-admin-group";
 import type { AdminGroup } from "../_data-access/get-overview";
 import { GroupDetailsFields } from "./group-details-fields";
+import { DeleteGroupButton } from "./delete-group-button";
 import { GroupRounds } from "./group-rounds";
 
 function formatDate(isoDate: string | null): string {
@@ -151,6 +152,7 @@ export function GroupCard({ group }: { group: AdminGroup }) {
               {group.isSuspended ? "Reativar" : "Suspender"}
             </Button>
           </div>
+          <DeleteGroupButton group={group} />
         </>
       )}
     </article>
