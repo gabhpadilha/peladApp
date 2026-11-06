@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3Icon,
+  GlobeIcon,
   HomeIcon,
   ShuffleIcon,
   StoreIcon,
@@ -29,6 +30,7 @@ const NAV_ITEMS: readonly NavItem[] = [
   { href: "/", label: "Início", icon: HomeIcon, isActive: (path) => path === "/" },
   { href: "/rodadas", label: "Rodadas", icon: ShuffleIcon, isActive: (path) => path.startsWith("/rodadas") },
   { href: "/carreira", label: "Carreira", icon: BarChart3Icon, isActive: (path) => path.startsWith("/jogadores") },
+  { href: "/comunidade", label: "Comunidade", icon: GlobeIcon, isActive: (path) => path.startsWith("/comunidade") },
   { href: "/loja", label: "Loja", icon: StoreIcon, isActive: (path) => path.startsWith("/loja") },
   { href: "/elenco", label: "Elenco", icon: UsersIcon, isActive: (path) => path.startsWith("/elenco"), ownerOnly: true },
   { href: "/eu", label: "Eu", icon: UserIcon, isActive: (path) => path.startsWith("/eu") },
@@ -94,7 +96,7 @@ export function MainNavPlaceholder(props: Omit<MainNavProps, "isOwner">) {
 
 /** Sem rota (`pathname` vazio): aparece sem destaque enquanto o `<Suspense>` carrega. */
 export function MainNavView({ variant, isOwner, currentPlayer, pathname }: MainNavProps & { pathname: string }) {
-  // Computador: o Administrador ganha o Elenco no cabeçalho. Celular: 5 botões fixos para todos (limite da barra de baixo);
+  // Computador: o Administrador ganha o Elenco no cabeçalho. Celular: 6 botões fixos para todos (limite da barra de baixo);
   // o Administrador chega ao Elenco por Eu → "Gerenciar elenco" e o botão Eu fica aceso lá (revisão de 2026-11-04).
   const items = NAV_ITEMS.filter((item) => variant === "top" ? isOwner || !item.ownerOnly : !item.ownerOnly);
 
@@ -131,7 +133,8 @@ export function MainNavView({ variant, isOwner, currentPlayer, pathname }: MainN
       data-bottom-nav
       className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur sm:hidden"
     >
-      <ul className="grid h-16 grid-cols-5">
+      {/* 6 colunas; a 4ª (Comunidade, a palavra mais longa) é um pouco mais larga para o texto de 12px caber sem cortar. */}
+      <ul className="grid h-16 grid-cols-[1fr_1fr_1fr_1.25fr_1fr_1fr]">
         {items.map(({ href, label, icon: Icon, isActive }) => {
           const isCurrent = isActive(pathname) || (href === "/eu" && pathname.startsWith("/elenco"));
           return (
