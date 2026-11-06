@@ -1,7 +1,8 @@
 import "server-only";
 import { parseCardTheme } from "@/lib/card-themes";
 import { rankShowcase, toPublicCard, type ShowcasePlayer } from "@/lib/community";
-import { readFrozenAttributes } from "@/lib/league";
+import { saveShowcase } from "@/lib/community-showcase";
+import { getLeague, readFrozenAttributes } from "@/lib/league";
 import { toPlayerPhoto } from "@/lib/player-photo";
 import { requireActiveMembership } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
@@ -23,12 +24,28 @@ export type CommunityGroup = {
   leader: { nickname: string; ovr: number | null; points: number } | null;
 };
 
-/** Vitrine de peladas: só as que o Administrador ligou (e não estão suspensas), com o líder do ranking. */
+/** O recorte público da própria pelada some ou fica velho (peladas antigas, rodada excluída pelo admin): refaz depois de 1 hora. */
+const SHOWCASE_MAX_AGE_MS = 60 * 60 * 1000;
+
+/** Vitrine de peladas: as que estão ligadas (por padrão todas) e não suspensas, com o líder do ranking. */
 export async function getCommunityGroups(): Promise<CommunityGroup[]> {
   const membership = await requireActiveMembership("/comunidade");
   const supabase = await createClient();
   const { data, error } = await supabase.rpc("get_listed_groups");
   if (error) throw error;
+
+  // Quem é da pelada recalcula o recorte dela (sessão própria, nunca de outra pelada) se faltar ou estiver velho.
+  if (data.some((group) => group.group_id === membership.groupId)) {
+    const { data: own } = await supabase.rpc("get_group_showcase", { target_group: membership.groupId });
+    const updatedAt = own?.[0]?.updated_at;
+    if (!updatedAt || Date.now() - new Date(updatedAt).getTime() > SHOWCASE_MAX_AGE_MS) {
+      try {
+        await saveShowcase(membership.groupId, await getLeague("/comunidade"));
+      } catch (refreshError) {
+        console.error("getCommunityGroups: recorte da própria pelada", refreshError);
+      }
+    }
+  }
 
   return Promise.all(
     data.map(async (group) => {

@@ -1,6 +1,6 @@
 # Comunidade: vitrine de peladas e feed de conquistas (2026-11-06)
 
-Pedido do dono do app: as peladas se enxergarem (ranking, estatísticas de atletas) e uma linha do tempo compartilhada com as conquistas. Decisões de 2026-11-06: começar por **vitrine de peladas + feed de conquistas**; só quem tem conta vê; **tudo desligado por padrão** (a pelada liga, cada jogador escolhe).
+Pedido do dono do app: as peladas se enxergarem (ranking, estatísticas de atletas) e uma linha do tempo compartilhada com as conquistas. Decisões de 2026-11-06: começar por **vitrine de peladas + feed de conquistas**; só quem tem conta vê; **a pelada nasce ligada** (o Administrador desliga; mudado no mesmo dia, antes era desligada) e **o perfil de cada jogador nasce desligado** (cada um escolhe).
 
 ## Princípio de segurança
 A comunidade **nunca lê os dados privados de outra pelada** (notas, votos, presenças, histórico por rodada, nome completo, usuário, foto original). Ela só lê **recortes públicos que a própria pelada gravou**:

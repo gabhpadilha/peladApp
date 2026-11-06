@@ -40,7 +40,7 @@ async function CommunityContent() {
           groups={
             groups.length === 0 ? (
               <p className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">
-                Nenhuma pelada na comunidade ainda. O administrador da sua pelada liga em Elenco → Comunidade.
+                Nenhuma pelada na comunidade agora. As peladas aparecem sozinhas, a não ser que o administrador desligue em Elenco.
               </p>
             ) : (
               <div className="flex flex-col gap-3">

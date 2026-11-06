@@ -132,6 +132,9 @@ await db.query("insert into public.card_skin_purchases (member_id, group_id, ski
   const S = "9 comunidade";
   const aw = async (member, group, match, kind) => (await db.query("insert into public.awards (group_id, match_id, member_id, kind, position, ovr, votes, score, attributes) values ($1,$2,$3,$4,'ALA',80,3,8.5,'{}'::jsonb) returning id", [group, match, member, kind])).rows[0].id;
   const aMatch = (await db.query("select id from public.matches where group_id=$1 limit 1", [A.group])).rows[0].id;
+  // As peladas nascem ligadas (migration 20261107130000); aqui o teste parte das desligadas.
+  check(S, "pelada nova nasce ligada por padrão", (await db.query("select count(*)::int c from public.groups where listed_at is null")).rows[0].c === 0);
+  await db.query("update public.groups set listed_at = null");
   const award = await aw(A.ids[1], A.group, aMatch, "craque");
   const countOf = count;
 
