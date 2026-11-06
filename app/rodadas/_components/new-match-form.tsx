@@ -20,6 +20,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { draftMatch, MATCH_TEAMS, PLAYERS_PER_TEAM } from "@/lib/draft";
 import { teamName } from "@/lib/teams";
+import { WEEKDAY_LABELS } from "@/lib/platform";
 import { cn } from "@/lib/utils";
 import { POSITION_LABELS } from "@/types/player";
 import { createMatch } from "../_actions/create-match";
@@ -29,6 +30,8 @@ import { newMatchSchema, type NewMatchInput } from "../_schemas/new-match-schema
 type NewMatchFormProps = {
   members: DraftMember[];
   today: string;
+  /** Dia do jogo da pelada (0 = domingo ... 6 = sábado), se cadastrado: só gera um aviso. */
+  playWeekday: number | null;
 };
 
 /** Branco (1) e Preto (2), na ordem em que aparecem. */
@@ -50,8 +53,24 @@ function TeamSwatch({ team }: { team: number }) {
   );
 }
 
+/**
+ * Aviso (nunca bloqueio) quando a data cai fora do dia em que a pelada joga: o jogo às vezes muda de dia.
+ * `date` é `AAAA-MM-DD`; o dia da semana sai da data local (sem fuso, para não escorregar um dia).
+ */
+function getOffDayWarning(date: string | undefined, playWeekday: number | null): string | null {
+  if (playWeekday === null || !date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  const [year, month, day] = date.split("-").map(Number);
+  const weekday = new Date(year, month - 1, day).getDay();
+  if (weekday === playWeekday) return null;
+  // Domingo e sábado são masculinos ("aos sábados", "num sábado"); segunda a sexta, femininos.
+  const isMasculine = (index: number) => index === 0 || index === 6;
+  const plural = `${isMasculine(playWeekday) ? "aos" : "às"} ${WEEKDAY_LABELS[playWeekday].toLowerCase()}s`;
+  const article = isMasculine(weekday) ? "num" : "numa";
+  return `Sua pelada joga ${plural}, e essa data cai ${article} ${WEEKDAY_LABELS[weekday].toLowerCase()}. Pode criar mesmo assim.`;
+}
+
 /** Data + confirmados do WhatsApp + sorteio: Branco e Preto, titulares e reservas equilibrados pelo OVR. */
-export function NewMatchForm({ members, today }: NewMatchFormProps) {
+export function NewMatchForm({ members, today, playWeekday }: NewMatchFormProps) {
   const [confirmedIds, setConfirmedIds] = useState<string[]>([]);
   const [createdRound, setCreatedRound] = useState<number | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
@@ -62,6 +81,8 @@ export function NewMatchForm({ members, today }: NewMatchFormProps) {
     defaultValues: { playedOn: today, players: [] },
   });
   const players = useWatch({ control: form.control, name: "players" });
+  const playedOn = useWatch({ control: form.control, name: "playedOn" });
+  const offDayWarning = getOffDayWarning(playedOn, playWeekday);
   const memberById = new Map(members.map((member) => [member.id, member]));
   const hasTeams = players.length > 0;
 
@@ -154,6 +175,11 @@ export function NewMatchForm({ members, today }: NewMatchFormProps) {
                   className="h-11 w-full min-w-0 appearance-none text-base [&::-webkit-date-and-time-value]:text-left"
                 />
                 {fieldState.invalid && <FieldError errors={[fieldState.error]} />}
+                {offDayWarning && (
+                  <p role="status" className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-300">
+                    {offDayWarning}
+                  </p>
+                )}
               </Field>
             )}
           />

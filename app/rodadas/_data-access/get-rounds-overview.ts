@@ -38,13 +38,15 @@ export type RoundsOverview = {
   matches: MatchSummary[];
   /** Hoje no fuso da pelada (`AAAA-MM-DD`), padrão da nova rodada. */
   today: string;
+  /** Dia da semana do jogo cadastrado pelo admin (0 = domingo ... 6 = sábado); `null` se não há. Só informação: avisa, não bloqueia. */
+  playWeekday: number | null;
 };
 
 export async function getRoundsOverview(): Promise<RoundsOverview> {
   const membership = await requireActiveMembership("/rodadas");
   const supabase = await createClient();
 
-  const [membersResult, matchesResult, submissionsResult, evaluations, awardsResult] = await Promise.all([
+  const [membersResult, matchesResult, submissionsResult, evaluations, awardsResult, groupResult] = await Promise.all([
     supabase
       .from("group_members")
       .select("id, nickname, position, deactivated_at")
@@ -58,6 +60,7 @@ export async function getRoundsOverview(): Promise<RoundsOverview> {
     supabase.rpc("get_match_submissions", { target_group: membership.groupId }),
     getGroupEvaluations(membership.groupId),
     supabase.from("awards").select("match_id, member_id, kind").eq("group_id", membership.groupId),
+    supabase.from("groups").select("play_weekday").eq("id", membership.groupId).maybeSingle(),
   ]);
 
   if (membersResult.error) throw membersResult.error;
@@ -100,5 +103,6 @@ export async function getRoundsOverview(): Promise<RoundsOverview> {
     })),
     // Seguro aqui: a sessão já foi lida, então a rota é dinâmica.
     today: new Intl.DateTimeFormat("en-CA", { timeZone: SITE_TIME_ZONE }).format(new Date()),
+    playWeekday: groupResult.data?.play_weekday ?? null,
   };
 }

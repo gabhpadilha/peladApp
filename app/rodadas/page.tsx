@@ -48,7 +48,7 @@ async function RoundsContent() {
 
       {overview.isOrganizer ? (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-          <NewMatchForm members={overview.members} today={overview.today} />
+          <NewMatchForm members={overview.members} today={overview.today} playWeekday={overview.playWeekday} />
           <MatchesList matches={overview.matches} isOrganizer />
         </div>
       ) : (
