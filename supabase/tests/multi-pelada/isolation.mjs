@@ -127,6 +127,66 @@ await db.query("insert into public.card_skin_purchases (member_id, group_id, ski
   check(S, "chave secreta (dono do banco) apaga a fechada", (await del(closed)) === 1);
 }
 
+// 9. Comunidade: vitrine, perfil público e feed (tudo desligado por padrão)
+{
+  const S = "9 comunidade";
+  const aw = async (member, group, match, kind) => (await db.query("insert into public.awards (group_id, match_id, member_id, kind, position, ovr, votes, score, attributes) values ($1,$2,$3,$4,'ALA',80,3,8.5,'{}'::jsonb) returning id", [group, match, member, kind])).rows[0].id;
+  const aMatch = (await db.query("select id from public.matches where group_id=$1 limit 1", [A.group])).rows[0].id;
+  const award = await aw(A.ids[1], A.group, aMatch, "craque");
+  const countOf = count;
+
+  check(S, "pelada desligada não aparece na vitrine", (await countOf(B.users[1], "select * from public.get_listed_groups()")) === 0);
+  check(S, "vitrine de pelada desligada vem vazia", (await countOf(B.users[1], "select * from public.get_group_showcase($1)", [A.group])) === 0);
+  fail(S, "jogador não liga a pelada (só o dono)", await attempt(A.users[1], "select public.set_group_listed($1, true)", [A.group]), "42501");
+  fail(S, "dono de outra pelada não liga a minha", await attempt(B.users[0], "select public.set_group_listed($1, true)", [A.group]), "42501");
+  pass(S, "dono liga a pelada", await attempt(A.users[0], "select public.set_group_listed($1, true)", [A.group]));
+  check(S, "pelada ligada aparece para outra pelada", (await countOf(B.users[1], "select * from public.get_listed_groups()")) === 1);
+
+  await db.query("insert into public.group_showcase (group_id, players) values ($1, $2::jsonb)", [A.group, JSON.stringify([{ id: A.ids[1], nickname: "x" }, { id: A.ids[2], nickname: "y" }])]);
+  const shown = async (who) => (await attempt(who, "select jsonb_array_length(players)::int n from public.get_group_showcase($1)", [A.group])).rows?.[0]?.n;
+  check(S, "ranking público vem sem ninguém antes do aceite", (await shown(B.users[1])) === 0);
+  fail(S, "ninguém aceita por outra pessoa", await attempt(A.users[2], "select public.set_public_profile($1, true)", [A.ids[1]]), "42501");
+  pass(S, "jogador aceita aparecer", await attempt(A.users[1], "select public.set_public_profile($1, true)", [A.ids[1]]));
+  check(S, "só quem aceitou entra no ranking público", (await shown(B.users[1])) === 1);
+
+  check(S, "galeria vem só de quem aceitou", (await countOf(B.users[1], "select * from public.get_public_awards($1)", [A.ids[1]])) === 1);
+  check(S, "galeria de quem não aceitou vem vazia", (await countOf(B.users[1], "select * from public.get_public_awards($1)", [A.ids[2]])) === 0);
+
+  const award2 = await aw(A.ids[2], A.group, aMatch, "gol");
+  fail(S, "não publica carta de outra pessoa", await attempt(A.users[3], "select public.publish_award($1)", [award]), "42501");
+  fail(S, "sem aceite não publica", await attempt(A.users[2], "select public.publish_award($1)", [award2]), "42501");
+  pass(S, "dono da carta publica", await attempt(A.users[1], "select public.publish_award($1)", [award]));
+  pass(S, "publicar de novo não duplica", await attempt(A.users[1], "select public.publish_award($1)", [award]));
+  check(S, "feed mostra 1 post para outra pelada", (await countOf(B.users[1], "select * from public.get_feed(20, null)")) === 1);
+  const post = (await db.query("select id from public.feed_posts limit 1")).rows[0].id;
+  pass(S, "outra pelada reage", await attempt(B.users[1], "select public.set_reaction($1, 'fire')", [post]));
+  fail(S, "emoji fora da lista é recusado", await attempt(B.users[1], "select public.set_reaction($1, 'poop')", [post]), "23514");
+  check(S, "reação contada", (await db.query("select count(*)::int c from public.feed_reactions where post_id=$1", [post])).rows[0].c === 1);
+  fail(S, "outra pessoa não remove o post", await attempt(B.users[1], "select public.unpublish_post($1)", [post]), "");
+  check(S, "post continua lá", (await db.query("select 1 from public.feed_posts where id=$1", [post])).rows.length === 1);
+
+  fail(S, "ninguém lê feed_posts direto", await attempt(B.users[1], "select * from public.feed_posts"), "42501");
+  fail(S, "ninguém lê feed_reactions direto", await attempt(B.users[1], "select * from public.feed_reactions"), "42501");
+  fail(S, "ninguém lê group_showcase direto", await attempt(B.users[1], "select * from public.group_showcase"), "42501");
+  fail(S, "ninguém grava feed_posts direto", await attempt(B.users[1], "insert into public.feed_posts (award_id, group_id, member_id, author_id) values ($1,$2,$3,$4)", [award2, A.group, A.ids[2], B.users[1]]), "42501");
+  fail(S, "jogador não liga listed_at direto", await attempt(A.users[0], "update public.groups set listed_at = null where id=$1", [A.group]), "42501");
+  fail(S, "jogador não liga public_profile_at direto", await attempt(A.users[2], "update public.group_members set public_profile_at = now() where id=$1", [A.ids[2]]), "42501");
+
+  // Isolamento continua: de fora ainda não se lê nada privado de A.
+  check(S, "de fora continua sem ver o elenco de A", (await countOf(B.users[1], "select 1 from public.group_members where group_id=$1", [A.group])) === 0);
+  check(S, "de fora continua sem ver rodadas de A", (await countOf(B.users[1], "select 1 from public.matches where group_id=$1", [A.group])) === 0);
+
+  // Suspensa some da comunidade; reativa volta.
+  await db.query("update public.groups set suspended_at = now() where id=$1", [A.group]);
+  check(S, "pelada suspensa some da vitrine", (await countOf(B.users[1], "select * from public.get_listed_groups()")) === 0);
+  check(S, "pelada suspensa some do feed", (await countOf(B.users[1], "select * from public.get_feed(20, null)")) === 0);
+  await db.query("update public.groups set suspended_at = null where id=$1", [A.group]);
+  // Jogador desliga: some do feed e do ranking.
+  await attempt(A.users[1], "select public.set_public_profile($1, false)", [A.ids[1]]);
+  check(S, "quem desligou some do feed", (await countOf(B.users[1], "select * from public.get_feed(20, null)")) === 0);
+  check(S, "quem desligou some da galeria", (await countOf(B.users[1], "select * from public.get_public_awards($1)", [A.ids[1]])) === 0);
+}
+
 const bad = results.filter((r) => !r.ok);
 console.log(`\n${results.length - bad.length}/${results.length} verificações passaram`);
 if (bad.length) { console.log("FALHARAM:\n" + bad.map((b) => `- [${b.scenario}] ${b.name} ${b.detail}`).join("\n")); process.exit(1); }
