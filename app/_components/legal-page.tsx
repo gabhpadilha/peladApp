@@ -45,17 +45,15 @@ export function LegalPage({ title, intro, sections }: { title: string; intro: Re
   );
 }
 
-/** Como falar com a gente: e-mail quando configurado; senão, pelo administrador da pelada. */
+/** Como falar com a gente: o e-mail de contato, ou o administrador da pelada. */
 export function ContactInfo() {
-  return CONTACT_EMAIL ? (
+  return (
     <p>
       Fale com a gente pelo e-mail{" "}
       <a href={`mailto:${CONTACT_EMAIL}`} className="font-medium text-primary hover:underline">
         {CONTACT_EMAIL}
       </a>
-      .
+      , ou com o administrador da sua pelada, que encaminha o seu pedido.
     </p>
-  ) : (
-    <p>Por enquanto, fale com o administrador da sua pelada, que encaminha o seu pedido a quem opera o Cancha Club.</p>
   );
 }

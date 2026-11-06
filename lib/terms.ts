@@ -11,5 +11,9 @@ export const TERMS_DATE_LABEL = "6 de novembro de 2026";
 /** Quem opera o Cancha Club (pessoa física por enquanto; sem CPF em página pública). */
 export const CONTROLLER_NAME = "Gabriel Silveira Jammal Padilha";
 
-/** E-mail de contato (privacidade e dúvidas). Vem da variável `NEXT_PUBLIC_CONTACT_EMAIL`; sem ela, a página orienta o caminho pelo app. */
-export const CONTACT_EMAIL: string | null = process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim() || null;
+/**
+ * E-mail de contato (privacidade e dúvidas): `contato@canchaclub.com.br`, que o ImprovMX redireciona para a caixa do dono
+ * (DNS no Registro.br: 2 MX e 1 TXT de SPF; confirmado ativo em 2026-11-07). A variável `NEXT_PUBLIC_CONTACT_EMAIL`, se
+ * existir, sobrescreve o padrão.
+ */
+export const CONTACT_EMAIL: string = process.env.NEXT_PUBLIC_CONTACT_EMAIL?.trim() || "contato@canchaclub.com.br";
