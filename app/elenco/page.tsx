@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { AppHeader } from "@/components/app-header";
+import { RenameGroupForm } from "./_components/rename-group-form";
 import { CreatePlayerForm } from "./_components/create-player-form";
 import { MembersList } from "./_components/members-list";
 import { getRoster } from "./_data-access/get-roster";
@@ -36,6 +37,8 @@ async function RosterContent() {
           Cadastre a galera, corrija dados, redefina senhas e desative quem saiu da pelada.
         </p>
       </div>
+
+      <RenameGroupForm groupName={roster.membership.groupName} />
 
       {/*
         Celular: cadastro e, embaixo, a lista. Desktop: lado a lado.
