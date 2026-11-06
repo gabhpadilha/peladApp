@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_deletion_requests: {
+        Row: {
+          id: string
+          requested_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          requested_at?: string
+          user_id: string
+        }
+        Update: {
+          id?: string
+          requested_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       award_reveals: {
         Row: {
           match_id: string
@@ -755,6 +773,7 @@ export type Database = {
         Args: { average: number; bonus: number }
         Returns: number
       }
+      cancel_account_deletion: { Args: never; Returns: undefined }
       card_ovr: { Args: { vals: number[] }; Returns: number }
       close_match: {
         Args: { target_match: string; theme_key?: string }
@@ -926,6 +945,7 @@ export type Database = {
           member_id: string
         }[]
       }
+      get_my_deletion_request: { Args: never; Returns: string }
       get_public_awards: {
         Args: { target_member: string }
         Returns: {
@@ -968,6 +988,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      request_account_deletion: { Args: never; Returns: undefined }
       round_score: {
         Args: {
           chu: number

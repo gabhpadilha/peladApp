@@ -103,6 +103,11 @@ export default function PrivacyPage() {
                 desnecessários, portabilidade, informação sobre com quem compartilhamos e a revogação do seu consentimento (art. 18 da
                 LGPD). Revogar o consentimento ou excluir a conta pode impedir o uso do app.
               </p>
+              <p>
+                Para pedir a exclusão da sua conta, use o botão <strong>Apagar minha conta</strong> na página Eu do app. O pedido chega
+                a quem opera o Cancha Club, que responde em até 15 dias. Ao apagar a conta, saem a sua carta, as suas cartas especiais e
+                as notas que você deu e recebeu, o que pode mudar o OVR e o ranking de outros jogadores.
+              </p>
               <ContactInfo />
               <p>Você também pode reclamar à Autoridade Nacional de Proteção de Dados (ANPD).</p>
             </>

@@ -11,6 +11,7 @@ import { MyCardSummary } from "./_components/my-card-summary";
 import { OpenRoundCard } from "./_components/open-round-card";
 import { WinnersBanner } from "./_components/winners-banner";
 import { WelcomeBonusDialog } from "./_components/welcome-bonus-dialog";
+import { getDeletionRequestCount } from "@/app/admin/_data-access/get-deletion-requests";
 import { isPlatformAdmin } from "@/lib/platform-admin";
 import { WELCOME_BONUS_COINS } from "@/lib/progression";
 import { getUserId } from "@/lib/session";
@@ -33,6 +34,7 @@ async function HomeContent() {
   // Atalho do admin da plataforma: o app instalado no iPhone não tem barra de endereço para digitar /admin.
   const userId = await getUserId();
   const isAdmin = userId ? await isPlatformAdmin(userId) : false;
+  const pendingDeletions = isAdmin ? await getDeletionRequestCount() : 0;
   const hasRounds = data.latestRound !== null || data.openRound !== null;
 
   const hasNow = data.pending.length > 0 || data.winnersAlert !== null || data.openRound !== null;
@@ -103,7 +105,9 @@ async function HomeContent() {
                 <ShieldIcon aria-hidden className="size-5 shrink-0 text-primary" />
                 <span className="flex min-w-0 flex-1 flex-col">
                   <span className="text-base font-medium">Painel da plataforma</span>
-                  <span className="text-sm text-muted-foreground">Peladas, planos, suspensão e novas peladas.</span>
+                  <span className="text-sm text-muted-foreground">
+                    {pendingDeletions > 0 ? `${pendingDeletions} ${pendingDeletions === 1 ? "pedido" : "pedidos"} de exclusão de conta · ` : ""}Peladas, planos, suspensão e novas peladas.
+                  </span>
                 </span>
                 <ArrowRightIcon aria-hidden className="size-5 shrink-0 text-muted-foreground" />
               </Link>

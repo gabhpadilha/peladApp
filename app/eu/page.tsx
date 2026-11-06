@@ -9,6 +9,9 @@ import { CoinPill } from "@/components/coin-pill";
 import { GroupGate } from "@/components/group-gate";
 import { PlayerCard } from "@/components/player-card";
 import { getActiveMembership, getUserId } from "@/lib/session";
+import { AccountDeletionCard } from "./_components/account-deletion-card";
+import { getDeletionRequestCount } from "@/app/admin/_data-access/get-deletion-requests";
+import { createClient } from "@/lib/supabase/server";
 import { isPlatformAdmin } from "@/lib/platform-admin";
 import { Button } from "@/components/ui/button";
 import { POSITION_LABELS } from "@/types/player";
@@ -43,6 +46,8 @@ async function MeContent() {
   const userId = await getUserId();
   const isOwner = userId ? ((await getActiveMembership(userId))?.isOwner ?? false) : false;
   const isAdmin = userId ? await isPlatformAdmin(userId) : false;
+  const deletionRequestedAt = (await (await createClient()).rpc("get_my_deletion_request")).data ?? null;
+  const pendingDeletions = isAdmin ? await getDeletionRequestCount() : 0;
 
   return (
     <>
@@ -89,7 +94,9 @@ async function MeContent() {
             <ShieldIcon aria-hidden className="size-5 shrink-0 text-primary" />
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="text-base font-medium">Painel da plataforma</span>
-              <span className="text-sm text-muted-foreground">Peladas, planos, suspensão e novas peladas.</span>
+              <span className="text-sm text-muted-foreground">
+                {pendingDeletions > 0 ? `${pendingDeletions} ${pendingDeletions === 1 ? "pedido" : "pedidos"} de exclusão de conta · ` : ""}Peladas, planos, suspensão e novas peladas.
+              </span>
             </span>
             <ChevronRightIcon aria-hidden className="size-5 shrink-0 text-muted-foreground" />
           </Link>
@@ -114,6 +121,9 @@ async function MeContent() {
             </AccountDisclosure>
             <AccountDisclosure title="Sua senha">
               <PasswordCard login={data.login} />
+            </AccountDisclosure>
+            <AccountDisclosure title="Apagar minha conta">
+              <AccountDeletionCard requestedAt={deletionRequestedAt} />
             </AccountDisclosure>
             <form action={signOut}>
               <Button

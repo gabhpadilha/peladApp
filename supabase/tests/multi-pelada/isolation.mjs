@@ -232,6 +232,25 @@ await db.query("insert into public.card_skin_purchases (member_id, group_id, ski
   fail(S, "rodada fechada não aceita edição (PA012)", await call(A.users[0], mid, [A.ids[0], A.ids[1]], [1, 2], [false, false]), "PA012");
 }
 
+// 11. Pedido de exclusão da própria conta
+{
+  const S = "11 exclusão de conta";
+  check(S, "sem pedido, a consulta volta vazia", (await attempt(A.users[4], "select public.get_my_deletion_request() as r")).rows[0].r === null);
+  pass(S, "jogador pede a exclusão", await attempt(A.users[4], "select public.request_account_deletion()"));
+  pass(S, "pedir de novo não duplica", await attempt(A.users[4], "select public.request_account_deletion()"));
+  check(S, "um pedido só", (await db.query("select count(*)::int c from public.account_deletion_requests where user_id=$1", [A.users[4]])).rows[0].c === 1);
+  check(S, "ele vê a data do próprio pedido", (await attempt(A.users[4], "select public.get_my_deletion_request() as r")).rows[0].r !== null);
+  check(S, "outro jogador não vê o pedido dele", (await attempt(A.users[5], "select public.get_my_deletion_request() as r")).rows[0].r === null);
+  fail(S, "ninguém lê a tabela direto", await attempt(A.users[5], "select * from public.account_deletion_requests"), "42501");
+  fail(S, "ninguém grava a tabela direto", await attempt(A.users[5], "insert into public.account_deletion_requests (user_id) values ($1)", [A.users[6]]), "42501");
+  fail(S, "ninguém apaga o pedido dos outros direto", await attempt(A.users[5], "delete from public.account_deletion_requests"), "42501");
+  pass(S, "jogador cancela o pedido", await attempt(A.users[4], "select public.cancel_account_deletion()"));
+  check(S, "pedido sumiu", (await db.query("select count(*)::int c from public.account_deletion_requests where user_id=$1", [A.users[4]])).rows[0].c === 0);
+  await attempt(A.users[4], "select public.request_account_deletion()");
+  await db.query("delete from auth.users where id=$1", [A.users[4]]);
+  check(S, "apagar a conta leva o pedido junto", (await db.query("select count(*)::int c from public.account_deletion_requests")).rows[0].c === 0);
+}
+
 const bad = results.filter((r) => !r.ok);
 console.log(`\n${results.length - bad.length}/${results.length} verificações passaram`);
 if (bad.length) { console.log("FALHARAM:\n" + bad.map((b) => `- [${b.scenario}] ${b.name} ${b.detail}`).join("\n")); process.exit(1); }

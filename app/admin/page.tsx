@@ -4,6 +4,8 @@ import { AppHeader } from "@/components/app-header";
 import { MAX_ACTIVE_GROUPS } from "@/lib/platform";
 import { CreateGroupForm } from "./_components/create-group-form";
 import { GroupCard } from "./_components/group-card";
+import { DeletionRequests } from "./_components/deletion-requests";
+import { getDeletionRequests } from "./_data-access/get-deletion-requests";
 import { getAdminOverview } from "./_data-access/get-overview";
 
 export const metadata: Metadata = {
@@ -25,7 +27,7 @@ export default function AdminPage() {
 }
 
 async function AdminContent() {
-  const overview = await getAdminOverview();
+  const [overview, deletionRequests] = await Promise.all([getAdminOverview(), getDeletionRequests()]);
   const canCreate = overview.activeGroups < MAX_ACTIVE_GROUPS;
 
   return (
@@ -37,6 +39,8 @@ async function AdminContent() {
           Só você vê esta tela. Mostra números e cadastro, nunca notas, votos ou fotos.
         </p>
       </div>
+
+      <DeletionRequests requests={deletionRequests} />
 
       <dl className="grid grid-cols-3 gap-2 text-center">
         <div className="rounded-xl border bg-card p-3">
