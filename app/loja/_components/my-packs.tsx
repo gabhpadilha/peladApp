@@ -2,31 +2,30 @@
 
 import { useState } from "react";
 import { GiftIcon } from "lucide-react";
+import { PackCover } from "@/components/pack-cover";
 import { PackOpener } from "@/components/pack-opener";
 import { Button } from "@/components/ui/button";
-import { PACK_RARITY_NAMES, PACK_RARITY_ORDER, PACK_TIER_NAMES, type MyPack } from "@/lib/packs";
+import { PACK_TIER_NAMES, type MyPack } from "@/lib/packs";
 
-const MONTH_NAMES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+const MONTH_NAMES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+/** Quantos pacotes aparecem antes do "Mostrar todos": a lista não toma a tela com muitos guardados. */
+const VISIBLE_PACKS = 3;
 
-/** `2026-12` → "dezembro". */
+/** `2026-12` → "dez". */
 function monthName(month: string): string {
   return MONTH_NAMES[Number(month.slice(5, 7)) - 1] ?? month;
 }
 
-function oddsText(odds: MyPack["odds"]): string {
-  return PACK_RARITY_ORDER.filter((rarity) => odds[rarity] !== undefined)
-    .map((rarity) => `${PACK_RARITY_NAMES[rarity]} ${String(odds[rarity]).replace(".", ",")}%`)
-    .join(" · ");
-}
-
-/** Pacotes guardados (ainda lacrados): abrir um ou todos em sequência. Some quando não há nenhum. */
+/** Pacotes guardados (ainda lacrados), em linhas compactas: abrir um ou todos em sequência. Some quando não há nenhum. */
 export function MyPacks({ packs }: { packs: readonly MyPack[] }) {
   const [opening, setOpening] = useState<readonly MyPack[] | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
   const sealed = packs.filter((pack) => pack.openedAt === null);
   if (sealed.length === 0 && opening === null) return null;
+  const shown = isExpanded ? sealed : sealed.slice(0, VISIBLE_PACKS);
 
   return (
-    <section aria-labelledby="meus-pacotes" className="flex flex-col gap-3 rounded-xl border border-amber-300/30 bg-card p-4">
+    <section aria-labelledby="meus-pacotes" className="flex flex-col gap-2 rounded-xl border border-amber-300/30 bg-card p-3">
       <div className="flex items-center justify-between gap-3">
         <h2 id="meus-pacotes" className="flex items-center gap-2 font-display text-lg font-bold tracking-wide uppercase">
           <GiftIcon aria-hidden className="size-5 text-amber-300" />
@@ -38,24 +37,27 @@ export function MyPacks({ packs }: { packs: readonly MyPack[] }) {
           </Button>
         )}
       </div>
-      <p className="text-sm text-muted-foreground">Cada rodada que você joga dá um pacote com uma skin de carta. Eles não vencem: abra quando quiser.</p>
-      <ul className="flex flex-col gap-2">
-        {sealed.map((pack) => (
-          <li key={pack.id} className="flex items-center gap-3 rounded-lg border bg-background/60 p-3">
-            <div aria-hidden className="flex h-14 w-10 shrink-0 items-center justify-center rounded-md border border-primary/45 bg-gradient-to-b from-[#1d2c24] to-[#0e1712] font-display text-xs font-extrabold text-primary">
-              R{pack.round}
+      <ul className="flex flex-col divide-y">
+        {shown.map((pack) => (
+          <li key={pack.id} className="py-2">
+            <div className="flex items-center gap-3">
+              <PackCover tier={pack.tier} className="h-11 shrink-0" />
+              <div className="flex min-w-0 flex-1 flex-col">
+                <span className="truncate font-display text-base leading-tight font-bold tracking-wide uppercase">{PACK_TIER_NAMES[pack.tier]}</span>
+                <span className="text-xs text-muted-foreground">Rodada {pack.round} · {monthName(pack.month)}</span>
+              </div>
+              <Button size="sm" onClick={() => setOpening([pack])}>
+                Abrir
+              </Button>
             </div>
-            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-              <span className="font-display text-base font-bold tracking-wide uppercase">{PACK_TIER_NAMES[pack.tier]}</span>
-              <span className="text-xs text-muted-foreground">Rodada {pack.round} · skins de {monthName(pack.month)}</span>
-              <span className="text-xs text-muted-foreground">{oddsText(pack.odds)}</span>
-            </div>
-            <Button size="sm" onClick={() => setOpening([pack])}>
-              Abrir
-            </Button>
           </li>
         ))}
       </ul>
+      {sealed.length > VISIBLE_PACKS && (
+        <Button variant="ghost" className="h-11 w-full text-sm" onClick={() => setIsExpanded((value) => !value)}>
+          {isExpanded ? "Mostrar menos" : `Mostrar todos (${sealed.length})`}
+        </Button>
+      )}
       {opening && <PackOpener packs={opening} onClose={() => setOpening(null)} />}
     </section>
   );

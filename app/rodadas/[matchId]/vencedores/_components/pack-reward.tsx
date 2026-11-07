@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { GiftIcon } from "lucide-react";
+import { PackCover } from "@/components/pack-cover";
 import { PackOpener } from "@/components/pack-opener";
 import { Button } from "@/components/ui/button";
 import { PACK_RARITY_NAMES, PACK_RARITY_ORDER, PACK_TIER_NAMES, type MyPack } from "@/lib/packs";
@@ -30,7 +31,7 @@ export function PackReward({ pack }: { pack: MyPack }) {
   return (
     <div className="flex animate-[reveal-fade_0.4s_ease-out_0.8s_both] flex-col gap-3 rounded-xl border border-amber-300/40 bg-amber-300/10 p-3">
       <div className="flex items-center gap-3">
-        <GiftIcon aria-hidden className="size-6 shrink-0 text-amber-200" />
+        <PackCover tier={pack.tier} className="h-16 shrink-0" />
         <div className="flex flex-col">
           <span className="text-xs tracking-wide text-amber-200/80 uppercase">Você ganhou</span>
           <span className="font-display text-xl leading-tight font-extrabold uppercase">{PACK_TIER_NAMES[pack.tier]}</span>
