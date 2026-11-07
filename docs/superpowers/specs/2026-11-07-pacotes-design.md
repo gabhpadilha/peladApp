@@ -1,6 +1,6 @@
 # Pacotes de skins: design (2026-11-07)
 
-Estado: **design para aprovação do dono do app**. Nada está implementado na `main`. O protótipo aprovado da abertura está na branch `spike/pacote-animacao` (`app/auth/previa/pacote/`, componente `PackLab`) e o modo `pure` da `CanchaCard` (só fundo, borda, arte que vaza e itens flutuantes) também só vive lá.
+Estado: **design APROVADO pelo dono do app em 2026-11-07**, com os parâmetros calibrados da proteção contra azar (M = 20, p = 2, garantia nos últimos 7 dias); a tela mostra a **chance real** do pacote lacrado, com uma linha explicando que a chance das cartas que ainda não saíram sobe ao longo do mês; se um mês falhar, as chances são recalibradas no mês seguinte. Nada está implementado na `main`. O protótipo aprovado da abertura está na branch `spike/pacote-animacao` (`app/auth/previa/pacote/`, componente `PackLab`) e o modo `pure` da `CanchaCard` (só fundo, borda, arte que vaza e itens flutuantes) também só vive lá.
 
 ## 1. Intenção
 Dar emoção ao fim da rodada e variar a dinâmica do jogo, com uma recompensa surpresa no estilo dos pacotes do FIFA: o jogador abre e pode vir algo muito bom ou algo comum. O Cancha Club é a camada visual de uma pelada real, então **a recompensa é só visual e de coleção**.
