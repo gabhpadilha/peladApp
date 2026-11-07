@@ -91,7 +91,14 @@ function CardBack({ rgb, power }: { rgb: string; power: number }) {
  * dourado aparecia dentro dele. Um tampão escuro atrás do capuz mantém o miolo escuro, como na Loja.
  */
 function HoodPlug() {
-  return <div aria-hidden className="absolute top-[3.5%] left-1/2 h-[9%] w-[15%] -translate-x-1/2 rounded-[50%] bg-[#0a120e]" />;
+  // Sombra por dentro do capuz: bem escura no fundo do miolo e suave nas bordas (degradê, sem `filter`).
+  return (
+    <div
+      aria-hidden
+      className="absolute top-[2.5%] left-1/2 h-[11%] w-[16%] -translate-x-1/2"
+      style={{ background: "radial-gradient(ellipse 50% 60% at 50% 62%, rgba(1,4,2,.98) 0%, rgba(2,6,4,.92) 55%, rgba(2,6,4,0) 100%)" }}
+    />
+  );
 }
 
 export type PackStageProps = {
