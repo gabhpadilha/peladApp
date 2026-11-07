@@ -1,8 +1,10 @@
 import "server-only";
 import { z } from "zod";
+import { getMyPacks } from "@/app/loja/_data-access/get-my-packs";
 import { getOwnPurchases } from "@/app/loja/_data-access/get-shop";
 import { getLeague } from "@/lib/league";
 import type { CardThemeKey } from "@/lib/card-themes";
+import type { MyPack } from "@/lib/packs";
 import type { RoundRewards } from "@/lib/progression";
 import type { Award, AwardKind } from "@/types/award";
 import type { Match } from "@/types/match";
@@ -39,7 +41,7 @@ export type MatchWinners = {
   /** Time da Semana (pode passar de 5 com empate). */
   team: Award[];
   /** O que a rodada deu a quem abriu o pacote (XP e CanchaCoins), com o saldo e a carta de hoje. */
-  rewards?: (RoundRewards & { balance: number; card: Player | null }) | null;
+  rewards?: (RoundRewards & { balance: number; card: Player | null; pack: MyPack | null }) | null;
 };
 
 /** Cartas especiais de uma rodada fechada, para a animação. `null` se a rodada não existe ou está aberta. */
@@ -65,6 +67,7 @@ export async function getMatchWinners(matchId: string): Promise<MatchWinners | n
         ...roundRewards,
         balance: Math.max(0, league.getProgression(memberId).coinsEarned - (await getOwnPurchases(memberId)).spent),
         card: league.players.find((player) => player.id === memberId) ?? null,
+        pack: (await getMyPacks()).find((pack) => pack.matchId === match.id) ?? null,
       }
     : null;
 

@@ -1,7 +1,9 @@
 import "server-only";
 import type { GroupMemberSummary } from "@/app/elenco/_data-access/get-roster";
 import { getMyCards, getOwnPurchases, type ShopItem } from "@/app/loja/_data-access/get-shop";
+import { getMyPacks } from "@/app/loja/_data-access/get-my-packs";
 import { getLeague } from "@/lib/league";
+import type { PackRarity } from "@/lib/packs";
 import type { Progression } from "@/lib/progression";
 import { createClient } from "@/lib/supabase/server";
 import { emailToUsername } from "@/lib/username";
@@ -15,6 +17,8 @@ export type Me = {
   balance: number;
   /** "Minhas cartas": a padrão e as compradas. */
   cards: ShopItem[];
+  /** Raridade das skins que vieram de pacote (`chave da skin` → raridade). */
+  packRarities: Record<string, PackRarity>;
   /** O jogador no formato do envio de foto (mesmo componente do Elenco). */
   photoMember: GroupMemberSummary;
   /** Usuário (ou e-mail, nas contas antigas) da conta logada, para o card de senha. */
@@ -38,6 +42,9 @@ export async function getMe(): Promise<Me | null> {
     progression,
     balance: Math.max(0, progression.coinsEarned - spent),
     cards: getMyCards(me, owned),
+    packRarities: Object.fromEntries(
+      (await getMyPacks()).flatMap((pack) => (pack.skin && pack.rarity ? [[pack.skin, pack.rarity] as const] : [])),
+    ),
     photoMember: {
       id: me.id,
       nickname: me.nickname,

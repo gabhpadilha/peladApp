@@ -8,7 +8,9 @@ import { GroupGate } from "@/components/group-gate";
 import { LevelProgressBar } from "@/components/level-progress";
 import { COIN_RULES } from "@/lib/progression";
 import { CoinPill } from "@/components/coin-pill";
+import { MyPacks } from "./_components/my-packs";
 import { ShopContent } from "./_components/shop-content";
+import { getMyPacks } from "./_data-access/get-my-packs";
 import { getShop } from "./_data-access/get-shop";
 
 export const metadata: Metadata = {
@@ -28,7 +30,7 @@ export default function ShopPage() {
 }
 
 async function ShopPageContent() {
-  const shop = await getShop();
+  const [shop, packs] = await Promise.all([getShop(), getMyPacks()]);
   if (!shop) notFound();
 
   return (
@@ -49,6 +51,8 @@ async function ShopPageContent() {
           </div>
           <CoinPill value={shop.balance} className="mt-6 shrink-0" />
         </div>
+
+        <MyPacks packs={packs} />
 
         <LevelProgressBar
           progress={shop.progression}

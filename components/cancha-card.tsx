@@ -811,6 +811,8 @@ export type CanchaCardAward = {
 };
 
 type CanchaCardProps = {
+  /** Design puro (vitrine da abertura de pacote): só fundo, borda, arte que vaza e itens flutuantes; sem nome, selo, faixa nem estatísticas. */
+  pure?: boolean;
   player: Player;
   award?: CanchaCardAward;
   /** Largura (e outras classes) vinda do `PlayerCard`. */
@@ -860,7 +862,7 @@ function FloaterPieces({ items, layer }: { items: readonly Floater[]; layer: "ba
     ));
 }
 
-export function CanchaCard({ player, award, className, photoSizes, photoFrame = "atual" }: CanchaCardProps) {
+export function CanchaCard({ player, award, className, photoSizes, photoFrame = "atual", pure = false }: CanchaCardProps) {
   const { roupa, rank, stats, band, subtitle } = getCanchaCardLook(player, award);
   const lift = roupa.statsLift ?? 0;
   const frame = PHOTO_FRAMES[roupa.photoFrame ?? photoFrame];
@@ -908,10 +910,11 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
           <img aria-hidden alt="" src={`/cartas/fundos/${roupa.innerBolts}.webp`} className={cn("pointer-events-none absolute inset-0 z-[2] size-full select-none motion-reduce:animate-none", !roupa.still && (roupa.glow ? "animate-[cc-thunder-glow_3.6s_ease-out_infinite]" : "animate-[cc-thunder-flash_3.2s_linear_infinite]"))} />
         )}
         {/* Clarão atrás da cabeça, na cor da luz da roupa. */}
-        {!roupa.matte && (
+        {!roupa.matte && !pure && (
           <div aria-hidden className="absolute inset-0 z-[2] bg-[radial-gradient(34%_24%_at_50%_30%,rgb(var(--cc-light)/0.55),transparent_75%)]" />
         )}
 
+        {!pure && (
         <div
           className={cn(
             "absolute inset-x-0 top-0 z-[3] flex h-[16%] flex-col justify-center border-b-[0.6cqw] border-(--cc-accent) pt-[2.6cqw] pr-[26cqw] pl-[8cqw] leading-none whitespace-nowrap",
@@ -922,12 +925,14 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
           <span className="truncate text-[10.5cqw] font-extrabold">{player.nickname}</span>
           <span className="mt-[1cqw] truncate text-[3.8cqw] font-bold tracking-[0.2em] text-(--cc-muted) uppercase">{subtitle}</span>
         </div>
+        )}
 
 
         {/* Sombra atrás da pessoa: ela se descola do fundo e parece estar na carta. */}
-        {player.photo && !roupa.clean && <PhotoShadow />}
+        {player.photo && !roupa.clean && !pure && <PhotoShadow />}
 
         {/* Foto grande, presa embaixo: o peito some no degradê antes do rodapé. */}
+        {!pure && (
         <div className={cn("absolute z-[5]", frame.box)} style={roupa.contentPad && roupa.windowInset ? { bottom: `${22.6 - roupa.windowInset.y * 1.4 + lift}cqw`, height: `${99 - lift}cqw` } : undefined}>
           {player.photo ? (
             <Image
@@ -946,9 +951,10 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
             </div>
           )}
         </div>
+        )}
 
         {/* Uma luz só: tom da roupa e vinheta por cima da foto e do fundo juntos (na fosca, só uma vinheta leve). */}
-        {!roupa.clean && (
+        {!roupa.clean && !pure && (
         <div
           aria-hidden
           style={roupa.contentPad ? { top: `calc(16% + ${roupa.contentPad}cqw)` } : undefined}
@@ -975,10 +981,11 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
             className="absolute z-[7] size-[5cqw] animate-[cc-twinkle_2.2s_ease-in-out_infinite] bg-[radial-gradient(circle,#fff_0_18%,rgb(var(--cc-light)/0.9)_40%,transparent_70%)] [clip-path:polygon(50%_0,58%_42%,100%_50%,58%_58%,50%_100%,42%_58%,0_50%,42%_42%)] motion-reduce:animate-none"
           />
         ))}
-        {!roupa.clean && (
+        {!roupa.clean && !pure && (
           <div aria-hidden style={roupa.contentPad ? { bottom: `calc(12% + ${roupa.contentPad - 0.8 + lift}cqw)` } : undefined} className={cn("absolute inset-x-0 bottom-[12%] z-[7] bg-linear-to-b from-transparent to-(--cc-bar)", frame.fade)} />
         )}
 
+        {!pure && (
         <div
           className={cn(
             "absolute top-[5cqw] right-[5.5cqw] z-[8] flex h-[24cqw] w-[19cqw] flex-col items-center pt-[2.3cqw] leading-none text-[#0b130f] [clip-path:polygon(0_0,100%_0,100%_76%,50%_100%,0_76%)]",
@@ -989,7 +996,10 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
           <span className="text-[9cqw] font-extrabold tabular-nums">{player.ovr ?? EMPTY_VALUE}</span>
           <RankInsignia rank={rank} />
         </div>
+        )}
 
+        {!pure && (
+          <>
         <span style={roupa.contentPad ? { bottom: `calc(13.5% + ${roupa.contentPad - 0.8 + lift}cqw)` } : undefined} className="absolute inset-x-0 bottom-[13.5%] z-[8] truncate px-[4cqw] text-center text-[3.9cqw] font-extrabold tracking-[0.35em] text-(--cc-accent) uppercase">
           {band}
         </span>
@@ -1008,6 +1018,8 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
             </div>
           ))}
         </dl>
+          </>
+        )}
       </div>
 
       {/* Por dentro da moldura: fio claro no metal (inset em % da própria carta: 2,6% da largura nos dois eixos) ou o brilho do neon. */}

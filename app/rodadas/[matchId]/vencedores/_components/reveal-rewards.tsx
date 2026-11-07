@@ -15,14 +15,16 @@ import {
 import { PlayerCard } from "@/components/player-card";
 import { Button } from "@/components/ui/button";
 import { CARD_TIER_LABELS, getCardTier } from "@/lib/card-tier";
+import type { MyPack } from "@/lib/packs";
 import type { RoundRewards } from "@/lib/progression";
 import { cn } from "@/lib/utils";
+import { PackReward } from "./pack-reward";
 import { formatRoundScore } from "@/types/award";
 import type { Player } from "@/types/player";
 
 type RevealRewardsProps = {
   round: number;
-  rewards: RoundRewards & { balance: number; card: Player | null };
+  rewards: RoundRewards & { balance: number; card: Player | null; pack: MyPack | null };
   onDone: () => void;
 };
 
@@ -178,6 +180,8 @@ export function RevealRewards({ round, rewards, onDone }: RevealRewardsProps) {
           })}
         </ul>
         </details>
+
+        {rewards.pack && <PackReward pack={rewards.pack} />}
 
         <div className="flex animate-[reveal-fade_0.4s_ease-out_0.9s_both] items-center justify-between rounded-xl border border-amber-300/30 bg-amber-300/10 px-3 py-2.5">
           <span className="flex items-center gap-2 text-sm text-amber-200/80">
