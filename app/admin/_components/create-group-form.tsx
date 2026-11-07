@@ -19,7 +19,7 @@ type CreatedGroup = { groupName: string; nickname: string; username: string; tem
 
 const EMPTY: Omit<CreateAdminGroupInput, "position" | "state"> = {
   groupName: "", slug: "", city: "", playWeekday: "", playTime: "20:00", venue: "", usualPlayers: "",
-  weeklyRoundLimit: String(FREE_WEEKLY_ROUND_LIMIT), ownerContact: "", adminNotes: "",
+  weeklyRoundLimit: String(FREE_WEEKLY_ROUND_LIMIT), packsEnabled: false, packMinPlayers: "10", ownerContact: "", adminNotes: "",
   fullName: "", nickname: "", ownerUsername: "",
 };
 

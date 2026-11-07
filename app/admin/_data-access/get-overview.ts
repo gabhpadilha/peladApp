@@ -14,6 +14,8 @@ export type AdminGroup = {
   usualPlayers: number | null;
   plan: string;
   weeklyRoundLimit: number | null;
+  packsEnabled: boolean;
+  packMinPlayers: number;
   isSuspended: boolean;
   createdAt: string;
   activePlayers: number;
@@ -72,6 +74,8 @@ export async function getAdminOverview(): Promise<AdminOverview> {
     usualPlayers: group.usual_players,
     plan: group.plan,
     weeklyRoundLimit: group.weekly_round_limit,
+    packsEnabled: group.packs_enabled,
+    packMinPlayers: group.pack_min_players,
     isSuspended: group.suspended_at !== null,
     createdAt: group.created_at,
     activePlayers: players.get(group.id) ?? 0,

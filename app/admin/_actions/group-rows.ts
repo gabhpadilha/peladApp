@@ -13,6 +13,8 @@ export function toGroupColumns(input: GroupDetailsInput) {
     venue: input.venue === "" ? null : input.venue,
     usual_players: input.usualPlayers === "" ? null : Number(input.usualPlayers),
     weekly_round_limit: input.weeklyRoundLimit === "" ? null : Number(input.weeklyRoundLimit),
+    packs_enabled: input.packsEnabled,
+    pack_min_players: Number(input.packMinPlayers),
   };
 }
 

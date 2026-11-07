@@ -110,6 +110,26 @@ export function GroupDetailsFields<Values extends FieldValues & GroupDetailsInpu
         <TextField {...text} name="usualPlayers" id={`${idPrefix}-players`} label="Jogadores por jogo" placeholder="10" inputMode="numeric" maxLength={2} hint="Opcional." />
         <TextField {...text} name="weeklyRoundLimit" id={`${idPrefix}-limit`} label="Rodadas por semana" placeholder="1" inputMode="numeric" maxLength={1} hint="Plano. Vazio = sem limite." />
       </div>
+      <Controller
+        name={"packsEnabled" as Path<Values>}
+        control={control}
+        render={({ field }) => (
+          <Field>
+            <label className="flex min-h-11 items-center gap-3 text-base" htmlFor={`${idPrefix}-packs`}>
+              <input
+                id={`${idPrefix}-packs`}
+                type="checkbox"
+                checked={Boolean(field.value)}
+                onChange={(event) => field.onChange(event.target.checked)}
+                className="size-5 accent-primary"
+              />
+              Pacotes de skins ligados
+            </label>
+            <FieldDescription>Ao fechar a rodada, quem jogou ganha um pacote. Desligado = nada muda.</FieldDescription>
+          </Field>
+        )}
+      />
+      <TextField {...text} name="packMinPlayers" id={`${idPrefix}-packmin`} label="Mínimo de jogadores para gerar pacotes" placeholder="10" inputMode="numeric" maxLength={2} hint="Rodada com menos presentes não gera pacote." />
       <TextField {...text} name="ownerContact" id={`${idPrefix}-contact`} label="Contato do dono (só você vê)" placeholder="(41) 99999-0000" maxLength={40} />
       <TextField {...text} name="adminNotes" id={`${idPrefix}-notes`} label="Observações (só você vê)" maxLength={1000} />
     </>
