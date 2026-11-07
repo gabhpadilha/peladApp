@@ -23,7 +23,6 @@ check("seed", "12 presentes", present === 12, String(present));
 // O dono avalia todos os outros e fecha.
 const owner = (await db.query("select id from public.group_members where group_id = $1 and user_id = $2", [w.group, w.users[0]])).rows[0].id;
 const others = (await db.query("select member_id from public.match_attendance where match_id = $1 and member_id <> $2", [match.id, owner])).rows;
-const rows = others.map((o) => `('${match.id}','${owner}','${o.member_id}',7,7,7,7,7,7)`);
 const gk = (await db.query("select ma.member_id from public.match_attendance ma join public.group_members gm on gm.id = ma.member_id where ma.match_id = $1 and gm.position = 'GOL'", [match.id])).rows.map((r) => r.member_id);
 const lineRows = others.filter((o) => !gk.includes(o.member_id)).map((o) => `('${match.id}','${owner}','${o.member_id}',7,7,7,7,7,7)`);
 const gkRows = others.filter((o) => gk.includes(o.member_id)).map((o) => `('${match.id}','${owner}','${o.member_id}',7,7,7,7,7,7)`);
