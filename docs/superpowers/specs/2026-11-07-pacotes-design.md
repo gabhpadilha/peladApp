@@ -21,6 +21,8 @@ Dar emoção ao fim da rodada e variar a dinâmica do jogo, com uma recompensa s
 5. O conjunto de skins é o **do mês** da rodada. A **proteção contra azar** sobe devagar ao longo do mês para que, no fim, **todo design do mês tenha saído pelo menos uma vez**.
 6. **Repetida** vira moedas, de propósito pouco (CanchaCoins).
 
+**Mínimo para gerar pacote:** a rodada precisa ter o mínimo de jogadores presentes. Hoje **10** (futsal: 2 times completos); quando existirem outros formatos de pelada (society, campo), passa a ser **2 times completos do formato da pelada** (definido no projeto de formatos). Implementar como **parâmetro por pelada**, não como número fixo. Rodadas menores continuam valendo para tudo (OVR, cartas, ranking), só não geram pacote.
+
 ## 3. Faixas do pacote e chances
 A posição vem da **nota da rodada** de cada jogador (a mesma que decide o Melhor Jogador: `getRoundScore` / `round_score`). **Empate: todos os empatados ficam na mesma faixa**, como na premiação individual.
 
