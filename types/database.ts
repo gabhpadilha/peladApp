@@ -140,6 +140,7 @@ export type Database = {
           member_id: string
           price: number
           skin: string
+          source: string
         }
         Insert: {
           created_at?: string
@@ -148,6 +149,7 @@ export type Database = {
           member_id: string
           price: number
           skin: string
+          source?: string
         }
         Update: {
           created_at?: string
@@ -156,6 +158,7 @@ export type Database = {
           member_id?: string
           price?: number
           skin?: string
+          source?: string
         }
         Relationships: [
           {
@@ -448,6 +451,8 @@ export type Database = {
           listed_at: string | null
           name: string
           name_key: string
+          pack_min_players: number
+          packs_enabled: boolean
           plan: string
           play_time: string | null
           play_weekday: number | null
@@ -467,6 +472,8 @@ export type Database = {
           listed_at?: string | null
           name: string
           name_key: string
+          pack_min_players?: number
+          packs_enabled?: boolean
           plan?: string
           play_time?: string | null
           play_weekday?: number | null
@@ -486,6 +493,8 @@ export type Database = {
           listed_at?: string | null
           name?: string
           name_key?: string
+          pack_min_players?: number
+          packs_enabled?: boolean
           plan?: string
           play_time?: string | null
           play_weekday?: number | null
@@ -691,6 +700,148 @@ export type Database = {
           },
         ]
       }
+      pack_config: {
+        Row: {
+          key: string
+          value: number
+        }
+        Insert: {
+          key: string
+          value: number
+        }
+        Update: {
+          key?: string
+          value?: number
+        }
+        Relationships: []
+      }
+      pack_rarity_coins: {
+        Row: {
+          coins: number
+          rarity: string
+        }
+        Insert: {
+          coins: number
+          rarity: string
+        }
+        Update: {
+          coins?: number
+          rarity?: string
+        }
+        Relationships: []
+      }
+      pack_sets: {
+        Row: {
+          design: string
+          month: string
+          rarity: string
+          skin: string
+        }
+        Insert: {
+          design: string
+          month: string
+          rarity: string
+          skin: string
+        }
+        Update: {
+          design?: string
+          month?: string
+          rarity?: string
+          skin?: string
+        }
+        Relationships: []
+      }
+      pack_tier_odds: {
+        Row: {
+          rarity: string
+          tier: string
+          weight: number
+        }
+        Insert: {
+          rarity: string
+          tier: string
+          weight: number
+        }
+        Update: {
+          rarity?: string
+          tier?: string
+          weight?: number
+        }
+        Relationships: []
+      }
+      packs: {
+        Row: {
+          coins_awarded: number
+          created_at: string
+          group_id: string
+          id: string
+          match_id: string
+          member_id: string
+          month: string
+          odds: Json
+          opened_at: string | null
+          rarity: string
+          skin: string
+          tier: string
+          was_duplicate: boolean | null
+          was_forced: boolean
+        }
+        Insert: {
+          coins_awarded?: number
+          created_at?: string
+          group_id: string
+          id?: string
+          match_id: string
+          member_id: string
+          month: string
+          odds: Json
+          opened_at?: string | null
+          rarity: string
+          skin: string
+          tier: string
+          was_duplicate?: boolean | null
+          was_forced?: boolean
+        }
+        Update: {
+          coins_awarded?: number
+          created_at?: string
+          group_id?: string
+          id?: string
+          match_id?: string
+          member_id?: string
+          month?: string
+          odds?: Json
+          opened_at?: string | null
+          rarity?: string
+          skin?: string
+          tier?: string
+          was_duplicate?: boolean | null
+          was_forced?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "packs_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "packs_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "packs_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "group_members"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -792,6 +943,7 @@ export type Database = {
         }
         Returns: undefined
       }
+      count_my_unopened_packs: { Args: never; Returns: number }
       counted_evaluations: {
         Args: { target_group: string }
         Returns: {
@@ -836,6 +988,7 @@ export type Database = {
         Returns: string
       }
       current_member_id: { Args: { target_group: string }; Returns: string }
+      draw_round_packs: { Args: { target_match: string }; Returns: number }
       finish_goal_check: { Args: { target_match: string }; Returns: undefined }
       get_feed: {
         Args: { before?: string; max_rows?: number }
@@ -946,6 +1099,23 @@ export type Database = {
         }[]
       }
       get_my_deletion_request: { Args: never; Returns: string }
+      get_my_packs: {
+        Args: never
+        Returns: {
+          coins_awarded: number
+          created_at: string
+          match_id: string
+          month: string
+          odds: Json
+          opened_at: string
+          pack_id: string
+          rarity: string
+          round: number
+          skin: string
+          tier: string
+          was_duplicate: boolean
+        }[]
+      }
       get_public_awards: {
         Args: { target_member: string }
         Returns: {
@@ -973,6 +1143,23 @@ export type Database = {
           member_position: Database["public"]["Enums"]["player_position"]
         }
         Returns: string
+      }
+      open_pack: {
+        Args: { target_pack: string }
+        Returns: {
+          coins_awarded: number
+          rarity: string
+          skin: string
+          was_duplicate: boolean
+        }[]
+      }
+      pack_round_ranking: {
+        Args: { target_match: string }
+        Returns: {
+          member_id: string
+          round_rank: number
+          tier: string
+        }[]
       }
       publish_award: { Args: { target_award: string }; Returns: string }
       ratings_open: { Args: { target_match: string }; Returns: boolean }
