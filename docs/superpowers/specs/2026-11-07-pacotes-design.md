@@ -48,15 +48,15 @@ A diferença entre A e D na lendária é de 5 vezes, e foi aprovada pelo dono. A
 - No fim do mês as skins **saem dos pacotes para sempre** (escassez). Quem tirou continua com ela.
 - **Skins de pacote não são vendidas na Loja.**
 
-**Proteção contra azar (decisão do dono: vale por mês, sobe devagar):** a chance de cada design que **ainda não saiu naquela pelada naquele mês** sobe aos poucos durante o mês, para que **no fim do mês cada design tenha saído pelo menos uma vez, para qualquer jogador**. Regras de projeto (os números exatos são do construtor, com simulação):
+**Proteção contra azar (decisão do dono: vale por mês, sobe devagar):** a unidade da garantia é o **design** (uma arte-base). Um design pode ter várias **versões** (por exemplo, recolores da mesma arte): a garantia exige que **pelo menos uma versão de cada design** tenha saído; qual versão sai dentro do design segue as chances normais. *Leitura minha de "uma versão de cada design"; confirme.* A chance de cada design que **ainda não saiu naquela pelada naquele mês** sobe aos poucos durante o mês, para que **no fim do mês cada design tenha saído pelo menos uma vez, para qualquer jogador**. Regras de projeto (os números exatos são do construtor, com simulação):
 1. **Escopo:** por pelada (cada pelada sorteia com o próprio histórico do mês). *Esta é uma leitura minha do pedido; confirme.*
 2. **Subida lenta:** um multiplicador crescente no peso do design, baixo no começo do mês e forte no fim (função do tempo do mês e/ou do nº de pacotes já sorteados), nunca alterando a raridade nem as faixas.
-3. **Garantia de fim de mês:** nas últimas rodadas do mês, se ainda faltam designs, o sorteio **cobre primeiro os que faltam** (do mais raro ao mais comum) entre os pacotes daquela rodada, quando houver pacotes suficientes; senão, por prioridade de raridade.
+3. **Garantia de fim de mês:** nas rodadas com **data nos últimos 7 dias do mês** (escolha minha, ajustável), se ainda faltam designs, o sorteio **cobre primeiro os que faltam** (do mais raro ao mais comum) entre os pacotes daquela rodada, quando houver pacotes suficientes; senão, por prioridade de raridade.
 4. **Limite honesto:** se a pelada fecha poucos pacotes no mês (menos pacotes que designs), a garantia total é impossível; vale a melhor cobertura por prioridade. **O construtor deve simular** (peladas de 6 a 14 jogadores, 2 a 5 rodadas por mês) e ajustar a subida até que a grande maioria cubra o conjunto, sem a subida ficar visível a ponto de "tirar a graça".
 5. O estado da proteção **é calculado do histórico de pacotes do mês na pelada** (nada de contador solto para dessincronizar), dentro da mesma transação do sorteio, com trava por pelada para duas rodadas fechando juntas.
 
 ## 5. Sorteio lacrado e abertura
-- O sorteio roda **no banco, dentro do fechamento da rodada** (junto de `compute_match_awards`): cria um pacote por jogador presente, com **faixa, mês, raridade e skin já definidos**. Ninguém consegue ler a skin antes de abrir (a tabela não tem leitura direta; só funções devolvem a skin de pacote já aberto).
+- O sorteio roda **no banco, dentro do fechamento da rodada** (junto de `compute_match_awards`, **na mesma transação**: se o sorteio falhar, a rodada não fecha): cria um pacote por jogador presente, com **faixa, mês, raridade e skin já definidos**. Ninguém consegue ler a skin antes de abrir (a tabela não tem leitura direta; só funções devolvem a skin de pacote já aberto).
 - **Abrir** é uma função do banco que marca o pacote como aberto, registra a data e devolve o resultado (skin, raridade, se é repetida). É idempotente (abrir de novo devolve o mesmo).
 - **Repetida:** a skin é **nova** na primeira vez que o jogador a revela e **repetida** nas seguintes (decidido **na hora de abrir**, na ordem de abertura). Repetida dá **CanchaCoins** fixas (proposta: **10 CC** para comum e rara, **20 CC** para épica e lendária; propositalmente pouco frente às skins da Loja de 200 a 600 CC). Decisão do construtor: como as moedas hoje são derivadas do histórico (nada gravado), somar as das repetidas como mais uma parcela derivada dos pacotes abertos.
 - **Posse:** a skin ganha entra na coleção do jogador (Eu → Minhas cartas) e pode ser usada como qualquer skin. Decisão do construtor: usar `card_skin_purchases` (com preço 0 e uma marca de origem "pacote") ou tabela própria, mantendo uma posse por skin por jogador.
@@ -90,3 +90,5 @@ Quais skins e raridades entram em dezembro (Destino, as de Natal, novas), o desi
 5. Skins já reveladas **ficam** se a rodada for excluída; pacotes lacrados dela somem.
 6. Pontinho **âmbar**, com número a partir de 2 pacotes.
 7. Sem pacote para rodadas fechadas antes do lançamento.
+8. A garantia vale por **design** (arte-base), não por cada recolor.
+9. "Últimas rodadas do mês" = rodadas com data nos **últimos 7 dias** do mês.
