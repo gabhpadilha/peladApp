@@ -44,7 +44,25 @@ export type MainNavProps = {
   isOwner: boolean;
   /** Selo de nível no "Eu" do computador; sem ele, só o ícone. */
   currentPlayer?: Player;
+  /** Pacotes de skins guardados: pontinho âmbar no ícone da Loja (número a partir de 2). */
+  unopenedPacks?: number;
 };
+
+/** Aviso âmbar de pacote para abrir, no canto do ícone da Loja: ponto com 1, número com 2 ou mais. */
+function PackDot({ count }: { count: number }) {
+  if (count <= 0) return null;
+  return (
+    <span
+      aria-label={count === 1 ? "1 pacote para abrir" : `${count} pacotes para abrir`}
+      className={cn(
+        "absolute -top-1 -right-1.5 flex items-center justify-center rounded-full bg-amber-400 font-bold text-black",
+        count === 1 ? "size-2.5" : "min-w-4 px-1 text-xs leading-4",
+      )}
+    >
+      {count === 1 ? null : count > 9 ? "9+" : count}
+    </span>
+  );
+}
 
 /*
  * Enquanto a sessão de uma página nova carrega, a navegação aparece provisória
@@ -95,7 +113,7 @@ export function MainNavPlaceholder(props: Omit<MainNavProps, "isOwner">) {
 }
 
 /** Sem rota (`pathname` vazio): aparece sem destaque enquanto o `<Suspense>` carrega. */
-export function MainNavView({ variant, isOwner, currentPlayer, pathname }: MainNavProps & { pathname: string }) {
+export function MainNavView({ variant, isOwner, currentPlayer, unopenedPacks = 0, pathname }: MainNavProps & { pathname: string }) {
   // Computador: o Administrador ganha o Elenco no cabeçalho. Celular: 6 botões fixos para todos (limite da barra de baixo);
   // o Administrador chega ao Elenco por Eu → "Gerenciar elenco" e o botão Eu fica aceso lá (revisão de 2026-11-04).
   const items = NAV_ITEMS.filter((item) => variant === "top" ? isOwner || !item.ownerOnly : !item.ownerOnly);
@@ -117,7 +135,14 @@ export function MainNavView({ variant, isOwner, currentPlayer, pathname }: MainN
                 isMe && currentPlayer && "pl-1.5",
               )}
             >
-              {isMe && currentPlayer ? <LevelBadge player={currentPlayer} /> : <Icon aria-hidden className="size-4" />}
+              {isMe && currentPlayer ? (
+                <LevelBadge player={currentPlayer} />
+              ) : (
+                <span className="relative">
+                  <Icon aria-hidden className="size-4" />
+                  {href === "/loja" && <PackDot count={unopenedPacks} />}
+                </span>
+              )}
               {label}
             </Link>
           );
@@ -147,7 +172,10 @@ export function MainNavView({ variant, isOwner, currentPlayer, pathname }: MainN
                   isCurrent ? "font-semibold text-primary" : "text-muted-foreground",
                 )}
               >
-                <Icon aria-hidden className="size-5" />
+                <span className="relative">
+                  <Icon aria-hidden className="size-5" />
+                  {href === "/loja" && <PackDot count={unopenedPacks} />}
+                </span>
                 {label}
               </Link>
             </li>

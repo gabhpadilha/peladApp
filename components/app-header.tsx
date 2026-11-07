@@ -3,6 +3,7 @@ import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
 import { MainNav, MainNavPlaceholder, type MainNavProps } from "@/components/main-nav";
 import { LevelBadge } from "@/components/player-card";
+import { getUnopenedPackCount } from "@/lib/pack-count";
 import { getActiveMembership, getUserId } from "@/lib/session";
 import type { Player } from "@/types/player";
 
@@ -15,7 +16,8 @@ type AppHeaderProps = {
 async function NavWithAccess(props: Omit<MainNavProps, "isOwner">) {
   const userId = await getUserId();
   const membership = userId ? await getActiveMembership(userId) : null;
-  return <MainNav {...props} isOwner={membership?.isOwner ?? false} />;
+  const unopenedPacks = membership ? await getUnopenedPackCount() : 0;
+  return <MainNav {...props} isOwner={membership?.isOwner ?? false} unopenedPacks={unopenedPacks} />;
 }
 
 /**

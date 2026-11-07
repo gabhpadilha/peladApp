@@ -142,6 +142,17 @@ export async function getLeague(nextPath = "/") {
     ]),
   );
 
+  // CanchaCoins das cartas repetidas dos pacotes abertos (só as do logado, nesta pelada): somam ao saldo.
+  const packsResult = await supabase.rpc("get_my_packs");
+  if (packsResult.error) throw packsResult.error;
+  const packCoins = packsResult.data
+    .filter((pack) => matchById.has(pack.match_id))
+    .reduce((total, pack) => total + pack.coins_awarded, 0);
+  const ownProgression = progressionById.get(membership.memberId);
+  if (ownProgression && packCoins > 0) {
+    progressionById.set(membership.memberId, { ...ownProgression, coinsEarned: ownProgression.coinsEarned + packCoins });
+  }
+
   if (!profilesResult) throw new Error("profiles não carregados");
   const { data: profiles, error: profilesError } = profilesResult;
   if (profilesError) throw profilesError;
