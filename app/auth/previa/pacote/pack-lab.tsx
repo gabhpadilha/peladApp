@@ -38,8 +38,54 @@ function rand(seed: number): number {
 
 const ms = (value: number): string => `calc(var(--k) * ${value}ms)`;
 
-const CRIMP =
+const CRIMP_BODY_UNUSED =
   "polygon(0% 9px,4% 2px,8% 9px,12% 2px,16% 9px,20% 2px,24% 9px,28% 2px,32% 9px,36% 2px,40% 9px,44% 2px,48% 9px,52% 2px,56% 9px,60% 2px,64% 9px,68% 2px,72% 9px,76% 2px,80% 9px,84% 2px,88% 9px,92% 2px,96% 9px,100% 2px,100% calc(100% - 2px),96% calc(100% - 9px),92% calc(100% - 2px),88% calc(100% - 9px),84% calc(100% - 2px),80% calc(100% - 9px),76% calc(100% - 2px),72% calc(100% - 9px),68% calc(100% - 2px),64% calc(100% - 9px),60% calc(100% - 2px),56% calc(100% - 9px),52% calc(100% - 2px),48% calc(100% - 9px),44% calc(100% - 2px),40% calc(100% - 9px),36% calc(100% - 2px),32% calc(100% - 9px),28% calc(100% - 2px),24% calc(100% - 9px),20% calc(100% - 2px),16% calc(100% - 9px),12% calc(100% - 2px),8% calc(100% - 9px),4% calc(100% - 2px),0% calc(100% - 9px))";
+
+const CRIMP =
+  "polygon(0% 10px,5% 0,10% 10px,15% 0,20% 10px,25% 0,30% 10px,35% 0,40% 10px,45% 0,50% 10px,55% 0,60% 10px,65% 0,70% 10px,75% 0,80% 10px,85% 0,90% 10px,95% 0,100% 10px,100% 100%,0% 100%)";
+
+/** Verso da carta: moldura fina de metal polido, quadra gravada em tom sobre tom e a marca em relevo. */
+function CardBack({ rgb, power, k }: { rgb: string; power: number; k: number }) {
+  return (
+    <div
+      className="absolute inset-0 rounded-[9%/6.5%] p-[2.3%]"
+      style={{
+        background: "linear-gradient(142deg,#f2f5f7 0%,#8b949c 20%,#2e353b 44%,#b4bcc3 68%,#5d666e 86%,#dde2e6 100%)",
+        boxShadow: `0 0 32px rgba(${rgb},${0.5 * power}), 0 22px 44px rgba(0,0,0,.55)`,
+        backfaceVisibility: "hidden",
+      }}
+    >
+      <div className="relative size-full overflow-hidden rounded-[17px]" style={{ background: "linear-gradient(160deg,#1f2a25 0%,#0c1210 52%,#16201b 100%)", boxShadow: "inset 0 0 0 1px rgba(0,0,0,.6), inset 0 0 38px rgba(0,0,0,.65)" }}>
+        {/* Quadra gravada. */}
+        <svg viewBox="0 0 240 340" className="absolute inset-0 size-full" fill="none" stroke="rgba(182,242,60,.16)" strokeWidth="1.3" aria-hidden>
+          <rect x="14" y="14" width="212" height="312" rx="12" />
+          <line x1="14" y1="170" x2="226" y2="170" />
+          <circle cx="120" cy="170" r="44" />
+          <circle cx="120" cy="170" r="2.5" fill="rgba(182,242,60,.3)" />
+          <rect x="72" y="14" width="96" height="40" />
+          <rect x="94" y="14" width="52" height="18" />
+          <rect x="72" y="286" width="96" height="40" />
+          <rect x="94" y="308" width="52" height="18" />
+          <path d="M92 54a30 30 0 0 0 56 0" />
+          <path d="M92 286a30 30 0 0 1 56 0" />
+        </svg>
+        {/* Marca em relevo: sombra embaixo, lima por cima. */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="relative h-[132px] w-[90px]">
+            <BrandMark className="absolute inset-0 top-[3px] size-full text-black/55" />
+            <BrandMark className="absolute inset-0 size-full text-[#b6f23c]" />
+            <div className="absolute inset-0 rounded-md" style={{ background: "linear-gradient(180deg,rgba(255,255,255,.22),transparent 38%)", WebkitMaskImage: "none" }} />
+          </div>
+        </div>
+        <span className="absolute inset-x-0 bottom-[22px] text-center font-display text-[9px] font-semibold tracking-[0.5em] text-white/30">CANCHA CLUB</span>
+        {/* Luz de borda respirando na cor da raridade (a expectativa antes de virar). */}
+        <div aria-hidden className="absolute inset-0" style={{ boxShadow: `inset 0 0 26px rgba(${rgb},${0.55 * power})`, animation: "pl-breathe 1.1s ease-in-out infinite", borderRadius: "inherit" }} />
+        {/* Reflexo passando enquanto a carta gira. */}
+        <div aria-hidden className="absolute inset-y-0 left-0 w-[26%]" style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,.2),transparent)", animation: "pl-sheen-back 1s ease-in-out both", animationDelay: `calc(var(--k) * 3350ms)` }} />
+      </div>
+    </div>
+  );
+}
 
 export function PackLab({ rarity }: { rarity: string }) {
   const cfg = RARITIES[rarity] ?? RARITIES.lendaria;
@@ -62,6 +108,9 @@ export function PackLab({ rarity }: { rarity: string }) {
         @keyframes pl-back-out { 0%{transform:rotateY(0)} 100%{transform:rotateY(90deg)} }
         @keyframes pl-front-in { 0%{transform:rotateY(-90deg) scale(.92)} 70%{transform:rotateY(6deg) scale(1.04)} 100%{transform:rotateY(0) scale(1)} }
         @keyframes pl-hover { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+        @keyframes pl-flip { 0%{transform:rotateY(0) scale(1) translateY(0)} 16%{transform:rotateY(-12deg) scale(1.02) translateY(4px)} 58%{transform:rotateY(192deg) scale(1.13) translateY(-18px)} 80%{transform:rotateY(174deg) scale(1.05) translateY(-6px)} 100%{transform:rotateY(180deg) scale(1) translateY(0)} }
+        @keyframes pl-breathe { 0%,100%{opacity:.5} 50%{opacity:1} }
+        @keyframes pl-sheen-back { 0%{transform:translateX(-130%) skewX(-16deg)} 100%{transform:translateX(330%) skewX(-16deg)} }
         @keyframes pl-fade { 0%{opacity:0} 100%{opacity:1} }
         @keyframes pl-out { to { opacity: 0; } }
         @keyframes pl-up { 0%{opacity:0;transform:translateY(12px)} 100%{opacity:1;transform:translateY(0)} }
@@ -114,53 +163,39 @@ export function PackLab({ rarity }: { rarity: string }) {
         <div aria-hidden className="absolute top-[42%] left-1/2 -ml-[250px] -mt-[250px] size-[500px] rounded-full" style={{ background: `radial-gradient(closest-side, rgba(${cfg.rgb},${0.5 * cfg.power}), rgba(${cfg.rgb},${0.12 * cfg.power}) 55%, transparent)`, animation: "pl-fade 1.2s ease-out both", animationDelay: ms(3400) }} />
 
         {/* Sombra de contato no chão. */}
-        <div aria-hidden className="absolute top-[calc(42%+190px)] left-1/2 -ml-[110px] h-[26px] w-[220px] rounded-full" style={{ background: "radial-gradient(closest-side, rgba(0,0,0,.65), transparent)", filter: "blur(6px)", animation: "pl-out .4s ease-in both", animationDelay: ms(2000) }} />
+        <div aria-hidden className="absolute top-[calc(42%+168px)] left-1/2 -ml-[100px] h-[24px] w-[200px] rounded-full" style={{ background: "radial-gradient(closest-side, rgba(0,0,0,.65), transparent)", filter: "blur(6px)", animation: "pl-out .4s ease-in both", animationDelay: ms(2000) }} />
 
-        {/* O pacote. */}
-        <div className="absolute top-[42%] left-1/2 -ml-[120px] -mt-[180px] h-[360px] w-[240px]" style={{ perspective: "800px" }}>
-          <div className="size-full" style={{ animation: "pl-float 3.4s ease-in-out infinite", transform: "rotateY(-8deg)", transformStyle: "preserve-3d" }}>
-            <div className="relative size-full" style={{ animation: "pl-charge 0.9s linear both", animationDelay: ms(600) }}>
-              {/* Tampa (serrilha de cima). */}
-              <div className="absolute inset-x-0 top-0 h-[46px] overflow-hidden" style={{ clipPath: CRIMP, background: "linear-gradient(180deg,#8fa89a 0%,#4d6659 55%,#2d4338 100%)", animation: "pl-cap 0.85s ease-in both", animationDelay: ms(1950) }}>
-                <div className="absolute inset-0 opacity-70 mix-blend-overlay" style={{ filter: "url(#foil)" }} />
-              </div>
-              {/* Corpo. */}
-              <div className="absolute inset-x-0 top-[44px] bottom-0 overflow-hidden" style={{ clipPath: CRIMP, background: "linear-gradient(158deg,#6d8a7a 0%,#3a5446 34%,#18281f 66%,#4b6757 100%)", animation: "pl-body 0.75s ease-in both", animationDelay: ms(2000) }}>
-                <div className="absolute inset-0 opacity-80 mix-blend-overlay" style={{ filter: "url(#foil)" }} />
-                <div className="absolute inset-y-0 left-0 w-[24%]" style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,.34),transparent)", animation: "pl-sweep 3s ease-in-out infinite" }} />
-                <div className="absolute inset-[7px] rounded-[3px] border border-white/25" />
-                <div className="relative flex h-full flex-col items-center justify-center gap-3 font-display">
-                  <BrandMark className="h-[74px] w-auto drop-shadow-[0_2px_6px_rgba(0,0,0,.55)]" />
-                  <span className="text-[17px] leading-none font-extrabold tracking-[0.32em] text-white drop-shadow-[0_1px_3px_rgba(0,0,0,.7)]">CANCHA CLUB</span>
-                  <span className="text-[46px] leading-none font-extrabold text-white drop-shadow-[0_2px_5px_rgba(0,0,0,.7)]">RODADA 5</span>
-                  <span className="font-sans text-[10px] tracking-[0.22em] text-white/80 uppercase drop-shadow-[0_1px_2px_rgba(0,0,0,.8)]">1 skin exclusiva</span>
-                </div>
+        {/* O pacote (o da primeira versão, aprovado pelo dono do app). */}
+        <div className="absolute top-[42%] left-1/2 -ml-[105px] -mt-[160px] h-[320px] w-[210px]" style={{ animation: "pl-float 3.2s ease-in-out infinite" }}>
+          <div className="relative size-full" style={{ animation: "pl-charge 0.9s linear both", animationDelay: ms(600) }}>
+            <div className="absolute inset-x-0 top-0 h-[46px]" style={{ clipPath: CRIMP, background: "linear-gradient(180deg,#2a3b31,#18251e)", animation: "pl-cap 0.85s ease-in both", animationDelay: ms(1950) }} />
+            <div className="absolute inset-x-0 top-[44px] bottom-0 overflow-hidden" style={{ clipPath: CRIMP, background: "linear-gradient(165deg,#1d2c24 0%,#0e1712 55%,#17261e 100%)", animation: "pl-body 0.75s ease-in both", animationDelay: ms(2000) }}>
+              <div className="absolute inset-2 rounded-md border border-[#b6f23c]/45" />
+              <div className="absolute inset-y-0 left-0 w-[28%]" style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent)", animation: "pl-sweep 2.6s ease-in-out infinite" }} />
+              <div className="relative flex h-full flex-col items-center justify-center gap-3 font-display">
+                <BrandMark className="h-16 w-auto" />
+                <span className="text-[19px] leading-none font-extrabold tracking-[0.3em]">CANCHA CLUB</span>
+                <span className="text-[44px] leading-none font-extrabold">RODADA 5</span>
+                <span className="font-sans text-[11px] tracking-wide text-white/70 uppercase">1 skin exclusiva</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Luz que vaza da fresta: mancha suave que cresce, na cor da raridade (a dica antes da carta). */}
-        <div aria-hidden className="absolute top-[calc(42%-180px+30px)] left-1/2 -ml-[170px] h-[70px] w-[340px]" style={{ animation: "pl-seam-grow 0.6s ease-out both, pl-out .35s ease-in both", animationDelay: `${ms(1450)}, ${ms(2300)}` }}>
+        <div aria-hidden className="absolute top-[calc(42%-160px+22px)] left-1/2 -ml-[150px] h-[70px] w-[300px]" style={{ animation: "pl-seam-grow 0.6s ease-out both, pl-out .35s ease-in both", animationDelay: `${ms(1450)}, ${ms(2300)}` }}>
           <div className="size-full rounded-full" style={{ background: `radial-gradient(closest-side, #fff 0%, rgba(${cfg.rgb},.95) 38%, transparent 100%)`, filter: "blur(7px)" }} />
         </div>
         {/* Estouro: floração larga da cor da raridade e uma sobre-exposição curta. */}
         <div aria-hidden className="absolute top-[42%] left-1/2 -ml-[210px] -mt-[210px] size-[420px] rounded-full" style={{ background: `radial-gradient(closest-side, #fff 0%, rgba(${cfg.rgb},.85) 35%, transparent 100%)`, animation: "pl-bloom 1.1s ease-out both", animationDelay: ms(1950) }} />
         <div aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(circle at 50% 42%, rgba(255,255,255,.95), rgba(${cfg.rgb},.55) 45%, rgba(${cfg.rgb},0) 85%)`, animation: "pl-expose 0.9s ease-out both", animationDelay: ms(1980) }} />
 
-        {/* A carta: costas e frente (design puro). */}
-        <div className="absolute top-[42%] left-1/2 -ml-[130px] -mt-[182px] h-[364px] w-[260px]" style={{ perspective: "1000px", animation: "pl-rise 0.95s cubic-bezier(.16,.84,.24,1) both", animationDelay: ms(2000) }}>
-          <div className="size-full" style={{ animation: "pl-hover 3.6s ease-in-out infinite", animationDelay: ms(4400) }}>
-            <div className="relative size-full" style={{ transformStyle: "preserve-3d" }}>
-              {/* Costas: carta lisa com a marca em relevo. */}
-              <div className="absolute inset-0 rounded-[9%/6.5%]" style={{ background: "linear-gradient(155deg,#2a3b32 0%,#121c17 46%,#1c2b23 100%)", boxShadow: `0 0 0 1.5px rgba(${cfg.rgb},.7), 0 0 38px rgba(${cfg.rgb},${0.5 * cfg.power}), inset 0 0 40px rgba(0,0,0,.6)`, backfaceVisibility: "hidden", animation: "pl-back-out 0.4s ease-in both", animationDelay: ms(3400) }}>
-                <div className="absolute inset-[7px] rounded-[8%/6%] border border-white/12" />
-                <div className="absolute inset-0 opacity-45 mix-blend-overlay rounded-[9%/6.5%]" style={{ filter: "url(#foil)" }} />
-                <div className="flex size-full items-center justify-center">
-                  <BrandMark className="h-[150px] w-auto opacity-90" />
-                </div>
-              </div>
-              <div className="absolute inset-0" style={{ backfaceVisibility: "hidden", animation: "pl-front-in 0.7s cubic-bezier(.2,.9,.2,1) both", animationDelay: "calc(var(--k) * 3400ms + 380ms)" }}>
+        {/* A carta: um objeto só, que gira. Costas (acabamento de carta de verdade) e frente (design puro). */}
+        <div className="absolute top-[42%] left-1/2 -ml-[130px] -mt-[182px] h-[364px] w-[260px]" style={{ perspective: "1100px", animation: "pl-rise 0.95s cubic-bezier(.16,.84,.24,1) both", animationDelay: ms(2000) }}>
+          <div className="size-full" style={{ animation: "pl-hover 3.6s ease-in-out infinite", animationDelay: ms(4600) }}>
+            <div className="relative size-full" style={{ transformStyle: "preserve-3d", animation: "pl-flip 1.15s cubic-bezier(.45,.05,.25,1) both", animationDelay: ms(3300) }}>
+              <CardBack rgb={cfg.rgb} power={cfg.power} k={cfg.k} />
+              <div className="absolute inset-0" style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}>
                 <CanchaCard player={mystery} pure photoSizes="260px" className="w-full" />
               </div>
             </div>
