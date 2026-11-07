@@ -1,4 +1,5 @@
 import { getGroupEvaluations, getOvrByMember } from "@/lib/group-scores";
+import { getConfirmedGoalsByMember } from "@/lib/match-goals";
 import { requireActiveMembership, type ActiveMembership, type PlayerPositionCode } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 import { AWARD_KINDS, type AwardKind } from "@/types/award";
@@ -73,7 +74,7 @@ export async function getRoundsOverview(): Promise<RoundsOverview> {
   const submittedByMatch = new Map(
     submissionsResult.data.map((row) => [row.match_id, Number(row.submitted)]),
   );
-  const ovrByMember = getOvrByMember(evaluations);
+  const ovrByMember = getOvrByMember(evaluations, await getConfirmedGoalsByMember(membership.groupId));
   const kindOrder: readonly AwardKind[] = AWARD_KINDS;
 
   return {

@@ -220,14 +220,14 @@ export async function getLeague(nextPath = "/") {
     .toSorted((a, b) => b.round - a.round || awardOrder(a.kind) - awardOrder(b.kind));
 
   const latestClosedMatch = getLatestClosedMatch(matches);
-  const players = buildPlayers(playerProfiles, matches, evaluations);
+  const players = buildPlayers(playerProfiles, matches, evaluations, { confirmedGoals });
   // Desativados ficam em `players` (histórico, cartas, perfil), mas fora do ranking.
   const inactiveIds = new Set(
     membersResult.data.filter((member) => member.deactivated_at !== null).map((member) => member.id),
   );
   const activePlayers = players.filter((player) => !inactiveIds.has(player.id));
   const previousPlayers = latestClosedMatch
-    ? buildPlayers(playerProfiles, matches, evaluations, { upToRound: latestClosedMatch.round - 1 })
+    ? buildPlayers(playerProfiles, matches, evaluations, { upToRound: latestClosedMatch.round - 1, confirmedGoals })
     : [];
 
   // Performance: índice por id. Antes, cada `getDelta` fazia `find` na lista inteira,

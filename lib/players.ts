@@ -1,9 +1,10 @@
-import { computeAttributes, computeOvr, getRoundScore } from "@/lib/ovr";
+import { computeCareerCard, getRoundScore } from "@/lib/ovr";
 import { isOvrEvaluation, type Evaluation, type Match } from "@/types/match";
 import {
   GOALKEEPER_ATTRIBUTES,
   OUTFIELD_ATTRIBUTES,
   type Player,
+  type PlayerAttribute,
   type PlayerProfile,
 } from "@/types/player";
 
@@ -37,12 +38,19 @@ export function getLatestClosedMatch(matches: readonly Match[]): Match | null {
   return getClosedMatches(matches).at(-1) ?? null;
 }
 
-function buildPlayer(profile: PlayerProfile, evaluations: readonly Evaluation[]): Player {
-  const ovr = computeOvr(evaluations);
+function pickAttributes<Key extends PlayerAttribute>(
+  attributes: Partial<Record<PlayerAttribute, number>>,
+  keys: readonly Key[],
+): Record<Key, number | null> {
+  return Object.fromEntries(keys.map((key) => [key, attributes[key] ?? null])) as Record<Key, number | null>;
+}
+
+function buildPlayer(profile: PlayerProfile, evaluations: readonly Evaluation[], goals: number): Player {
+  const { ovr, attributes } = computeCareerCard(evaluations, goals);
   if (profile.role === "goalkeeper") {
-    return { ...profile, ovr, attributes: computeAttributes(evaluations, GOALKEEPER_ATTRIBUTES) };
+    return { ...profile, ovr, attributes: pickAttributes(attributes, GOALKEEPER_ATTRIBUTES) };
   }
-  return { ...profile, ovr, attributes: computeAttributes(evaluations, OUTFIELD_ATTRIBUTES) };
+  return { ...profile, ovr, attributes: pickAttributes(attributes, OUTFIELD_ATTRIBUTES) };
 }
 
 /**
@@ -53,7 +61,7 @@ export function buildPlayers(
   profiles: readonly PlayerProfile[],
   matches: readonly Match[],
   evaluations: readonly Evaluation[],
-  { upToRound }: { upToRound?: number } = {},
+  { upToRound, confirmedGoals }: { upToRound?: number; confirmedGoals?: ReadonlyMap<string, number> } = {},
 ): Player[] {
   const countedMatchIds = new Set(
     getClosedMatches(matches)
@@ -71,7 +79,17 @@ export function buildPlayers(
     else receivedByPlayer.set(evaluation.playerId, [evaluation]);
   }
 
-  return profiles.map((profile) => buildPlayer(profile, receivedByPlayer.get(profile.id) ?? []));
+  // Gols confirmados das rodadas contadas, somados por jogador (bônus de Ataque da carta).
+  const goalsByPlayer = new Map<string, number>();
+  for (const [key, goals] of confirmedGoals ?? []) {
+    const [matchId, playerId] = key.split(":");
+    if (!countedMatchIds.has(matchId)) continue;
+    goalsByPlayer.set(playerId, (goalsByPlayer.get(playerId) ?? 0) + goals);
+  }
+
+  return profiles.map((profile) =>
+    buildPlayer(profile, receivedByPlayer.get(profile.id) ?? [], goalsByPlayer.get(profile.id) ?? 0),
+  );
 }
 
 /** Variação do OVR causada pela última rodada fechada. */

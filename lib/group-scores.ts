@@ -1,5 +1,5 @@
 import "server-only";
-import { computeOvr } from "@/lib/ovr";
+import { computeCareerCard } from "@/lib/ovr";
 import { createClient } from "@/lib/supabase/server";
 import { isOvrEvaluation, type Evaluation } from "@/types/match";
 import type { PlayerAttribute } from "@/types/player";
@@ -39,8 +39,11 @@ export async function getGroupEvaluations(groupId: string): Promise<Evaluation[]
   });
 }
 
-/** OVR de cada membro (soma das avaliações ÷ quantidade), `null` se nunca avaliado. */
-export function getOvrByMember(evaluations: readonly Evaluation[]): Map<string, number | null> {
+/** OVR de cada membro (média dos OVRs das rodadas, com o bônus de gols), `null` se nunca avaliado. */
+export function getOvrByMember(
+  evaluations: readonly Evaluation[],
+  goalsByMember: ReadonlyMap<string, number> = new Map(),
+): Map<string, number | null> {
   // Map.groupBy só existe a partir do Node 21; o projeto roda no 20.
   const byPlayer = new Map<string, Evaluation[]>();
   for (const evaluation of evaluations) {
@@ -49,5 +52,5 @@ export function getOvrByMember(evaluations: readonly Evaluation[]): Map<string, 
     received.push(evaluation);
     byPlayer.set(evaluation.playerId, received);
   }
-  return new Map([...byPlayer].map(([playerId, received]) => [playerId, computeOvr(received)]));
+  return new Map([...byPlayer].map(([playerId, received]) => [playerId, computeCareerCard(received, goalsByMember.get(playerId) ?? 0).ovr]));
 }

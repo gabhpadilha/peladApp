@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getGroupEvaluations, getOvrByMember } from "@/lib/group-scores";
+import { getConfirmedGoalsByMember } from "@/lib/match-goals";
 import { requireActiveMembership, type ActiveMembership, type PlayerPositionCode } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 import { toPlayerPhoto } from "@/lib/player-photo";
@@ -70,7 +71,7 @@ export async function getRoster(): Promise<Roster> {
     );
   if (profilesError) throw profilesError;
   const profileByUser = new Map(profiles.map((profile) => [profile.id, profile]));
-  const ovrByMember = getOvrByMember(evaluations);
+  const ovrByMember = getOvrByMember(evaluations, await getConfirmedGoalsByMember(membership.groupId));
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
 
   return {

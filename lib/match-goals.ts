@@ -52,3 +52,20 @@ export const getRoundGoalsState = cache(
     };
   },
 );
+
+/** Gols confirmados de cada membro nas rodadas fechadas (bônus de Ataque do OVR, `computeCareerCard`). */
+export async function getConfirmedGoalsByMember(groupId: string): Promise<Map<string, number>> {
+  const supabase = await createClient();
+  const [goals, closedResult] = await Promise.all([
+    getGroupGoals(groupId),
+    supabase.from("matches").select("id").eq("group_id", groupId).eq("status", "closed"),
+  ]);
+  if (closedResult.error) throw closedResult.error;
+  const closedIds = new Set(closedResult.data.map((match) => match.id));
+  const totals = new Map<string, number>();
+  for (const goal of goals) {
+    if (!goal.isConfirmed || !closedIds.has(goal.matchId)) continue;
+    totals.set(goal.memberId, (totals.get(goal.memberId) ?? 0) + goal.goals);
+  }
+  return totals;
+}

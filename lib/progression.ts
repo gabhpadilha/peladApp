@@ -1,4 +1,4 @@
-import { addToOvrTotals, getRoundScore, ovrFromTotals, type OvrTotals } from "@/lib/ovr";
+import { computeCareerCard, getRoundScore } from "@/lib/ovr";
 import { getClosedMatches } from "@/lib/players";
 import { AWARD_LABELS, type AwardKind } from "@/types/award";
 import { isOvrEvaluation, type Evaluation, type Match } from "@/types/match";
@@ -175,10 +175,9 @@ function indexByPlayerAndMatch<Item>(
 /** Rodada a rodada (só as fechadas), na ordem: o que cada uma deu ao jogador. */
 function* walkRounds({ playerId, matches, evaluations, awards, submissions, confirmedGoals }: ProgressionInput) {
   let previousOvr: number | null = null;
-  // Performance: OVR acumulado com somas correntes por atributo. Antes, `computeOvr`
-  // recalculava todo o histórico a cada rodada (O(rodadas²) por jogador). Os totais
-  // são os mesmos de `computeOvr`, então o resultado é exatamente o mesmo.
-  const ovrTotals: OvrTotals = new Map();
+  // OVR de carreira (média dos OVRs das rodadas + bônus de gols), acumulado rodada a rodada.
+  const ovrEvaluations: Evaluation[] = [];
+  let goalsSoFar = 0;
   const evaluationsByMatch = indexByPlayerAndMatch(evaluations, evaluationIndexes, (evaluation) => evaluation).get(playerId);
   const awardsByMatch = indexByPlayerAndMatch(awards, awardIndexes, (award) => ({
     playerId: award.memberId,
@@ -190,9 +189,10 @@ function* walkRounds({ playerId, matches, evaluations, awards, submissions, conf
     const playerAwards = awardsByMatch?.get(match.id) ?? NO_AWARDS;
     // OVR só com as notas na posição do cadastro; a nota da rodada (XP e moedas) usa todas.
     for (const evaluation of received) {
-      if (isOvrEvaluation(evaluation)) addToOvrTotals(ovrTotals, evaluation);
+      if (isOvrEvaluation(evaluation)) ovrEvaluations.push(evaluation);
     }
-    const ovr = ovrFromTotals(ovrTotals);
+    goalsSoFar += confirmedGoals.get(submissionKey(match.id, playerId)) ?? 0;
+    const ovr = computeCareerCard(ovrEvaluations, goalsSoFar).ovr;
     const gains: RoundGain[] = [];
     const isLegacyRound = match.date < AWARD_XP_CUTOFF;
     const bestPlayerXp = isLegacyRound ? LEGACY_XP_BEST_PLAYER : XP_BEST_PLAYER;
