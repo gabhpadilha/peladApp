@@ -86,6 +86,14 @@ function CardBack({ rgb, power }: { rgb: string; power: number }) {
   );
 }
 
+/**
+ * O capuz da Destino é vazado (o miolo é transparente). Na Loja o fundo é escuro e ele parece inteiro; no palco da abertura o halo
+ * dourado aparecia dentro dele. Um tampão escuro atrás do capuz mantém o miolo escuro, como na Loja.
+ */
+function HoodPlug() {
+  return <div aria-hidden className="absolute top-[3.5%] left-1/2 h-[9%] w-[15%] -translate-x-1/2 rounded-[50%] bg-[#0a120e]" />;
+}
+
 export type PackStageProps = {
   rarity: PackRarity;
   /** Chave da skin sorteada (a carta que gira). */
@@ -116,7 +124,10 @@ export function PackStage({ rarity, skin, round, oddsPercent, duplicateCoins, re
       <div className="pack-lab absolute inset-0 overflow-hidden bg-[#050907] text-white">
         <div aria-hidden className="absolute inset-0" style={{ background: `radial-gradient(75% 48% at 50% 44%, rgba(${cfg.rgb},${0.3 * cfg.power}), transparent 72%)` }} />
         <div className="absolute top-[42%] left-1/2 -ml-[130px] -mt-[182px] h-[364px] w-[260px]">
-          <CanchaCard player={mystery} pure photoSizes="260px" className="w-full" />
+          <>
+                  {skinKey === "destino" && <HoodPlug />}
+                  <CanchaCard player={mystery} pure photoSizes="260px" className="w-full" />
+                </>
         </div>
         <div className="absolute inset-x-0 top-[calc(42%+205px)] flex flex-col items-center gap-2.5 px-6 text-center">
           <span className="font-display text-[22px] leading-none font-semibold tracking-[0.34em] uppercase" style={{ color }}>{label}</span>
@@ -221,7 +232,10 @@ export function PackStage({ rarity, skin, round, oddsPercent, duplicateCoins, re
             <div className="relative size-full" style={{ transformStyle: "preserve-3d", animation: "pl-flip 1.15s cubic-bezier(.45,.05,.25,1) both", animationDelay: ms(3300) }}>
               <CardBack rgb={cfg.rgb} power={cfg.power} />
               <div className="absolute inset-0" style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}>
-                <CanchaCard player={mystery} pure photoSizes="260px" className="w-full" />
+                <>
+                  {skinKey === "destino" && <HoodPlug />}
+                  <CanchaCard player={mystery} pure photoSizes="260px" className="w-full" />
+                </>
               </div>
             </div>
           </div>
