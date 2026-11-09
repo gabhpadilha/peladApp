@@ -872,38 +872,33 @@ const RARITY_TEXT_COLORS: Record<PackRarity, string> = {
 };
 
 /**
- * Raridade da skin em uso, pela largura da carta (container query):
- * - grande (120px ou mais, medidos na própria carta): o cristal e o nome da raridade, um sobre o outro, centralizados embaixo da carta;
- * - médio (56 a 119px): só o cristal, engastado na borda de baixo (metade dentro, metade fora), sem tomar espaço;
- * - pequeno (menos de 56px): nada na carta; a lista mostra um cristal pequeno junto do texto (`RarityMark`).
- * Os quatro cristais (um formato, quatro cores) saem do `scripts/rarity-gems/render.mjs` (three.js, ray tracing, renderizados
- * uma vez e guardados em `public/rarity/`): na tela é só uma imagem, sem WebGL.
+ * Raridade da skin em uso, presa à própria carta em qualquer tamanho (decisão do dono do app em 2026-11-09: longe da carta perde a
+ * referência): o cristal fica engastado na borda de baixo, centralizado, metade dentro e metade fora da arte da skin; nas cartas
+ * grandes (120px ou mais, medidos na carta) o nome da raridade fica colado logo abaixo do cristal. Os quatro cristais (um formato,
+ * quatro cores) saem do `scripts/rarity-gems/render.mjs` (three.js, ray tracing, renderizados uma vez e guardados em
+ * `public/rarity/`): na tela é só uma imagem, sem WebGL.
  */
 function RarityGem({ rarity, skin }: { rarity: PackRarity; skin: string }) {
   const name = PACK_RARITY_NAMES[rarity];
+  // O centro do cristal cai um pouco para dentro da arte que passa da borda de baixo (folhas, moldura), para ficar preso a ela.
+  const center = (SKIN_BOTTOM_OVERHANG[skin] ?? 0) * 0.7 + 7;
   return (
     <>
-      <span
-        style={{ marginTop: `${(SKIN_BOTTOM_OVERHANG[skin] ?? 0) + 1.5}cqw` }}
-        className="pointer-events-none absolute top-full left-1/2 z-[9] hidden -translate-x-1/2 flex-col items-center gap-[1cqw] select-none @min-[120px]:flex"
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element -- ícone estático (public/rarity), sem o otimizador do Next */}
-        <img role="img" alt={`Raridade ${name}`} src={`/rarity/${rarity}.webp`} className="h-[max(38px,34cqw)] w-auto" />
-        <span
-          aria-hidden
-          style={{ color: RARITY_TEXT_COLORS[rarity] }}
-          className="font-display text-[max(12px,8.5cqw)] leading-none font-bold tracking-[0.16em] whitespace-nowrap uppercase"
-        >
-          {name}
-        </span>
-      </span>
-      {/* eslint-disable-next-line @next/next/no-img-element -- idem */}
+      {/* eslint-disable-next-line @next/next/no-img-element -- ícone estático (public/rarity), sem o otimizador do Next */}
       <img
         role="img"
         alt={`Raridade ${name}`}
         src={`/rarity/${rarity}.webp`}
-        className="pointer-events-none absolute bottom-0 left-1/2 z-[9] hidden h-[max(26px,26cqw)] w-auto translate-y-[60%] -translate-x-1/2 select-none @min-[56px]:block @min-[120px]:hidden"
+        style={{ top: `calc(100% + ${center}cqw)` }}
+        className="pointer-events-none absolute left-1/2 z-[9] h-[max(20px,30cqw)] w-auto -translate-x-1/2 -translate-y-1/2 select-none"
       />
+      <span
+        aria-hidden
+        style={{ top: `calc(100% + ${center + 18}cqw)`, color: RARITY_TEXT_COLORS[rarity] }}
+        className="pointer-events-none absolute left-1/2 z-[9] hidden -translate-x-1/2 font-display text-[max(12px,8.5cqw)] leading-none font-bold tracking-[0.16em] whitespace-nowrap uppercase select-none @min-[120px]:block"
+      >
+        {name}
+      </span>
     </>
   );
 }
