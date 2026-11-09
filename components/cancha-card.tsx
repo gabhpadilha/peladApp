@@ -7,7 +7,7 @@ import { getCardStats } from "@/lib/card-stats";
 import { getInitials } from "@/lib/get-initials";
 import type { CardThemeKey } from "@/lib/card-themes";
 import { AWARD_LABELS, awardDesignKind, type AwardDesignKind, type AwardKind } from "@/types/award";
-import { getSkinRarity, PACK_RARITY_NAMES, PACK_RARITY_ORDER, type PackRarity } from "@/lib/packs";
+import { getSkinRarity, PACK_RARITY_NAMES, type PackRarity } from "@/lib/packs";
 import type { CardSkinKey } from "@/types/card-skin";
 import type { Player } from "@/types/player";
 
@@ -863,32 +863,22 @@ function FloaterPieces({ items, layer }: { items: readonly Floater[]; layer: "ba
     ));
 }
 
-/** Cor dos losangos de cada raridade (a luz da abertura do pacote). */
-const RARITY_PIP_COLORS: Record<PackRarity, string> = {
-  comum: "#aab8c6",
-  rara: "#5696ff",
-  epica: "#b870ff",
-  lendaria: "#ffc454",
-};
-
-/** Raridade da skin em uso: 1 a 4 losangos pequenos logo abaixo da carta (legenda discreta, fora do desenho dela). */
-function RarityPips({ rarity }: { rarity: PackRarity }) {
-  const count = PACK_RARITY_ORDER.indexOf(rarity) + 1;
+/**
+ * Raridade da skin em uso: uma gema 3D pequena logo abaixo da carta (legenda discreta, fora do desenho dela). As quatro gemas
+ * (aço, safira, ametista com anel e âmbar em garras de ouro) saem do `scripts/rarity-gems/render.mjs` (three.js, renderizadas
+ * uma vez e guardadas em `public/rarity/`): na tela é só uma imagem, sem WebGL.
+ */
+function RarityGem({ rarity }: { rarity: PackRarity }) {
   return (
-    <span
+    // eslint-disable-next-line @next/next/no-img-element -- ícone minúsculo e estático (public/rarity), sem o otimizador do Next
+    <img
       role="img"
-      aria-label={`Raridade ${PACK_RARITY_NAMES[rarity]}`}
-      className="pointer-events-none absolute top-full left-1/2 z-[9] mt-[5cqw] flex -translate-x-1/2 gap-[2.6cqw]"
-    >
-      {Array.from({ length: count }, (_, index) => (
-        <span
-          key={index}
-          aria-hidden
-          style={{ background: RARITY_PIP_COLORS[rarity], boxShadow: `0 0 4px ${RARITY_PIP_COLORS[rarity]}` }}
-          className="size-[max(4px,4.4cqw)] rotate-45 rounded-[0.6cqw]"
-        />
-      ))}
-    </span>
+      alt={`Raridade ${PACK_RARITY_NAMES[rarity]}`}
+      src={`/rarity/${rarity}.webp`}
+      width={160}
+      height={160}
+      className="pointer-events-none absolute top-full left-1/2 z-[9] mt-[1cqw] aspect-square w-[max(16px,15cqw)] -translate-x-1/2 select-none"
+    />
   );
 }
 
@@ -1066,7 +1056,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
             : cn(METAL_WINDOW, "shadow-[inset_0_0_0_0.5cqw_var(--cc-m3),inset_0_0_0_0.9cqw_rgb(0_0_0/0.35)]"),
         )}
       />
-      {rarity && <RarityPips rarity={rarity} />}
+      {rarity && <RarityGem rarity={rarity} />}
     </article>
   );
 
