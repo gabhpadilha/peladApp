@@ -1060,3 +1060,8 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
     card
   );
 }
+
+/** A carta ocupa só os 84% do meio da própria caixa (carta de neon: o brilho usa a sobra). O verso da carta precisa do mesmo tamanho. */
+export function isTrimmedCard(player: Player): boolean {
+  return getCanchaCardLook(player).roupa.neon !== undefined;
+}
