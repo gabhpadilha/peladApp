@@ -138,15 +138,35 @@ export function CardBack({ rarity, skinName, className }: { rarity: PackRarity; 
         className="absolute left-1/2 aspect-square w-[28%] -translate-x-1/2 -translate-y-1/2"
         style={{ top: `${((MID_Y) / H) * 100}%` }}
       />
+      {/* Os textos ficam centralizados dentro das plaquinhas (mesmas medidas do desenho), sem encostar nas bordas.
+          O espaçamento entre letras também cria um vão depois da última, então o mesmo valor entra à esquerda. */}
       <span
-        className="absolute inset-x-0 text-center font-display text-[4.2cqw] leading-none font-bold tracking-[0.22em] uppercase"
-        style={{ color: look.text, top: `${(102 / H) * 100}%`, transform: "translateY(-50%)" }}
+        className="absolute flex items-center justify-center overflow-hidden px-[2cqw] font-display leading-none font-bold whitespace-nowrap uppercase"
+        style={{
+          left: `${((CX - 210) / W) * 100}%`,
+          width: `${(420 / W) * 100}%`,
+          top: `${(76 / H) * 100}%`,
+          height: `${(52 / H) * 100}%`,
+          color: look.text,
+          fontSize: "3.5cqw",
+          letterSpacing: "0.16em",
+          paddingLeft: "calc(2cqw + 0.16em)",
+        }}
       >
-        {skinName}
+        <span className="truncate">{skinName}</span>
       </span>
       <span
-        className="absolute inset-x-0 text-center font-display text-[6.4cqw] leading-none font-extrabold tracking-[0.3em] uppercase"
-        style={{ color: look.line[1], top: `${((H - 97) / H) * 100}%`, transform: "translateY(-50%)" }}
+        className="absolute flex items-center justify-center overflow-hidden px-[2cqw] font-display leading-none font-extrabold whitespace-nowrap uppercase"
+        style={{
+          left: `${((CX - 230) / W) * 100}%`,
+          width: `${(460 / W) * 100}%`,
+          top: `${((H - 128) / H) * 100}%`,
+          height: `${(62 / H) * 100}%`,
+          color: look.line[1],
+          fontSize: "4.7cqw",
+          letterSpacing: "0.2em",
+          paddingLeft: "calc(2cqw + 0.2em)",
+        }}
       >
         {PACK_RARITY_NAMES[rarity]}
       </span>
