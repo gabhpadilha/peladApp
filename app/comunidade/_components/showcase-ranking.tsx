@@ -4,7 +4,6 @@ import { useState } from "react";
 import Link from "next/link";
 import { OvrBadge } from "@/components/ovr-badge";
 import { PlayerCard } from "@/components/player-card";
-import { RarityFlip } from "@/components/rarity-flip";
 import { rankShowcase, showcaseMonths, toPublicCard, type CommunityPeriod, type RankingKind, type ShowcasePlayer } from "@/lib/community";
 import { cn } from "@/lib/utils";
 
@@ -75,9 +74,7 @@ export function ShowcaseRanking({ groupId, players }: { groupId: string; players
                 className="flex items-center gap-3 rounded-xl border bg-card p-3 transition-colors hover:bg-muted"
               >
                 <span className="w-6 shrink-0 text-center font-display text-xl font-bold text-muted-foreground tabular-nums">{row.position}</span>
-                <RarityFlip player={toPublicCard(row.player)} mode="thumb" className="w-14 shrink-0">
-                  <PlayerCard player={toPublicCard(row.player)} size="fill" />
-                </RarityFlip>
+                <PlayerCard player={toPublicCard(row.player)} size="fill" className="w-14 shrink-0" />
                 <div className="min-w-0 flex-1">
                   <p className="truncate font-bold">{row.player.nickname}</p>
                   <p className="text-sm text-muted-foreground">

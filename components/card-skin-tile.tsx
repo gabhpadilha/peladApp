@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { LockIcon } from "lucide-react";
+import { CardViewer } from "@/components/card-viewer";
 import { PlayerCard } from "@/components/player-card";
 import { RarityLabel } from "@/components/rarity-label";
 import { getSkinRarity } from "@/lib/packs";
@@ -30,7 +31,9 @@ export function CardSkinTile({ player, name, isEquipped = false, isLocked = fals
       <div className="relative w-[70%]">
         {/* Só opacidade: `saturate` (filtro) sobre as cartas desmontava a prévia no iPhone. */}
         <div className={cn(isLocked && "opacity-40")}>
-          <PlayerCard player={player} size="fill" />
+          <CardViewer player={player}>
+            <PlayerCard player={player} size="fill" />
+          </CardViewer>
         </div>
         {isLocked && (
           <span className="absolute inset-0 flex items-center justify-center">

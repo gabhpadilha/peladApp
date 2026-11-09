@@ -7,6 +7,7 @@ import { signOut } from "@/app/_actions/sign-out";
 import { AppHeader } from "@/components/app-header";
 import { CoinPill } from "@/components/coin-pill";
 import { GroupGate } from "@/components/group-gate";
+import { CardViewer } from "@/components/card-viewer";
 import { PlayerCard } from "@/components/player-card";
 import { getActiveMembership, getUserId } from "@/lib/session";
 import { AccountDeletionCard } from "./_components/account-deletion-card";
@@ -60,7 +61,9 @@ async function MeContent() {
         </div>
 
         <div className="flex items-center gap-4">
-          <PlayerCard player={me} size="fill" className="w-[46%] max-w-52 shrink-0 sm:w-60 sm:max-w-none" />
+          <CardViewer player={me} className="w-[46%] max-w-52 shrink-0 sm:w-60 sm:max-w-none">
+            <PlayerCard player={me} size="fill" />
+          </CardViewer>
           <div className="flex min-w-0 flex-col items-start gap-1.5">
             <p className="truncate font-display text-3xl leading-none font-bold">{me.nickname}</p>
             <p className="text-sm text-muted-foreground">
