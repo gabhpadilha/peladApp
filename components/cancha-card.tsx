@@ -872,26 +872,39 @@ const RARITY_TEXT_COLORS: Record<PackRarity, string> = {
 };
 
 /**
- * Legenda de raridade embaixo da carta (fora do desenho dela): o cristal de raridade e, quando a carta é grande o bastante,
- * o nome da raridade ao lado. Os quatro cristais (um formato, quatro cores) saem do `scripts/rarity-gems/render.mjs` (three.js,
- * ray tracing, renderizados uma vez e guardados em `public/rarity/`): na tela é só uma imagem, sem WebGL.
+ * Raridade da skin em uso, pela largura da carta (container query):
+ * - grande (120px ou mais, medidos na própria carta): o cristal e o nome da raridade, um sobre o outro, centralizados embaixo da carta;
+ * - médio (56 a 119px): só o cristal, engastado na borda de baixo (metade dentro, metade fora), sem tomar espaço;
+ * - pequeno (menos de 56px): nada na carta; a lista mostra um cristal pequeno junto do texto (`RarityMark`).
+ * Os quatro cristais (um formato, quatro cores) saem do `scripts/rarity-gems/render.mjs` (three.js, ray tracing, renderizados
+ * uma vez e guardados em `public/rarity/`): na tela é só uma imagem, sem WebGL.
  */
 function RarityGem({ rarity, skin }: { rarity: PackRarity; skin: string }) {
+  const name = PACK_RARITY_NAMES[rarity];
   return (
-    <span
-      style={{ marginTop: `${(SKIN_BOTTOM_OVERHANG[skin] ?? 0) + 1.5}cqw` }}
-      className="pointer-events-none absolute top-full left-1/2 z-[9] flex -translate-x-1/2 items-center gap-[1.5cqw] whitespace-nowrap select-none"
-    >
-      {/* eslint-disable-next-line @next/next/no-img-element -- ícone estático (public/rarity), sem o otimizador do Next */}
-      <img role="img" alt={`Raridade ${PACK_RARITY_NAMES[rarity]}`} src={`/rarity/${rarity}.webp`} className="h-[max(34px,38cqw)] w-auto" />
+    <>
       <span
-        aria-hidden
-        style={{ color: RARITY_TEXT_COLORS[rarity] }}
-        className="hidden font-display text-[max(12px,8.5cqw)] leading-none font-bold tracking-[0.14em] uppercase @min-[84px]:block"
+        style={{ marginTop: `${(SKIN_BOTTOM_OVERHANG[skin] ?? 0) + 1.5}cqw` }}
+        className="pointer-events-none absolute top-full left-1/2 z-[9] hidden -translate-x-1/2 flex-col items-center gap-[1cqw] select-none @min-[120px]:flex"
       >
-        {PACK_RARITY_NAMES[rarity]}
+        {/* eslint-disable-next-line @next/next/no-img-element -- ícone estático (public/rarity), sem o otimizador do Next */}
+        <img role="img" alt={`Raridade ${name}`} src={`/rarity/${rarity}.webp`} className="h-[max(38px,34cqw)] w-auto" />
+        <span
+          aria-hidden
+          style={{ color: RARITY_TEXT_COLORS[rarity] }}
+          className="font-display text-[max(12px,8.5cqw)] leading-none font-bold tracking-[0.16em] whitespace-nowrap uppercase"
+        >
+          {name}
+        </span>
       </span>
-    </span>
+      {/* eslint-disable-next-line @next/next/no-img-element -- idem */}
+      <img
+        role="img"
+        alt={`Raridade ${name}`}
+        src={`/rarity/${rarity}.webp`}
+        className="pointer-events-none absolute bottom-0 left-1/2 z-[9] hidden h-[max(26px,26cqw)] w-auto translate-y-[60%] -translate-x-1/2 select-none @min-[56px]:block @min-[120px]:hidden"
+      />
+    </>
   );
 }
 
