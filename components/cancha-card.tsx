@@ -876,7 +876,7 @@ function RarityGem({ rarity, skin }: { rarity: PackRarity; skin: string }) {
       alt={`Raridade ${PACK_RARITY_NAMES[rarity]}`}
       src={`/rarity/${rarity}.webp`}
       style={{ marginTop: `${(SKIN_BOTTOM_OVERHANG[skin] ?? 0) + 2.5}cqw` }}
-      className="pointer-events-none absolute top-full left-1/2 z-[9] h-[max(28px,32cqw)] w-auto -translate-x-1/2 select-none"
+      className="pointer-events-none absolute top-full left-1/2 z-[9] h-[max(34px,42cqw)] w-auto -translate-x-1/2 select-none"
     />
   );
 }

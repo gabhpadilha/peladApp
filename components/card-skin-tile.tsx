@@ -25,7 +25,7 @@ export function CardSkinTile({ player, name, isEquipped = false, isLocked = fals
       )}
     >
       {/* Com skin de raridade, deixa espaço para o cristal que fica embaixo da carta. */}
-      <div className={cn("relative w-[70%]", getSkinRarity(player.cardSkin) && "mb-12")}>
+      <div className={cn("relative w-[70%]", getSkinRarity(player.cardSkin) && "mb-14")}>
         {/* Só opacidade: `saturate` (filtro) sobre as cartas desmontava a prévia no iPhone. */}
         <div className={cn(isLocked && "opacity-40")}>
           <PlayerCard player={player} size="fill" />

@@ -5,64 +5,171 @@
 <script type="module">
 import * as THREE from "three";
 
-const SIZE = 512;
-const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
-renderer.setSize(SIZE, SIZE);
+// Cristal "ray traced": um poliedro convexo (planos), com refração, reflexão interna total, absorção de cor (Beer-Lambert) e dispersão
+// em arco-íris traçados por pixel no shader; luz de estúdio procedural em HDR. O brilho e os raios de difração entram numa segunda passagem.
+const W = 960, H = 1536;
+const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: true, premultipliedAlpha: false, preserveDrawingBuffer: true });
+renderer.setSize(W, H);
 renderer.setPixelRatio(1);
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
+renderer.toneMapping = THREE.NoToneMapping;
 document.body.appendChild(renderer.domElement);
+const camera = new THREE.OrthographicCamera(-2.5, 2.5, 4, -4, 0.1, 50);
+camera.position.set(0, 0, 10);
 
-/** Estúdio de joalheria: caixas de luz brancas e faixas coloridas num fundo escuro, para reflexos nítidos nas facetas. */
-function studio() {
-  const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x05070a);
-  let seed = 7;
-  const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
-  // Domo com degradê suave (para o corpo da pedra não ficar chapado) e dezenas de faixas de luz finas e fortes (os brilhos das facetas).
-  const dome = new THREE.Mesh(new THREE.SphereGeometry(30, 48, 32), new THREE.ShaderMaterial({
-    side: THREE.BackSide, toneMapped: false,
-    vertexShader: "varying vec3 p; void main(){ p = normalize(position); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }",
-    fragmentShader: "varying vec3 p; void main(){ float t = p.y*0.5+0.5; vec3 c = mix(vec3(0.02,0.03,0.04), vec3(0.55,0.6,0.7), pow(t,3.0)); gl_FragColor = vec4(c,1.0); }",
-  }));
-  scene.add(dome);
-  for (let i = 0; i < 46; i++) {
-    const theta = rand() * Math.PI * 2;
-    const phi = Math.acos(1 - rand() * 1.6);
-    const r = 22;
-    const pos = [r * Math.sin(phi) * Math.cos(theta), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(theta)];
-    const w = 0.4 + rand() * 1.6;
-    const h = 2 + rand() * 9;
-    const warm = rand() > 0.55;
-    const k = 2 + rand() * 6;
-    const rgb = warm ? [k, k * 0.86, k * 0.62] : [k * 0.8, k * 0.92, k];
-    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(...rgb), side: THREE.DoubleSide, toneMapped: false }));
-    mesh.position.set(...pos);
-    mesh.lookAt(0, 0, 0);
-    mesh.rotateZ(rand() * Math.PI);
-    scene.add(mesh);
+/** Planos do cristal alongado: 6 faces + 6 chanfros nos cantos + pirâmides de 2 níveis nas duas pontas. */
+function crystalPlanes() {
+  const planes = [];
+  const R = 0.6, TOP = 3.3;
+  for (let k = 0; k < 6; k++) {
+    const a = (k * Math.PI) / 3 + Math.PI / 6;
+    planes.push([Math.cos(a), 0, Math.sin(a), R]);
+    const c = (k * Math.PI) / 3;
+    planes.push([Math.cos(c), 0, Math.sin(c), R * 1.1]);
   }
-  return scene;
+  for (const sign of [1, -1]) {
+    for (let k = 0; k < 6; k++) {
+      const a = (k * Math.PI) / 3 + Math.PI / 6;
+      for (const [elev, apex] of [[1.12, TOP], [0.82, TOP - 0.62]]) {
+        const n = new THREE.Vector3(Math.cos(a) * Math.cos(elev), Math.sin(elev) * sign, Math.sin(a) * Math.cos(elev)).normalize();
+        planes.push([n.x, n.y, n.z, Math.sin(elev) * apex]);
+      }
+      const c = (k * Math.PI) / 3;
+      const elev = 1.0;
+      const n = new THREE.Vector3(Math.cos(c) * Math.cos(elev), Math.sin(elev) * sign, Math.sin(c) * Math.cos(elev)).normalize();
+      planes.push([n.x, n.y, n.z, Math.sin(elev) * (TOP - 0.28)]);
+    }
+  }
+  return planes;
 }
-const pmrem = new THREE.PMREMGenerator(renderer);
-const env = pmrem.fromScene(studio(), 0.01, 0.1, 100).texture;
+const PLANES = crystalPlanes();
 
-/** Cristal alongado de 6 faces com as duas pontas lapidadas (o mesmo formato nas quatro raridades; muda só a cor). */
-function crystalGeometry() {
-  const profile = [
-    [0.0, -2.7],
-    [0.34, -1.9],
-    [0.62, -1.25],
-    [0.64, -1.1],
-    [0.64, 1.1],
-    [0.62, 1.25],
-    [0.34, 1.9],
-    [0.0, 2.7],
-  ].map(([x, y]) => new THREE.Vector2(x, y));
-  return new THREE.LatheGeometry(profile, 6);
+const GEMS = {
+  // Um formato só; muda a cor da pedra (absorção por canal), o índice de refração e o brilho do núcleo.
+  comum: { ior: 1.52, disp: 0.022, absorb: [0.05, 0.07, 0.1], glow: [0.75, 0.82, 0.95], rgb: "190,205,225", flare: 0.55 },
+  rara: { ior: 1.77, disp: 0.03, absorb: [0.9, 0.55, 0.04], glow: [0.2, 0.45, 1.0], rgb: "70,130,255", flare: 0.8 },
+  epica: { ior: 1.68, disp: 0.03, absorb: [0.5, 0.9, 0.06], glow: [0.62, 0.2, 1.0], rgb: "170,90,255", flare: 0.9 },
+  lendaria: { ior: 1.7, disp: 0.034, absorb: [0.04, 0.34, 1.1], glow: [1.0, 0.68, 0.14], rgb: "255,190,60", flare: 1.0 },
+};
+
+const vertex = "varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }";
+const fragment = `
+precision highp float;
+varying vec2 vUv;
+uniform vec4 planes[${PLANES.length}];
+uniform mat3 toGem;   // mundo -> cristal
+uniform mat3 toWorld; // cristal -> mundo
+uniform vec3 absorb;
+uniform vec3 glow;
+uniform float ior;
+uniform float disp;
+
+float panel(vec3 d, vec3 c, vec3 t, vec2 size, float soft) {
+  vec3 b = normalize(cross(c, t));
+  vec3 tt = normalize(cross(b, c));
+  float a = dot(d, c);
+  if (a <= 0.0) return 0.0;
+  vec2 p = vec2(dot(d, tt), dot(d, b)) / a;
+  vec2 q = abs(p) / size;
+  return (1.0 - smoothstep(1.0 - soft, 1.0, q.x)) * (1.0 - smoothstep(1.0 - soft, 1.0, q.y));
 }
 
-/** Textura de brilho: raio fino e longo com a cor no miolo e as pontas em arco-íris (a difração das referências). */
+// Estúdio de joalheria em HDR: fundo escuro, caixas de luz e faixas finas em volta (sobretudo atrás, de onde vem a luz que atravessa a pedra).
+vec3 env(vec3 d) {
+  d = normalize(d);
+  float y = d.y * 0.5 + 0.5;
+  vec3 c = mix(vec3(0.012, 0.014, 0.02), vec3(0.16, 0.18, 0.24), pow(y, 2.5));
+  c += vec3(0.5, 0.55, 0.65) * panel(d, normalize(vec3(0.0, 1.0, 0.3)), vec3(1.0, 0.0, 0.0), vec2(1.6, 0.7), 0.3) * 1.2;
+  c += vec3(1.0, 0.95, 0.9) * panel(d, normalize(vec3(0.35, 0.25, 1.0)), vec3(0.0, 1.0, 0.0), vec2(0.18, 1.1), 0.35) * 9.0;
+  c += vec3(0.8, 0.9, 1.0) * panel(d, normalize(vec3(-0.5, 0.1, 1.0)), vec3(0.2, 1.0, 0.0), vec2(0.1, 1.0), 0.4) * 11.0;
+  c += vec3(1.0, 0.85, 0.7) * panel(d, normalize(vec3(0.05, -0.25, 1.0)), vec3(1.0, 0.0, 0.0), vec2(1.2, 0.07), 0.4) * 8.0;
+  c += vec3(1.0) * panel(d, normalize(vec3(0.0, 0.5, 1.0)), vec3(1.0, 0.0, 0.0), vec2(0.9, 0.12), 0.35) * 10.0;
+  c += vec3(0.7, 0.8, 1.0) * panel(d, normalize(vec3(0.85, -0.1, 0.55)), vec3(0.0, 1.0, 0.0), vec2(0.07, 0.8), 0.4) * 9.0;
+  c += vec3(1.0, 0.9, 0.8) * panel(d, normalize(vec3(-0.9, 0.3, 0.4)), vec3(0.0, 1.0, 0.1), vec2(0.06, 0.9), 0.4) * 8.0;
+  c += vec3(1.0) * panel(d, normalize(vec3(0.5, 0.75, 0.4)), vec3(0.7, 0.0, 0.7), vec2(0.5, 0.07), 0.4) * 9.0;
+  c += vec3(0.6, 0.7, 0.9) * panel(d, normalize(vec3(-0.2, -0.7, 0.7)), vec3(1.0, 0.0, 0.0), vec2(1.0, 0.1), 0.4) * 5.0;
+  // frente (reflexos nas faces da frente)
+  c += vec3(1.0, 0.98, 0.95) * panel(d, normalize(vec3(-0.35, 0.55, -1.0)), vec3(0.0, 1.0, 0.2), vec2(0.28, 0.9), 0.4) * 5.0;
+  c += vec3(0.9, 0.95, 1.0) * panel(d, normalize(vec3(0.55, 0.2, -1.0)), vec3(0.0, 1.0, -0.2), vec2(0.12, 0.8), 0.4) * 6.0;
+  c += vec3(1.0) * panel(d, normalize(vec3(0.0, 0.9, -0.6)), vec3(1.0, 0.0, 0.0), vec2(0.9, 0.12), 0.4) * 4.0;
+  return c;
+}
+
+float schlick(float cosT, float n) {
+  float f0 = (n - 1.0) / (n + 1.0);
+  f0 *= f0;
+  return f0 + (1.0 - f0) * pow(1.0 - cosT, 5.0);
+}
+
+// Raio de dentro do cristal até sair, com reflexões internas totais e absorção. Devolve a luz que sai (um canal, com um índice de refração só).
+float trace(vec3 o, vec3 d, int channel, float n, float absorbC) {
+  float tn = -1e9, tf = 1e9;
+  int inIdx = -1;
+  for (int i = 0; i < ${PLANES.length}; i++) {
+    vec3 pn = planes[i].xyz;
+    float nd = dot(pn, d);
+    float no = dot(pn, o) - planes[i].w;
+    if (abs(nd) < 1e-6) { if (no > 0.0) return -1.0; }
+    else {
+      float t = -no / nd;
+      if (nd < 0.0) { if (t > tn) { tn = t; inIdx = i; } }
+      else if (t < tf) tf = t;
+    }
+  }
+  if (inIdx < 0 || tn >= tf) return -1.0;
+  vec3 p = o + d * tn;
+  vec3 nrm = planes[inIdx].xyz;
+  float cosI = clamp(dot(-d, nrm), 0.0, 1.0);
+  float F = schlick(cosI, n);
+  float out_c = F * env(toWorld * reflect(d, nrm))[channel];
+  vec3 dir = refract(d, nrm, 1.0 / n);
+  float w = 1.0 - F;
+  float atten = 1.0;
+  for (int b = 0; b < 12; b++) {
+    float tx = 1e9;
+    int idx = -1;
+    for (int i = 0; i < ${PLANES.length}; i++) {
+      float nd = dot(planes[i].xyz, dir);
+      if (nd > 1e-6) {
+        float t = (planes[i].w - dot(planes[i].xyz, p)) / nd;
+        if (t > 1e-4 && t < tx) { tx = t; idx = i; }
+      }
+    }
+    if (idx < 0) break;
+    p += dir * tx;
+    atten *= exp(-absorbC * tx);
+    vec3 en = planes[idx].xyz;
+    vec3 r = refract(dir, -en, n);
+    float cosX = clamp(dot(dir, en), 0.0, 1.0);
+    float Fx = (dot(r, r) < 1e-6) ? 1.0 : schlick(sqrt(max(0.0, 1.0 - n * n * (1.0 - cosX * cosX))), n);
+    if (dot(r, r) > 1e-6) out_c += w * (1.0 - Fx) * atten * env(toWorld * r)[channel];
+    w *= Fx;
+    dir = reflect(dir, en);
+    if (w < 0.01) break;
+  }
+  out_c += w * atten * 0.6 * env(toWorld * dir)[channel];
+  return out_c;
+}
+
+void main() {
+  vec2 xy = (vUv - 0.5) * vec2(5.0, 8.0);
+  vec3 o = toGem * vec3(xy, 10.0);
+  vec3 d = normalize(toGem * vec3(0.0, 0.0, -1.0));
+  float r = trace(o, d, 0, ior - disp, absorb.r);
+  if (r < 0.0) { gl_FragColor = vec4(0.0); return; }
+  float g = max(trace(o, d, 1, ior, absorb.g), 0.0);
+  float b = max(trace(o, d, 2, ior + disp, absorb.b), 0.0);
+  vec3 col = vec3(r, g, b);
+  // luz interna da cor da pedra, mais forte no eixo (o núcleo luminoso das referências)
+  float axis = exp(-pow(length(o.xz) / 0.34, 2.0));
+  col += glow * axis * 0.55;
+  col = col * 1.7;
+  // tone map (ACES) e sRGB
+  col = clamp((col * (2.51 * col + 0.03)) / (col * (2.43 * col + 0.59) + 0.14), 0.0, 1.0);
+  col = pow(col, vec3(1.0 / 2.2));
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
 function streakTexture(rgb, spectral) {
   const c = document.createElement("canvas");
   c.width = 512; c.height = 32;
@@ -71,111 +178,68 @@ function streakTexture(rgb, spectral) {
   if (spectral) {
     ["rgba(255,60,60,0)", "rgba(255,160,40,.55)", "rgba(80,255,120,.35)", "rgba(80,140,255,.45)", "rgba(255,255,255,0.0)"].forEach((col, i, arr) => grad.addColorStop(i / (arr.length - 1), col));
   } else {
-    grad.addColorStop(0, `rgba(${rgb},0)`);
-    grad.addColorStop(0.42, `rgba(${rgb},.55)`);
-    grad.addColorStop(0.5, "rgba(255,255,255,1)");
-    grad.addColorStop(0.58, `rgba(${rgb},.55)`);
-    grad.addColorStop(1, `rgba(${rgb},0)`);
+    grad.addColorStop(0, `rgba(${rgb},0)`); grad.addColorStop(0.42, `rgba(${rgb},.55)`); grad.addColorStop(0.5, "rgba(255,255,255,1)"); grad.addColorStop(0.58, `rgba(${rgb},.55)`); grad.addColorStop(1, `rgba(${rgb},0)`);
   }
-  g.fillStyle = grad;
-  g.fillRect(0, 0, 512, 32);
-  // afinar na vertical (raio, não faixa)
+  g.fillStyle = grad; g.fillRect(0, 0, 512, 32);
   const v = g.createLinearGradient(0, 0, 0, 32);
   v.addColorStop(0, "rgba(0,0,0,1)"); v.addColorStop(0.5, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(0,0,0,1)");
-  g.globalCompositeOperation = "destination-out";
-  g.fillStyle = v; g.fillRect(0, 0, 512, 32);
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  return tex;
+  g.globalCompositeOperation = "destination-out"; g.fillStyle = v; g.fillRect(0, 0, 512, 32);
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; return tex;
 }
-
 function glowTexture(rgb) {
-  const c = document.createElement("canvas");
-  c.width = c.height = 256;
+  const c = document.createElement("canvas"); c.width = c.height = 256;
   const g = c.getContext("2d");
   const grad = g.createRadialGradient(128, 128, 0, 128, 128, 128);
-  grad.addColorStop(0, "rgba(255,255,255,1)");
-  grad.addColorStop(0.18, `rgba(${rgb},.85)`);
-  grad.addColorStop(0.5, `rgba(${rgb},.22)`);
-  grad.addColorStop(1, `rgba(${rgb},0)`);
+  grad.addColorStop(0, "rgba(255,255,255,1)"); grad.addColorStop(0.18, `rgba(${rgb},.8)`); grad.addColorStop(0.5, `rgba(${rgb},.2)`); grad.addColorStop(1, `rgba(${rgb},0)`);
   g.fillStyle = grad; g.fillRect(0, 0, 256, 256);
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  return tex;
+  const tex = new THREE.CanvasTexture(c); tex.colorSpace = THREE.SRGBColorSpace; return tex;
 }
 
-const goldMat = () => new THREE.MeshStandardMaterial({ color: 0xf3c969, metalness: 1, roughness: 0.18, envMap: env, envMapIntensity: 1.6 });
-
-// Um formato só; muda a cor (e o brilho do núcleo): comum quartzo gelo, rara safira, épica ametista, lendária topázio dourado.
-const GEMS = {
-  comum: { tint: 0xe6edf7, atten: 0x9fb2c8, dist: 4.0, rgb: "190,205,225", core: 0xb7c6da, flare: 0.55, exposure: 1.0 },
-  rara: { tint: 0x8fb4ff, atten: 0x1f5bff, dist: 3.0, rgb: "70,130,255", core: 0x2a6bff, flare: 0.8, exposure: 1.0 },
-  epica: { tint: 0xd0a0ff, atten: 0xa030ff, dist: 3.0, rgb: "170,90,255", core: 0x9a3cff, flare: 0.9, exposure: 1.0 },
-  lendaria: { tint: 0xffdc8a, atten: 0xffae00, dist: 3.0, rgb: "255,190,60", core: 0xffa800, flare: 1.0, exposure: 1.0 },
-};
-
-function build(kind, mode) {
-  const mask = mode === "mask";
-  const flareOnly = mode === "flare";
-  const cfg = GEMS[kind];
+function bodyScene(cfg) {
+  const rot = new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler(0.3, 0.72, 0.12, "YXZ"));
+  const toWorld = new THREE.Matrix3().setFromMatrix4(rot);
+  const toGem = toWorld.clone().transpose();
+  const material = new THREE.ShaderMaterial({
+    vertexShader: vertex, fragmentShader: fragment, blending: THREE.NoBlending, depthTest: false,
+    uniforms: {
+      planes: { value: PLANES.map((p) => new THREE.Vector4(...p)) },
+      toGem: { value: toGem }, toWorld: { value: toWorld },
+      absorb: { value: new THREE.Vector3(...cfg.absorb) }, glow: { value: new THREE.Vector3(...cfg.glow) },
+      ior: { value: cfg.ior }, disp: { value: cfg.disp },
+    },
+  });
   const scene = new THREE.Scene();
-  scene.environment = mask ? null : env;
-  scene.background = new THREE.Color(mask || flareOnly ? 0x000000 : 0x56606c);
-  const group = new THREE.Group();
-
-  const gem = new THREE.Mesh(
-    crystalGeometry(),
-    new THREE.MeshPhysicalMaterial({
-      color: cfg.tint, metalness: 0, roughness: 0.02, transmission: 1, thickness: 1.2, ior: 1.6, dispersion: 0.9,
-      attenuationColor: new THREE.Color(cfg.atten), attenuationDistance: cfg.dist, specularIntensity: 1, envMap: env, envMapIntensity: 1.1,
-      clearcoat: 0.25, clearcoatRoughness: 0.02, flatShading: true, side: THREE.DoubleSide,
-    }),
-  );
-  if (!flareOnly) group.add(gem);
-
-  // Núcleo luminoso por dentro (o que acende o cristal, como nas referências).
-  const core = new THREE.Mesh(
-    crystalGeometry(),
-    new THREE.MeshStandardMaterial({ color: cfg.core, emissive: cfg.core, emissiveIntensity: 1.0, roughness: 0.3, flatShading: true, transparent: true, opacity: 0.4 }),
-  );
-  core.scale.set(0.34, 0.5, 0.34);
-  if (!flareOnly) group.add(core);
-
-  group.rotation.set(0.12, 0.38, 0.1);
-  scene.add(group);
-
-  // Brilho e raios de difração (só na imagem colorida; ficam fora da silhueta usada no alfa).
-  const flares = new THREE.Group();
-  flares.userData.flare = true;
-  const additive = { transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false };
-  const halo = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.6), new THREE.MeshBasicMaterial({ map: glowTexture(cfg.rgb), ...additive, opacity: 0.6 * cfg.flare }));
-  halo.position.z = 1.2;
-  flares.add(halo);
-  const streak = (len, thick, angle, rgb, spectral, opacity) => {
-    const m = new THREE.Mesh(new THREE.PlaneGeometry(len, thick), new THREE.MeshBasicMaterial({ map: streakTexture(rgb, spectral), ...additive, opacity: opacity * cfg.flare }));
-    m.rotation.z = angle;
-    m.position.z = 1.3;
-    flares.add(m);
-  };
-  streak(7.2, 0.5, Math.PI / 2, cfg.rgb, false, 0.9);
-  streak(6.6, 0.45, 0, cfg.rgb, false, 0.85);
-  streak(4.6, 0.3, Math.PI / 4, cfg.rgb, true, 0.7);
-  streak(4.2, 0.28, -Math.PI / 3.4, cfg.rgb, true, 0.6);
-  if (flareOnly) scene.add(flares);
-  if (mask) scene.overrideMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+  scene.add(new THREE.Mesh(new THREE.PlaneGeometry(5, 8), material));
   return scene;
 }
 
-const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 60);
-camera.position.set(0, 0, 11.5);
-camera.lookAt(0, 0, 0);
+function flareScene(cfg) {
+  const scene = new THREE.Scene();
+  const additive = { transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false };
+  const add = (w, h, map, op, rot = 0) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map, ...additive, opacity: op * cfg.flare }));
+    m.rotation.z = rot; scene.add(m);
+  };
+  add(2.6, 2.6, glowTexture(cfg.rgb), 0.55);
+  add(7.6, 0.5, streakTexture(cfg.rgb, false), 0.9, Math.PI / 2);
+  add(4.9, 0.45, streakTexture(cfg.rgb, false), 0.85, 0);
+  add(4.8, 0.3, streakTexture(cfg.rgb, true), 0.7, Math.PI / 4);
+  add(4.4, 0.28, streakTexture(cfg.rgb, true), 0.6, -Math.PI / 3.4);
+  return scene;
+}
 
 window.renderAll = () => {
   const out = {};
   for (const kind of Object.keys(GEMS)) {
-    renderer.toneMappingExposure = GEMS[kind].exposure;
-    const shot = (mode) => { renderer.render(build(kind, mode), camera); return renderer.domElement.toDataURL("image/png"); };
-    out[kind] = { color: shot("body"), mask: shot("mask"), flare: shot("flare") };
+    const cfg = GEMS[kind];
+    renderer.setClearColor(0x000000, 0);
+    renderer.clear();
+    renderer.render(bodyScene(cfg), camera);
+    const body = renderer.domElement.toDataURL("image/png");
+    renderer.setClearColor(0x000000, 1);
+    renderer.clear();
+    renderer.render(flareScene(cfg), camera);
+    out[kind] = { body, flare: renderer.domElement.toDataURL("image/png") };
   }
   return out;
 };
