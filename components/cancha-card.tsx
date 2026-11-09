@@ -875,10 +875,8 @@ function RarityGem({ rarity, skin }: { rarity: PackRarity; skin: string }) {
       role="img"
       alt={`Raridade ${PACK_RARITY_NAMES[rarity]}`}
       src={`/rarity/${rarity}.webp`}
-      width={160}
-      height={160}
       style={{ marginTop: `${(SKIN_BOTTOM_OVERHANG[skin] ?? 0) + 2.5}cqw` }}
-      className="pointer-events-none absolute top-full left-1/2 z-[9] aspect-square w-[max(20px,22cqw)] -translate-x-1/2 select-none"
+      className="pointer-events-none absolute top-full left-1/2 z-[9] h-[max(24px,28cqw)] w-auto -translate-x-1/2 select-none"
     />
   );
 }

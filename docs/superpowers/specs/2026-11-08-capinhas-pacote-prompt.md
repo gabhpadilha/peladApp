@@ -30,3 +30,7 @@ A diferença entre as faixas é de **material e brilho**, não de formato: as qu
 
 ## Raridade e peças da arte das skins (referência)
 A capinha é da **faixa** do pacote; a raridade da **skin** que sai dele segue as regras do `CLAUDE.md` (comum 1 peça, rara 2, épica 3, lendária 3 mais flutuantes).
+
+## Cristais de raridade (gema embaixo da carta, 2026-11-09)
+Referências do dono: cristal azul em losango alongado com núcleo brilhante e raios de difração, prisma roxo longo com dispersão em arco-íris e um buquê de cristais holográficos com estilhaços no ar. A gema aparece embaixo de toda carta com skin (arquivos em `public/rarity/<raridade>.webp`, altura-alvo 220 px, fundo transparente; o app mede a altura, então formas alongadas funcionam).
+Prompt-base (uma imagem por raridade, mesma conversa): "Um único cristal [FORMA] flutuando no centro, fotorrealista, refração e dispersão em arco-íris, facetas nítidas, núcleo luminoso, **fundo preto puro**, sem chão, sem texto, bem iluminado, cristal inteiro com folga nas bordas." Formas: **comum** quartzo fumê curto; **rara** safira azul em losango alongado; **épica** ametista em prisma longo; **lendária** buquê de cristais holográficos com estilhaços. O app recorta o fundo escuro ligado à borda da imagem (`/tmp`-style: flood fill por luminância), então o fundo precisa ser preto de verdade.
