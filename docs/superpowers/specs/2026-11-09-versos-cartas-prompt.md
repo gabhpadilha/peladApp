@@ -28,7 +28,23 @@ A carta gira e o verso mostra a raridade da skin. **Uma arte-base só**; muda en
 >
 > **Não inclua:** nenhum texto, letra ou número (a logo é o único símbolo), nem luas, estrelas, sóis, tarô, astrologia, personagens ou rostos. Acabamento limpo, nítido, alto contraste, fotorrealista.
 
-## O que trocar nas outras raridades (depois que a lendária for aprovada)
+## Versão simples (pedido do dono do app depois da primeira lendária do Gemini)
+O resultado do Gemini (obsidiana preta, moeda de ouro com a logo e linhas de quadra em ouro) ficou na direção certa, mas **com detalhe demais em aço e pedras**. Simplificar: **sem rubis, sem cantoneiras de joia, sem bisel grosso e sem guilloché denso**. Fica só: placa preta fosca, **fio de ouro fino** com as linhas de quadra (poucas), a **moeda de ouro com a logo** no centro e as duas plaquinhas **só em contorno fino**.
+
+### Pedido para ajustar a imagem que ele já gerou (colar na mesma conversa)
+> Mantenha exatamente este desenho (placa preta, moeda de ouro com a logo no centro, linhas de quadra em ouro, plaquinha vazia em cima e embaixo), mas **simplifique bastante**: remova os rubis e as cantoneiras de joia dos cantos; troque a moldura grossa de ouro por um **fio fino de ouro**; reduza as linhas de quadra a **poucas linhas limpas** (círculo central, as duas áreas e a linha do meio) sem o desenho fino repetido (guilloché) em volta da moeda; deixe o fundo preto **fosco e liso**, sem textura de fibra; as duas plaquinhas viram **apenas um contorno fino de ouro, sem bisel**. Mantenha a moeda de ouro com a logo, com um brilho suave. Nada de texto, só a logo. Mesma proporção 5:7 e mesma posição de tudo.
+
+### Prompt-base simples (para as outras raridades; só muda cor e material)
+> Verso de carta colecionável **minimalista e elegante**, vista de cima, plana, proporção 5:7 vertical, de ponta a ponta, sem cantos arredondados. Fundo **[COR DO FUNDO] fosco e liso**. **Fio fino [COR DO FIO]** formando a moldura e poucas linhas limpas de quadra de futsal vista de cima (círculo central, as duas áreas, linha do meio). No centro, uma **moeda circular [MATERIAL DA MOEDA]** com a **logo do Cancha Club em relevo, exatamente como na imagem anexa**. Uma **plaquinha vazia só em contorno fino** no topo e outra maior embaixo, sem texto. Sem pedras, sem joias, sem bisel grosso, sem ornamentos repetitivos, sem nenhum texto além da logo. Fotorrealista, luz suave, **[BRILHO]**.
+
+| | Comum | Rara | Épica | Lendária |
+|---|---|---|---|---|
+| **Fundo** | grafite fosco | azul-marinho fosco | roxo-escuro fosco | preto fosco |
+| **Fio** | prata fosca | azul-gelo | dourado-champanhe | ouro |
+| **Moeda** | aço escovado | prata polida | ouro-champanhe com reflexo violeta | ouro polido |
+| **Brilho** | nenhum | reflexo azul suave | reflexo iridescente violeta | brilho dourado suave |
+
+## O que trocar nas outras raridades (versão detalhada, descartada por enquanto)
 | | Comum | Rara | Épica | Lendária |
 |---|---|---|---|---|
 | **Placa** | polímero grafite fosco | alumínio anodizado azul escovado | vidro violeta escuro sobre metal escovado | obsidiana preta polida |
