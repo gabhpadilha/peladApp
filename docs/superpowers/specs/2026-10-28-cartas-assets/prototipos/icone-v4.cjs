@@ -3,8 +3,8 @@
 // Mesma receita do Melhor Jogador e da Lenda: fundo -> borda -> render, a borda por cima do conteúdo.
 // A caixa da carta é o lado de FORA do ouro da borda (x 190 a 1606, y 184 a 2174 da arte; 5:7) levado para os 84% do meio da caixa 714 x 1000.
 // O cartão do fundo veio um pouco menor e mais baixo que a abertura da borda (deixava uma faixa preta no alto): ele é esticado ~2% até
-// cobrir a caixa toda, por baixo da borda (`artInset` na roupa). O render veio grande demais (68% da carta): é reduzido a 70% e posto
-// no meio da lateral direita, meio dentro e meio fora, abaixo do selo do OVR.
+// cobrir a caixa toda, por baixo da borda (`artInset` na roupa). O render fica a 90% do tamanho original, ATRÁS do jogador por dentro da carta (no fundo)
+// e por cima da borda só do lado de fora (`-vaza`).
 // Saem `premium-marfim.webp` (fundo) e `premium-marfim-vaza.webp` (borda + render, 774 x 1000: o aglomerado passa da caixa pela direita).
 // Uso: node icone-v4.cjs <pasta de saída> <raiz do repo>
 const path = require("path");
@@ -12,7 +12,7 @@ const sharp = require(path.resolve(process.argv[3], "node_modules/sharp"));
 const OUT = process.argv[2];
 const F = (n) => path.join(__dirname, `icone-v4-${n}-dono.jpg`);
 const SRC = { w: 1792, h: 2400, card: { x: 190, y: 184, w: 1416, h: 1990 }, fundo: { x: 206, y: 232, w: 1377, h: 1956 } };
-const BW = 714, BH = 1000, OUT_W = 790;
+const BW = 714, BH = 1000, OUT_W = 800;
 const CW = BW * 0.84, CH = BH * 0.84, CX0 = BW * 0.08, CY0 = BH * 0.08;
 const SX = CW / SRC.card.w, SY = CH / SRC.card.h;
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -62,10 +62,6 @@ async function cutRender() {
 }
 
 (async () => {
-  // Fundo: o cartão inteiro, esticado para a caixa da carta (a borda esconde as beiradas).
-  const fu = SRC.fundo;
-  await sharp(F("fundo")).extract({ left: fu.x, top: fu.y, width: fu.w, height: fu.h }).resize(600, 850, { fit: "fill" }).webp({ quality: 92 }).toFile(`${OUT}/premium-marfim.webp`);
-
   const left = Math.round(CX0 - SRC.card.x * SX), top = Math.round(CY0 - SRC.card.y * SY);
   const place = async (png, srcW, srcH) => {
     const rw = Math.round(srcW * SX), rh = Math.round(srcH * SY);
@@ -74,15 +70,31 @@ async function cutRender() {
     const w = Math.min(rw - cl, OUT_W - Math.max(0, left)), h = Math.min(rh - ct, BH - Math.max(0, top));
     return { input: await sharp(piece).extract({ left: cl, top: ct, width: w, height: h }).png().toBuffer(), left: Math.max(0, left), top: Math.max(0, top) };
   };
-  // Render reduzido e reposicionado numa tela 2000 x 2400 da arte (cabe o que passa da borda direita).
-  const RS = 0.7, RC = [1320, 870], RT = [1570, 1180];
-  const raw = await cutRender();
-  const rw0 = Math.round(SRC.w * RS), rh0 = Math.round(SRC.h * RS);
-  const small = await sharp(raw).resize(rw0, rh0, { kernel: "lanczos3" }).png().toBuffer();
-  const wide = await sharp({ create: { width: 2000, height: SRC.h, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+
+  // Render maior e reposicionado numa tela 2000 x 2400 da arte (cabe o que passa da borda direita).
+  const RS = 0.9, RC = [1320, 870], RT = [1500, 1000], WIDE = 2000;
+  const small = await sharp(await cutRender()).resize(Math.round(SRC.w * RS), Math.round(SRC.h * RS), { kernel: "lanczos3" }).png().toBuffer();
+  const wide = await sharp({ create: { width: WIDE, height: SRC.h, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
     .composite([{ input: small, left: Math.round(RT[0] - RC[0] * RS), top: Math.round(RT[1] - RC[1] * RS) }]).png().toBuffer();
+
+  // O render fica ATRÁS do jogador por dentro da carta (vai no fundo) e POR CIMA da borda só do lado de fora (camada `-vaza`):
+  // a divisa é a janela do conteúdo (1,43% da carta para dentro da borda), com uns 16 px de rampa, e os dois lados têm os mesmos pixels.
+  const SPLIT = SRC.card.x + SRC.card.w - SRC.card.w * 0.0143;
+  const raw = await sharp(wide).raw().toBuffer();
+  const outer = Buffer.from(raw);
+  for (let y = 0; y < SRC.h; y++) for (let x = 0; x < WIDE; x++) { const o = (y * WIDE + x) * 4 + 3; outer[o] = Math.round(raw[o] * smooth(SPLIT - 16, SPLIT, x)); }
+  const outerPng = await sharp(outer, { raw: { width: WIDE, height: SRC.h, channels: 4 } }).png().toBuffer();
+
+  // Fundo: o cartão do fundo esticado até a caixa da carta + o render por cima, recortado na folga de `artInset` (1,43% e 1,02%).
+  const fu = SRC.fundo, c = SRC.card;
+  const stretched = await sharp(F("fundo")).extract({ left: fu.x, top: fu.y, width: fu.w, height: fu.h }).resize(c.w, c.h, { fit: "fill" }).png().toBuffer();
+  const renderOnCard = await sharp(wide).extract({ left: c.x, top: c.y, width: Math.min(c.w, WIDE - c.x), height: c.h }).png().toBuffer();
+  const card = await sharp(stretched).composite([{ input: renderOnCard, left: 0, top: 0 }]).png().toBuffer();
+  const ix = Math.round(c.w * 0.0143), iy = Math.round(c.h * 0.0102);
+  await sharp(card).extract({ left: ix, top: iy, width: c.w - 2 * ix, height: c.h - 2 * iy }).resize(600, 850, { fit: "fill" }).webp({ quality: 92 }).toFile(`${OUT}/premium-marfim.webp`);
+
   const frame = await place(await cutFrame(), SRC.w, SRC.h);
-  const render = await place(wide, 2000, SRC.h);
+  const render = await place(outerPng, WIDE, SRC.h);
   await sharp({ create: { width: OUT_W, height: BH, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
     .composite([frame, render]).webp({ quality: 92, alphaQuality: 100 }).toFile(`${OUT}/premium-marfim-vaza.webp`);
   console.log("ok");
