@@ -1173,6 +1173,19 @@ export type Database = {
         }[]
       }
       get_my_deletion_request: { Args: never; Returns: string }
+      get_my_listings: {
+        Args: { target_group: string }
+        Returns: {
+          created_at: string
+          expires_at: string
+          id: string
+          price: number
+          purchase_id: string
+          skin: string
+          sold_at: string
+          status: string
+        }[]
+      }
       get_my_market_income: { Args: { target_group: string }; Returns: number }
       get_my_packs: {
         Args: never

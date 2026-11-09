@@ -134,7 +134,22 @@ let safiraA, listing1;
   check(S, "open_pack só conta como repetida a cópia em posse", fn.includes("transferred_at is null"));
 }
 
-// 7. Isolamento: comprador não lê as compras da outra pelada
+// 7. Meus anúncios
+{
+  const S = "7 meus anúncios";
+  const mine = (await W.as(A.users[2], () => db.query("select * from public.get_my_listings($1)", [A.group]))).rows;
+  check(S, "lista os próprios anúncios", mine.length >= 3 && mine.every((l) => l.skin));
+  const many = (await W.as(A.users[3], () => db.query("select * from public.get_my_listings($1)", [A.group]))).rows;
+  check(S, "vencido aparece como expired", many.filter((l) => l.status === "expired").length === 10 && many.some((l) => l.status === "active"));
+  check(S, "cancelado aparece como cancelled", mine.some((l) => l.status === "cancelled"));
+  const sold = (await W.as(A.users[1], () => db.query("select * from public.get_my_listings($1)", [A.group]))).rows;
+  check(S, "vendido aparece como sold", sold.some((l) => l.status === "sold" && l.sold_at));
+  const other = (await W.as(B.users[2], () => db.query("select * from public.get_my_listings($1)", [A.group]))).rows;
+  check(S, "não lê anúncios de outra pelada pelo id", other.length === 0);
+  fail(S, "anon não chama", await (async () => { try { await db.exec("set role anon"); await db.query("select * from public.get_my_listings($1)", [A.group]); return { ok: true }; } catch (e) { return { ok: false, code: e.code, error: e.message }; } finally { await db.exec("reset role"); } })(), "42501");
+}
+
+// 8. Isolamento: comprador não lê as compras da outra pelada
 {
   const S = "7 isolamento";
   const r = await attempt(B.users[1], "select * from public.card_skin_purchases where group_id = $1", [A.group]);

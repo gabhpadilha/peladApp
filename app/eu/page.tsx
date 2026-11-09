@@ -73,7 +73,7 @@ async function MeContent() {
           </div>
         </div>
 
-        <MyCards me={me} cards={data.cards} />
+        <MyCards me={me} cards={data.cards} market={data.market} />
 
         {isOwner && (
           <Link

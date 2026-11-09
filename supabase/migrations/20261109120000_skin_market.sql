@@ -204,6 +204,30 @@ $$;
 revoke execute on function public.get_my_market_income(uuid) from public, anon;
 grant execute on function public.get_my_market_income(uuid) to authenticated;
 
+-- Os anúncios do logado na pelada indicada (Eu → Minhas cartas e "Meus anúncios"), do mais novo ao mais antigo.
+-- "expired" = ativo com prazo no passado (a skin já está livre).
+create function public.get_my_listings(target_group uuid)
+returns table (
+  id uuid, purchase_id uuid, skin text, price integer, created_at timestamptz, expires_at timestamptz,
+  status text, sold_at timestamptz
+)
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select l.id, l.purchase_id, l.skin, l.price, l.created_at, l.expires_at,
+         case when l.status = 'active' and l.expires_at <= now() then 'expired' else l.status end,
+         l.sold_at
+    from public.market_listings l
+    join public.group_members gm on gm.id = l.seller_member_id
+   where gm.group_id = target_group and gm.user_id = (select auth.uid())
+   order by l.created_at desc
+   limit 60;
+$$;
+revoke execute on function public.get_my_listings(uuid) from public, anon;
+grant execute on function public.get_my_listings(uuid) to authenticated;
+
 -- 4. Usar uma skin exige tê-la em posse e não anunciada (o servidor também confere) -----------------------------------
 -- Pacote: "repetida" passa a ser só a cópia ainda em posse (quem vendeu e tira de novo ganha a skin de volta).
 create or replace function public.open_pack(target_pack uuid)

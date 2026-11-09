@@ -59,3 +59,16 @@ export const MARKET_ERROR_MESSAGES: Readonly<Record<string, string>> = {
   PA030: "Você já tem essa skin.",
   PA031: "CanchaCoins insuficientes para essa compra.",
 };
+
+/** Passo do botão − / + do preço no formulário de anunciar. */
+export const MARKET_PRICE_STEP = 10;
+
+/** Preço sugerido ao abrir o formulário: o de tabela da Loja ou o meio da faixa da raridade, arredondado ao passo. */
+export function getMarketSuggestedPrice(skin: string): number | null {
+  const range = getMarketPriceRange(skin);
+  if (!range) return null;
+  const shopSkin = CARD_SKINS.find((item) => item.key === skin);
+  const target = shopSkin && shopSkin.price > 0 ? shopSkin.price : (range.min + range.max) / 2;
+  const rounded = Math.round(target / MARKET_PRICE_STEP) * MARKET_PRICE_STEP;
+  return Math.min(range.max, Math.max(range.min, rounded));
+}
