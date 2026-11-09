@@ -53,6 +53,8 @@ export type Roupa = {
   bar: string;
   /** Texto secundário (posição, nomes das estatísticas). */
   muted: string;
+  /** Cor do texto principal (nome, números); padrão branco. Cartas claras (Ícone) usam tinta escura. */
+  ink?: string;
   /** Carta fosca (a padrão, de começo de jogo): sem clarão, brilhos, feixe de luz nem selo brilhante. */
   matte?: boolean;
   /** Estrelinhas piscando na frente do jogador (padrão: sim, menos na fosca). */
@@ -217,7 +219,7 @@ const ROUPAS = {
   // Maré (2026-11-05, teste do kit em camadas: fundo e borda feitos no Gemini com o gabarito 5:7, montados por `prototipos/montar-carta.cjs`):
   // tromba-d'água num mar de enchente e moldura de ouro com a "capa" de lâminas nos cantos de baixo. Janela padrão (`ring`, 64,5 px da caixa).
   mare: { background: "premium-mare", overflow: "premium-mare-vaza", artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, clean: true, trim: null, metal: ["#b8902f", "#b8902f", "#fff1c2"], accent: "#f3d27a", light: "120 230 255", bar: "#031018", muted: "#bfeeff", sparkles: false, neon: "#f3d27a" },
-  icone: { background: "premium-marfim", overflow: "premium-marfim-vaza", overflowWidth: 774 / 714, artFrame: true, trim: null, metal: ["#c9a24e", "#c9a24e", "#fff4d6"], accent: "#e2c06e", light: "255 240 200", bar: "#1a140a", muted: "#f0dfb5", sparkles: false, neon: "#ffcf4d" },
+  icone: { background: "premium-marfim", overflow: "premium-marfim-vaza", overflowWidth: 774 / 714, artFrame: true, clean: true, bareName: true, ink: "#2a2113", trim: null, metal: ["#c9a24e", "#c9a24e", "#fff4d6"], accent: "#c9a24e", light: "255 240 200", bar: "#f4efe4", muted: "#6b5a36", sparkles: false, neon: "#ffcf4d" },
   // Aurora (2026-11-04, GUARDADA: o dono gostou mas pediu para não aplicar ainda; não está em `CARD_SKINS`, então não aparece na Loja.
   // Para usar: entrada em `CARD_SKINS` (sugestão nível 14, 1600 CC), `case` em `skinRoupa` e `SKIN_CLASSES`): aurora boreal renderizada pixel a pixel em código (`prototipos/premium-aurora.cjs`), fio de ouro, respiro preto,
   // tubo de neon verde-água por fora e a Estrela Polar no topo; a luz da aurora vaza sobre a moldura. Concêntrica: windowRadius = raio da carta − o aro.
@@ -876,6 +878,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
     "--cc-bar": roupa.bar,
     "--cc-muted": roupa.muted,
     "--cc-neon": roupa.neon,
+    ...(roupa.ink ? { color: roupa.ink } : null),
   } as CSSProperties;
   const isNeon = roupa.neon !== undefined;
   const hasTrim = isNeon && roupa.trim !== null;
