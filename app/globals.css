@@ -333,6 +333,12 @@
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
   }
+  /* Controles não selecionam o texto nem abrem o menu de "salvar imagem" no toque longo do iPhone (conteúdo comum continua selecionável). */
+  :where(button, [role="button"], summary) {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
   /* Foco visível para quem navega pelo teclado (os botões do shadcn já têm o próprio anel). */
   :where(a, button, summary, [role="button"], [role="tab"], select, input, textarea):focus-visible {
     outline: 2px solid var(--ring);
