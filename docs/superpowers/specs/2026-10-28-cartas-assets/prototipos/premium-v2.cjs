@@ -35,6 +35,8 @@ const GEMS = {
   esmeralda: { hue: 150, sat: 0.95, light: 0.95, neon: "#2dffa0" },
   ametista: { hue: 278, sat: 0.95, light: 1.05, neon: "#c46bff" },
   rubi: { hue: 348, sat: 1, light: 1, neon: "#ff2f66" },
+  // Ícone (2026-11-09): a mesma arte, com os azuis viram marfim e prata-claro (quase sem cor, bem mais claros); o ouro fica.
+  marfim: { hue: 42, sat: 0.25, light: 3, neon: "#ffcf4d" },
 };
 // Trecho do lado direito em que o aglomerado de cristais passa pelo neon (na arte, px): ali fica o neon dela.
 const CRYSTAL_ZONE = { top: 420, bottom: 1340 };
