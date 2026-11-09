@@ -47,13 +47,13 @@ export async function buyCardSkin(input: { skin: string; equip: boolean }): Prom
   const admin = createAdminClient();
   const { data: purchases, error: purchasesError } = await admin
     .from("card_skin_purchases")
-    .select("skin, price")
+    .select("skin, price, transferred_at")
     .eq("member_id", membership.memberId);
   if (purchasesError) {
     console.error("buyCardSkin: leitura das compras falhou", purchasesError);
     return { success: false, message: "Não foi possível comprar agora. Tente de novo." };
   }
-  if (purchases.some((purchase) => purchase.skin === skin.key)) {
+  if (purchases.some((purchase) => purchase.skin === skin.key && purchase.transferred_at === null)) {
     return { success: false, message: `Você já tem a ${skin.name}.` };
   }
   const balance = progression.coinsEarned - purchases.reduce((total, purchase) => total + purchase.price, 0);

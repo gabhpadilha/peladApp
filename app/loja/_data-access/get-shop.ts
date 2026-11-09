@@ -47,12 +47,18 @@ export type Shop = {
 /** "Hoje" no fuso da pelada, `AAAA-MM-DD` (o servidor roda em UTC). */
 const todayFormatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo" });
 
-/** Spent e compras do próprio jogador (o RLS deixa todos da pelada lerem). */
+/**
+ * Gasto e skins em posse do próprio jogador (o RLS deixa todos da pelada lerem). Skin vendida no Mercado
+ * continua no gasto (o preço pago não volta) e sai da posse (`transferred_at`).
+ */
 export async function getOwnPurchases(memberId: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("card_skin_purchases").select("skin, price").eq("member_id", memberId);
+  const { data, error } = await supabase
+    .from("card_skin_purchases")
+    .select("skin, price, transferred_at")
+    .eq("member_id", memberId);
   if (error) throw error;
-  const owned = new Set(data.map((purchase) => purchase.skin).filter(isCardSkinKey));
+  const owned = new Set(data.filter((purchase) => purchase.transferred_at === null).map((purchase) => purchase.skin).filter(isCardSkinKey));
   const spent = data.reduce((total, purchase) => total + purchase.price, 0);
   return { owned, spent };
 }

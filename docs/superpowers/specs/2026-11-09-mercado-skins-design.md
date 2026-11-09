@@ -47,8 +47,9 @@ Copiar o mercado de transferências do EA FC: o jogador anuncia uma skin dele po
 
 - **Carreira vai para dentro de Eu.**
 - **Loja e Mercado viram um botão só** na barra de baixo, com as duas partes lado a lado lá dentro (como Loja e Transferências no EA FC).
-- A barra do celular fica com 5 botões: Início, Rodadas, Comunidade, Loja/Mercado e Eu.
-- O nome do botão integrado, a ordem dos botões e onde a Carreira aparece em Eu ficam para a prévia visual, que o dono aprova antes do código.
+- A barra do celular fica com **5 colunas iguais**: Início, Rodadas, **Social** (a Comunidade, nome curto só na barra), **Loja** (com as abas Loja | Mercado lá dentro) e Eu.
+- Carreira em Eu: bloco "Minha carreira" com Estatísticas e Coleção.
+- Prévias aprovadas pelo dono em 2026-11-09: lista do Mercado (filtro recolhido por ícone, raridade em lista suspensa, botões de preço do mesmo tamanho), folha de compra, folha de anunciar, Meus anúncios e Eu com a Carreira.
 
 ## Como funciona por baixo (partes decididas e chamadas minhas)
 
@@ -65,6 +66,17 @@ Copiar o mercado de transferências do EA FC: o jogador anuncia uma skin dele po
 **Faixas de preço.** Numa tabela no banco (por raridade e, depois, por carta), que só o admin edita (primeiro por SQL, depois pelo `/admin`). O preço do anúncio é validado no servidor contra a faixa.
 
 **Testes.** No PGlite, como os pacotes: listar, cancelar, vencer, comprar, compra simultânea (só uma passa), saldo insuficiente, faixa de preço, Esmeralda bloqueada, skin em uso, pelada suspensa, isolamento entre peladas (nada privado vaza).
+
+## Como ficou no banco (etapa 1, feita em 2026-11-09)
+
+Mais simples que um inventário novo, com o mesmo efeito (migration `20261109120000_skin_market.sql`, teste `supabase/tests/market/market.mjs`, 47 verificações):
+
+- **Posse:** `card_skin_purchases` continua sendo o histórico do que cada um pagou. A skin vendida **não sai da tabela** (senão o vendedor recuperaria o preço pago no saldo): a linha ganha `transferred_at` e deixa de contar como posse. Quem compra ganha uma linha nova com `source = 'market'` e o preço do anúncio. O `unique (member_id, skin)` virou um índice único só das cópias em posse (quem vendeu pode comprar a mesma skin de novo).
+- **Saldo:** moedas ganhas (rodadas + repetidas dos pacotes + **vendas no Mercado**, `get_my_market_income`) − soma de `price`. Nada gravado, como antes.
+- **Anúncios:** `market_listings` (`active`/`sold`/`cancelled`; "vencido" é ativo com prazo no passado, liberado ao anunciar de novo). Sem acesso direto.
+- **Funções** (só a chave secreta chama, depois de o servidor conferir a sessão): `market_list`, `market_cancel`, `market_buy` (trava o comprador e o anúncio; recebe as moedas ganhas calculadas no servidor e soma o gasto lá dentro, então duas compras ao mesmo tempo não gastam o mesmo saldo). Erros PA020 a PA031 (mensagens em `lib/market.ts`).
+- **Faixas de preço:** por enquanto em `lib/market.ts` (servidor valida antes de anunciar), não numa tabela; vão para o banco quando vier a faixa por carta e por escassez.
+- **Usar skin anunciada:** `equipCardSkin` recusa; na venda, o banco também tira a skin da carta do vendedor por segurança.
 
 ## Etapas
 

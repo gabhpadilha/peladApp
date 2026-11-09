@@ -143,14 +143,20 @@ export async function getLeague(nextPath = "/") {
   );
 
   // CanchaCoins das cartas repetidas dos pacotes abertos (só as do logado, nesta pelada): somam ao saldo.
-  const packsResult = await supabase.rpc("get_my_packs");
+  // Junto, as CanchaCoins das vendas no Mercado (só as do logado, nesta pelada): somam ao saldo como moedas ganhas.
+  const [packsResult, marketResult] = await Promise.all([
+    supabase.rpc("get_my_packs"),
+    supabase.rpc("get_my_market_income", { target_group: membership.groupId }),
+  ]);
   if (packsResult.error) throw packsResult.error;
   const packCoins = packsResult.data
     .filter((pack) => matchById.has(pack.match_id))
     .reduce((total, pack) => total + pack.coins_awarded, 0);
+  if (marketResult.error) throw marketResult.error;
+  const extraCoins = packCoins + (marketResult.data ?? 0);
   const ownProgression = progressionById.get(membership.memberId);
-  if (ownProgression && packCoins > 0) {
-    progressionById.set(membership.memberId, { ...ownProgression, coinsEarned: ownProgression.coinsEarned + packCoins });
+  if (ownProgression && extraCoins > 0) {
+    progressionById.set(membership.memberId, { ...ownProgression, coinsEarned: ownProgression.coinsEarned + extraCoins });
   }
 
   if (!profilesResult) throw new Error("profiles não carregados");

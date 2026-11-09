@@ -24,6 +24,7 @@ export async function equipCardSkin(skin: string | null): Promise<ShopActionResu
       .select("id")
       .eq("member_id", membership.memberId)
       .eq("skin", skin)
+      .is("transferred_at", null)
       .maybeSingle();
     if (error) {
       console.error("equipCardSkin: leitura da compra falhou", error);
@@ -31,6 +32,20 @@ export async function equipCardSkin(skin: string | null): Promise<ShopActionResu
     }
     if (!purchase) {
       return { success: false, message: "Compre a carta antes de usar." };
+    }
+    // Skin anunciada no Mercado (e ainda no prazo) não vai para a carta: senão a venda tiraria a carta do jogador.
+    const { count, error: listingError } = await admin
+      .from("market_listings")
+      .select("id", { count: "exact", head: true })
+      .eq("purchase_id", purchase.id)
+      .eq("status", "active")
+      .gt("expires_at", new Date().toISOString());
+    if (listingError) {
+      console.error("equipCardSkin: leitura do anúncio falhou", listingError);
+      return { success: false, message: "Não foi possível trocar a carta. Tente de novo." };
+    }
+    if ((count ?? 0) > 0) {
+      return { success: false, message: "Essa skin está anunciada no Mercado. Cancele o anúncio para usar." };
     }
   }
 

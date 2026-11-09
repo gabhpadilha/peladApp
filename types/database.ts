@@ -141,6 +141,7 @@ export type Database = {
           price: number
           skin: string
           source: string
+          transferred_at: string | null
         }
         Insert: {
           created_at?: string
@@ -150,6 +151,7 @@ export type Database = {
           price: number
           skin: string
           source?: string
+          transferred_at?: string | null
         }
         Update: {
           created_at?: string
@@ -159,6 +161,7 @@ export type Database = {
           price?: number
           skin?: string
           source?: string
+          transferred_at?: string | null
         }
         Relationships: [
           {
@@ -506,6 +509,77 @@ export type Database = {
           weekly_round_limit?: number | null
         }
         Relationships: []
+      }
+      market_listings: {
+        Row: {
+          buyer_member_id: string | null
+          created_at: string
+          expires_at: string
+          id: string
+          price: number
+          purchase_id: string
+          seller_group_id: string
+          seller_member_id: string
+          skin: string
+          sold_at: string | null
+          status: string
+        }
+        Insert: {
+          buyer_member_id?: string | null
+          created_at?: string
+          expires_at: string
+          id?: string
+          price: number
+          purchase_id: string
+          seller_group_id: string
+          seller_member_id: string
+          skin: string
+          sold_at?: string | null
+          status?: string
+        }
+        Update: {
+          buyer_member_id?: string | null
+          created_at?: string
+          expires_at?: string
+          id?: string
+          price?: number
+          purchase_id?: string
+          seller_group_id?: string
+          seller_member_id?: string
+          skin?: string
+          sold_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "market_listings_buyer_member_id_fkey"
+            columns: ["buyer_member_id"]
+            isOneToOne: false
+            referencedRelation: "group_members"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "market_listings_purchase_id_fkey"
+            columns: ["purchase_id"]
+            isOneToOne: false
+            referencedRelation: "card_skin_purchases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "market_listings_seller_group_id_fkey"
+            columns: ["seller_group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "market_listings_seller_member_id_fkey"
+            columns: ["seller_member_id"]
+            isOneToOne: false
+            referencedRelation: "group_members"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       match_attendance: {
         Row: {
@@ -1099,6 +1173,7 @@ export type Database = {
         }[]
       }
       get_my_deletion_request: { Args: never; Returns: string }
+      get_my_market_income: { Args: { target_group: string }; Returns: number }
       get_my_packs: {
         Args: never
         Returns: {
@@ -1143,6 +1218,27 @@ export type Database = {
           member_position: Database["public"]["Enums"]["player_position"]
         }
         Returns: string
+      }
+      market_buy: {
+        Args: { buyer: string; earned: number; target_listing: string }
+        Returns: string
+      }
+      market_cancel: {
+        Args: { seller: string; target_listing: string }
+        Returns: undefined
+      }
+      market_list: {
+        Args: {
+          ask_price: number
+          hours?: number
+          seller: string
+          target_purchase: string
+        }
+        Returns: string
+      }
+      market_release_expired: {
+        Args: { target_purchase: string }
+        Returns: undefined
       }
       open_pack: {
         Args: { target_pack: string }
