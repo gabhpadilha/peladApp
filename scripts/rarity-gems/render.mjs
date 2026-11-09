@@ -1,4 +1,4 @@
-// Gera os cristais de raridade (um formato, quatro cores) com three.js num Chromium sem tela e grava public/rarity/<raridade>.webp.
+// Gera os cristais de raridade (um formato, quatro cores) com three.js num Chromium sem tela e grava scripts/rarity-gems/saida/<raridade>.webp (guardados; fora do app por enquanto).
 // O cristal é traçado por raio no shader (refração, reflexão interna, absorção e dispersão); o brilho e os raios entram por cima.
 // Rode à mão quando mudar o desenho: node scripts/rarity-gems/render.mjs (precisa de `three` e do Playwright).
 import { createServer } from "node:http";
@@ -33,7 +33,7 @@ await page.goto(`http://localhost:${port}/`);
 await page.waitForFunction(() => window.ready === true, null, { timeout: 60000 });
 const images = await page.evaluate(() => window.renderAll());
 
-const raw = async (dataUrl, channels) => sharp(Buffer.from(dataUrl.split(",")[1], "base64")).ensureAlpha().raw().toBuffer();
+const raw = async (dataUrl) => sharp(Buffer.from(dataUrl.split(",")[1], "base64")).ensureAlpha().raw().toBuffer();
 for (const [kind, { body, flare }] of Object.entries(images)) {
   const bodyRaw = await raw(body);
   const flareRaw = await raw(flare);
@@ -53,7 +53,7 @@ for (const [kind, { body, flare }] of Object.entries(images)) {
   }
   const rgba = await sharp(out, { raw: { width: W, height: H, channels: 4 } }).png().toBuffer();
   const webp = await sharp(rgba).trim({ threshold: 6 }).resize({ height: 300, fit: "inside", kernel: "lanczos3" }).webp({ quality: 92, alphaQuality: 100 }).toBuffer();
-  await writeFile(path.join(root, "public/rarity", `${kind}.webp`), webp);
+  await writeFile(path.join(root, "scripts/rarity-gems/saida", `${kind}.webp`), webp);
   await writeFile(path.join("/tmp/claude-0", `gem-${kind}.png`), rgba);
   console.log(kind, webp.length, "bytes");
 }

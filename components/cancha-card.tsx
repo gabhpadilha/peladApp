@@ -7,7 +7,6 @@ import { getCardStats } from "@/lib/card-stats";
 import { getInitials } from "@/lib/get-initials";
 import type { CardThemeKey } from "@/lib/card-themes";
 import { AWARD_LABELS, awardDesignKind, type AwardDesignKind, type AwardKind } from "@/types/award";
-import { getSkinRarity, PACK_RARITY_NAMES, SKIN_BOTTOM_OVERHANG, type PackRarity } from "@/lib/packs";
 import type { CardSkinKey } from "@/types/card-skin";
 import type { Player } from "@/types/player";
 
@@ -863,52 +862,10 @@ function FloaterPieces({ items, layer }: { items: readonly Floater[]; layer: "ba
     ));
 }
 
-/** Cor do nome de cada raridade (a luz da abertura do pacote). */
-const RARITY_TEXT_COLORS: Record<PackRarity, string> = {
-  comum: "#c7d2de",
-  rara: "#7fb0ff",
-  epica: "#c99bff",
-  lendaria: "#ffd067",
-};
-
-/**
- * Raridade da skin em uso, presa à própria carta em qualquer tamanho (decisão do dono do app em 2026-11-09: longe da carta perde a
- * referência): o cristal fica engastado na borda de baixo, centralizado, metade dentro e metade fora da arte da skin; nas cartas
- * grandes (120px ou mais, medidos na carta) o nome da raridade fica colado logo abaixo do cristal. Os quatro cristais (um formato,
- * quatro cores) saem do `scripts/rarity-gems/render.mjs` (three.js, ray tracing, renderizados uma vez e guardados em
- * `public/rarity/`): na tela é só uma imagem, sem WebGL.
- */
-function RarityGem({ rarity, skin }: { rarity: PackRarity; skin: string }) {
-  const name = PACK_RARITY_NAMES[rarity];
-  // O centro do cristal cai um pouco para dentro da arte que passa da borda de baixo (folhas, moldura), para ficar preso a ela.
-  const center = (SKIN_BOTTOM_OVERHANG[skin] ?? 0) * 0.7 + 7;
-  return (
-    <>
-      {/* eslint-disable-next-line @next/next/no-img-element -- ícone estático (public/rarity), sem o otimizador do Next */}
-      <img
-        role="img"
-        alt={`Raridade ${name}`}
-        src={`/rarity/${rarity}.webp`}
-        style={{ top: `calc(100% + ${center}cqw)` }}
-        className="pointer-events-none absolute left-1/2 z-[9] h-[max(20px,30cqw)] w-auto -translate-x-1/2 -translate-y-1/2 select-none"
-      />
-      <span
-        aria-hidden
-        style={{ top: `calc(100% + ${center + 18}cqw)`, color: RARITY_TEXT_COLORS[rarity] }}
-        className="pointer-events-none absolute left-1/2 z-[9] hidden -translate-x-1/2 font-display text-[max(12px,8.5cqw)] leading-none font-bold tracking-[0.16em] whitespace-nowrap uppercase select-none @min-[120px]:block"
-      >
-        {name}
-      </span>
-    </>
-  );
-}
-
 export function CanchaCard({ player, award, className, photoSizes, photoFrame = "atual", pure = false }: CanchaCardProps) {
   const { roupa, rank, stats, band, subtitle } = getCanchaCardLook(player, award);
   const lift = roupa.statsLift ?? 0;
   const frame = PHOTO_FRAMES[roupa.photoFrame ?? photoFrame];
-  // Cartas especiais (prêmios) não vestem skin; só a carta em uso mostra a raridade da skin.
-  const rarity = award || pure ? null : getSkinRarity(player.cardSkin);
 
   const vars = {
     "--cc-m1": roupa.metal[0],
@@ -1077,7 +1034,6 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
             : cn(METAL_WINDOW, "shadow-[inset_0_0_0_0.5cqw_var(--cc-m3),inset_0_0_0_0.9cqw_rgb(0_0_0/0.35)]"),
         )}
       />
-      {rarity && player.cardSkin && <RarityGem rarity={rarity} skin={player.cardSkin} />}
     </article>
   );
 

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { LockIcon } from "lucide-react";
 import { PlayerCard } from "@/components/player-card";
-import { getSkinRarity } from "@/lib/packs";
+import { getSkinRarity, PACK_RARITY_NAMES, type PackRarity } from "@/lib/packs";
 import { cn } from "@/lib/utils";
 import type { Player } from "@/types/player";
 
@@ -15,8 +15,18 @@ type CardSkinTileProps = {
   children: ReactNode;
 };
 
+/** Cor do nome de cada raridade (a luz da abertura do pacote). */
+const RARITY_TEXT: Record<PackRarity, string> = {
+  comum: "text-slate-300",
+  rara: "text-sky-300",
+  epica: "text-violet-300",
+  lendaria: "text-amber-300",
+};
+
 /** Uma carta da Loja ou de "Minhas cartas" (página Eu): carta, nome e a ação. */
 export function CardSkinTile({ player, name, isEquipped = false, isLocked = false, children }: CardSkinTileProps) {
+  // Raridade escrita embaixo do nome (só na Loja e em Eu → Minhas cartas; em outras telas a representação ainda será definida).
+  const rarity = getSkinRarity(player.cardSkin);
   return (
     <li
       className={cn(
@@ -24,8 +34,7 @@ export function CardSkinTile({ player, name, isEquipped = false, isLocked = fals
         isEquipped && "border-primary/60 bg-primary/5",
       )}
     >
-      {/* Com skin de raridade, deixa espaço para o cristal que fica embaixo da carta. */}
-      <div className={cn("relative w-[70%]", getSkinRarity(player.cardSkin) && "mb-14")}>
+      <div className="relative w-[70%]">
         {/* Só opacidade: `saturate` (filtro) sobre as cartas desmontava a prévia no iPhone. */}
         <div className={cn(isLocked && "opacity-40")}>
           <PlayerCard player={player} size="fill" />
@@ -40,6 +49,7 @@ export function CardSkinTile({ player, name, isEquipped = false, isLocked = fals
       </div>
       <div className="flex w-full flex-col items-center gap-2">
         <p className="font-display text-lg leading-none font-bold uppercase">{name}</p>
+        {rarity && <p className={cn("font-display text-sm leading-none font-bold tracking-[0.16em] uppercase", RARITY_TEXT[rarity])}>{PACK_RARITY_NAMES[rarity]}</p>}
         {children}
       </div>
     </li>
