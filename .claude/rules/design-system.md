@@ -69,6 +69,10 @@ Desde 2026-10-29 todas as cartas usam a `CanchaCard` (o `PlayerCard` a chama). A
 - **Tamanho (pedido do dono do app em 2026-10-29: as cartas são o foco do jogo):** cartas grandes em toda tela. Minha carta na Início com ~metade da largura do card no celular (até 224px) e 240px no PC, com o OVR maior; Melhor Jogador da rodada e Time do Mês do slider com 144–160px no celular e 192px no PC (exceção: no slider da Início, o Time do Mês fica com 96px no celular, ao lado dos chips um por linha, e os leques são menores, para o slide caber numa tela sem rolar; chip nunca quebra o texto); ranking 64/80px; Eu 46%/240px; Carreira 256/288px; mesa tática até 176px. Carta nova numa tela: comece grande e só reduza se faltar espaço.
 - **Espaçamento:** grades de cartas usam vão que acompanha a tela (`clamp(...)`), e o campo da revelação (Time da Semana/Mês) tem proporção fixa com as vagas em %. Ao criar tela com cartas, deixe folga para o brilho do neon.
 
+## 🎴 Raridade das skins de pacote (2026-11-08)
+
+cada nível acrescenta algo que o anterior não tem. **Comum:** borda simples (fio ou tubo) e fundo padrão ou textura leve. **Rara:** borda trabalhada de leve e fundo com pattern próprio. **Épica:** borda trabalhada, fundo sofisticado e **1 peça em render 3D vazando** da carta (animação opcional, como raios acendendo). **Lendária:** borda trabalhada com enfeites, fundo sofisticado (ferro, metal), **render 3D vazando**, **elementos flutuando em volta** (círculo atrás e runas ou cacos) e animação; só 1 por conjunto e é o único nível com flutuantes (também o mais pesado para o iPhone). Peças de arte no Gemini: comum 1, rara 2 (fundo e borda), épica 3 (fundo, borda e render), lendária 3 mais 3 a 5 flutuantes. **Comuns e raras podem ser recolores do mesmo desenho** (coluna `pack_sets.design`), como Esmeralda, Safira, Ametista e Rubi. Régua com o que existe: Destino lendária; Lenda do Trovão e Relâmpago entre épica e lendária; os cristais (Safira, Ametista, Esmeralda) seriam épicas pela regra; Rubi e Ícone (louros, sem vazar) raras.
+
 ## 🃏 Carta do jogador (desenho antigo, `LegacyPlayerCard`)
 
 - **Dois tipos de carta:**

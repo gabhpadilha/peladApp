@@ -27,3 +27,6 @@ A diferença entre as faixas é de **material e brilho**, não de formato: as qu
 - Fundo preto puro: o app recorta pelo brilho, como nas cartas.
 - Sem texto na arte: "RODADA N" e o nome da faixa o app escreve por cima.
 - Entregar em PNG/JPG; os arquivos entram em `public/pacotes/<mes>/<faixa>.webp` e substituem a capinha provisória (`components/pack-cover.tsx`).
+
+## Raridade e peças da arte das skins (referência)
+A capinha é da **faixa** do pacote; a raridade da **skin** que sai dele segue as regras do `CLAUDE.md` (comum 1 peça, rara 2, épica 3, lendária 3 mais flutuantes).
