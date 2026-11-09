@@ -53,8 +53,10 @@ async function cutRender() {
   const out = Buffer.alloc(n * 4);
   for (let i = 0; i < n; i++) {
     const ramp = smooth(12, 70, mx[i]);
+    // o render vem com os cristais encostando na borda direita da imagem, cortados retos: esmaece nos últimos 90 px
+    const x = i % W, edge = smooth(0, 90, W - 1 - x) * smooth(0, 40, x);
     const a = Math.max(ramp, m[i] / 255);
-    out[i * 4 + 3] = Math.round(a * 255);
+    out[i * 4 + 3] = Math.round(a * edge * 255);
     const k = m[i] > 128 || ramp >= 1 ? 1 : 1 / Math.max(a, 0.05);
     for (let c = 0; c < 3; c++) out[i * 4 + c] = Math.min(255, Math.round(data[i * 3 + c] * k));
   }

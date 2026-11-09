@@ -107,19 +107,25 @@ export function ShopContent({ sections, balance, sale }: ShopContentProps) {
       <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
         {items.map((item) => {
           const isLocked = item.state === "locked";
+          const isShort = !isLocked && balance < item.price;
           // Só o que o jogador ainda não tem aparece aqui; as dele ficam em Eu → Minhas cartas.
           return (
-            <CardSkinTile key={item.skin ?? "padrao"} player={withSkin(item)} name={item.name} isLocked={isLocked}>
-              {item.state === "available" && (
+            <CardSkinTile key={item.skin ?? "padrao"} player={withSkin(item)} name={item.name}>
+              {item.state === "available" && !isShort ? (
                 <Button type="button" className="h-10 w-full gap-1.5" disabled={isPending} onClick={() => setSelected(item)}>
                   <CoinsIcon aria-hidden className="size-4" />
                   <Price item={item} />
                 </Button>
-              )}
-              {isLocked && (
-                <span className="flex h-10 w-full items-center justify-center rounded-md bg-muted/50 px-1 text-center text-xs text-muted-foreground">
-                  Nível {item.level} · {formatCoins(item.price)} CC{item.originalPrice !== null && ` (era ${formatCoins(item.originalPrice)})`}
-                </span>
+              ) : (
+                <div className="flex w-full flex-col items-center gap-1">
+                  <Button type="button" variant="secondary" className="h-10 w-full gap-1.5" disabled>
+                    <CoinsIcon aria-hidden className="size-4" />
+                    <Price item={item} />
+                  </Button>
+                  <p className="text-center text-xs text-muted-foreground">
+                    {isLocked ? `Libera no nível ${item.level}` : `Faltam ${formatCoins(item.price - balance)} CC`}
+                  </p>
+                </div>
               )}
             </CardSkinTile>
           );

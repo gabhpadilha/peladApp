@@ -199,7 +199,7 @@ export function CardViewer({ player, children, className }: { player: Player; ch
       {isOpen && (
         <Dialog open onOpenChange={setIsOpen}>
           <DialogContent className="max-h-[94dvh] gap-5 overflow-y-auto overscroll-contain bg-[#0a110d] p-5 sm:max-w-md">
-            <div className="mx-auto w-[min(68vw,264px)] pt-2 pb-5">
+            <div className="mx-auto w-[min(62vw,248px)] pt-2 pb-5">
               <ViewerCard player={player} />
             </div>
             <ViewerDetails player={player} />

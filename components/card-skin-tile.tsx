@@ -1,5 +1,4 @@
 import type { ReactNode } from "react";
-import { LockIcon } from "lucide-react";
 import { CardViewer } from "@/components/card-viewer";
 import { PlayerCard } from "@/components/player-card";
 import { RarityLabel } from "@/components/rarity-label";
@@ -12,13 +11,12 @@ type CardSkinTileProps = {
   player: Player;
   name: string;
   isEquipped?: boolean;
-  isLocked?: boolean;
   /** Botão ou selo embaixo do nome ("Em uso", "Usar", preço…). */
   children: ReactNode;
 };
 
 /** Uma carta da Loja ou de "Minhas cartas" (página Eu): carta, nome e a ação. */
-export function CardSkinTile({ player, name, isEquipped = false, isLocked = false, children }: CardSkinTileProps) {
+export function CardSkinTile({ player, name, isEquipped = false, children }: CardSkinTileProps) {
   // Raridade escrita embaixo do nome (só na Loja e em Eu → Minhas cartas; em outras telas a representação ainda será definida).
   const rarity = getSkinRarity(player.cardSkin);
   return (
@@ -28,20 +26,12 @@ export function CardSkinTile({ player, name, isEquipped = false, isLocked = fals
         isEquipped && "border-primary/60 bg-primary/5",
       )}
     >
-      <div className="relative w-[70%]">
-        {/* Só opacidade: `saturate` (filtro) sobre as cartas desmontava a prévia no iPhone. */}
-        <div className={cn(isLocked && "opacity-40")}>
-          <CardViewer player={player}>
-            <PlayerCard player={player} size="fill" />
-          </CardViewer>
-        </div>
-        {isLocked && (
-          <span className="absolute inset-0 flex items-center justify-center">
-            <span className="flex size-10 items-center justify-center rounded-full bg-background/85 ring-1 ring-border">
-              <LockIcon aria-hidden className="size-5 text-muted-foreground" />
-            </span>
-          </span>
-        )}
+      {/* A carta sempre aparece inteira e abre o visualizador, mesmo sem nível ou moedas para comprar (pedido do dono do app em 2026-11-09):
+          o que fica cinza é só o botão de compra. */}
+      <div className="w-[70%]">
+        <CardViewer player={player}>
+          <PlayerCard player={player} size="fill" />
+        </CardViewer>
       </div>
       <div className="flex w-full flex-col items-center gap-2">
         <p className="font-display text-lg leading-none font-bold uppercase">{name}</p>
