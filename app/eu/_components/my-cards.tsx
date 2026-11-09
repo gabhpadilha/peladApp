@@ -7,7 +7,7 @@ import { equipCardSkin } from "@/app/loja/_actions/equip-card-skin";
 import type { ShopItem } from "@/app/loja/_data-access/get-shop";
 import { CardSkinTile } from "@/components/card-skin-tile";
 import { Button } from "@/components/ui/button";
-import { PACK_RARITY_NAMES, type PackRarity } from "@/lib/packs";
+import type { PackRarity } from "@/lib/packs";
 import { cn } from "@/lib/utils";
 import type { Player } from "@/types/player";
 
@@ -67,7 +67,8 @@ export function MyCards({ me, cards, packRarities }: MyCardsProps) {
           <CardSkinTile
             key={item.skin ?? "padrao"}
             player={{ ...me, cardSkin: item.skin }}
-            name={item.skin && packRarities[item.skin] ? `${item.name} · ${PACK_RARITY_NAMES[packRarities[item.skin]]}` : item.name}
+            name={item.name}
+            rarity={item.skin ? packRarities[item.skin] : undefined}
             isEquipped={item.state === "equipped"}
           >
             {item.state === "equipped" ? (

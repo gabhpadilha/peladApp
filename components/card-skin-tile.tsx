@@ -1,6 +1,8 @@
 import type { ReactNode } from "react";
 import { LockIcon } from "lucide-react";
 import { PlayerCard } from "@/components/player-card";
+import { RarityTag } from "@/components/rarity-tag";
+import type { PackRarity } from "@/lib/packs";
 import { cn } from "@/lib/utils";
 import type { Player } from "@/types/player";
 
@@ -10,12 +12,14 @@ type CardSkinTileProps = {
   name: string;
   isEquipped?: boolean;
   isLocked?: boolean;
+  /** Raridade da skin (as que saem de pacote): legenda embaixo da carta. */
+  rarity?: PackRarity;
   /** Botão ou selo embaixo do nome ("Em uso", "Usar", preço…). */
   children: ReactNode;
 };
 
 /** Uma carta da Loja ou de "Minhas cartas" (página Eu): carta, nome e a ação. */
-export function CardSkinTile({ player, name, isEquipped = false, isLocked = false, children }: CardSkinTileProps) {
+export function CardSkinTile({ player, name, isEquipped = false, isLocked = false, rarity, children }: CardSkinTileProps) {
   return (
     <li
       className={cn(
@@ -38,6 +42,7 @@ export function CardSkinTile({ player, name, isEquipped = false, isLocked = fals
       </div>
       <div className="flex w-full flex-col items-center gap-2">
         <p className="font-display text-lg leading-none font-bold uppercase">{name}</p>
+        {rarity && <RarityTag rarity={rarity} />}
         {children}
       </div>
     </li>
