@@ -36,7 +36,8 @@ const GEMS = {
   ametista: { hue: 278, sat: 0.95, light: 1.05, neon: "#c46bff" },
   rubi: { hue: 348, sat: 1, light: 1, neon: "#ff2f66" },
   // Ícone (2026-11-09): a mesma arte, com os azuis viram marfim e prata-claro (quase sem cor, bem mais claros); o ouro fica.
-  marfim: { hue: 42, sat: 0.25, light: 3, neon: "#ffcf4d" },
+  // `curve`: clareia o escuro sem estourar o claro (o azul-claro do brilho em volta dos cristais virava uma faixa branca chapada).
+  marfim: { hue: 42, sat: 0.25, light: 3, neon: "#ffcf4d", curve: true },
 };
 // Trecho do lado direito em que o aglomerado de cristais passa pelo neon (na arte, px): ali fica o neon dela.
 const CRYSTAL_ZONE = { top: 420, bottom: 1340 };
@@ -66,7 +67,7 @@ function recolor(r, g, b, gem) {
   const [h, s, l] = rgbToHsl(r, g, b);
   const blueness = smooth(150, 175, h) * (1 - smooth(275, 300, h)) * smooth(0.08, 0.2, s);
   if (blueness === 0) return [r, g, b];
-  const [nr, ng, nb] = hslToRgb(h + (gem.hue - SOURCE_HUE), clamp(s * gem.sat), clamp(l * gem.light));
+  const [nr, ng, nb] = hslToRgb(h + (gem.hue - SOURCE_HUE), clamp(s * gem.sat), clamp(gem.curve ? (l < 0.2 ? l * 3 : 0.6 + (l - 0.2) * 0.45) : l * gem.light));
   return [r + (nr - r) * blueness, g + (ng - g) * blueness, b + (nb - b) * blueness];
 }
 
@@ -158,7 +159,7 @@ function depth(x, y) {
         const [r, g, b] = sample(sx, sy);
         // O neon da arte some (aos poucos) onde o novo aparece; ao lado do aglomerado vale o da arte.
         const keepArt = d < 0 ? 1 - neonWeight(dRaw, gap, r, g, b) * ringMask(x, y) : 1;
-        const key = smooth(10, 45, Math.max(Math.abs(r - BG), Math.abs(g - BG), Math.abs(b - BG)));
+        const key = gem.curve ? smooth(28, 80, Math.max(Math.abs(r - BG), Math.abs(g - BG), Math.abs(b - BG))) : smooth(10, 45, Math.max(Math.abs(r - BG), Math.abs(g - BG), Math.abs(b - BG))); // `curve`: o brilho fraco em volta dos cristais sai (virava uma névoa em coluna)
         const alpha = (d < 0 ? key : 1 - smooth(BAND, BAND + FADE, d)) * keepArt;
         if (alpha <= 0) continue;
         const [nr, ng, nb] = recolor(r, g, b, gem);
@@ -166,8 +167,25 @@ function depth(x, y) {
         vaza[o] = clamp(nr, 0, 255); vaza[o + 1] = clamp(ng, 0, 255); vaza[o + 2] = clamp(nb, 0, 255); vaza[o + 3] = Math.round(alpha * 255);
       }
     }
+    if (gem.curve) {
+      // Ícone: o tubo de neon da arte (cinza-claro depois de recolorido) ficava como uma tira reta e opaca logo depois do neon dourado
+      // novo, onde não há cristal. Apaga só essa tira (colunas logo fora da carta, sem cristal mais à direita e igual nos pixels de cima e
+      // de baixo); onde há cristal, ele cobre a tira. O neon dourado passa inteiro por baixo (`ringMask` não corta o Ícone).
+      const A = (xx, yy, k) => vaza[(yy * OUT_W + xx) * 4 + k];
+      const x0 = Math.round(CX0 + CW) + 4, x1 = x0 + 17;
+      const kill = [];
+      for (let y = 8; y < BH - 8; y++) {
+        for (let x = x0; x <= x1; x++) {
+          if (A(x, y, 3) === 0 || A(x + 22, y, 3) > 20) continue;
+          let same = A(x, y - 6, 3) > 0 && A(x, y + 6, 3) > 0;
+          for (let k = 0; same && k < 3; k++) same = Math.abs(A(x, y, k) - A(x, y - 6, k)) < 16 && Math.abs(A(x, y, k) - A(x, y + 6, k)) < 16;
+          if (same) kill.push((y * OUT_W + x) * 4 + 3);
+        }
+      }
+      for (const i of kill) vaza[i] = 0;
+    }
     const ring = await sharp(ringSvg(gem)).ensureAlpha().raw().toBuffer();
-    for (let y = 0; y < BH; y++) for (let x = 0; x < OUT_W; x++) { const o = (y * OUT_W + x) * 4 + 3; ring[o] = Math.round(ring[o] * ringMask(x, y)); }
+    for (let y = 0; y < BH; y++) for (let x = 0; x < OUT_W; x++) { const o = (y * OUT_W + x) * 4 + 3; ring[o] = Math.round(ring[o] * (gem.curve ? 1 : ringMask(x, y))); }
     const art = await sharp(vaza, { raw: { width: OUT_W, height: BH, channels: 4 } }).png().toBuffer();
     await sharp(ring, { raw: { width: OUT_W, height: BH, channels: 4 } }).composite([{ input: art }]).webp({ quality: 90, alphaQuality: 95 }).toFile(`${OUT}/premium-${name}-vaza.webp`);
   }
