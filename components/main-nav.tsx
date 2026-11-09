@@ -4,7 +4,6 @@ import { useEffect, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  BarChart3Icon,
   GlobeIcon,
   HomeIcon,
   ShuffleIcon,
@@ -24,13 +23,15 @@ type NavItem = {
   isActive: (pathname: string) => boolean;
   /** Só o Administrador (gestão de cadastro). */
   ownerOnly?: boolean;
+  /** Nome curto na barra de baixo do celular (as 5 colunas são iguais). */
+  shortLabel?: string;
 };
 
 const NAV_ITEMS: readonly NavItem[] = [
   { href: "/", label: "Início", icon: HomeIcon, isActive: (path) => path === "/" },
   { href: "/rodadas", label: "Rodadas", icon: ShuffleIcon, isActive: (path) => path.startsWith("/rodadas") },
-  { href: "/carreira", label: "Carreira", icon: BarChart3Icon, isActive: (path) => path.startsWith("/jogadores") },
-  { href: "/comunidade", label: "Comunidade", icon: GlobeIcon, isActive: (path) => path.startsWith("/comunidade") },
+  // A Carreira mora em Eu → "Minha carreira" (decisão do dono do app em 2026-11-09); a Loja traz o Mercado numa aba.
+  { href: "/comunidade", label: "Comunidade", shortLabel: "Social", icon: GlobeIcon, isActive: (path) => path.startsWith("/comunidade") },
   { href: "/loja", label: "Loja", icon: StoreIcon, isActive: (path) => path.startsWith("/loja") },
   { href: "/elenco", label: "Elenco", icon: UsersIcon, isActive: (path) => path.startsWith("/elenco"), ownerOnly: true },
   { href: "/eu", label: "Eu", icon: UserIcon, isActive: (path) => path.startsWith("/eu") },
@@ -114,7 +115,7 @@ export function MainNavPlaceholder(props: Omit<MainNavProps, "isOwner">) {
 
 /** Sem rota (`pathname` vazio): aparece sem destaque enquanto o `<Suspense>` carrega. */
 export function MainNavView({ variant, isOwner, currentPlayer, unopenedPacks = 0, pathname }: MainNavProps & { pathname: string }) {
-  // Computador: o Administrador ganha o Elenco no cabeçalho. Celular: 6 botões fixos para todos (limite da barra de baixo);
+  // Computador: o Administrador ganha o Elenco no cabeçalho. Celular: 5 botões fixos para todos, em colunas iguais;
   // o Administrador chega ao Elenco por Eu → "Gerenciar elenco" e o botão Eu fica aceso lá (revisão de 2026-11-04).
   const items = NAV_ITEMS.filter((item) => variant === "top" ? isOwner || !item.ownerOnly : !item.ownerOnly);
 
@@ -158,9 +159,9 @@ export function MainNavView({ variant, isOwner, currentPlayer, unopenedPacks = 0
       data-bottom-nav
       className="fixed inset-x-0 bottom-0 z-30 border-t bg-background/95 pb-[env(safe-area-inset-bottom)] backdrop-blur sm:hidden"
     >
-      {/* 6 colunas; a 4ª (Comunidade, a palavra mais longa) é um pouco mais larga para o texto de 12px caber sem cortar. */}
-      <ul className="grid h-16 grid-cols-[1fr_1fr_1fr_1.25fr_1fr_1fr]">
-        {items.map(({ href, label, icon: Icon, isActive }) => {
+      {/* 5 colunas iguais; a Comunidade aparece como "Social" para o espaçamento ficar uniforme. */}
+      <ul className="grid h-16 grid-cols-5">
+        {items.map(({ href, label, shortLabel, icon: Icon, isActive }) => {
           const isCurrent = isActive(pathname) || (href === "/eu" && pathname.startsWith("/elenco"));
           return (
             <li key={href}>
@@ -176,7 +177,7 @@ export function MainNavView({ variant, isOwner, currentPlayer, unopenedPacks = 0
                   <Icon aria-hidden className="size-5" />
                   {href === "/loja" && <PackDot count={unopenedPacks} />}
                 </span>
-                {label}
+                {shortLabel ?? label}
               </Link>
             </li>
           );

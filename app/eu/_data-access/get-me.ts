@@ -5,6 +5,7 @@ import { getLeague } from "@/lib/league";
 import { getMarketPriceRange, getMarketSuggestedPrice, type PriceRange } from "@/lib/market";
 import { getMyListings } from "@/lib/market-listings";
 import type { Progression } from "@/lib/progression";
+import { rankByPoints } from "@/lib/ranking-points";
 import { createClient } from "@/lib/supabase/server";
 import { emailToUsername } from "@/lib/username";
 import type { Player } from "@/types/player";
@@ -26,6 +27,8 @@ export type Me = {
   balance: number;
   /** "Minhas cartas": a padrão e as compradas. */
   cards: ShopItem[];
+  /** Resumo do bloco "Minha carreira" (a Carreira saiu da barra e mora aqui). */
+  career: { rankPosition: number | null; awardCount: number };
   /** Mercado de cada skin em posse, pela chave da skin. */
   market: Record<string, MyCardMarket>;
   /** O jogador no formato do envio de foto (mesmo componente do Elenco). */
@@ -64,6 +67,11 @@ export async function getMe(): Promise<Me | null> {
     progression,
     balance: Math.max(0, progression.coinsEarned - spent),
     cards: getMyCards(me, owned),
+    career: {
+      rankPosition:
+        rankByPoints(league.activePlayers, league.getRankingPoints()).find((entry) => entry.player.id === me.id)?.position ?? null,
+      awardCount: league.awards.filter((award) => award.memberId === me.id).length,
+    },
     market,
     photoMember: {
       id: me.id,

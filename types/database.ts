@@ -1158,6 +1158,19 @@ export type Database = {
           state: string
         }[]
       }
+      get_market_listings: {
+        Args: { target_group: string }
+        Returns: {
+          created_at: string
+          expires_at: string
+          id: string
+          is_mine: boolean
+          price: number
+          seller_group: string
+          seller_nickname: string
+          skin: string
+        }[]
+      }
       get_match_submissions: {
         Args: { target_group: string }
         Returns: {
@@ -1184,6 +1197,8 @@ export type Database = {
           skin: string
           sold_at: string
           status: string
+          buyer_nickname: string
+          buyer_group: string
         }[]
       }
       get_my_market_income: { Args: { target_group: string }; Returns: number }

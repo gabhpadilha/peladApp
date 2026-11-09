@@ -72,3 +72,20 @@ export function getMarketSuggestedPrice(skin: string): number | null {
   const rounded = Math.round(target / MARKET_PRICE_STEP) * MARKET_PRICE_STEP;
   return Math.min(range.max, Math.max(range.min, rounded));
 }
+
+/** Cor principal de cada skin, para o filtro do Mercado. Skin nova: acrescente aqui. */
+export const SKIN_COLORS: Readonly<Record<string, string>> = {
+  esmeralda: "Verde",
+  safira: "Azul",
+  ametista: "Roxa",
+  rubi: "Vermelha",
+  icone: "Branca",
+  lobisomem: "Azul",
+  vampiro: "Vermelha",
+  nuvem: "Branca",
+  relampago: "Dourada",
+  lenda: "Azul",
+  destino: "Verde",
+};
+
+export const MARKET_COLOR_OPTIONS: readonly string[] = ["Azul", "Roxa", "Vermelha", "Branca", "Dourada", "Verde"];

@@ -218,3 +218,11 @@ Implementada em `app/avaliar/[matchId]/` (sem navbar). Aberta pelo botão "Avali
 - Os 2 times de titulares são **equilibrados pelo OVR**: goleiros primeiro (um por time), a linha do maior para o menor OVR, sempre no time com menos jogadores e, no empate, menor soma. Sem nota → média do grupo. Faltou goleiro: um de linha completa o time, marcado "rodízio no gol".
 - **O excedente vira reservas, divididos igualmente entre Branco e Preto** (um a mais num dos times se for ímpar), também equilibrando o OVR do elenco todo. Reserva = presente com time e `match_attendance.reserve = true`: avalia e é avaliado.
 - No formulário: só "Sortear times"/"Sortear de novo", cards **Time Branco** e **Time Preto** (bolinha da cor, média de OVR dos titulares) com a lista de titulares e, abaixo (tracejado), **Reservas · N**. O organizador ajusta antes de criar: cada jogador tem o seletor Branco / Branco · reserva / Preto / Preto · reserva. Na lista de rodadas: "Branco x Preto · 10 titulares + 3 reservas"; na tela de notas e na votação: "Branco ·", "Preto · reserva ·".
+
+## 🏷️ Mercado de skins (2026-11-09, telas aprovadas pelo dono do app)
+
+- **Barra de baixo:** 5 colunas iguais (`grid-cols-5`): Início, Rodadas, **Social** (nome curto da Comunidade, só na barra), Loja e Eu. A Carreira mora em Eu → "Minha carreira" (dois cartões: Estatísticas e Coleção).
+- **Loja | Mercado:** troca segmentada no topo (`ShopTabs`), o botão da barra é um só.
+- **Mercado:** busca e um botão de ícone que abre e fecha os filtros (3 `<select>` de 44 px: Raridade, Evento, Cor; selo com a contagem quando há filtro ligado); anúncios em **lista** (miniatura só com o design, nome, raridade escrita, "apelido · pelada", tempo restante) e o **botão de preço sempre com a mesma largura** (`w-28`). Sem poder comprar, só o botão fica cinza, com o motivo embaixo ("Faltam N CC", "Você já tem", "Seu anúncio").
+- **Folhas:** compra (carta, vendedor, saldo antes → depois em âmbar, "Comprar por N CC") e venda (preço com − / + de 10 em 10 ou digitado, faixa permitida, "Anunciar por N CC").
+- **Minhas cartas:** "Em uso" (lima), **Usar | Vender** lado a lado, "No Mercado · N" em âmbar com o tempo e "Cancelar"; a Esmeralda diz "Carta grátis: não dá para vender". Âmbar = moeda e anúncio.

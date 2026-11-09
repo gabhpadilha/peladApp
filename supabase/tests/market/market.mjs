@@ -149,6 +149,29 @@ let safiraA, listing1;
   fail(S, "anon não chama", await (async () => { try { await db.exec("set role anon"); await db.query("select * from public.get_my_listings($1)", [A.group]); return { ok: true }; } catch (e) { return { ok: false, code: e.code, error: e.message }; } finally { await db.exec("reset role"); } })(), "42501");
 }
 
+// 7b. Vitrine do Mercado
+{
+  const S = "7b vitrine";
+  const D = await W.scenario("MD", { count: 3 });
+  const id = await grant(D, 1, "icone", 1200);
+  const l = (await list(D, 1, id, 1000)).rows[0].id;
+  const seen = (await W.as(B.users[1], () => db.query("select * from public.get_market_listings($1)", [B.group]))).rows;
+  const row = seen.find((r) => r.id === l);
+  check(S, "outra pelada vê o anúncio", !!row);
+  check(S, "só apelido e pelada de quem vende", row && row.seller_nickname === "P1" && row.seller_group === "Pelada MD" && Object.keys(row).length === 8);
+  check(S, "não é meu para quem é de fora", row && row.is_mine === false);
+  const own = (await W.as(D.users[1], () => db.query("select * from public.get_market_listings($1)", [D.group]))).rows.find((r) => r.id === l);
+  check(S, "é meu para quem anunciou", own && own.is_mine === true);
+  check(S, "vendidos, cancelados e vencidos não aparecem", seen.every((r) => new Date(r.expires_at) > new Date()) && !seen.some((r) => r.id === listing1));
+  await db.query("update public.groups set suspended_at = now() where id = $1", [D.group]);
+  const after = (await W.as(B.users[1], () => db.query("select * from public.get_market_listings($1)", [B.group]))).rows;
+  check(S, "pelada suspensa some da vitrine", !after.some((r) => r.id === l));
+  await db.query("update public.groups set suspended_at = null where id = $1", [D.group]);
+  pass(S, "compra de D por B", await buy(B, 2, l, 100000));
+  const mine = (await W.as(D.users[1], () => db.query("select * from public.get_my_listings($1)", [D.group]))).rows[0];
+  check(S, "vendedor vê apelido e pelada de quem comprou", mine.buyer_nickname === "P2" && mine.buyer_group === "Pelada MB");
+}
+
 // 8. Isolamento: comprador não lê as compras da outra pelada
 {
   const S = "7 isolamento";

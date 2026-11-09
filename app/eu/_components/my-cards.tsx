@@ -11,7 +11,7 @@ import { CardSkinTile } from "@/components/card-skin-tile";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { Player } from "@/types/player";
-import { SellSheet } from "./sell-sheet";
+import { SellSheet } from "@/components/sell-sheet";
 
 type MyCardsProps = {
   me: Player;

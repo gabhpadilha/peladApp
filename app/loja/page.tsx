@@ -10,6 +10,7 @@ import { COIN_RULES } from "@/lib/progression";
 import { CoinPill } from "@/components/coin-pill";
 import { MyPacks } from "./_components/my-packs";
 import { ShopContent } from "./_components/shop-content";
+import { ShopTabs } from "./_components/shop-tabs";
 import { getMyPacks } from "./_data-access/get-my-packs";
 import { getShop } from "./_data-access/get-shop";
 
@@ -51,6 +52,8 @@ async function ShopPageContent() {
           </div>
           <CoinPill value={shop.balance} className="mt-6 shrink-0" />
         </div>
+
+        <ShopTabs current="loja" />
 
         <MyPacks packs={packs} />
 

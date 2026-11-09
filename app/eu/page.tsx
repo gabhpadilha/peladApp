@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronRightIcon, GlobeIcon, LogOutIcon, ShieldIcon, UsersIcon } from "lucide-react";
+import { BarChart3Icon, ChevronRightIcon, GlobeIcon, Layers3Icon, LogOutIcon, ShieldIcon, UsersIcon } from "lucide-react";
 import { signOut } from "@/app/_actions/sign-out";
 import { AppHeader } from "@/components/app-header";
 import { CoinPill } from "@/components/coin-pill";
@@ -72,6 +72,48 @@ async function MeContent() {
             <CoinPill value={data.balance} />
           </div>
         </div>
+
+        <section aria-labelledby="career-title" className="flex flex-col gap-2">
+          <h2 id="career-title" className="font-display text-lg font-bold tracking-wide uppercase">
+            Minha carreira
+          </h2>
+          <div className="grid grid-cols-2 gap-3">
+            {[
+              {
+                href: `/jogadores/${me.id}`,
+                icon: BarChart3Icon,
+                title: "Estatísticas",
+                text: [me.ovr !== null ? `OVR ${me.ovr}` : null, data.career.rankPosition ? `${data.career.rankPosition}º no ranking` : null]
+                  .filter(Boolean)
+                  .join(" · ") || "Notas, gols e histórico",
+              },
+              {
+                href: `/jogadores/${me.id}/colecao`,
+                icon: Layers3Icon,
+                title: "Coleção",
+                text:
+                  data.career.awardCount === 0
+                    ? "Suas cartas especiais"
+                    : `${data.career.awardCount} ${data.career.awardCount === 1 ? "carta especial" : "cartas especiais"}`,
+              },
+            ].map(({ href, icon: Icon, title, text }) => (
+              <Link
+                key={href}
+                href={href}
+                className="flex min-h-24 flex-col justify-between gap-2 rounded-xl border bg-card p-4 transition-colors hover:bg-muted"
+              >
+                <span className="flex items-center justify-between">
+                  <Icon aria-hidden className="size-5 text-primary" />
+                  <ChevronRightIcon aria-hidden className="size-4 text-muted-foreground" />
+                </span>
+                <span className="flex flex-col">
+                  <span className="text-base font-medium">{title}</span>
+                  <span className="text-xs text-muted-foreground">{text}</span>
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
 
         <MyCards me={me} cards={data.cards} market={data.market} />
 

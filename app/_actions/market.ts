@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import { getLeague } from "@/lib/league";
 import { MARKET_ERROR_MESSAGES, MARKET_LISTING_HOURS, getMarketPriceRange } from "@/lib/market";
 import { requireActiveMembership } from "@/lib/session";
 import { createAdminClient, hasAdminEnv } from "@/lib/supabase/admin";
@@ -82,4 +83,32 @@ export async function cancelListing(input: { listingId: string }): Promise<Marke
 
   revalidatePath("/", "layout");
   return { success: true, message: "Anúncio cancelado. A carta voltou para você." };
+}
+
+const buySchema = z.object({ listingId: z.uuid() });
+
+/**
+ * Compra um anúncio do Mercado na hora. O servidor calcula as moedas ganhas (rodadas, pacotes e vendas) e o banco,
+ * com a conta e o anúncio travados, desconta o que já foi gasto e troca skin e moedas na mesma transação.
+ */
+export async function buyListing(input: { listingId: string }): Promise<MarketActionResult> {
+  const membership = await requireActiveMembership("/loja/mercado");
+  const parsed = buySchema.safeParse(input);
+  if (!parsed.success) return { success: false, message: MARKET_ERROR_MESSAGES.PA028 };
+  if (!hasAdminEnv()) {
+    console.error("Falta a SUPABASE_SECRET_KEY (cliente admin indisponível).");
+    return { success: false, message: UNAVAILABLE };
+  }
+  const league = await getLeague("/loja/mercado");
+  const earned = league.getProgression(membership.memberId).coinsEarned;
+  const { data: skin, error } = await createAdminClient().rpc("market_buy", {
+    buyer: membership.memberId,
+    target_listing: parsed.data.listingId,
+    earned,
+  });
+  if (error) return { success: false, message: friendly(error, "buyListing") };
+
+  revalidatePath("/", "layout");
+  const name = isCardSkinKey(skin) ? getCardSkin(skin).name : "skin";
+  return { success: true, message: `A ${name} é sua! Ela já está em Eu → Minhas cartas.` };
 }
