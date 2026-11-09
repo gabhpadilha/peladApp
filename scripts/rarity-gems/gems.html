@@ -1,115 +1,149 @@
 <!doctype html>
 <meta charset="utf-8">
-<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
-<body style="margin:0;background:transparent">
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js"}}</script>
+<body style="margin:0;background:#000">
 <script type="module">
 import * as THREE from "three";
-import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
 
-const SIZE = 384;
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, preserveDrawingBuffer: true });
+const SIZE = 512;
+const renderer = new THREE.WebGLRenderer({ antialias: true, preserveDrawingBuffer: true });
 renderer.setSize(SIZE, SIZE);
 renderer.setPixelRatio(1);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.15;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
 document.body.appendChild(renderer.domElement);
 
+/** Estúdio de joalheria: caixas de luz brancas e faixas coloridas num fundo escuro, para reflexos nítidos nas facetas. */
+function studio() {
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x05070a);
+  let seed = 7;
+  const rand = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  // Domo com degradê suave (para o corpo da pedra não ficar chapado) e dezenas de faixas de luz finas e fortes (os brilhos das facetas).
+  const dome = new THREE.Mesh(new THREE.SphereGeometry(30, 48, 32), new THREE.ShaderMaterial({
+    side: THREE.BackSide, toneMapped: false,
+    vertexShader: "varying vec3 p; void main(){ p = normalize(position); gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }",
+    fragmentShader: "varying vec3 p; void main(){ float t = p.y*0.5+0.5; vec3 c = mix(vec3(0.02,0.03,0.04), vec3(0.55,0.6,0.7), pow(t,3.0)); gl_FragColor = vec4(c,1.0); }",
+  }));
+  scene.add(dome);
+  for (let i = 0; i < 46; i++) {
+    const theta = rand() * Math.PI * 2;
+    const phi = Math.acos(1 - rand() * 1.6);
+    const r = 22;
+    const pos = [r * Math.sin(phi) * Math.cos(theta), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(theta)];
+    const w = 0.6 + rand() * 3.2;
+    const h = 2 + rand() * 9;
+    const warm = rand() > 0.55;
+    const k = 4 + rand() * 14;
+    const rgb = warm ? [k, k * 0.86, k * 0.62] : [k * 0.8, k * 0.92, k];
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(...rgb), side: THREE.DoubleSide, toneMapped: false }));
+    mesh.position.set(...pos);
+    mesh.lookAt(0, 0, 0);
+    mesh.rotateZ(rand() * Math.PI);
+    scene.add(mesh);
+  }
+  return scene;
+}
 const pmrem = new THREE.PMREMGenerator(renderer);
-const env = pmrem.fromScene(new RoomEnvironment(), 0.02).texture;
+const env = pmrem.fromScene(studio(), 0.01, 0.1, 100).texture;
 
-/** Lapidação brilhante: coroa com mesa, cintura fina e pavilhão, 8 facetas (LatheGeometry + flatShading). */
-function brilliantGeometry(segments = 8) {
+/** Lapidação brilhante: mesa, coroa em dois níveis, cintura fina e pavilhão em ponta. */
+function brilliantGeometry(segments) {
   const profile = [
     [0.0, -1.0],
-    [0.98, 0.1],
-    [1.0, 0.22],
-    [0.66, 0.62],
+    [0.34, -0.7],
+    [0.66, -0.34],
+    [0.98, 0.08],
+    [1.0, 0.18],
+    [0.9, 0.34],
+    [0.72, 0.5],
+    [0.5, 0.62],
     [0.0, 0.62],
   ].map(([x, y]) => new THREE.Vector2(x, y));
   return new THREE.LatheGeometry(profile, segments);
 }
 
+const goldMat = () => new THREE.MeshStandardMaterial({ color: 0xf3c969, metalness: 1, roughness: 0.18, envMap: env, envMapIntensity: 1.6 });
+
 const GEMS = {
-  // comum: pedra de aço lapidada, sem brilho exagerado
-  comum: { color: 0x5f7389, emissive: 0x0a1118, rough: 0.3, metal: 0.45, inner: false, ring: false, prongs: false, segments: 6, exposure: 0.85 },
-  // rara: safira azul com brilho próprio
-  rara: { color: 0x1458ff, emissive: 0x041a66, rough: 0.1, metal: 0.1, inner: true, ring: false, prongs: false, segments: 8, exposure: 0.85 },
-  // épica: ametista com anel orbital
-  epica: { color: 0x8a22ff, emissive: 0x2a0770, rough: 0.1, metal: 0.1, inner: true, ring: true, prongs: false, segments: 8, exposure: 0.85 },
-  // lendária: gema dourada engastada em garras, com anel e aura
-  lendaria: { color: 0xff9d00, emissive: 0x6a3000, rough: 0.1, metal: 0.2, inner: true, ring: true, prongs: true, segments: 8, exposure: 0.9 },
+  // comum: quartzo fumê, translúcido e sóbrio
+  comum: { tint: 0xe3d3bd, atten: 0xb89c7c, dist: 3.5, ior: 1.46, core: 0xa5886a, disp: 0.15, seg: 16, ring: null, prongs: false, exposure: 1.0 },
+  // rara: safira azul profunda
+  rara: { tint: 0x6f9bff, atten: 0x1f5bff, dist: 2.4, ior: 1.5, core: 0x1648d8, disp: 0.3, seg: 16, ring: null, prongs: false, exposure: 1.05 },
+  // épica: ametista com anel orbital de prata
+  epica: { tint: 0xd69bff, atten: 0xc030ff, dist: 2.6, ior: 1.5, core: 0xa52be0, disp: 0.35, seg: 16, ring: "silver", prongs: false, exposure: 1.1 },
+  // lendária: topázio imperial engastado em garras de ouro, com anel
+  lendaria: { tint: 0xffd86f, atten: 0xffb800, dist: 2.6, ior: 1.55, core: 0xe6a000, disp: 0.5, seg: 16, ring: "gold", prongs: true, exposure: 1.15 },
 };
 
-function build(kind) {
+function build(kind, mask) {
   const cfg = GEMS[kind];
   const scene = new THREE.Scene();
-  scene.environment = env;
+  scene.environment = mask ? null : env;
+  scene.background = mask ? new THREE.Color(0x000000) : new THREE.Color(0x8b9893);
   const group = new THREE.Group();
 
-  const outer = new THREE.Mesh(
-    brilliantGeometry(cfg.segments),
+  const gem = new THREE.Mesh(
+    brilliantGeometry(cfg.seg),
     new THREE.MeshPhysicalMaterial({
-      color: cfg.color, emissive: cfg.emissive, emissiveIntensity: 0.7, roughness: cfg.rough, metalness: cfg.metal,
-      clearcoat: 0.6, clearcoatRoughness: 0.08, envMapIntensity: 0.9, flatShading: true,
+      color: cfg.tint, metalness: 0, roughness: 0.02, transmission: 1, thickness: 1.4, ior: cfg.ior, dispersion: cfg.disp,
+      attenuationColor: new THREE.Color(cfg.atten), attenuationDistance: cfg.dist, specularIntensity: 1, envMap: env, envMapIntensity: 1.5,
+      clearcoat: 0.35, clearcoatRoughness: 0.02, flatShading: true, side: THREE.DoubleSide,
     }),
   );
-  group.add(outer);
+  group.add(gem);
 
-  if (cfg.inner) {
-    const core = new THREE.Mesh(
-      brilliantGeometry(cfg.segments),
-      new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: cfg.color, emissiveIntensity: 1.1, roughness: 0.2, metalness: 0, flatShading: true, transparent: true, opacity: 0.28 }),
-    );
-    core.scale.set(0.58, 0.58, 0.58);
-    core.rotation.y = Math.PI / cfg.segments;
-    group.add(core);
-  }
+  // Corpo da cor da pedra: uma lapidação menor por dentro que acende as facetas (o que dá a profundidade de um cristal de verdade).
+  const core = new THREE.Mesh(
+    brilliantGeometry(cfg.seg),
+    new THREE.MeshStandardMaterial({ color: cfg.core, emissive: cfg.core, emissiveIntensity: 0.9, roughness: 0.3, flatShading: true, transparent: true, opacity: 0.55 }),
+  );
+  core.scale.set(0.62, 0.62, 0.62);
+  core.rotation.y = Math.PI / cfg.seg;
+  group.add(core);
 
-  const goldMat = new THREE.MeshStandardMaterial({ color: 0xe9c46a, metalness: 1, roughness: 0.22, envMapIntensity: 2.4 });
   if (cfg.ring) {
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(1.55, 0.045, 12, 96), kind === "lendaria" ? goldMat : new THREE.MeshStandardMaterial({ color: 0xc9a8ff, metalness: 1, roughness: 0.25, envMapIntensity: 2.4 }));
-    ring.rotation.x = Math.PI / 2.35;
-    ring.rotation.z = 0.25;
+    const metal = cfg.ring === "gold" ? goldMat() : new THREE.MeshStandardMaterial({ color: 0xdfe3ee, metalness: 1, roughness: 0.16, envMap: env, envMapIntensity: 1.8 });
+    const ring = new THREE.Mesh(new THREE.TorusGeometry(1.62, 0.05, 16, 120), metal);
+    ring.rotation.x = Math.PI / 2.3;
+    ring.rotation.z = 0.28;
     group.add(ring);
   }
   if (cfg.prongs) {
+    const metal = goldMat();
     for (let i = 0; i < 4; i++) {
       const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
-      const prong = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.7, 12), goldMat);
-      prong.position.set(Math.cos(a) * 1.0, 0.22, Math.sin(a) * 1.0);
-      prong.rotation.z = -Math.cos(a) * 0.35;
-      prong.rotation.x = Math.sin(a) * 0.35;
+      const prong = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.72, 16), metal);
+      prong.position.set(Math.cos(a) * 1.02, 0.2, Math.sin(a) * 1.02);
+      prong.rotation.z = -Math.cos(a) * 0.3;
+      prong.rotation.x = Math.sin(a) * 0.3;
       group.add(prong);
     }
-    const band = new THREE.Mesh(new THREE.TorusGeometry(1.02, 0.07, 10, 64), goldMat);
+    const band = new THREE.Mesh(new THREE.TorusGeometry(1.04, 0.08, 14, 80), metal);
     band.rotation.x = Math.PI / 2;
-    band.position.y = 0.16;
+    band.position.y = 0.15;
     group.add(band);
   }
 
-  group.rotation.set(0.42, 0.5, 0.08);
+  group.rotation.set(0.45, 0.55, 0.06);
   scene.add(group);
-
-  const key = new THREE.DirectionalLight(0xffffff, 1.9);
-  key.position.set(2.5, 3.5, 3);
-  const rim = new THREE.DirectionalLight(cfg.color, 1.6);
-  rim.position.set(-3, 1.5, -2.5);
-  scene.add(key, rim);
+  if (mask) scene.overrideMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
   return scene;
 }
 
-const camera = new THREE.PerspectiveCamera(32, 1, 0.1, 50);
-camera.position.set(0, 0.35, 7.2);
+const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 60);
+camera.position.set(0, 0.35, 8);
 camera.lookAt(0, 0, 0);
 
 window.renderAll = () => {
   const out = {};
   for (const kind of Object.keys(GEMS)) {
     renderer.toneMappingExposure = GEMS[kind].exposure;
-    renderer.setClearColor(0x000000, 0);
-    renderer.clear();
-    renderer.render(build(kind), camera);
-    out[kind] = renderer.domElement.toDataURL("image/png");
+    renderer.render(build(kind, false), camera);
+    const color = renderer.domElement.toDataURL("image/png");
+    renderer.toneMappingExposure = 1;
+    renderer.render(build(kind, true), camera);
+    out[kind] = { color, mask: renderer.domElement.toDataURL("image/png") };
   }
   return out;
 };

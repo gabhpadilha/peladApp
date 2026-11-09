@@ -7,7 +7,7 @@ import { getCardStats } from "@/lib/card-stats";
 import { getInitials } from "@/lib/get-initials";
 import type { CardThemeKey } from "@/lib/card-themes";
 import { AWARD_LABELS, awardDesignKind, type AwardDesignKind, type AwardKind } from "@/types/award";
-import { getSkinRarity, PACK_RARITY_NAMES, type PackRarity } from "@/lib/packs";
+import { getSkinRarity, PACK_RARITY_NAMES, SKIN_BOTTOM_OVERHANG, type PackRarity } from "@/lib/packs";
 import type { CardSkinKey } from "@/types/card-skin";
 import type { Player } from "@/types/player";
 
@@ -868,7 +868,7 @@ function FloaterPieces({ items, layer }: { items: readonly Floater[]; layer: "ba
  * (aço, safira, ametista com anel e âmbar em garras de ouro) saem do `scripts/rarity-gems/render.mjs` (three.js, renderizadas
  * uma vez e guardadas em `public/rarity/`): na tela é só uma imagem, sem WebGL.
  */
-function RarityGem({ rarity }: { rarity: PackRarity }) {
+function RarityGem({ rarity, skin }: { rarity: PackRarity; skin: string }) {
   return (
     // eslint-disable-next-line @next/next/no-img-element -- ícone minúsculo e estático (public/rarity), sem o otimizador do Next
     <img
@@ -877,7 +877,8 @@ function RarityGem({ rarity }: { rarity: PackRarity }) {
       src={`/rarity/${rarity}.webp`}
       width={160}
       height={160}
-      className="pointer-events-none absolute top-full left-1/2 z-[9] mt-[1cqw] aspect-square w-[max(16px,15cqw)] -translate-x-1/2 select-none"
+      style={{ marginTop: `${(SKIN_BOTTOM_OVERHANG[skin] ?? 0) + 2.5}cqw` }}
+      className="pointer-events-none absolute top-full left-1/2 z-[9] aspect-square w-[max(20px,22cqw)] -translate-x-1/2 select-none"
     />
   );
 }
@@ -1056,7 +1057,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
             : cn(METAL_WINDOW, "shadow-[inset_0_0_0_0.5cqw_var(--cc-m3),inset_0_0_0_0.9cqw_rgb(0_0_0/0.35)]"),
         )}
       />
-      {rarity && <RarityGem rarity={rarity} />}
+      {rarity && player.cardSkin && <RarityGem rarity={rarity} skin={player.cardSkin} />}
     </article>
   );
 

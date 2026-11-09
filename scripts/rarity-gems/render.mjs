@@ -24,17 +24,29 @@ const server = createServer(async (req, res) => {
 const port = server.address().port;
 
 const browser = await chromium.launch({ args: ["--use-gl=angle", "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"] });
-const page = await browser.newPage({ viewport: { width: 384, height: 384 } });
+const page = await browser.newPage({ viewport: { width: 512, height: 512 } });
 page.on("console", (message) => console.log("[page]", message.text()));
 page.on("pageerror", (error) => console.error("[erro]", error.message));
 await page.goto(`http://localhost:${port}/`);
 await page.waitForFunction(() => window.ready === true, null, { timeout: 30000 });
 const images = await page.evaluate(() => window.renderAll());
-for (const [kind, dataUrl] of Object.entries(images)) {
-  const png = Buffer.from(dataUrl.split(",")[1], "base64");
-  const webp = await sharp(png).trim({ threshold: 1 }).resize({ width: 160, height: 160, fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } }).webp({ quality: 92, alphaQuality: 100 }).toBuffer();
+for (const [kind, { color, mask }] of Object.entries(images)) {
+  const colorPng = Buffer.from(color.split(",")[1], "base64");
+  const maskPng = Buffer.from(mask.split(",")[1], "base64");
+  // O desenho sai sobre um fundo escuro (a transmissão da gema precisa de fundo); a silhueta branca vira o canal alfa.
+  const { data: grey } = await sharp(maskPng).removeAlpha().greyscale().raw().toBuffer({ resolveWithObject: true });
+  const { data: rgb } = await sharp(colorPng).removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  const out = Buffer.alloc(512 * 512 * 4);
+  for (let i = 0; i < 512 * 512; i++) {
+    out[i * 4] = rgb[i * 3];
+    out[i * 4 + 1] = rgb[i * 3 + 1];
+    out[i * 4 + 2] = rgb[i * 3 + 2];
+    out[i * 4 + 3] = grey[i];
+  }
+  const rgba = await sharp(out, { raw: { width: 512, height: 512, channels: 4 } }).png().toBuffer();
+  const webp = await sharp(rgba).trim({ threshold: 4 }).resize({ width: 192, height: 192, fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } }).webp({ quality: 92, alphaQuality: 100 }).toBuffer();
   await writeFile(path.join(root, "public/rarity", `${kind}.webp`), webp);
-  await writeFile(path.join("/tmp/claude-0", `gem-${kind}.png`), png);
+  await writeFile(path.join("/tmp/claude-0", `gem-${kind}.png`), rgba);
   console.log(kind, webp.length, "bytes");
 }
 await browser.close();
