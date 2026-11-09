@@ -31,10 +31,10 @@ function studio() {
     const phi = Math.acos(1 - rand() * 1.6);
     const r = 22;
     const pos = [r * Math.sin(phi) * Math.cos(theta), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(theta)];
-    const w = 0.6 + rand() * 3.2;
+    const w = 0.4 + rand() * 1.6;
     const h = 2 + rand() * 9;
     const warm = rand() > 0.55;
-    const k = 4 + rand() * 14;
+    const k = 2 + rand() * 6;
     const rgb = warm ? [k, k * 0.86, k * 0.62] : [k * 0.8, k * 0.92, k];
     const mesh = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: new THREE.Color(...rgb), side: THREE.DoubleSide, toneMapped: false }));
     mesh.position.set(...pos);
@@ -47,103 +47,135 @@ function studio() {
 const pmrem = new THREE.PMREMGenerator(renderer);
 const env = pmrem.fromScene(studio(), 0.01, 0.1, 100).texture;
 
-/** Lapidação brilhante: mesa, coroa em dois níveis, cintura fina e pavilhão em ponta. */
-function brilliantGeometry(segments) {
+/** Cristal alongado de 6 faces com as duas pontas lapidadas (o mesmo formato nas quatro raridades; muda só a cor). */
+function crystalGeometry() {
   const profile = [
-    [0.0, -1.0],
-    [0.34, -0.7],
-    [0.66, -0.34],
-    [0.98, 0.08],
-    [1.0, 0.18],
-    [0.9, 0.34],
-    [0.72, 0.5],
-    [0.5, 0.62],
-    [0.0, 0.62],
+    [0.0, -2.7],
+    [0.34, -1.9],
+    [0.62, -1.25],
+    [0.64, -1.1],
+    [0.64, 1.1],
+    [0.62, 1.25],
+    [0.34, 1.9],
+    [0.0, 2.7],
   ].map(([x, y]) => new THREE.Vector2(x, y));
-  return new THREE.LatheGeometry(profile, segments);
+  return new THREE.LatheGeometry(profile, 6);
+}
+
+/** Textura de brilho: raio fino e longo com a cor no miolo e as pontas em arco-íris (a difração das referências). */
+function streakTexture(rgb, spectral) {
+  const c = document.createElement("canvas");
+  c.width = 512; c.height = 32;
+  const g = c.getContext("2d");
+  const grad = g.createLinearGradient(0, 0, 512, 0);
+  if (spectral) {
+    ["rgba(255,60,60,0)", "rgba(255,160,40,.55)", "rgba(80,255,120,.35)", "rgba(80,140,255,.45)", "rgba(255,255,255,0.0)"].forEach((col, i, arr) => grad.addColorStop(i / (arr.length - 1), col));
+  } else {
+    grad.addColorStop(0, `rgba(${rgb},0)`);
+    grad.addColorStop(0.42, `rgba(${rgb},.55)`);
+    grad.addColorStop(0.5, "rgba(255,255,255,1)");
+    grad.addColorStop(0.58, `rgba(${rgb},.55)`);
+    grad.addColorStop(1, `rgba(${rgb},0)`);
+  }
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 512, 32);
+  // afinar na vertical (raio, não faixa)
+  const v = g.createLinearGradient(0, 0, 0, 32);
+  v.addColorStop(0, "rgba(0,0,0,1)"); v.addColorStop(0.5, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(0,0,0,1)");
+  g.globalCompositeOperation = "destination-out";
+  g.fillStyle = v; g.fillRect(0, 0, 512, 32);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+function glowTexture(rgb) {
+  const c = document.createElement("canvas");
+  c.width = c.height = 256;
+  const g = c.getContext("2d");
+  const grad = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+  grad.addColorStop(0, "rgba(255,255,255,1)");
+  grad.addColorStop(0.18, `rgba(${rgb},.85)`);
+  grad.addColorStop(0.5, `rgba(${rgb},.22)`);
+  grad.addColorStop(1, `rgba(${rgb},0)`);
+  g.fillStyle = grad; g.fillRect(0, 0, 256, 256);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
 }
 
 const goldMat = () => new THREE.MeshStandardMaterial({ color: 0xf3c969, metalness: 1, roughness: 0.18, envMap: env, envMapIntensity: 1.6 });
 
+// Um formato só; muda a cor (e o brilho do núcleo): comum quartzo gelo, rara safira, épica ametista, lendária topázio dourado.
 const GEMS = {
-  // comum: quartzo fumê, translúcido e sóbrio
-  comum: { tint: 0xe3d3bd, atten: 0xb89c7c, dist: 3.5, ior: 1.46, core: 0xa5886a, disp: 0.15, seg: 16, ring: null, prongs: false, exposure: 1.0 },
-  // rara: safira azul profunda
-  rara: { tint: 0x6f9bff, atten: 0x1f5bff, dist: 2.4, ior: 1.5, core: 0x1648d8, disp: 0.3, seg: 16, ring: null, prongs: false, exposure: 1.05 },
-  // épica: ametista com anel orbital de prata
-  epica: { tint: 0xd69bff, atten: 0xc030ff, dist: 2.6, ior: 1.5, core: 0xa52be0, disp: 0.35, seg: 16, ring: "silver", prongs: false, exposure: 1.1 },
-  // lendária: topázio imperial engastado em garras de ouro, com anel
-  lendaria: { tint: 0xffd86f, atten: 0xffb800, dist: 2.6, ior: 1.55, core: 0xe6a000, disp: 0.5, seg: 16, ring: "gold", prongs: true, exposure: 1.15 },
+  comum: { tint: 0xe6edf7, atten: 0x9fb2c8, dist: 4.0, rgb: "190,205,225", core: 0xb7c6da, flare: 0.55, exposure: 1.0 },
+  rara: { tint: 0x8fb4ff, atten: 0x1f5bff, dist: 3.0, rgb: "70,130,255", core: 0x2a6bff, flare: 0.8, exposure: 1.0 },
+  epica: { tint: 0xd0a0ff, atten: 0xa030ff, dist: 3.0, rgb: "170,90,255", core: 0x9a3cff, flare: 0.9, exposure: 1.0 },
+  lendaria: { tint: 0xffdc8a, atten: 0xffae00, dist: 3.0, rgb: "255,190,60", core: 0xffa800, flare: 1.0, exposure: 1.0 },
 };
 
-function build(kind, mask) {
+function build(kind, mode) {
+  const mask = mode === "mask";
+  const flareOnly = mode === "flare";
   const cfg = GEMS[kind];
   const scene = new THREE.Scene();
   scene.environment = mask ? null : env;
-  scene.background = mask ? new THREE.Color(0x000000) : new THREE.Color(0x8b9893);
+  scene.background = new THREE.Color(mask || flareOnly ? 0x000000 : 0x56606c);
   const group = new THREE.Group();
 
   const gem = new THREE.Mesh(
-    brilliantGeometry(cfg.seg),
+    crystalGeometry(),
     new THREE.MeshPhysicalMaterial({
-      color: cfg.tint, metalness: 0, roughness: 0.02, transmission: 1, thickness: 1.4, ior: cfg.ior, dispersion: cfg.disp,
-      attenuationColor: new THREE.Color(cfg.atten), attenuationDistance: cfg.dist, specularIntensity: 1, envMap: env, envMapIntensity: 1.5,
-      clearcoat: 0.35, clearcoatRoughness: 0.02, flatShading: true, side: THREE.DoubleSide,
+      color: cfg.tint, metalness: 0, roughness: 0.02, transmission: 1, thickness: 1.2, ior: 1.6, dispersion: 0.9,
+      attenuationColor: new THREE.Color(cfg.atten), attenuationDistance: cfg.dist, specularIntensity: 1, envMap: env, envMapIntensity: 1.1,
+      clearcoat: 0.25, clearcoatRoughness: 0.02, flatShading: true, side: THREE.DoubleSide,
     }),
   );
-  group.add(gem);
+  if (!flareOnly) group.add(gem);
 
-  // Corpo da cor da pedra: uma lapidação menor por dentro que acende as facetas (o que dá a profundidade de um cristal de verdade).
+  // Núcleo luminoso por dentro (o que acende o cristal, como nas referências).
   const core = new THREE.Mesh(
-    brilliantGeometry(cfg.seg),
-    new THREE.MeshStandardMaterial({ color: cfg.core, emissive: cfg.core, emissiveIntensity: 0.9, roughness: 0.3, flatShading: true, transparent: true, opacity: 0.55 }),
+    crystalGeometry(),
+    new THREE.MeshStandardMaterial({ color: cfg.core, emissive: cfg.core, emissiveIntensity: 1.0, roughness: 0.3, flatShading: true, transparent: true, opacity: 0.4 }),
   );
-  core.scale.set(0.62, 0.62, 0.62);
-  core.rotation.y = Math.PI / cfg.seg;
-  group.add(core);
+  core.scale.set(0.34, 0.5, 0.34);
+  if (!flareOnly) group.add(core);
 
-  if (cfg.ring) {
-    const metal = cfg.ring === "gold" ? goldMat() : new THREE.MeshStandardMaterial({ color: 0xdfe3ee, metalness: 1, roughness: 0.16, envMap: env, envMapIntensity: 1.8 });
-    const ring = new THREE.Mesh(new THREE.TorusGeometry(1.62, 0.05, 16, 120), metal);
-    ring.rotation.x = Math.PI / 2.3;
-    ring.rotation.z = 0.28;
-    group.add(ring);
-  }
-  if (cfg.prongs) {
-    const metal = goldMat();
-    for (let i = 0; i < 4; i++) {
-      const a = (i / 4) * Math.PI * 2 + Math.PI / 4;
-      const prong = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.72, 16), metal);
-      prong.position.set(Math.cos(a) * 1.02, 0.2, Math.sin(a) * 1.02);
-      prong.rotation.z = -Math.cos(a) * 0.3;
-      prong.rotation.x = Math.sin(a) * 0.3;
-      group.add(prong);
-    }
-    const band = new THREE.Mesh(new THREE.TorusGeometry(1.04, 0.08, 14, 80), metal);
-    band.rotation.x = Math.PI / 2;
-    band.position.y = 0.15;
-    group.add(band);
-  }
-
-  group.rotation.set(0.45, 0.55, 0.06);
+  group.rotation.set(0.12, 0.38, 0.1);
   scene.add(group);
+
+  // Brilho e raios de difração (só na imagem colorida; ficam fora da silhueta usada no alfa).
+  const flares = new THREE.Group();
+  flares.userData.flare = true;
+  const additive = { transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false };
+  const halo = new THREE.Mesh(new THREE.PlaneGeometry(2.6, 2.6), new THREE.MeshBasicMaterial({ map: glowTexture(cfg.rgb), ...additive, opacity: 0.6 * cfg.flare }));
+  halo.position.z = 1.2;
+  flares.add(halo);
+  const streak = (len, thick, angle, rgb, spectral, opacity) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(len, thick), new THREE.MeshBasicMaterial({ map: streakTexture(rgb, spectral), ...additive, opacity: opacity * cfg.flare }));
+    m.rotation.z = angle;
+    m.position.z = 1.3;
+    flares.add(m);
+  };
+  streak(7.2, 0.5, Math.PI / 2, cfg.rgb, false, 0.9);
+  streak(6.6, 0.45, 0, cfg.rgb, false, 0.85);
+  streak(4.6, 0.3, Math.PI / 4, cfg.rgb, true, 0.7);
+  streak(4.2, 0.28, -Math.PI / 3.4, cfg.rgb, true, 0.6);
+  if (flareOnly) scene.add(flares);
   if (mask) scene.overrideMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
   return scene;
 }
 
 const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 60);
-camera.position.set(0, 0.35, 8);
+camera.position.set(0, 0, 11.5);
 camera.lookAt(0, 0, 0);
 
 window.renderAll = () => {
   const out = {};
   for (const kind of Object.keys(GEMS)) {
     renderer.toneMappingExposure = GEMS[kind].exposure;
-    renderer.render(build(kind, false), camera);
-    const color = renderer.domElement.toDataURL("image/png");
-    renderer.toneMappingExposure = 1;
-    renderer.render(build(kind, true), camera);
-    out[kind] = { color, mask: renderer.domElement.toDataURL("image/png") };
+    const shot = (mode) => { renderer.render(build(kind, mode), camera); return renderer.domElement.toDataURL("image/png"); };
+    out[kind] = { color: shot("body"), mask: shot("mask"), flare: shot("flare") };
   }
   return out;
 };

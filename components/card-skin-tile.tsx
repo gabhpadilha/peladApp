@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { LockIcon } from "lucide-react";
 import { PlayerCard } from "@/components/player-card";
+import { getSkinRarity } from "@/lib/packs";
 import { cn } from "@/lib/utils";
 import type { Player } from "@/types/player";
 
@@ -23,7 +24,8 @@ export function CardSkinTile({ player, name, isEquipped = false, isLocked = fals
         isEquipped && "border-primary/60 bg-primary/5",
       )}
     >
-      <div className="relative w-[70%]">
+      {/* Com skin de raridade, deixa espaço para o cristal que fica embaixo da carta. */}
+      <div className={cn("relative w-[70%]", getSkinRarity(player.cardSkin) && "mb-12")}>
         {/* Só opacidade: `saturate` (filtro) sobre as cartas desmontava a prévia no iPhone. */}
         <div className={cn(isLocked && "opacity-40")}>
           <PlayerCard player={player} size="fill" />
