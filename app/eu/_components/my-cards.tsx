@@ -7,7 +7,6 @@ import { equipCardSkin } from "@/app/loja/_actions/equip-card-skin";
 import type { ShopItem } from "@/app/loja/_data-access/get-shop";
 import { CardSkinTile } from "@/components/card-skin-tile";
 import { Button } from "@/components/ui/button";
-import type { PackRarity } from "@/lib/packs";
 import { cn } from "@/lib/utils";
 import type { Player } from "@/types/player";
 
@@ -15,12 +14,10 @@ type MyCardsProps = {
   me: Player;
   /** Padrão + compradas (`getMyCards`). */
   cards: ShopItem[];
-  /** Raridade das skins que vieram de pacote. */
-  packRarities: Record<string, PackRarity>;
 };
 
 /** "Minhas cartas": escolher qual carta usar entre a padrão e as compradas na Loja. */
-export function MyCards({ me, cards, packRarities }: MyCardsProps) {
+export function MyCards({ me, cards }: MyCardsProps) {
   const [message, setMessage] = useState<{ kind: "error" | "saved"; text: string } | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -68,7 +65,6 @@ export function MyCards({ me, cards, packRarities }: MyCardsProps) {
             key={item.skin ?? "padrao"}
             player={{ ...me, cardSkin: item.skin }}
             name={item.name}
-            rarity={item.skin ? packRarities[item.skin] : undefined}
             isEquipped={item.state === "equipped"}
           >
             {item.state === "equipped" ? (

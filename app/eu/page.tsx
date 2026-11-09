@@ -70,7 +70,7 @@ async function MeContent() {
           </div>
         </div>
 
-        <MyCards me={me} cards={data.cards} packRarities={data.packRarities} />
+        <MyCards me={me} cards={data.cards} />
 
         {isOwner && (
           <Link

@@ -29,6 +29,28 @@ export function isPackRarity(value: string): value is PackRarity {
   return PACK_RARITY_ORDER.includes(value as PackRarity);
 }
 
+/**
+ * Raridade de cada skin, pela régua do dono do app (2026-11-08; ver `CLAUDE.md`): aparece como losangos discretos embaixo da carta em
+ * todo lugar (`RarityPips` em `cancha-card.tsx`). Skin nova de pacote entra aqui junto com a entrada em `CARD_SKINS`.
+ */
+export const SKIN_RARITIES: Readonly<Record<string, PackRarity>> = {
+  esmeralda: "epica",
+  safira: "epica",
+  ametista: "epica",
+  rubi: "rara",
+  icone: "rara",
+  lobisomem: "rara",
+  vampiro: "rara",
+  nuvem: "epica",
+  relampago: "epica",
+  lenda: "epica",
+  destino: "lendaria",
+};
+
+export function getSkinRarity(skin: string | null | undefined): PackRarity | null {
+  return skin ? (SKIN_RARITIES[skin] ?? null) : null;
+}
+
 /** Um pacote do jogador. A skin e a raridade só vêm depois de aberto (o banco não as entrega antes). */
 export type MyPack = {
   id: string;
