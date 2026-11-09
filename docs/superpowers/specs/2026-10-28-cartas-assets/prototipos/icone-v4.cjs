@@ -72,17 +72,19 @@ async function cutRender() {
   };
 
   // Render maior e reposicionado numa tela 2000 x 2400 da arte (cabe o que passa da borda direita).
-  const RS = 0.9, RC = [1320, 870], RT = [1500, 1000], WIDE = 2000;
+  const RS = 0.9, RC = [1320, 870], RT = [1400, 1000], WIDE = 2000;
   const small = await sharp(await cutRender()).resize(Math.round(SRC.w * RS), Math.round(SRC.h * RS), { kernel: "lanczos3" }).png().toBuffer();
   const wide = await sharp({ create: { width: WIDE, height: SRC.h, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
     .composite([{ input: small, left: Math.round(RT[0] - RC[0] * RS), top: Math.round(RT[1] - RC[1] * RS) }]).png().toBuffer();
 
   // O render fica ATRÁS do jogador por dentro da carta (vai no fundo) e POR CIMA da borda só do lado de fora (camada `-vaza`):
   // a divisa é a janela do conteúdo (1,43% da carta para dentro da borda), com uns 16 px de rampa, e os dois lados têm os mesmos pixels.
-  const SPLIT = SRC.card.x + SRC.card.w - SRC.card.w * 0.0143;
+  // A divisa fica um pouco antes do lado de dentro do ouro (x 1573 da arte): se ela cai depois, o fio de dentro da borda passa por cima
+  // dos cristais como uma listra (o dono viu).
+  const SPLIT = 1568;
   const raw = await sharp(wide).raw().toBuffer();
   const outer = Buffer.from(raw);
-  for (let y = 0; y < SRC.h; y++) for (let x = 0; x < WIDE; x++) { const o = (y * WIDE + x) * 4 + 3; outer[o] = Math.round(raw[o] * smooth(SPLIT - 16, SPLIT, x)); }
+  for (let y = 0; y < SRC.h; y++) for (let x = 0; x < WIDE; x++) { const o = (y * WIDE + x) * 4 + 3; outer[o] = Math.round(raw[o] * smooth(SPLIT - 12, SPLIT, x)); }
   const outerPng = await sharp(outer, { raw: { width: WIDE, height: SRC.h, channels: 4 } }).png().toBuffer();
 
   // Fundo: o cartão do fundo esticado até a caixa da carta + o render por cima, recortado na folga de `artInset` (1,43% e 1,02%).
