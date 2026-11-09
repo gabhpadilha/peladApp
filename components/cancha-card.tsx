@@ -863,21 +863,35 @@ function FloaterPieces({ items, layer }: { items: readonly Floater[]; layer: "ba
     ));
 }
 
+/** Cor do nome de cada raridade (a luz da abertura do pacote). */
+const RARITY_TEXT_COLORS: Record<PackRarity, string> = {
+  comum: "#c7d2de",
+  rara: "#7fb0ff",
+  epica: "#c99bff",
+  lendaria: "#ffd067",
+};
+
 /**
- * Raridade da skin em uso: uma gema 3D pequena logo abaixo da carta (legenda discreta, fora do desenho dela). As quatro gemas
- * (aço, safira, ametista com anel e âmbar em garras de ouro) saem do `scripts/rarity-gems/render.mjs` (three.js, renderizadas
- * uma vez e guardadas em `public/rarity/`): na tela é só uma imagem, sem WebGL.
+ * Legenda de raridade embaixo da carta (fora do desenho dela): o cristal de raridade e, quando a carta é grande o bastante,
+ * o nome da raridade ao lado. Os quatro cristais (um formato, quatro cores) saem do `scripts/rarity-gems/render.mjs` (three.js,
+ * ray tracing, renderizados uma vez e guardados em `public/rarity/`): na tela é só uma imagem, sem WebGL.
  */
 function RarityGem({ rarity, skin }: { rarity: PackRarity; skin: string }) {
   return (
-    // eslint-disable-next-line @next/next/no-img-element -- ícone minúsculo e estático (public/rarity), sem o otimizador do Next
-    <img
-      role="img"
-      alt={`Raridade ${PACK_RARITY_NAMES[rarity]}`}
-      src={`/rarity/${rarity}.webp`}
-      style={{ marginTop: `${(SKIN_BOTTOM_OVERHANG[skin] ?? 0) + 2.5}cqw` }}
-      className="pointer-events-none absolute top-full left-1/2 z-[9] h-[max(34px,42cqw)] w-auto -translate-x-1/2 select-none"
-    />
+    <span
+      style={{ marginTop: `${(SKIN_BOTTOM_OVERHANG[skin] ?? 0) + 1.5}cqw` }}
+      className="pointer-events-none absolute top-full left-1/2 z-[9] flex -translate-x-1/2 items-center gap-[1.5cqw] whitespace-nowrap select-none"
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element -- ícone estático (public/rarity), sem o otimizador do Next */}
+      <img role="img" alt={`Raridade ${PACK_RARITY_NAMES[rarity]}`} src={`/rarity/${rarity}.webp`} className="h-[max(34px,38cqw)] w-auto" />
+      <span
+        aria-hidden
+        style={{ color: RARITY_TEXT_COLORS[rarity] }}
+        className="hidden font-display text-[max(12px,8.5cqw)] leading-none font-bold tracking-[0.14em] uppercase @min-[84px]:block"
+      >
+        {PACK_RARITY_NAMES[rarity]}
+      </span>
+    </span>
   );
 }
 
