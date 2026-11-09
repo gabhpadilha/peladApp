@@ -1,13 +1,11 @@
+import { ShowcaseCard } from "@/components/showcase-card";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ArrowRightIcon, CloudLightningIcon, TagIcon, GhostIcon, MedalIcon, SparklesIcon, StoreIcon, TrophyIcon, type LucideIcon } from "lucide-react";
 import { formatCoins } from "@/components/coin-pill";
 import { RankInsignia } from "@/components/cancha-card";
-import { PlayerCard } from "@/components/player-card";
 import { CARD_RANK_LABELS, getCardRank, RANK_FLAT_CLASSES, type CardRank } from "@/lib/card-rank";
 import { CARD_TIER_MIN_OVR, getTierProgress } from "@/lib/card-tier";
-import { SAMPLE_PLAYER } from "@/lib/sample-player";
-import { withAwardBonus } from "@/lib/award-bonus";
 import { type CardThemeKey, type CurrentCardEvent } from "@/lib/card-themes";
 import { getCurrentShopEvent } from "@/lib/shop-events";
 import { formatShortDate } from "@/lib/format-date";
@@ -118,7 +116,7 @@ function SaleBanner({ sale, skins }: { sale: ShopSale; skins: readonly { key: Ca
         {skins.map((skin) => (
           <li key={skin.key} className="flex items-center gap-2">
             <div className="w-8 shrink-0">
-              <PlayerCard player={{ ...SAMPLE_PLAYER, cardSkin: skin.key }} size="fill" />
+              <ShowcaseCard skin={skin.key} />
             </div>
             <div className="flex min-w-0 flex-col leading-tight">
               <span className="text-sm">{skin.name}</span>
@@ -277,11 +275,7 @@ export function NewsSlider({ event, today, shopSale, player }: NewsSliderProps) 
                 {MONTH_CARDS.map((card) => (
                   <div key={card.kind} className="flex min-w-0 flex-col items-center gap-1.5 text-center">
                     <div className="w-[5.5rem] sm:w-36">
-                      <PlayerCard
-                        player={withAwardBonus(SAMPLE_PLAYER, card.kind)}
-                        award={{ kind: card.kind, theme: "default" }}
-                        size="fill"
-                      />
+<ShowcaseCard award={{ kind: card.kind, theme: "default" }} />
                     </div>
                     <p className="font-display text-base leading-none font-bold uppercase">{card.title}</p>
                     <p className="text-[0.6875rem] leading-snug text-muted-foreground sm:text-xs">{card.text}</p>
@@ -313,7 +307,7 @@ export function NewsSlider({ event, today, shopSale, player }: NewsSliderProps) 
           visual={
             <CardFan
               cards={EVENT_FAN.map((kind) => (
-                <PlayerCard key={kind} player={withAwardBonus(SAMPLE_PLAYER, kind)} award={{ kind, theme: event.theme }} size="fill" />
+                <ShowcaseCard key={kind} award={{ kind, theme: event.theme }} />
               )) as [ReactNode, ReactNode, ReactNode]}
             />
           }
@@ -345,7 +339,7 @@ export function NewsSlider({ event, today, shopSale, player }: NewsSliderProps) 
           visual={
             <CardFan
               cards={shopFan.map((skin) => (
-                <PlayerCard key={skin} player={{ ...SAMPLE_PLAYER, cardSkin: skin }} size="fill" />
+                <ShowcaseCard key={skin} skin={skin} />
               )) as [ReactNode, ReactNode, ReactNode]}
             />
           }

@@ -1,8 +1,7 @@
+import { ShowcaseCard } from "@/components/showcase-card";
 import Link from "next/link";
 import { ArrowRightIcon, LockIcon } from "lucide-react";
-import { PlayerCard } from "@/components/player-card";
-import { SAMPLE_PLAYER } from "@/lib/sample-player";
-import { BOOSTED_AWARDS, withAwardBonus } from "@/lib/award-bonus";
+import { BOOSTED_AWARDS } from "@/lib/award-bonus";
 import { CARD_THEME_LABELS, type CardThemeKey } from "@/lib/card-themes";
 import { AWARD_KINDS, AWARD_LABELS } from "@/types/award";
 import type { Player } from "@/types/player";
@@ -35,7 +34,7 @@ export function EmptyCollection({ player, isOwnProfile, theme }: EmptyCollection
             <div className="relative w-full">
               {/* Bloqueada: apagada e sem cor até ser ganha. */}
               <div className="opacity-40 grayscale">
-                <PlayerCard player={withAwardBonus(SAMPLE_PLAYER, kind)} award={{ kind, theme }} size="fill" />
+                <ShowcaseCard award={{ kind, theme }} />
               </div>
               <span className="absolute inset-0 flex items-center justify-center">
                 <span className="rounded-full border bg-background/80 p-2">

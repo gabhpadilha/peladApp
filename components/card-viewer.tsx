@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent, type ReactNode } from "react";
 import { RotateCwIcon } from "lucide-react";
 import { CardBack } from "@/components/card-back";
-import { CanchaCard, isTrimmedCard } from "@/components/cancha-card";
+import { isTrimmedCard } from "@/components/cancha-card";
+import { ShowcaseCard } from "@/components/showcase-card";
 import { PlayerCard } from "@/components/player-card";
 import { RarityLabel } from "@/components/rarity-label";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -69,7 +70,7 @@ function ViewerCard({ player, showcase }: { player: Player; showcase: boolean })
   const skinName = player.cardSkin && isCardSkinKey(player.cardSkin) ? getCardSkin(player.cardSkin).name : "";
   // Vitrine: só o design da skin, como no pacote (sem foto, nome, selo nem estatísticas do jogador de exemplo).
   const front = showcase ? (
-    <CanchaCard player={{ ...player, photo: null, nickname: "", fullName: "" }} pure photoSizes="264px" className="w-full" />
+    <ShowcaseCard skin={player.cardSkin ?? null} />
   ) : (
     <PlayerCard player={player} size="fill" />
   );

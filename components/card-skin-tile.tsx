@@ -1,3 +1,4 @@
+import { ShowcaseCard } from "@/components/showcase-card";
 import type { ReactNode } from "react";
 import { CardViewer } from "@/components/card-viewer";
 import { PlayerCard } from "@/components/player-card";
@@ -32,7 +33,7 @@ export function CardSkinTile({ player, name, isEquipped = false, showcase = fals
           o que fica cinza é só o botão de compra. */}
       <div className="w-[70%]">
         <CardViewer player={player} showcase={showcase}>
-          <PlayerCard player={player} size="fill" />
+          {showcase ? <ShowcaseCard skin={player.cardSkin ?? null} /> : <PlayerCard player={player} size="fill" />}
         </CardViewer>
       </div>
       <div className="flex w-full flex-col items-center gap-2">

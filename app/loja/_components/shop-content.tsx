@@ -1,10 +1,10 @@
 "use client";
 
+import { ShowcaseCard } from "@/components/showcase-card";
 import { useState, useTransition } from "react";
 import { CloudLightningIcon, CoinsIcon, CrownIcon, GhostIcon, SparklesIcon, type LucideIcon } from "lucide-react";
 import { CardSkinTile } from "@/components/card-skin-tile";
 import type { ShopEventKey } from "@/lib/shop-events";
-import { PlayerCard } from "@/components/player-card";
 import { SAMPLE_PLAYER } from "@/lib/sample-player";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -165,7 +165,7 @@ export function ShopContent({ sections, balance, sale }: ShopContentProps) {
             <>
               <SheetHeader className="items-center gap-1 pt-8 text-center">
                 <div className="mb-4 w-40">
-                  <PlayerCard player={withSkin(selected)} size="fill" />
+                  <ShowcaseCard skin={selected.skin} />
                 </div>
                 <SheetTitle className="font-display text-3xl font-extrabold uppercase">{selected.name}</SheetTitle>
                 <SheetDescription>

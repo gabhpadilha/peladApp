@@ -1,11 +1,10 @@
 "use client";
 
+import { ShowcaseCard } from "@/components/showcase-card";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { CoinsIcon, StoreIcon } from "lucide-react";
 import { formatCoins } from "@/components/coin-pill";
-import { PlayerCard } from "@/components/player-card";
-import { SAMPLE_PLAYER } from "@/lib/sample-player";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { getCardSkin } from "@/types/card-skin";
@@ -54,7 +53,7 @@ export function WelcomeBonusDialog({ coins }: WelcomeBonusDialogProps) {
 
         <div className="flex flex-col items-center gap-2">
           <div className="w-32">
-            <PlayerCard player={{ ...SAMPLE_PLAYER, cardSkin: FEATURED_SKIN.key }} size="fill" />
+            <ShowcaseCard skin={FEATURED_SKIN.key} />
           </div>
           <span className="rounded-full bg-primary/15 px-3 py-1 text-sm font-semibold text-primary">
             {FEATURED_SKIN.name} · Grátis
