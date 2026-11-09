@@ -101,8 +101,8 @@ function Art({ rarity }: { rarity: PackRarity }) {
       ].map((pass, index) => (
         <g key={index} transform={`translate(${pass.dx} ${pass.dy})`} fill="none" stroke={pass.stroke} strokeOpacity={pass.opacity} strokeLinecap="round" strokeLinejoin="round">
           {/* Moldura externa e fio interno */}
-          <rect x="36" y="36" width={W - 72} height={H - 72} rx="44" strokeWidth={8 * pass.width} />
-          <rect x="56" y="56" width={W - 112} height={H - 112} rx="30" strokeWidth={3 * pass.width} />
+          <rect x="36" y="36" width={W - 72} height={H - 72} rx="54" strokeWidth={8 * pass.width} />
+          <rect x="56" y="56" width={W - 112} height={H - 112} rx="34" strokeWidth={3 * pass.width} />
           {/* Quadra */}
           <path d={COURT_PATHS.lines} strokeWidth={4.5 * pass.width} />
           <circle cx={CX} cy={MID_Y} r={6 * M} strokeWidth={4.5 * pass.width} />
@@ -122,11 +122,11 @@ function Art({ rarity }: { rarity: PackRarity }) {
   );
 }
 
-export function CardBack({ rarity, skinName, className }: { rarity: PackRarity; skinName: string; className?: string }) {
+export function CardBack({ rarity, skinName, hideNames = false, className }: { rarity: PackRarity; skinName: string; /** Na abertura do pacote os nomes ficam em branco (a skin ainda é segredo). */ hideNames?: boolean; className?: string }) {
   const look = LOOKS[rarity];
   return (
     <div
-      className={`@container relative aspect-[5/7] w-full overflow-hidden rounded-[6%/4.3%] select-none ${className ?? ""}`}
+      className={`@container relative aspect-[5/7] w-full overflow-hidden rounded-[9%/6.5%] select-none ${className ?? ""}`}
       style={{ boxShadow: `0 0 0 1px rgba(${look.glow},.35), 0 10px 28px rgba(0,0,0,.5)` }}
     >
       <Art rarity={rarity} />
@@ -153,7 +153,7 @@ export function CardBack({ rarity, skinName, className }: { rarity: PackRarity; 
           paddingLeft: "calc(2cqw + 0.16em)",
         }}
       >
-        <span className="truncate">{skinName}</span>
+        <span className="truncate">{hideNames ? "" : skinName}</span>
       </span>
       <span
         className="absolute flex items-center justify-center overflow-hidden px-[2cqw] font-display leading-none font-extrabold whitespace-nowrap uppercase"
@@ -168,7 +168,7 @@ export function CardBack({ rarity, skinName, className }: { rarity: PackRarity; 
           paddingLeft: "calc(2cqw + 0.2em)",
         }}
       >
-        {PACK_RARITY_NAMES[rarity]}
+        {hideNames ? "" : PACK_RARITY_NAMES[rarity]}
       </span>
     </div>
   );

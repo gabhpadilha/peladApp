@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { OvrBadge } from "@/components/ovr-badge";
 import { PlayerCard } from "@/components/player-card";
+import { RarityFlip } from "@/components/rarity-flip";
 import { cn } from "@/lib/utils";
 import { POSITION_LABELS } from "@/types/player";
 import type { RankedPlayer } from "../_data-access/get-home-data";
@@ -25,7 +26,9 @@ export function RankingList({ players, currentPlayerId }: RankingListProps) {
             <span className="w-4 text-sm text-muted-foreground tabular-nums">{position}</span>
             {/* Miniatura da carta (com a foto, quando tem): a carta escala pela largura. */}
             <div className="w-16 shrink-0 sm:w-20">
-              <PlayerCard player={player} size="fill" />
+              <RarityFlip player={player} mode="thumb">
+                <PlayerCard player={player} size="fill" />
+              </RarityFlip>
             </div>
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="truncate font-medium">{player.nickname}</span>

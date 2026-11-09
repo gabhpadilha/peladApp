@@ -1,5 +1,6 @@
 import { OvrDelta } from "@/components/ovr-delta";
 import { PlayerCard } from "@/components/player-card";
+import { RarityFlip } from "@/components/rarity-flip";
 import { CARD_TIER_LABELS, getCardTier } from "@/lib/card-tier";
 import { POSITION_LABELS } from "@/types/player";
 import type { AthleteProfile } from "../_data-access/get-athlete-profile";
@@ -39,7 +40,9 @@ export function AthleteHero({ profile }: AthleteHeroProps) {
         {player.ovr ?? ""}
       </span>
 
-      <PlayerCard player={player} size="fill" className="w-64 md:w-72 md:shrink-0" />
+      <RarityFlip player={player} mode="tap" className="w-64 md:w-72 md:shrink-0">
+        <PlayerCard player={player} size="fill" />
+      </RarityFlip>
 
       <div className="relative flex w-full flex-col gap-6">
         <div className="text-center md:text-left">

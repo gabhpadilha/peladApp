@@ -6,6 +6,7 @@ import { CheckIcon, PlusIcon } from "lucide-react";
 import { OffPositionBadge } from "@/components/off-position-badge";
 import { GoalsChip } from "./round-goals";
 import { PlayerCard } from "@/components/player-card";
+import { RarityFlip } from "@/components/rarity-flip";
 import { cn } from "@/lib/utils";
 import type { BoardPlayer } from "../_data-access/get-match-board";
 
@@ -108,8 +109,8 @@ export const BoardCard = memo(function BoardCard({ entry, mode, rating, onRate }
     </span>
   );
 
-  if (mode === "rate" && !isSelf && !entry.isRatedByMe) {
-    return (
+  const card =
+    mode === "rate" && !isSelf && !entry.isRatedByMe ? (
       <button
         type="button"
         onClick={() => onRate(player.id)}
@@ -118,13 +119,13 @@ export const BoardCard = memo(function BoardCard({ entry, mode, rating, onRate }
       >
         {content}
       </button>
+    ) : (
+      <Link href={`/jogadores/${player.id}`} aria-label={`Perfil de ${player.nickname}`} className={CARD_CLASS}>
+        {content}
+      </Link>
     );
-  }
-  return (
-    <Link href={`/jogadores/${player.id}`} aria-label={`Perfil de ${player.nickname}`} className={CARD_CLASS}>
-      {content}
-    </Link>
-  );
+  // Tocar na carta avalia ou abre o perfil: o giro para ver a raridade tem o próprio botão no canto.
+  return <RarityFlip player={player} mode="corner">{card}</RarityFlip>;
 }, (previous, next) =>
   previous.entry === next.entry &&
   previous.mode === next.mode &&

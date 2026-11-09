@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CameraIcon, ChartColumnIcon, GalleryVerticalEndIcon, InfoIcon } from "lucide-react";
 import { OvrDelta } from "@/components/ovr-delta";
 import { PlayerCard } from "@/components/player-card";
+import { RarityFlip } from "@/components/rarity-flip";
 import { buttonVariants } from "@/components/ui/button";
 import { CARD_TIER_LABELS, getCardTier } from "@/lib/card-tier";
 import { cn } from "@/lib/utils";
@@ -47,7 +48,9 @@ export function MyCardSummary({
       <div className="flex items-center gap-4">
         {/* A carta escala pela largura do pai: é a carta do próprio jogador, o foco do jogo (maior desde 2026-10-29). */}
         <div className="w-[52%] max-w-56 shrink-0 sm:w-60 sm:max-w-none">
-          <PlayerCard player={player} size="fill" />
+          <RarityFlip player={player} mode="tap">
+            <PlayerCard player={player} size="fill" />
+          </RarityFlip>
         </div>
 
         <div className="flex min-w-0 flex-1 flex-col gap-3">

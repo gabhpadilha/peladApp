@@ -2,6 +2,7 @@
 
 import type { CSSProperties } from "react";
 import { BrandMark } from "@/components/brand-logo";
+import { CardBack } from "@/components/card-back";
 import { CanchaCard } from "@/components/cancha-card";
 import { SAMPLE_PLAYER } from "@/lib/sample-player";
 import { PACK_RARITY_NAMES, type PackRarity } from "@/lib/packs";
@@ -43,40 +44,18 @@ const ms = (value: number): string => `calc(var(--k) * ${value}ms)`;
 const CRIMP =
   "polygon(0% 10px,5% 0,10% 10px,15% 0,20% 10px,25% 0,30% 10px,35% 0,40% 10px,45% 0,50% 10px,55% 0,60% 10px,65% 0,70% 10px,75% 0,80% 10px,85% 0,90% 10px,95% 0,100% 10px,100% 100%,0% 100%)";
 
-/** Verso da carta: moldura fina de metal polido, quadra gravada em tom sobre tom e a marca em relevo. */
-function CardBack({ rgb, power }: { rgb: string; power: number }) {
+/**
+ * Verso da carta na abertura: o mesmo verso da raridade que a carta tem no app (`CardBack`, com a quadra e a moeda da logo), com os nomes
+ * em branco (a skin ainda é segredo), a luz de borda respirando na cor da raridade e o reflexo que passa enquanto a carta gira.
+ */
+function PackCardBack({ rarity, rgb, power }: { rarity: PackRarity; rgb: string; power: number }) {
   return (
     <div
-      className="absolute inset-0 rounded-[9%/6.5%] p-[2.3%]"
-      style={{
-        background: "linear-gradient(142deg,#f2f5f7 0%,#8b949c 20%,#2e353b 44%,#b4bcc3 68%,#5d666e 86%,#dde2e6 100%)",
-        boxShadow: `0 0 32px rgba(${rgb},${0.5 * power}), 0 22px 44px rgba(0,0,0,.55)`,
-        backfaceVisibility: "hidden",
-      }}
+      className="absolute inset-0 rounded-[9%/6.5%]"
+      style={{ boxShadow: `0 0 32px rgba(${rgb},${0.5 * power}), 0 22px 44px rgba(0,0,0,.55)`, backfaceVisibility: "hidden" }}
     >
-      <div className="relative size-full overflow-hidden rounded-[17px]" style={{ background: "linear-gradient(160deg,#1f2a25 0%,#0c1210 52%,#16201b 100%)", boxShadow: "inset 0 0 0 1px rgba(0,0,0,.6), inset 0 0 38px rgba(0,0,0,.65)" }}>
-        {/* Quadra gravada. */}
-        <svg viewBox="0 0 240 340" className="absolute inset-0 size-full" fill="none" stroke="rgba(182,242,60,.16)" strokeWidth="1.3" aria-hidden>
-          <rect x="14" y="14" width="212" height="312" rx="12" />
-          <line x1="14" y1="170" x2="226" y2="170" />
-          <circle cx="120" cy="170" r="44" />
-          <circle cx="120" cy="170" r="2.5" fill="rgba(182,242,60,.3)" />
-          <rect x="72" y="14" width="96" height="40" />
-          <rect x="94" y="14" width="52" height="18" />
-          <rect x="72" y="286" width="96" height="40" />
-          <rect x="94" y="308" width="52" height="18" />
-          <path d="M92 54a30 30 0 0 0 56 0" />
-          <path d="M92 286a30 30 0 0 1 56 0" />
-        </svg>
-        {/* Marca em relevo: sombra embaixo, lima por cima. */}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="relative h-[132px] w-[90px]">
-            <BrandMark className="absolute inset-0 top-[3px] size-full text-black/55" />
-            <BrandMark className="absolute inset-0 size-full text-[#b6f23c]" />
-            <div className="absolute inset-0 rounded-md" style={{ background: "linear-gradient(180deg,rgba(255,255,255,.22),transparent 38%)", WebkitMaskImage: "none" }} />
-          </div>
-        </div>
-        <span className="absolute inset-x-0 bottom-[22px] text-center font-display text-[9px] font-semibold tracking-[0.5em] text-white/30">CANCHA CLUB</span>
+      <CardBack rarity={rarity} skinName="" hideNames />
+      <div className="absolute inset-0 overflow-hidden rounded-[9%/6.5%]">
         {/* Luz de borda respirando na cor da raridade (a expectativa antes de virar). */}
         <div aria-hidden className="absolute inset-0" style={{ boxShadow: `inset 0 0 26px rgba(${rgb},${0.55 * power})`, animation: "pl-breathe 1.1s ease-in-out infinite", borderRadius: "inherit" }} />
         {/* Reflexo passando enquanto a carta gira. */}
@@ -237,7 +216,7 @@ export function PackStage({ rarity, skin, round, oddsPercent, duplicateCoins, re
         <div className="absolute top-[42%] left-1/2 -ml-[130px] -mt-[182px] h-[364px] w-[260px]" style={{ perspective: "1100px", animation: "pl-rise 0.95s cubic-bezier(.16,.84,.24,1) both", animationDelay: ms(2000) }}>
           <div className="size-full" style={{ animation: "pl-hover 3.6s ease-in-out infinite", animationDelay: ms(4600) }}>
             <div className="relative size-full" style={{ transformStyle: "preserve-3d", animation: "pl-flip 1.15s cubic-bezier(.45,.05,.25,1) both", animationDelay: ms(3300) }}>
-              <CardBack rgb={cfg.rgb} power={cfg.power} />
+              <PackCardBack rarity={rarity} rgb={cfg.rgb} power={cfg.power} />
               <div className="absolute inset-0" style={{ transform: "rotateY(180deg)", backfaceVisibility: "hidden" }}>
                 <>
                   {skinKey === "destino" && <HoodPlug />}

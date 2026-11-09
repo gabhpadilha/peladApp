@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronDownIcon } from "lucide-react";
 import { GoalBall } from "@/components/goal-ball";
 import { PlayerCard } from "@/components/player-card";
+import { RarityFlip } from "@/components/rarity-flip";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { POSITION_LABELS } from "@/types/player";
@@ -72,7 +73,9 @@ export function ScorersRanking({ month, allTime, monthLabel, currentPlayerId }: 
               >
                 <span className="w-4 text-sm text-muted-foreground tabular-nums">{position}</span>
                 <div className="w-12 shrink-0 sm:w-14">
-                  <PlayerCard player={player} size="fill" />
+                  <RarityFlip player={player} mode="thumb">
+                    <PlayerCard player={player} size="fill" />
+                  </RarityFlip>
                 </div>
                 <span className="flex min-w-0 flex-1 flex-col">
                   <span className="truncate font-medium">{player.nickname}</span>
