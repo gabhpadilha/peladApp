@@ -1,36 +1,43 @@
-# Versos das cartas por raridade: prompt para o Gemini (2026-11-09)
+# Versos das cartas por raridade: prompt para o Gemini (2026-11-09, versão 2)
 
-A carta gira e o verso mostra a raridade da skin. **Uma arte-base só**; o que muda entre as raridades é a **cor, o brilho e a quantidade de ornamento**. O app põe em cima o nome da skin, no centro o cristal da raridade e embaixo o nome da raridade, então a arte precisa deixar esses lugares livres.
+A carta gira e o verso mostra a raridade da skin. **Uma arte-base só**; muda entre as raridades o **material, a cor, o brilho e a quantidade de detalhe**. A primeira versão (estilo tarô, linhas finas em foil) foi **descartada pelo dono do app**: ele quer **carta colecionável de verdade, com a nossa logo e detalhes mais fotorrealistas** (metal, relevo, foil, vidro).
+
+## Direção
+- **Peça de colecionador fotografada de cima**, não ilustração: placa de material real com relevo, bisel, reflexos e microtextura (aço escovado, anodizado, ouro polido, obsidiana, foil holográfico). Referências de espírito: verso de carta premium de Ultimate Team, Topps Chrome, Pokémon holográfica, baralho de luxo.
+- **A logo do Cancha Club é a estrela**: no centro, em relevo, dentro de um medalhão. Anexar os dois arquivos de logo (`logo-cancha-branco-sobre-preto.png` e `logo-cancha-lima-sobre-preto.png`, gerados da marca "Quadra vazada").
+- **Linguagem decorativa = linhas de quadra de futsal vista de cima** (a própria logo é uma quadra): meia-lua, áreas, círculo central, marcas, em baixo-relevo ou gravadas como guilloché, em vez de luas e estrelas de tarô.
+- **Nada de tarô, astrologia, luas, sóis ou estrelas místicas.**
 
 ## Especificações (valem para as 4 imagens)
-- **Proporção 5:7** (vertical), por exemplo 1000 × 1400 px. A carta final tem cantos arredondados (o app corta), então a arte vai de ponta a ponta, **sem cantos arredondados desenhados** e sem margem branca ou transparente.
-- **Círculo do centro vazio**: um círculo grande (cerca de 62% da largura), liso e escuro, para o cristal. Sem desenho dentro dele.
-- **Sem nenhum texto, letra, número ou logo** na arte (nome da skin e da raridade o app escreve).
-- **Faixa livre em cima e embaixo** (cerca de 12% da altura cada), só com o fundo e poucas estrelas, onde ficam os nomes.
-- Simetria total (esquerda e direita iguais, em cima e embaixo iguais), como nas referências.
-- Traço fino, nítido, como impressão em foil sobre fundo fosco. Nada de personagens, rostos, animais ou objetos reais.
-- Entregar em PNG ou JPG. Pedir **uma imagem por mensagem**, na mesma conversa, e usar a primeira como gabarito para as outras.
+- **Proporção 5:7** (vertical), por exemplo 1000 × 1400 px, de ponta a ponta, **sem cantos arredondados desenhados** e sem margem (o app arredonda).
+- **Medalhão central** com a logo em relevo, ocupando cerca de 45% da largura.
+- **Duas plaquinhas vazias, em baixo-relevo, sem nenhum texto**: uma faixa estreita no topo (cerca de 10% da altura, para o nome da skin) e uma maior embaixo (cerca de 16%, para o nome da raridade e o cristal).
+- Simetria esquerda/direita. **Nenhum texto, letra ou número** fora da logo.
+- Entregar em PNG ou JPG. **Uma imagem por mensagem, na mesma conversa**; a primeira vira gabarito.
 
-## Prompt-base (copie e troque o que está entre colchetes)
-> Verso de uma carta colecionável, vista de frente e plana, proporção 5:7 vertical, de ponta a ponta, sem cantos arredondados. Estilo de verso de carta de tarô ou baralho de luxo: **linhas finas em foil [COR DO FIO]** sobre fundo fosco **[COR DO FUNDO]**, simetria perfeita. No centro, um **círculo grande, liso e escuro, totalmente vazio**, com um fio fino contornando. Em volta do círculo: **[ORNAMENTO DO CENTRO]**. Nos quatro cantos: **[ORNAMENTO DOS CANTOS]**. Moldura: **[MOLDURA]**. Espalhe **[ESTRELAS]** pelo fundo, deixando as faixas de cima e de baixo (12% da altura cada) quase limpas. **[BRILHO]**. Sem nenhum texto, número, logo ou personagem. Acabamento limpo e vetorial, alto contraste, cores sólidas.
+## Prompt da lendária
+> Crie o verso de uma carta colecionável premium, vista de cima e totalmente plana, proporção 5:7 vertical (por exemplo 1000 × 1400 px), preenchendo a imagem de ponta a ponta, sem cantos arredondados, sem margem e sem sombra em volta. Não é um desenho: tem que parecer uma **fotografia de estúdio de uma peça física de colecionador de altíssimo valor**, com materiais reais, relevo, bisel, reflexos nítidos e microtextura.
+>
+> **Material e cor (lendária):** placa de **obsidiana preta polida** com fina textura de fibra de carbono por baixo, bordas com **bisel de ouro maciço polido**, e todos os detalhes em **ouro 24k espelhado** com pequenos **detalhes em rubi vermelho facetado**. Iluminação de estúdio com reflexos dourados intensos nas arestas, um halo quente atrás do medalhão e leve brilho holográfico nos cantos, como foil de carta rara.
+>
+> **Centro:** um **medalhão circular grande**, em relevo, com anel de ouro e bisel, e dentro dele a **logo do Cancha Club exatamente como na imagem anexa** (uma carta em formato de escudo vista de cima, que é uma quadra de futsal, com o "c" aberto no círculo central, a linha do meio entrando pela esquerda e as duas áreas). A logo em **ouro espelhado em alto-relevo**, com sombra suave e reflexo, fiel ao desenho anexo, sem alterar a forma.
+>
+> **Decoração:** gravada na obsidiana, **linhas de quadra de futsal vista de cima** em guilloché fino de ouro: arcos de área, círculo central repetido em anéis concêntricos, marcas e cantos de quadra, em baixo-relevo, simétricos. Nos quatro cantos, **cantoneiras de ouro** com pequenos rubis. Uma moldura dupla de ouro com microtexto repetitivo de padrão geométrico (sem letras).
+>
+> **Plaquinhas:** uma **faixa estreita e vazia, em baixo-relevo, no topo** e uma **plaquinha maior e vazia, em baixo-relevo, embaixo**, cada uma com bisel de ouro, **sem nenhum texto dentro**.
+>
+> **Não inclua:** nenhum texto, letra ou número (a logo é o único símbolo), nem luas, estrelas, sóis, tarô, astrologia, personagens ou rostos. Acabamento limpo, nítido, alto contraste, fotorrealista.
 
-### O que trocar por raridade
+## O que trocar nas outras raridades (depois que a lendária for aprovada)
 | | Comum | Rara | Épica | Lendária |
 |---|---|---|---|---|
-| **Cor do fio** | prata fosca | azul-gelo claro | dourado creme | ouro polido com um fio vermelho-rubi fino |
-| **Cor do fundo** | grafite azulado | azul-noite profundo | roxo-ametista escuro | preto profundo com leve calor dourado |
-| **Ornamento do centro** | um anel simples | anel duplo com pequenas marcas | anel de 72 marcas finas e raios curtos em volta, estilo sol | anéis duplos, 72 marcas e 48 raios alternando longos e curtos, mais um terceiro anel pontilhado |
-| **Ornamento dos cantos** | cantos retos com um pequeno traço | luas crescentes grandes e estrelas de 4 pontas | luas crescentes grandes, estrelas e um sol pequeno no centro de cima e de baixo | luas crescentes grandes, filigranas, sol detalhado em cima e embaixo, mandalas pequenas nos lados |
-| **Moldura** | um fio único | fio duplo | fio duplo e uma linha pontilhada por dentro | fio duplo, linha pontilhada e arabescos ondulados nas laterais |
-| **Estrelas** | poucas (cerca de 10) | médias (cerca de 40) | muitas (cerca de 70) | campo denso (cerca de 120), com algumas maiores |
-| **Brilho** | nenhum, tudo fosco | brilho azul suave atrás do círculo | halo violeta atrás do círculo e fio com leve reflexo | halo dourado intenso atrás do círculo e fio com reflexo metálico, textura de foil |
+| **Placa** | polímero grafite fosco | alumínio anodizado azul escovado | vidro violeta escuro sobre metal escovado | obsidiana preta polida |
+| **Bisel e detalhes** | aço escovado | prata polida | ouro-champanhe e foil holográfico violeta | ouro 24k espelhado com rubis |
+| **Gravura de quadra** | poucas linhas, rasas | linhas duplas | linhas duplas, anéis concêntricos | guilloché denso, anéis, cantoneiras |
+| **Brilho** | nenhum | reflexo azul suave | holográfico iridescente | halo dourado e reflexos intensos |
 
-## Ordem sugerida
-1. Gerar a **comum** (a mais simples) e aprovar a estrutura e o círculo vazio.
-2. Pedir cada uma das outras assim: "Mesmo desenho, mesmas proporções e círculo do centro vazio. Agora na versão **rara**, mudando só o que está na tabela" (colando a coluna da raridade).
-3. Mandar os 4 arquivos. Eles entram em `public/cartas/versos/<raridade>.webp` e substituem o desenho provisório do `components/card-back.tsx`.
-
-## Armadilhas (do que já aprendemos nas cartas)
-- Se o Gemini escrever texto, pedir de novo "sem nenhuma letra".
-- Se o círculo do centro vier com desenho dentro, pedir "círculo do centro totalmente liso e vazio".
-- Pedir sempre uma camada por mensagem e manter a mesma conversa para a família ficar igual.
+## Armadilhas
+- Se o Gemini escrever texto: "Refaça sem nenhuma letra ou número, só a logo."
+- Se mudar a logo: "A logo tem que ser exatamente a da imagem anexa, sem alterar a forma."
+- Se vier cantos arredondados, margem ou sombra em volta: "Preencha a imagem inteira, sem margem nem sombra."
+- Se vier tarô, luas ou estrelas: "Troque por linhas de quadra de futsal (arcos de área, círculo central), sem nenhum elemento de astrologia."
