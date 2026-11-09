@@ -110,7 +110,7 @@ export function ShopContent({ sections, balance, sale }: ShopContentProps) {
           const isShort = !isLocked && balance < item.price;
           // Só o que o jogador ainda não tem aparece aqui; as dele ficam em Eu → Minhas cartas.
           return (
-            <CardSkinTile key={item.skin ?? "padrao"} player={withSkin(item)} name={item.name}>
+            <CardSkinTile key={item.skin ?? "padrao"} player={withSkin(item)} name={item.name} showcase>
               {item.state === "available" && !isShort ? (
                 <Button type="button" className="h-10 w-full gap-1.5" disabled={isPending} onClick={() => setSelected(item)}>
                   <CoinsIcon aria-hidden className="size-4" />

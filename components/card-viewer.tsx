@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type KeyboardEvent, type ReactNode } from "react";
 import { RotateCwIcon } from "lucide-react";
 import { CardBack } from "@/components/card-back";
-import { isTrimmedCard } from "@/components/cancha-card";
+import { CanchaCard, isTrimmedCard } from "@/components/cancha-card";
 import { PlayerCard } from "@/components/player-card";
 import { RarityLabel } from "@/components/rarity-label";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -63,11 +63,16 @@ function useCardFlip() {
 }
 
 /** A carta grande do visualizador: tocar nela vira para o verso da raridade (só skins com raridade). */
-function ViewerCard({ player }: { player: Player }) {
+function ViewerCard({ player, showcase }: { player: Player; showcase: boolean }) {
   const { isBack, flip, style } = useCardFlip();
   const rarity = getSkinRarity(player.cardSkin);
   const skinName = player.cardSkin && isCardSkinKey(player.cardSkin) ? getCardSkin(player.cardSkin).name : "";
-  const front = <PlayerCard player={player} size="fill" />;
+  // Vitrine: só o design da skin, como no pacote (sem foto, nome, selo nem estatísticas do jogador de exemplo).
+  const front = showcase ? (
+    <CanchaCard player={{ ...player, photo: null, nickname: "", fullName: "" }} pure photoSizes="264px" className="w-full" />
+  ) : (
+    <PlayerCard player={player} size="fill" />
+  );
 
   if (!rarity) return <div className="w-full">{front}</div>;
 
@@ -118,6 +123,21 @@ function StatBar({ label, value }: { label: string; value: number | null }) {
         <div className="h-full rounded-full bg-primary" style={{ width: `${Math.min(100, value ?? 0)}%` }} />
       </div>
     </li>
+  );
+}
+
+/** Vitrine (Loja): só o nome da skin e a raridade; a foto e as estatísticas aparecem quando a carta veste o jogador de verdade. */
+function ShowcaseDetails({ player }: { player: Player }) {
+  const rarity = getSkinRarity(player.cardSkin);
+  const skinName = player.cardSkin && isCardSkinKey(player.cardSkin) ? getCardSkin(player.cardSkin).name : "Carta padrão";
+  return (
+    <div className="flex flex-col items-center gap-2 text-center">
+      <DialogTitle className="font-display text-3xl leading-none font-extrabold uppercase">{skinName}</DialogTitle>
+      {rarity && <RarityLabel rarity={rarity} />}
+      <DialogDescription className="max-w-72 text-sm text-muted-foreground">
+        Pré-visualização do visual. Quando você usar, ela ganha a sua foto, o seu nome e as suas estatísticas.
+      </DialogDescription>
+    </div>
   );
 }
 
@@ -174,7 +194,7 @@ function ViewerDetails({ player }: { player: Player }) {
  * Toque na carta abre o visualizador (decisão do dono do app em 2026-11-09, no lugar do botão de virar): a carta grande, que vira para
  * o verso da raridade ao toque, e os detalhes dela (OVR, patente, estatísticas e skin). Só envolve a carta; o tamanho vem de quem usa.
  */
-export function CardViewer({ player, children, className }: { player: Player; children: ReactNode; className?: string }) {
+export function CardViewer({ player, children, className, showcase = false }: { player: Player; children: ReactNode; className?: string; /** Carta de vitrine (jogador de exemplo): mostra só o design, sem foto nem estatísticas. */ showcase?: boolean }) {
   const [isOpen, setIsOpen] = useState(false);
 
   function handleKeyDown(event: KeyboardEvent) {
@@ -200,9 +220,9 @@ export function CardViewer({ player, children, className }: { player: Player; ch
         <Dialog open onOpenChange={setIsOpen}>
           <DialogContent className="max-h-[94dvh] gap-5 overflow-y-auto overscroll-contain bg-[#0a110d] p-5 sm:max-w-md">
             <div className="mx-auto w-[min(62vw,248px)] pt-2 pb-5">
-              <ViewerCard player={player} />
+              <ViewerCard player={player} showcase={showcase} />
             </div>
-            <ViewerDetails player={player} />
+            {showcase ? <ShowcaseDetails player={player} /> : <ViewerDetails player={player} />}
           </DialogContent>
         </Dialog>
       )}

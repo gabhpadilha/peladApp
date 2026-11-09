@@ -11,12 +11,14 @@ type CardSkinTileProps = {
   player: Player;
   name: string;
   isEquipped?: boolean;
+  /** Carta de vitrine (jogador de exemplo, na Loja): o visualizador mostra só o design. */
+  showcase?: boolean;
   /** Botão ou selo embaixo do nome ("Em uso", "Usar", preço…). */
   children: ReactNode;
 };
 
 /** Uma carta da Loja ou de "Minhas cartas" (página Eu): carta, nome e a ação. */
-export function CardSkinTile({ player, name, isEquipped = false, children }: CardSkinTileProps) {
+export function CardSkinTile({ player, name, isEquipped = false, showcase = false, children }: CardSkinTileProps) {
   // Raridade escrita embaixo do nome (só na Loja e em Eu → Minhas cartas; em outras telas a representação ainda será definida).
   const rarity = getSkinRarity(player.cardSkin);
   return (
@@ -29,7 +31,7 @@ export function CardSkinTile({ player, name, isEquipped = false, children }: Car
       {/* A carta sempre aparece inteira e abre o visualizador, mesmo sem nível ou moedas para comprar (pedido do dono do app em 2026-11-09):
           o que fica cinza é só o botão de compra. */}
       <div className="w-[70%]">
-        <CardViewer player={player}>
+        <CardViewer player={player} showcase={showcase}>
           <PlayerCard player={player} size="fill" />
         </CardViewer>
       </div>
