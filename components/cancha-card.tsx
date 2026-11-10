@@ -33,7 +33,7 @@ export type Floater = {
   y: number;
   w: number;
   layer: "back" | "front";
-  anim: "float" | "orbit" | "spin";
+  anim: "float" | "orbit" | "spin" | "thunder-strike";
   /** Duração do ciclo, em segundos. */
   dur: number;
   delay?: number;
@@ -186,6 +186,18 @@ const DESTINO_FLOATERS: readonly Floater[] = [
   { src: "destino-caco-c", x: 52, y: 3.5, w: 8, layer: "back", anim: "float", dur: 8, delay: 0.8 },
 ];
 
+/** Runas, rochas e raios que flutuam em volta da Tormenta (`prototipos/tormenta-pecas.cjs`); os raios estalam como trovão (só `opacity`). */
+const TORMENTA_FLOATERS: readonly Floater[] = [
+  { src: "tormenta-pedra-a", x: 8, y: 27, w: 15, layer: "front", anim: "float", dur: 8, rot: -10 },
+  { src: "tormenta-runa", x: 92, y: 60, w: 14, layer: "front", anim: "orbit", dur: 9, delay: 1, rot: 8 },
+  { src: "tormenta-pedra-b", x: 91, y: 12, w: 10, layer: "front", anim: "orbit", dur: 10, delay: 0.5, rot: 14 },
+  { src: "tormenta-runa", x: 8, y: 80, w: 11, layer: "front", anim: "float", dur: 7, delay: 2.2, rot: -6 },
+  { src: "tormenta-pedra-b", x: 93, y: 86, w: 9, layer: "front", anim: "float", dur: 6, delay: 1.4, rot: -12 },
+  { src: "tormenta-raio-b", x: 5.5, y: 52, w: 8, layer: "front", anim: "thunder-strike", dur: 3.4 },
+  { src: "tormenta-raio-c", x: 95, y: 36, w: 9, layer: "front", anim: "thunder-strike", dur: 4.1, delay: 1.3 },
+  { src: "tormenta-raio-a", x: 7, y: 92, w: 6, layer: "front", anim: "thunder-strike", dur: 3.8, delay: 2.1 },
+];
+
 const ROUPAS = {
   // Grafite fosco (aprovado pelo dono do app em 2026-10-29): menos premium que as skins, de propósito.
   padrao: { background: "fosco-grafite", metal: ["#2a312d", "#2a312d", "rgb(255 255 255 / 0.1)"], accent: "#8fa197", light: "255 255 255", bar: "#121714", muted: "#9fb0a4", matte: true },
@@ -214,6 +226,9 @@ const ROUPAS = {
   // Destino (2026-11-05, evento "Destino" da Loja de dezembro, carta de prestígio, nível 5, 600 CC, em `CARD_SKINS` só para dezembro de 2026; design original que só alude a um vilão de cinema, sem nome, logo ou traje): ferro forjado e aço com runas
   // de um alfabeto inventado brilhando em verde-esmeralda, pano verde-musgo e cristais, e moldura de aço escovado com runas verdes, cristais nos cantos de cima e um capuz verde no topo (arte do dono em `prototipos/destino-fundo-dono.jpg` e `destino-borda-capuz-dono.jpg`).
   destino: { background: "premium-destino", overflow: "premium-destino-vaza", floaters: DESTINO_FLOATERS, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#6b6f73", "#6b6f73", "#d6c07a"], accent: "#c9a85c", light: "120 255 170", bar: "#06100b", muted: "#b9e8c8", sparkles: false, neon: "#3dffa0" },
+  // Tormenta (2026-11-09, evento "Destino" da Loja de dezembro, segunda carta de prestígio, nível 5, 600 CC; só alusões à mitologia nórdica, sem nome, logo ou traje de obra): tempestade azul com raios, moldura de ferro com runas azuis brilhando,
+  // um martelo de nós celtas no topo e peles nos cantos de cima, com rochas de cristal, runas e raios flutuando em volta (arte do dono em `prototipos/tormenta-{fundo,borda,pecas}-dono.*`; o fundo com `montar-carta.cjs tormenta ... 60,75,704,965 - 12 0,0,765,1024` e a moldura com `tormenta-borda.cjs`, recorte próprio: ferro e peles opacos, raios só por luz, sem mancha preta).
+  tormenta: { background: "premium-tormenta", overflow: "premium-tormenta-vaza", floaters: TORMENTA_FLOATERS, statsLift: 5, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#5d6672", "#5d6672", "#cfe6ff"], accent: "#7fc4ff", light: "120 190 255", bar: "#050b18", muted: "#bcd8ff", sparkles: false, neon: "#4aa8ff" },
   // GUARDADAS, fora da Loja (sem entrada em `CARD_SKINS`; para usar: entrada lá, `case` em `skinRoupa` e `SKIN_CLASSES`): Voltagem e Maré.
   // Voltagem (2026-11-05, pedido do dono do app: o estilo da borda da referência dele no nosso retângulo): fio duplo de ouro pálido por dentro e
   // linhas de neon por fora, com o degrau onde se dividem (`prototipos/voltagem.cjs`). Janela `ring` recuada até o fio de dentro.
@@ -472,6 +487,7 @@ function skinRoupa(skin: CardSkinKey): RoupaKey {
     case "rubi": return "rubi";
     case "icone": return "icone";
     case "destino": return "destino";
+    case "tormenta": return "tormenta";
     case "lobisomem": return "lobisomem";
     case "nuvem": return "nuvem";
     case "relampago": return "relampago";
@@ -885,7 +901,7 @@ function FloaterPieces({ items, layer }: { items: readonly Floater[]; layer: "ba
           alt=""
           src={`/cartas/fundos/${item.src}.webp`}
           className="size-full select-none motion-reduce:animate-none"
-          style={{ animation: `cc-${item.anim} ${item.dur}s ${item.anim === "spin" ? "linear" : "ease-in-out"} ${item.delay ?? 0}s infinite` }}
+          style={{ animation: `cc-${item.anim} ${item.dur}s ${item.anim === "spin" || item.anim === "thunder-strike" ? "linear" : "ease-in-out"} ${item.delay ?? 0}s infinite` }}
         />
       </span>
     ));

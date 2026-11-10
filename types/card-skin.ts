@@ -29,6 +29,8 @@ export const CARD_SKINS = [
   // Evento "Destino" de dezembro de 2026 (decisão do dono do app em 2026-11-05; alude a um vilão de cinema sem copiar nada): à venda só em dezembro de 2026.
   // Carta de prestígio, como a Lenda do Trovão. Reator e Fúria (nível 3, 200 CC) entram aqui quando as artes chegarem.
   { key: "destino", name: "Destino", level: 5, price: 600, event: { theme: "destino", year: 2026 } },
+  // Segunda carta de prestígio de dezembro (2026-11-09): tempestade nórdica (martelo de runas, peles e raios azuis), só alusões à mitologia.
+  { key: "tormenta", name: "Tormenta", level: 5, price: 600, event: { theme: "destino", year: 2026 } },
 ] as const;
 
 export type CardSkin = (typeof CARD_SKINS)[number];
