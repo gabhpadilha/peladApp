@@ -106,25 +106,42 @@ export type CareerCard = {
   attributes: Partial<Record<PlayerAttribute, number>>;
 };
 
+/** Quantas rodadas contam na carta (decisão do dono do app em 2026-11-10: "o desempenho do último mês"). */
+export const CAREER_WINDOW_ROUNDS = 5;
+
 /**
- * Carta de carreira (decisão do dono do app em 2026-11-08): o OVR do jogador é a **média simples dos OVRs
- * de cada rodada** (sem tirar nenhuma); cada atributo é a média dele nas rodadas. Em cada rodada já saíram a maior e a menor
- * nota (o banco entrega `counted_evaluations`). Os gols confirmados somam no Ataque da carta (VEL e CHU, 1 ponto por gol, teto de
- * `GOAL_ATTACK_BONUS_MAX`, sem goleiro) e o OVR sobe o quanto o Ataque maior fizer subir a média das 2 maiores estatísticas.
- * `evaluations` são todas de rodadas fechadas, só na posição do cadastro. Espelha `compute_match_awards` no banco.
+ * Carta de carreira (decisão do dono do app em 2026-11-10, vale desde a primeira rodada): o OVR do jogador é a
+ * **média simples dos OVRs das suas últimas `CAREER_WINDOW_ROUNDS` rodadas avaliadas** e cada atributo é a média dele
+ * nessas rodadas (antes eram todas as rodadas). Em cada rodada já saíram a maior e a menor nota (o banco entrega
+ * `counted_evaluations`). Os gols confirmados **nessas mesmas rodadas** somam no Ataque da carta (VEL e CHU, 1 ponto por
+ * gol, teto de `GOAL_ATTACK_BONUS_MAX`, sem goleiro) e o OVR sobe o quanto o Ataque maior fizer subir a média das 2
+ * maiores estatísticas. `evaluations` são todas de rodadas fechadas, só na posição do cadastro; `roundOrder` dá a posição
+ * de cada rodada no tempo (número da rodada) e `goalsByMatch` os gols confirmados do jogador em cada uma.
+ * Espelha `compute_match_awards` no banco.
  */
-export function computeCareerCard(evaluations: readonly Evaluation[], goals = 0): CareerCard {
+export function computeCareerCard(
+  evaluations: readonly Evaluation[],
+  roundOrder: ReadonlyMap<string, number>,
+  goalsByMatch: ReadonlyMap<string, number> = new Map(),
+): CareerCard {
   const byRound = new Map<string, OvrTotals>();
   for (const evaluation of evaluations) {
     let totals = byRound.get(evaluation.matchId);
     if (!totals) byRound.set(evaluation.matchId, (totals = new Map()));
     addToOvrTotals(totals, evaluation);
   }
+  const windowRounds = [...byRound]
+    .filter(([, totals]) => totals.size > 0)
+    .toSorted(([a], [b]) => (roundOrder.get(a) ?? 0) - (roundOrder.get(b) ?? 0))
+    .slice(-CAREER_WINDOW_ROUNDS);
+
   const roundOvrs: number[] = [];
   const attributeRounds = new Map<PlayerAttribute, number[]>();
-  for (const totals of byRound.values()) {
+  let goals = 0;
+  for (const [matchId, totals] of windowRounds) {
     const roundOvr = ovrFromTotals(totals);
     if (roundOvr !== null) roundOvrs.push(roundOvr);
+    goals += goalsByMatch.get(matchId) ?? 0;
     for (const [key, total] of totals) {
       const list = attributeRounds.get(key);
       const value = total.sum / total.count;

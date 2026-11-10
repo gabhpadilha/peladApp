@@ -71,7 +71,8 @@ export async function getRoster(): Promise<Roster> {
     );
   if (profilesError) throw profilesError;
   const profileByUser = new Map(profiles.map((profile) => [profile.id, profile]));
-  const ovrByMember = getOvrByMember(evaluations, await getConfirmedGoalsByMember(membership.groupId));
+  const { goals: confirmedGoals, roundOrder } = await getConfirmedGoalsByMember(membership.groupId);
+  const ovrByMember = getOvrByMember(evaluations, roundOrder, confirmedGoals);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
 
   return {

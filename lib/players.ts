@@ -45,8 +45,13 @@ function pickAttributes<Key extends PlayerAttribute>(
   return Object.fromEntries(keys.map((key) => [key, attributes[key] ?? null])) as Record<Key, number | null>;
 }
 
-function buildPlayer(profile: PlayerProfile, evaluations: readonly Evaluation[], goals: number): Player {
-  const { ovr, attributes } = computeCareerCard(evaluations, goals);
+function buildPlayer(
+  profile: PlayerProfile,
+  evaluations: readonly Evaluation[],
+  roundOrder: ReadonlyMap<string, number>,
+  goalsByMatch: ReadonlyMap<string, number>,
+): Player {
+  const { ovr, attributes } = computeCareerCard(evaluations, roundOrder, goalsByMatch);
   if (profile.role === "goalkeeper") {
     return { ...profile, ovr, attributes: pickAttributes(attributes, GOALKEEPER_ATTRIBUTES) };
   }
@@ -79,16 +84,20 @@ export function buildPlayers(
     else receivedByPlayer.set(evaluation.playerId, [evaluation]);
   }
 
-  // Gols confirmados das rodadas contadas, somados por jogador (bônus de Ataque da carta).
-  const goalsByPlayer = new Map<string, number>();
+  // Gols confirmados das rodadas contadas, por jogador e por rodada (bônus de Ataque da carta nas últimas rodadas).
+  const goalsByPlayer = new Map<string, Map<string, number>>();
   for (const [key, goals] of confirmedGoals ?? []) {
     const [matchId, playerId] = key.split(":");
     if (!countedMatchIds.has(matchId)) continue;
-    goalsByPlayer.set(playerId, (goalsByPlayer.get(playerId) ?? 0) + goals);
+    const byMatch = goalsByPlayer.get(playerId) ?? new Map<string, number>();
+    byMatch.set(matchId, goals);
+    goalsByPlayer.set(playerId, byMatch);
   }
+  const roundOrder = new Map(getClosedMatches(matches).map((match) => [match.id, match.round]));
+  const noGoals = new Map<string, number>();
 
   return profiles.map((profile) =>
-    buildPlayer(profile, receivedByPlayer.get(profile.id) ?? [], goalsByPlayer.get(profile.id) ?? 0),
+    buildPlayer(profile, receivedByPlayer.get(profile.id) ?? [], roundOrder, goalsByPlayer.get(profile.id) ?? noGoals),
   );
 }
 

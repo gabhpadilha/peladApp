@@ -74,7 +74,8 @@ export async function getRoundsOverview(): Promise<RoundsOverview> {
   const submittedByMatch = new Map(
     submissionsResult.data.map((row) => [row.match_id, Number(row.submitted)]),
   );
-  const ovrByMember = getOvrByMember(evaluations, await getConfirmedGoalsByMember(membership.groupId));
+  const { goals: confirmedGoals, roundOrder } = await getConfirmedGoalsByMember(membership.groupId);
+  const ovrByMember = getOvrByMember(evaluations, roundOrder, confirmedGoals);
   const kindOrder: readonly AwardKind[] = AWARD_KINDS;
 
   return {

@@ -55,19 +55,19 @@ export const getRoundGoalsState = cache(
   },
 );
 
-/** Gols confirmados de cada membro nas rodadas fechadas (bônus de Ataque do OVR, `computeCareerCard`). */
-export async function getConfirmedGoalsByMember(groupId: string): Promise<Map<string, number>> {
+/** Gols confirmados por rodada fechada, chave "rodada:membro" (bônus de Ataque do OVR, `computeCareerCard`), e a ordem das rodadas. */
+export async function getConfirmedGoalsByMember(groupId: string): Promise<{ goals: Map<string, number>; roundOrder: Map<string, number> }> {
   const supabase = await createClient();
   const [goals, closedResult] = await Promise.all([
     getGroupGoals(groupId),
-    supabase.from("matches").select("id").eq("group_id", groupId).eq("status", "closed"),
+    supabase.from("matches").select("id, round").eq("group_id", groupId).eq("status", "closed"),
   ]);
   if (closedResult.error) throw closedResult.error;
   const closedIds = new Set(closedResult.data.map((match) => match.id));
   const totals = new Map<string, number>();
   for (const goal of goals) {
     if (!goal.isConfirmed || !closedIds.has(goal.matchId)) continue;
-    totals.set(goal.memberId, (totals.get(goal.memberId) ?? 0) + goal.goals);
+    totals.set(`${goal.matchId}:${goal.memberId}`, goal.goals);
   }
-  return totals;
+  return { goals: totals, roundOrder: new Map(closedResult.data.map((match) => [match.id, match.round])) };
 }

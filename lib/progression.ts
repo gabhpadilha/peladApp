@@ -175,9 +175,10 @@ function indexByPlayerAndMatch<Item>(
 /** Rodada a rodada (só as fechadas), na ordem: o que cada uma deu ao jogador. */
 function* walkRounds({ playerId, matches, evaluations, awards, submissions, confirmedGoals }: ProgressionInput) {
   let previousOvr: number | null = null;
-  // OVR de carreira (média dos OVRs das rodadas + bônus de gols), acumulado rodada a rodada.
+  // OVR de carreira (média dos OVRs das últimas 5 rodadas + bônus de gols delas), acumulado rodada a rodada.
   const ovrEvaluations: Evaluation[] = [];
-  let goalsSoFar = 0;
+  const goalsByMatch = new Map<string, number>();
+  const roundOrder = new Map<string, number>();
   const evaluationsByMatch = indexByPlayerAndMatch(evaluations, evaluationIndexes, (evaluation) => evaluation).get(playerId);
   const awardsByMatch = indexByPlayerAndMatch(awards, awardIndexes, (award) => ({
     playerId: award.memberId,
@@ -191,8 +192,9 @@ function* walkRounds({ playerId, matches, evaluations, awards, submissions, conf
     for (const evaluation of received) {
       if (isOvrEvaluation(evaluation)) ovrEvaluations.push(evaluation);
     }
-    goalsSoFar += confirmedGoals.get(submissionKey(match.id, playerId)) ?? 0;
-    const ovr = computeCareerCard(ovrEvaluations, goalsSoFar).ovr;
+    roundOrder.set(match.id, match.round);
+    goalsByMatch.set(match.id, confirmedGoals.get(submissionKey(match.id, playerId)) ?? 0);
+    const ovr = computeCareerCard(ovrEvaluations, roundOrder, goalsByMatch).ovr;
     const gains: RoundGain[] = [];
     const isLegacyRound = match.date < AWARD_XP_CUTOFF;
     const bestPlayerXp = isLegacyRound ? LEGACY_XP_BEST_PLAYER : XP_BEST_PLAYER;

@@ -41,10 +41,11 @@ export async function getGroupEvaluations(groupId: string): Promise<Evaluation[]
   });
 }
 
-/** OVR de cada membro (média dos OVRs das rodadas, com o bônus de gols), `null` se nunca avaliado. */
+/** OVR de cada membro (média dos OVRs das últimas 5 rodadas, com o bônus de gols delas), `null` se nunca avaliado. */
 export function getOvrByMember(
   evaluations: readonly Evaluation[],
-  goalsByMember: ReadonlyMap<string, number> = new Map(),
+  roundOrder: ReadonlyMap<string, number>,
+  confirmedGoals: ReadonlyMap<string, number> = new Map(),
 ): Map<string, number | null> {
   // Map.groupBy só existe a partir do Node 21; o projeto roda no 20.
   const byPlayer = new Map<string, Evaluation[]>();
@@ -54,5 +55,14 @@ export function getOvrByMember(
     received.push(evaluation);
     byPlayer.set(evaluation.playerId, received);
   }
-  return new Map([...byPlayer].map(([playerId, received]) => [playerId, computeCareerCard(received, goalsByMember.get(playerId) ?? 0).ovr]));
+  return new Map(
+    [...byPlayer].map(([playerId, received]) => {
+      const goalsByMatch = new Map<string, number>();
+      for (const evaluation of received) {
+        const goals = confirmedGoals.get(`${evaluation.matchId}:${playerId}`);
+        if (goals) goalsByMatch.set(evaluation.matchId, goals);
+      }
+      return [playerId, computeCareerCard(received, roundOrder, goalsByMatch).ovr];
+    }),
+  );
 }
