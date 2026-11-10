@@ -275,6 +275,8 @@ export async function getLeague(nextPath = "/") {
     matches,
     evaluations,
     awards,
+    /** Gols confirmados, chave "rodada:membro". */
+    confirmedGoals,
     latestClosedMatch,
     pending: getPendingEvaluations(membership.memberId, matches, givenEvaluations),
     /** O logado já deu nota a esse jogador nessa rodada? */

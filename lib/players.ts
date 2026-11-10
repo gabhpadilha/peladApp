@@ -1,4 +1,4 @@
-import { computeCareerCard, computeOvr } from "@/lib/ovr";
+import { computeCareerCard, computeRoundOvr } from "@/lib/ovr";
 import { isOvrEvaluation, type Evaluation, type Match } from "@/types/match";
 import {
   GOALKEEPER_ATTRIBUTES,
@@ -111,6 +111,7 @@ export function getMatchPerformances(
   playerId: string,
   matches: readonly Match[],
   evaluations: readonly Evaluation[],
+  confirmedGoals: ReadonlyMap<string, number> = new Map(),
 ): MatchPerformance[] {
   // Performance: notas do jogador agrupadas por rodada numa passada só, em vez de
   // filtrar a lista inteira a cada rodada (O(rodadas × notas) → O(rodadas + notas)).
@@ -127,8 +128,8 @@ export function getMatchPerformances(
     return {
       match,
       wasPresent: match.presentPlayerIds.includes(playerId),
-      // Mesma régua em todas as rodadas (OVR da rodada), inclusive as de antes de 2/11: só exibição; XP e moedas seguem `getRoundScore`.
-      score: computeOvr(received),
+      // Mesma régua em todas as rodadas (OVR da rodada + gols dela), inclusive as de antes de 2/11: só exibição; XP e moedas seguem `getRoundScore`.
+      score: computeRoundOvr(received, confirmedGoals.get(`${match.id}:${playerId}`) ?? 0),
       evaluationCount: received.length,
       offPosition: received.some((evaluation) => evaluation.offPosition),
     };

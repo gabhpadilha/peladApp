@@ -62,7 +62,7 @@ export function AthleteHero({ profile }: AthleteHeroProps) {
             {player.ovrBreakdown.rounds === 1 ? "sua rodada" : `suas últimas ${player.ovrBreakdown.rounds} rodadas`}
             {player.ovrBreakdown.goalPoints > 0 &&
               ` + ${player.ovrBreakdown.goalPoints} dos ${player.ovrBreakdown.goals} gols`}
-            . A nota de cada rodada está no histórico, na mesma conta.
+            . Os gols entram na nota de cada rodada, que está no histórico.
           </p>
         )}
 

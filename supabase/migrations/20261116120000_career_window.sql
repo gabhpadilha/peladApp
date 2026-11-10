@@ -1,6 +1,6 @@
 -- Carta de sempre = últimas 5 rodadas avaliadas (decisão do dono do app em 2026-11-10; espelha `computeCareerCard`
 -- em lib/ovr.ts). Só muda a carta congelada dos prêmios NOVOS: quem ganhou e as cartas já distribuídas não mudam.
--- Os gols que somam no Ataque são os confirmados nessas mesmas rodadas. O desempate por OVR geral segue como estava.
+-- Os gols somam no Ataque DE CADA RODADA (nota da rodada), não na média geral. O desempate por OVR geral segue como estava.
 -- Carreira (decisão do dono do app em 2026-11-08): o OVR do jogador é a média dos OVRs das rodadas e cada atributo a
 -- média dele nas rodadas (sem tirar nenhuma; em cada rodada já saem a maior e a menor nota), e cada gol confirmado soma 1 ponto no
 -- Ataque (VEL e CHU, teto de 10, sem goleiro). Aqui, a carta congelada dos prêmios (`compute_match_awards`); o resto igual a 20261108130000.
@@ -350,22 +350,9 @@ begin
   ) win
   cross join lateral (
     select
-      coalesce(sum(goal.goals), 0)::integer as total
-    from public.match_goals goal
-    join public.matches goal_match on goal_match.id = goal.match_id and goal_match.status = 'closed' and goal_match.group_id = target_group
-    where goal.member_id = winners.member_id
-      and goal.match_id = any(win.ids)
-      and goal.goals > 0
-      and (
-        select count(*) from public.match_goal_confirmations confirmation
-        where confirmation.match_id = goal.match_id and confirmation.member_id = goal.member_id and confirmation.confirmed
-      ) >= 3
-  ) goal_total
-  cross join lateral (
-    select
       avg(per_round.score) as ovr,
-      avg(per_round.vel) + case when member.position = 'GOL' then 0 else least(10, goal_total.total) / 10.0 end as vel,
-      avg(per_round.chu) + case when member.position = 'GOL' then 0 else least(10, goal_total.total) / 10.0 end as chu,
+      avg(per_round.vel) as vel,
+      avg(per_round.chu) as chu,
       avg(per_round.pas) as pas, avg(per_round.dri) as dri, avg(per_round.def) as def, avg(per_round.fis) as fis,
       avg(per_round.ref) as ref, avg(per_round.ela) as ela, avg(per_round.pos) as pos,
       avg(per_round.sai) as sai, avg(per_round.rep) as rep, avg(per_round.pes) as pes
@@ -373,11 +360,24 @@ begin
       select
         received.match_id,
         avg(received.score) as score,
-        avg(received.vel) as vel, avg(received.chu) as chu, avg(received.pas) as pas,
+        -- Os gols confirmados nesta rodada somam no Ataque DELA (1 por gol, teto de 10, sem goleiro).
+        avg(received.vel) + case when member.position = 'GOL' then 0 else least(10, coalesce(max(round_goals.total), 0)) / 10.0 end as vel,
+        avg(received.chu) + case when member.position = 'GOL' then 0 else least(10, coalesce(max(round_goals.total), 0)) / 10.0 end as chu,
+        avg(received.pas) as pas,
         avg(received.dri) as dri, avg(received.def) as def, avg(received.fis) as fis,
         avg(received.ref) as ref, avg(received.ela) as ela, avg(received.pos) as pos,
         avg(received.sai) as sai, avg(received.rep) as rep, avg(received.pes) as pes
       from public.counted_evaluations(target_group) received
+      left join lateral (
+        select goal.goals::integer as total
+        from public.match_goals goal
+        where goal.match_id = received.match_id
+          and goal.member_id = winners.member_id
+          and (
+            select count(*) from public.match_goal_confirmations confirmation
+            where confirmation.match_id = goal.match_id and confirmation.member_id = goal.member_id and confirmation.confirmed
+          ) >= 3
+      ) round_goals on true
       where received.player_id = winners.member_id
         and received.counted
         and not received.off_position

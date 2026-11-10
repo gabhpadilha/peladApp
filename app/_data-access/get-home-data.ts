@@ -2,7 +2,7 @@ import { getCurrentCardEvent, type CardThemeKey, type CurrentCardEvent } from "@
 import { getActiveSale, type ShopSale } from "@/lib/shop-sale";
 import { getMyGoals, type MyGoals } from "@/app/objetivos/_data-access/get-goals";
 import { getLeague } from "@/lib/league";
-import { computeOvr } from "@/lib/ovr";
+import { computeRoundOvr } from "@/lib/ovr";
 import { getMatchPerformances, type PendingEvaluation } from "@/lib/players";
 import { rankScorers, type Scorer } from "@/lib/goal-ranking";
 import { rankByPoints, type RankedByPoints } from "@/lib/ranking-points";
@@ -114,7 +114,7 @@ export async function getHomeData(): Promise<HomeData> {
   const monthScorers = rankScorers(league.activePlayers, league.getGoalTotals(today.slice(0, 7)));
   const allTimeScorers = rankScorers(league.activePlayers, league.getGoalTotals());
   const myAllTime = allTimeRanking.find((entry) => entry.player.id === currentPlayer.id);
-  const performances = getMatchPerformances(currentPlayer.id, league.matches, league.evaluations);
+  const performances = getMatchPerformances(currentPlayer.id, league.matches, league.evaluations, league.confirmedGoals);
 
   const latestMatch = league.latestClosedMatch;
   const topPerformers = latestMatch
@@ -124,7 +124,7 @@ export async function getHomeData(): Promise<HomeData> {
             (evaluation) =>
               evaluation.matchId === latestMatch.id && evaluation.playerId === player.id,
           );
-          const score = computeOvr(received);
+          const score = computeRoundOvr(received, league.confirmedGoals.get(`${latestMatch.id}:${player.id}`) ?? 0);
           return score === null ? [] : [{ player, score }];
         })
         .toSorted((a, b) => b.score - a.score)

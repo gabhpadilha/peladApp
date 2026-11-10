@@ -1,5 +1,5 @@
 import type { Evaluation } from "@/types/match";
-import { getOvrFromStats, getStatsFromAttributes, OVR_COUNTED_STATS } from "@/lib/card-stats";
+import { getOvrFromStats, getStatsFromAttributes } from "@/lib/card-stats";
 import { THREE_STAT_RATINGS_FROM } from "@/lib/rating-stats";
 import { GOALKEEPER_ATTRIBUTES, type PlayerAttribute } from "@/types/player";
 
@@ -112,12 +112,36 @@ export type CareerCard = {
 export const CAREER_WINDOW_ROUNDS = 5;
 
 /**
+ * Uma rodada na escala da carta, **com os gols dela**: cada gol confirmado na rodada soma 1 no Ataque (VEL e CHU, teto de
+ * `GOAL_ATTACK_BONUS_MAX`, sem goleiro) e o OVR da rodada sobe o quanto o Ataque maior fizer subir a média das 2 maiores
+ * estatísticas (decisão do dono do app em 2026-11-10: os gols somam na nota da rodada, não na média geral).
+ */
+function roundCard(totals: OvrTotals, goals: number): { attributes: Partial<Record<PlayerAttribute, number>>; ovr: number | null } {
+  const attributes = Object.fromEntries(
+    [...totals].map(([key, total]) => [key, toCardScale(total.sum / total.count)]),
+  ) as Partial<Record<PlayerAttribute, number>>;
+  const isGoalkeeper = GOALKEEPER_ATTRIBUTES.some((key) => totals.has(key));
+  const bonus = isGoalkeeper ? 0 : getGoalAttackBonus(goals);
+  if (bonus > 0) {
+    attributes.vel = Math.min(CARD_SCALE_MAX, (attributes.vel ?? 0) + bonus);
+    attributes.chu = Math.min(CARD_SCALE_MAX, (attributes.chu ?? 0) + bonus);
+  }
+  return { attributes, ovr: totals.size === 0 ? null : getOvrFromStats(getStatsFromAttributes(isGoalkeeper ? "goalkeeper" : "outfield", attributes)) };
+}
+
+/** Nota de UMA rodada (OVR da rodada) já com os gols que o jogador fez nela. É a que aparece no histórico e na mesa tática. */
+export function computeRoundOvr(evaluations: readonly Evaluation[], goals = 0): number | null {
+  const totals: OvrTotals = new Map();
+  for (const evaluation of evaluations) addToOvrTotals(totals, evaluation);
+  return roundCard(totals, goals).ovr;
+}
+
+/**
  * Carta de carreira (decisão do dono do app em 2026-11-10, vale desde a primeira rodada): o OVR do jogador é a
- * **média simples dos OVRs das suas últimas `CAREER_WINDOW_ROUNDS` rodadas avaliadas** e cada atributo é a média dele
- * nessas rodadas (antes eram todas as rodadas). Em cada rodada já saíram a maior e a menor nota (o banco entrega
- * `counted_evaluations`). Os gols confirmados **nessas mesmas rodadas** somam no Ataque da carta (VEL e CHU, 1 ponto por
- * gol, teto de `GOAL_ATTACK_BONUS_MAX`, sem goleiro) e o OVR sobe o quanto o Ataque maior fizer subir a média das 2
- * maiores estatísticas. `evaluations` são todas de rodadas fechadas, só na posição do cadastro; `roundOrder` dá a posição
+ * **média simples das notas das suas últimas `CAREER_WINDOW_ROUNDS` rodadas avaliadas** e cada atributo é a média dele
+ * nessas rodadas. A nota de cada rodada já leva os gols confirmados nela (`roundCard`): os gols somam na rodada, não
+ * na média geral. Em cada rodada já saíram a maior e a menor nota (o banco entrega `counted_evaluations`).
+ * `evaluations` são todas de rodadas fechadas, só na posição do cadastro; `roundOrder` dá a posição
  * de cada rodada no tempo (número da rodada) e `goalsByMatch` os gols confirmados do jogador em cada uma.
  * Espelha `compute_match_awards` no banco.
  */
@@ -138,15 +162,18 @@ export function computeCareerCard(
     .slice(-CAREER_WINDOW_ROUNDS);
 
   const roundOvrs: number[] = [];
+  const plainOvrs: number[] = [];
   const attributeRounds = new Map<PlayerAttribute, number[]>();
   let goals = 0;
   for (const [matchId, totals] of windowRounds) {
-    const roundOvr = ovrFromTotals(totals);
-    if (roundOvr !== null) roundOvrs.push(roundOvr);
-    goals += goalsByMatch.get(matchId) ?? 0;
-    for (const [key, total] of totals) {
+    const roundGoals = goalsByMatch.get(matchId) ?? 0;
+    const card = roundCard(totals, roundGoals);
+    if (card.ovr === null) continue;
+    roundOvrs.push(card.ovr);
+    plainOvrs.push(ovrFromTotals(totals) ?? card.ovr);
+    goals += roundGoals;
+    for (const [key, value] of Object.entries(card.attributes) as [PlayerAttribute, number][]) {
       const list = attributeRounds.get(key);
-      const value = total.sum / total.count;
       if (list) list.push(value);
       else attributeRounds.set(key, [value]);
     }
@@ -154,33 +181,10 @@ export function computeCareerCard(
   if (roundOvrs.length === 0) return { ovr: null, attributes: {}, breakdown: null };
 
   const attributes: Partial<Record<PlayerAttribute, number>> = {};
-  for (const [key, values] of attributeRounds) attributes[key] = toCardScale(average(values) ?? 0);
-  const baseOvr = average(roundOvrs) ?? 0;
-
-  const isGoalkeeper = GOALKEEPER_ATTRIBUTES.some((key) => attributeRounds.has(key));
-  const bonus = isGoalkeeper ? 0 : getGoalAttackBonus(goals);
-  const base = Math.round(baseOvr);
-  if (bonus === 0) return { ovr: base, attributes, breakdown: { base, goalPoints: 0, goals, rounds: roundOvrs.length } };
-
-  const role = "outfield";
-  const withBonus = {
-    ...attributes,
-    vel: Math.min(CARD_SCALE_MAX, (attributes.vel ?? 0) + bonus),
-    chu: Math.min(CARD_SCALE_MAX, (attributes.chu ?? 0) + bonus),
-  };
-  const gain = statsAverage(getStatsFromAttributes(role, withBonus)) - statsAverage(getStatsFromAttributes(role, attributes));
-  const ovr = Math.min(CARD_SCALE_MAX, Math.round(baseOvr + gain));
-  return { ovr, attributes: withBonus, breakdown: { base, goalPoints: ovr - base, goals, rounds: roundOvrs.length } };
-}
-
-/** Média das 2 maiores estatísticas, sem arredondar (para medir quanto o bônus de gols soma ao OVR). */
-function statsAverage(stats: ReturnType<typeof getStatsFromAttributes>): number {
-  const best = stats
-    .map((stat) => stat.value)
-    .filter((value): value is number => value !== null)
-    .toSorted((a, b) => b - a)
-    .slice(0, OVR_COUNTED_STATS);
-  return average(best) ?? 0;
+  for (const [key, values] of attributeRounds) attributes[key] = Math.min(CARD_SCALE_MAX, Math.round(average(values) ?? 0));
+  const ovr = Math.min(CARD_SCALE_MAX, Math.round(average(roundOvrs) ?? 0));
+  const base = Math.round(average(plainOvrs) ?? 0);
+  return { ovr, attributes, breakdown: { base, goalPoints: Math.max(0, ovr - base), goals, rounds: roundOvrs.length } };
 }
 
 /** Média de cada atributo sobre todas as avaliações, na escala da carta. */

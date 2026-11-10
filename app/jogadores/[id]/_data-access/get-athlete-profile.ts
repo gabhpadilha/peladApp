@@ -78,7 +78,7 @@ export async function getAthleteProfile(memberId: string): Promise<AthleteProfil
   const isActive = league.isActive(player.id);
   // Desativado não entra no ranking: posição 0 vira "–" no perfil.
   const roleRanking = rankPlayers(league.activePlayers, player.role);
-  const performances = getMatchPerformances(player.id, league.matches, league.evaluations);
+  const performances = getMatchPerformances(player.id, league.matches, league.evaluations, league.confirmedGoals);
   const scores = performances.flatMap((performance) =>
     performance.score === null ? [] : [performance.score],
   );
