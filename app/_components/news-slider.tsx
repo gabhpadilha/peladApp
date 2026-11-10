@@ -1,9 +1,11 @@
 import { PackCover } from "@/components/pack-cover";
+import { PatchVideoButton } from "@/components/patch-video-modal";
+import { LATEST_PATCH_NOTES } from "@/lib/patch-notes";
 import { ShowcaseCard } from "@/components/showcase-card";
 import { PACK_SHOP_PRICES, PACK_SHOP_TIERS, PACK_TIER_NAMES } from "@/lib/packs";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowLeftRightIcon, ArrowRightIcon, CloudLightningIcon, GiftIcon, GemIcon, TagIcon, TargetIcon, GhostIcon, SparklesIcon, StoreIcon, TrophyIcon, type LucideIcon } from "lucide-react";
+import { ArrowRightIcon, CloudLightningIcon, GhostIcon, PlayIcon, ScrollTextIcon, SparklesIcon, StoreIcon, TagIcon, TrophyIcon, type LucideIcon } from "lucide-react";
 import { formatCoins } from "@/components/coin-pill";
 import { type CardThemeKey, type CurrentCardEvent } from "@/lib/card-themes";
 import { getCurrentShopEvent } from "@/lib/shop-events";
@@ -14,7 +16,6 @@ import { CARD_SKINS, isCardSkinOnSale, type CardSkinKey } from "@/types/card-ski
 import { getSalePrice, type ShopSale } from "@/lib/shop-sale";
 import type { Player } from "@/types/player";
 import { cn } from "@/lib/utils";
-import { GoalsGuideVisual, MarketGuideVisual, PacksGuideVisual, RarityGuideVisual } from "./news-guide";
 import { NewsCarousel } from "./news-carousel";
 
 type NewsSliderProps = {
@@ -187,7 +188,49 @@ export function NewsSlider({ event, today, shopSale, player }: NewsSliderProps) 
     flagship && sideSkins.length >= 2 ? [sideSkins[1].key, flagship.key, sideSkins[0].key] : SHOP_FAN;
 
 
+  const patch = LATEST_PATCH_NOTES;
   const slides = [
+    {
+      key: "patch",
+      title: patch.title,
+      content: (
+        <Slide
+          icon={ScrollTextIcon}
+          eyebrow="Novidades do app"
+          title={patch.title}
+          meta={`${patch.event} · versões ${patch.versions}`}
+          text={patch.summary}
+          visual={
+            <div className="flex w-full items-center gap-4 sm:mx-auto sm:max-w-md">
+              <PatchVideoButton
+                src={patch.video.src}
+                poster={patch.video.poster}
+                title={patch.title}
+                className="relative shrink-0 overflow-hidden rounded-lg border"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={patch.video.poster} alt="" className="h-40 w-[5.5rem] object-cover" />
+                <span className="absolute inset-0 flex items-center justify-center bg-black/35">
+                  <span className="flex size-11 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                    <PlayIcon aria-hidden className="size-5 translate-x-px fill-current" />
+                  </span>
+                </span>
+              </PatchVideoButton>
+              <div className="flex min-w-0 flex-col gap-2">
+                <p className="font-display text-lg leading-tight font-bold uppercase">Assista em {patch.video.duration}</p>
+                <ul className="flex flex-wrap gap-1.5">
+                  {patch.highlights.map((item) => (
+                    <li key={item} className="rounded-full border px-2.5 py-1 text-xs">{item}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          }
+          href="/novidades"
+          cta="Ler os patch notes"
+        />
+      ),
+    },
     ...(shopSale
       ? [
           {
@@ -208,67 +251,6 @@ export function NewsSlider({ event, today, shopSale, player }: NewsSliderProps) 
           },
         ]
       : []),
-    {
-      key: "pacotes",
-      title: "Pacotes de skins",
-      content: (
-        <Slide
-          icon={GiftIcon}
-          eyebrow="Novidade · pacotes"
-          title="Pacotes de skins"
-          meta={shopEvent.label ? `Conjunto do mês: ${shopEvent.label}` : undefined}
-          text="Cada pacote traz uma skin sorteada do conjunto do mês. Quem joga a rodada ganha um pacote ao fechar, e dá para comprar mais na Loja. O que sair é seu para sempre."
-          visual={<PacksGuideVisual month={today.slice(0, 7)} />}
-          href="/loja"
-          cta="Ver os pacotes"
-        />
-      ),
-    },
-    {
-      key: "raridade",
-      title: "Raridade",
-      content: (
-        <Slide
-          icon={GemIcon}
-          eyebrow="Novidade · coleção"
-          title="Skins por raridade"
-          text="As skins dos pacotes têm quatro raridades: comum, rara, épica e lendária. Toque numa carta em Minhas cartas e ela vira para mostrar a raridade no verso."
-          visual={<RarityGuideVisual />}
-          href="/eu#minhas-cartas"
-          cta="Ver minhas cartas"
-        />
-      ),
-    },
-    {
-      key: "mercado",
-      title: "Mercado",
-      content: (
-        <Slide
-          icon={ArrowLeftRightIcon}
-          eyebrow="Novidade · Mercado"
-          title="Mercado e venda rápida"
-          text="Skin repetida ou que ninguém usa? Venda para outros jogadores, de todas as peladas, ou faça uma venda rápida e receba na hora."
-          visual={<MarketGuideVisual />}
-          href="/loja/mercado"
-          cta="Ir para o Mercado"
-        />
-      ),
-    },
-    {
-      key: "objetivos",
-      title: "Objetivos do mês",
-      content: (
-        <Slide
-          icon={TargetIcon}
-          eyebrow="Novidade · objetivos"
-          title="Objetivos do mês"
-          text="Todo mês você escolhe 3 objetivos, um fácil, um médio e um difícil. Cumpriu, ganha um pacote de skin: quanto mais difícil, melhor o pacote."
-          visual={<GoalsGuideVisual month={today.slice(0, 7)} />}
-          href="/objetivos"
-          cta="Ver os objetivos"
-        />
-      ),
-    },
     {
       key: "ranking",
       title: "Ranking por pontos",
