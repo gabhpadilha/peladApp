@@ -51,11 +51,11 @@ function buildPlayer(
   roundOrder: ReadonlyMap<string, number>,
   goalsByMatch: ReadonlyMap<string, number>,
 ): Player {
-  const { ovr, attributes, breakdown } = computeCareerCard(evaluations, roundOrder, goalsByMatch);
+  const { ovr, attributes } = computeCareerCard(evaluations, roundOrder, goalsByMatch);
   if (profile.role === "goalkeeper") {
-    return { ...profile, ovr, ovrBreakdown: breakdown, attributes: pickAttributes(attributes, GOALKEEPER_ATTRIBUTES) };
+    return { ...profile, ovr, attributes: pickAttributes(attributes, GOALKEEPER_ATTRIBUTES) };
   }
-  return { ...profile, ovr, ovrBreakdown: breakdown, attributes: pickAttributes(attributes, OUTFIELD_ATTRIBUTES) };
+  return { ...profile, ovr, attributes: pickAttributes(attributes, OUTFIELD_ATTRIBUTES) };
 }
 
 /**

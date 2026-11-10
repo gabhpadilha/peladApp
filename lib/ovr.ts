@@ -104,8 +104,6 @@ export type CareerCard = {
   ovr: number | null;
   /** Média de cada atributo ao longo das rodadas, na escala da carta (Ataque já com o bônus de gols). */
   attributes: Partial<Record<PlayerAttribute, number>>;
-  /** A conta do OVR: média das rodadas da janela, pontos que os gols somaram e quantas rodadas entraram. */
-  breakdown: { base: number; goalPoints: number; goals: number; rounds: number } | null;
 };
 
 /** Quantas rodadas contam na carta (decisão do dono do app em 2026-11-10: "o desempenho do último mês"). */
@@ -162,29 +160,24 @@ export function computeCareerCard(
     .slice(-CAREER_WINDOW_ROUNDS);
 
   const roundOvrs: number[] = [];
-  const plainOvrs: number[] = [];
   const attributeRounds = new Map<PlayerAttribute, number[]>();
-  let goals = 0;
   for (const [matchId, totals] of windowRounds) {
     const roundGoals = goalsByMatch.get(matchId) ?? 0;
     const card = roundCard(totals, roundGoals);
     if (card.ovr === null) continue;
     roundOvrs.push(card.ovr);
-    plainOvrs.push(ovrFromTotals(totals) ?? card.ovr);
-    goals += roundGoals;
     for (const [key, value] of Object.entries(card.attributes) as [PlayerAttribute, number][]) {
       const list = attributeRounds.get(key);
       if (list) list.push(value);
       else attributeRounds.set(key, [value]);
     }
   }
-  if (roundOvrs.length === 0) return { ovr: null, attributes: {}, breakdown: null };
+  if (roundOvrs.length === 0) return { ovr: null, attributes: {} };
 
   const attributes: Partial<Record<PlayerAttribute, number>> = {};
   for (const [key, values] of attributeRounds) attributes[key] = Math.min(CARD_SCALE_MAX, Math.round(average(values) ?? 0));
   const ovr = Math.min(CARD_SCALE_MAX, Math.round(average(roundOvrs) ?? 0));
-  const base = Math.round(average(plainOvrs) ?? 0);
-  return { ovr, attributes, breakdown: { base, goalPoints: Math.max(0, ovr - base), goals, rounds: roundOvrs.length } };
+  return { ovr, attributes };
 }
 
 /** Média de cada atributo sobre todas as avaliações, na escala da carta. */
