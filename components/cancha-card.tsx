@@ -2,6 +2,7 @@ import Image from "next/image";
 import type { CSSProperties } from "react";
 import { cn } from "@/lib/utils";
 import { PHOTO_SHADOW_GRADIENT_ID } from "@/lib/card-svg-ids";
+import { AWARD_ICONS } from "@/components/award-icons";
 import { getCardRank, CARD_RANK_LABELS, RANK_FLAT_CLASSES, type CardRank } from "@/lib/card-rank";
 import { getCardStats } from "@/lib/card-stats";
 import { getInitials } from "@/lib/get-initials";
@@ -55,6 +56,8 @@ export type Roupa = {
   muted: string;
   /** Cor do texto principal (nome, números); padrão branco. Cartas claras (Ícone) usam tinta escura. */
   ink?: string;
+  /** Medalhão com o ícone do prêmio no canto da carta (carta-base dos prêmios individuais, 2026-11-09): fundo, aro e ícone. */
+  awardMedal?: { bg: string; border: string; fg: string };
   /** Carta fosca (a padrão, de começo de jogo): sem clarão, brilhos, feixe de luz nem selo brilhante. */
   matte?: boolean;
   /** Estrelinhas piscando na frente do jogador (padrão: sim, menos na fosca). */
@@ -196,15 +199,15 @@ const ROUPAS = {
   // Natal campeão = carta do CAMPEÃO DO MÊS (melhor jogador do mês) de dezembro de 2026 (decisão do dono do app em 2026-11-05; GUARDADA: falta ligar em `CAMPEAO_MES`/`awardRoupa` quando o tema de dezembro existir em `CARD_THEMES`): malha de tricô verde natalina
   // e moldura de ouro com pinheiro, laços, sinos e azevinho por fora (arte do dono em `prototipos/natal-campeao-*-dono.jpg`, montada por `montar-carta.cjs`). Mesmo padrão da Rubi e da Ícone.
   natalCampeao: { background: "premium-natal-campeao", overflow: "premium-natal-campeao-vaza", artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#b8902f", "#b8902f", "#fff1c2"], accent: "#f3d27a", light: "255 215 150", bar: "#08170d", muted: "#ffe9b8", sparkles: false, neon: "#f3d27a" },
-  // Natal gelo = carta dos DESTAQUES DA RODADA de dezembro de 2026 (decisão do dono do app em 2026-11-05; GUARDADA, ainda não ligada em `awardRoupa`): tricô azul-gelo com renas e flocos e moldura de ouro
+  // Natal gelo = carta dos DESTAQUES DA RODADA de dezembro de 2026 (decisão do dono do app em 2026-11-05; LIGADA em `awardRoupa` como carta-base dos prêmios individuais em 2026-11-09): tricô azul-gelo com renas e flocos e moldura de ouro
   // com boneco de neve, pinheiro com neve, laços azuis e montes de neve por fora (arte do dono em `prototipos/natal-gelo-*-dono.jpg`). Mesmo padrão da Rubi e da Ícone.
   natalGelo: { background: "premium-natal-gelo", overflow: "premium-natal-gelo-vaza", statsLift: 6, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#b8902f", "#b8902f", "#fff1c2"], accent: "#f3d27a", light: "190 225 255", bar: "#07182a", muted: "#d4ebff", sparkles: false, neon: "#f3d27a" },
-  // Natal craque = carta do MELHOR JOGADOR da rodada ("jogador da rodada") de dezembro de 2026 (decisão do dono do app em 2026-11-05; GUARDADA, ainda não ligada em `awardRoupa`): tricô vermelho
+  // Natal craque = carta do MELHOR JOGADOR da rodada ("jogador da rodada") de dezembro de 2026 (decisão do dono do app em 2026-11-05; LIGADA em `awardRoupa` como carta-base dos prêmios individuais em 2026-11-09): tricô vermelho
   // com barras brancas e moldura de ouro com sinos, estrela, laços, pinhas, laranjas e neve (arte do dono em `prototipos/natal-craque-*-dono.jpg`). Mesmo padrão. O Time da Semana saiu do jogo.
-  natalCraque: { background: "premium-natal-craque", overflow: "premium-natal-craque-vaza", statsLift: 6, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#b8902f", "#b8902f", "#fff1c2"], accent: "#f3d27a", light: "255 200 170", bar: "#2a0707", muted: "#ffe0c8", sparkles: false, neon: "#f3d27a" },
-  // Natal murcha = carta da BOLA MURCHA de dezembro de 2026 (decisão do dono do app em 2026-11-05; GUARDADA, ainda não ligada em `awardRoupa`): tricô cinza-carvão com um presente que solta
+  natalCraque: { background: "premium-natal-craque", overflow: "premium-natal-craque-vaza", statsLift: 6, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#b8902f", "#b8902f", "#fff1c2"], accent: "#f3d27a", light: "255 200 170", bar: "#2a0707", muted: "#ffe0c8", sparkles: false, neon: "#f3d27a", awardMedal: { bg: "#7a1111", border: "#fff1c2", fg: "#f3d27a" } },
+  // Natal murcha = carta da BOLA MURCHA de dezembro de 2026 (decisão do dono do app em 2026-11-05; LIGADA em `awardRoupa` como carta-base dos prêmios individuais em 2026-11-09): tricô cinza-carvão com um presente que solta
   // uma bola murcha e moldura de aço fosco com pinheiro, laços vermelhos, bolinhas e uma bola de pano murcha no topo (arte do dono em `prototipos/natal-murcha-*-dono.jpg`). Sem brilho (`matte`), como a Bola Murcha.
-  natalMurcha: { background: "premium-natal-murcha", overflow: "premium-natal-murcha-vaza", statsLift: 3, namePadX: 6, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, matte: true, trim: null, metal: ["#7d848c", "#7d848c", "#c9ced3"], accent: "#aeb5bc", light: "180 190 200", bar: "#17181b", muted: "#c9ced3", sparkles: false, neon: "#aeb5bc" },
+  natalMurcha: { background: "premium-natal-murcha", overflow: "premium-natal-murcha-vaza", statsLift: 3, namePadX: 6, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, matte: true, trim: null, metal: ["#7d848c", "#7d848c", "#c9ced3"], accent: "#aeb5bc", light: "180 190 200", bar: "#17181b", muted: "#c9ced3", sparkles: false, neon: "#aeb5bc", awardMedal: { bg: "#17181b", border: "#aeb5bc", fg: "#c9ced3" } },
   // Natal time do mês = carta do TIME DO MÊS de dezembro de 2026 (decisão do dono do app em 2026-11-05; GUARDADA, ainda não ligada em `MONTH_ROUPA`): tricô roxo com presentes e flocos em ouro e creme
   // e moldura fina de ouro com presentes roxos e dourados, laços, bolas de Natal e ametistas (arte do dono em `prototipos/natal-timedomes-*-dono.jpg`).
   natalTimeDoMes: { background: "premium-natal-timedomes", overflow: "premium-natal-timedomes-vaza", statsLift: 4, statsPadX: 12, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#b8902f", "#b8902f", "#fff1c2"], accent: "#f3d27a", light: "220 180 255", bar: "#1a0a26", muted: "#f1dcc0", sparkles: false, neon: "#f3d27a" },
@@ -416,8 +419,18 @@ const CAMPEAO_MES: Roupa = {
   trim: null,
 };
 
+/**
+ * Temas cujas cartas já foram ganhas com o desenho próprio do evento: ficam de colecionador (Halloween e Toró).
+ * Dos eventos seguintes em diante, os prêmios individuais vestem a carta-base (decisão do dono do app em 2026-11-09).
+ */
+const LEGACY_AWARD_THEMES: readonly CardThemeKey[] = ["halloween", "temporal"];
+
 function awardRoupa(kind: AwardKind, theme: CardThemeKey): Roupa {
   const design = awardDesignKind(kind);
+  // Carta-base dos prêmios individuais: o mesmo desenho em todos (muda só o ícone do medalhão); a Bola Murcha tem o seu, em destaque negativo.
+  if (!LEGACY_AWARD_THEMES.includes(theme) && design !== "time_da_semana") {
+    return design === "bola_murcha" ? ROUPAS.natalMurcha : ROUPAS.natalCraque;
+  }
   // Time do Mês e Bola Murcha não vestem o tema do mês, mas o desenho mudou em 2026-10-31: as cartas
   // ganhas antes (todas gravadas com o tema do Halloween) são de colecionador e ficam com o desenho
   // da época (pedido do dono do app): o cristal com a coroa e o bronze oxidado.
@@ -843,6 +856,20 @@ export function getCanchaCardLook(player: Player, award?: CanchaCardAward) {
   return { roupa, rank, stats, band, subtitle, trim };
 }
 
+/** Medalhão com o ícone do prêmio, abaixo do selo de OVR (só nas cartas-base dos prêmios; some nas miniaturas). */
+function AwardMedal({ kind, medal }: { kind: AwardKind; medal: NonNullable<Roupa["awardMedal"]> }) {
+  const Icon = AWARD_ICONS[kind];
+  return (
+    <span
+      aria-hidden
+      className="pointer-events-none absolute top-[27%] right-[7.5%] z-[14] grid size-[17%] place-items-center rounded-full border-2 shadow-lg @max-[150px]:hidden"
+      style={{ backgroundColor: medal.bg, borderColor: medal.border, color: medal.fg }}
+    >
+      <Icon className="size-[58%]" strokeWidth={2.4} />
+    </span>
+  );
+}
+
 function FloaterPieces({ items, layer }: { items: readonly Floater[]; layer: "back" | "front" }) {
   return items
     .filter((item) => item.layer === layer)
@@ -1051,6 +1078,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
         // eslint-disable-next-line @next/next/no-img-element -- arte decorativa do tamanho da caixa, sem otimizar
         <img aria-hidden alt="" src={`/cartas/fundos/${roupa.overflow}.webp`} className={cn("pointer-events-none absolute top-0 left-0 z-[11] h-full select-none", roupa.overflowWidth ? "max-w-none" : "w-full")} style={roupa.overflowWidth ? { width: `${roupa.overflowWidth * 100}%`, left: `${-(roupa.overflowLeft ?? 0) * 100}%` } : undefined} />
       )}
+      {award && roupa.awardMedal && !pure && <AwardMedal kind={award.kind} medal={roupa.awardMedal} />}
       {roupa.floaters && <FloaterPieces items={roupa.floaters} layer="front" />}
       {roupa.drops && <WaterDrops />}
       {roupa.overflowBolts && (
