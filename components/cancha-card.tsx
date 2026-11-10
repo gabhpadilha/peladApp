@@ -225,6 +225,12 @@ const ROUPAS = {
   // Tormenta (2026-11-10, lendária do conjunto de novembro, só de pacote; tema Toró): fundo de nuvens de tempestade em relevo com cristais e gotas de vidro, moldura de ferro e bronze com raios de plasma e uma coroa de pára-raios no topo,
   // aglomerado de cristais de tempestade que passa pela borda direita (meio dentro, meio fora) e peças 3D flutuando atrás (anel de raio, gotas e cacos). Arte do dono no Gemini (`prototipos/tormenta-*-dono.jpg`, `tormenta-v1.cjs`).
   tormenta: { background: "premium-tormenta", overflow: "premium-tormenta-vaza", overflowWidth: 800 / 714, floaters: TORMENTA_FLOATERS, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#5a4a33", "#5a4a33", "#d9b988"], accent: "#7fb6ff", light: "150 200 255", bar: "#050a14", muted: "#a9c8ff", sparkles: false, neon: "#3aa0ff" },
+  // Aguaceiro e Chuva Violeta (raras de novembro de 2026, só de pacote; feitas em código por Claude, `prototipos/aguaceiro.cjs`): chuva em diagonal sobre vidro azul-noite com gotas, e moldura de aço azul-petróleo trabalhada de leve com suportes de canto,
+  // raios e gotas em relevo e uma gota pendente embaixo. Chuva Violeta é o mesmo desenho girado para o violeta. Nublado e Neblina (comuns, `prototipos/nublado.cjs`): céu de toró de textura leve em cinza-azulado e em verde-musgo, com o tubo de neon de sempre.
+  aguaceiro: { background: "premium-aguaceiro", overflow: "premium-aguaceiro-vaza", artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#4e6b82", "#4e6b82", "#d4e6f3"], accent: "#a6c8e6", light: "170 210 255", bar: "#050d18", muted: "#b8d4ec", sparkles: false, neon: "#6fb2ff" },
+  chuvavioleta: { background: "premium-chuvavioleta", overflow: "premium-chuvavioleta-vaza", artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#5f5a86", "#5f5a86", "#e1dbf5"], accent: "#c9c0ee", light: "205 190 255", bar: "#0a0818", muted: "#d6cdf5", sparkles: false, neon: "#a58bff" },
+  nublado: { background: "skin-nublado", metal: ["#5f7388", "#5f7388", "#dbe7f3"], accent: "#cfe0f1", light: "200 220 245", bar: "#0a121b", muted: "#c3d3e4", sparkles: false, neon: "#a9c6e4", trim: null },
+  neblina: { background: "skin-neblina", metal: ["#5f7a6a", "#5f7a6a", "#dcefe3"], accent: "#c5dccd", light: "190 235 215", bar: "#08130e", muted: "#bcd8c7", sparkles: false, neon: "#9fd4b5", trim: null },
   destino: { background: "premium-destino", overflow: "premium-destino-vaza", floaters: DESTINO_FLOATERS, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#6b6f73", "#6b6f73", "#d6c07a"], accent: "#c9a85c", light: "120 255 170", bar: "#06100b", muted: "#b9e8c8", sparkles: false, neon: "#3dffa0" },
   // GUARDADAS, fora da Loja (sem entrada em `CARD_SKINS`; para usar: entrada lá, `case` em `skinRoupa` e `SKIN_CLASSES`): Voltagem e Maré.
   // Voltagem (2026-11-05, pedido do dono do app: o estilo da borda da referência dele no nosso retângulo): fio duplo de ouro pálido por dentro e
@@ -475,6 +481,10 @@ function skinRoupa(skin: CardSkinKey): RoupaKey {
     case "icone": return "icone";
     case "destino": return "destino";
     case "tormenta": return "tormenta";
+    case "aguaceiro": return "aguaceiro";
+    case "chuvavioleta": return "chuvavioleta";
+    case "nublado": return "nublado";
+    case "neblina": return "neblina";
     case "lobisomem": return "lobisomem";
     case "nuvem": return "nuvem";
     case "relampago": return "relampago";

@@ -32,6 +32,12 @@ export const CARD_SKINS = [
   // Skins que só saem de pacote (nunca à venda na Loja; sem nível nem preço de tabela, então o Mercado usa a faixa da raridade).
   // Tormenta: lendária do conjunto de novembro de 2026 (tema Toró), 3D por fora, por dentro e por trás (2026-11-10).
   { key: "tormenta", name: "Tormenta", level: 0, price: 0, packOnly: true },
+  // Raras (Aguaceiro, em azul, e Chuva Violeta, o mesmo desenho em violeta) e comuns (Nublado e Neblina, em cinza-azulado e verde-musgo) do mesmo conjunto,
+  // feitas em código por Claude a pedido do dono do app (2026-11-10).
+  { key: "aguaceiro", name: "Aguaceiro", level: 0, price: 0, packOnly: true },
+  { key: "chuvavioleta", name: "Chuva Violeta", level: 0, price: 0, packOnly: true },
+  { key: "nublado", name: "Nublado", level: 0, price: 0, packOnly: true },
+  { key: "neblina", name: "Neblina", level: 0, price: 0, packOnly: true },
 ] as const;
 
 export type CardSkin = (typeof CARD_SKINS)[number];
