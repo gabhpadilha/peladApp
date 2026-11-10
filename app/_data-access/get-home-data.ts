@@ -6,6 +6,7 @@ import { getRoundScore } from "@/lib/ovr";
 import { getMatchPerformances, type PendingEvaluation } from "@/lib/players";
 import { rankScorers, type Scorer } from "@/lib/goal-ranking";
 import { rankByPoints, type RankedByPoints } from "@/lib/ranking-points";
+import { requireActiveMembership } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
 import type { Award } from "@/types/award";
 import type { Match } from "@/types/match";
@@ -95,7 +96,13 @@ async function getWinnersAlert(memberId: string, match: Match | null, awards: Aw
 }
 
 export async function getHomeData(): Promise<HomeData> {
-  const league = await getLeague("/");
+  // O bônus de boas-vindas e os objetivos só precisam da sessão (já em cache): saem junto com a liga, em vez de esperar por ela.
+  const membership = await requireActiveMembership("/");
+  const [league, showWelcomeBonus, goals] = await Promise.all([
+    getLeague("/"),
+    hasUnseenWelcomeBonus(membership.memberId),
+    getMyGoals(membership.groupId),
+  ]);
   const currentPlayer = league.players.find((player) => player.id === league.currentMemberId);
   if (!currentPlayer) {
     throw new Error("Jogador logado não encontrado na pelada");
@@ -125,11 +132,7 @@ export async function getHomeData(): Promise<HomeData> {
     : [];
 
   const openMatch = league.matches.findLast((match) => match.status === "open");
-  const [winnersAlert, showWelcomeBonus, goals] = await Promise.all([
-    getWinnersAlert(league.currentMemberId, latestMatch, league.awards),
-    hasUnseenWelcomeBonus(league.currentMemberId),
-    getMyGoals(league.membership.groupId),
-  ]);
+  const winnersAlert = await getWinnersAlert(league.currentMemberId, latestMatch, league.awards);
 
   return {
     groupName: league.membership.groupName,

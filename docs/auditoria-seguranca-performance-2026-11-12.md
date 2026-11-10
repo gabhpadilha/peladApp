@@ -39,3 +39,14 @@ O que não deu para ver daqui (configuração real do Supabase e da Vercel) est�
   `select m.group_id, count(*) from public.evaluations e join public.matches m on m.id = e.match_id group by 1;`
 - **Cabeçalhos em produção:** conferir com o navegador (aba Rede) o que a Vercel já adiciona (HSTS costuma vir da própria Vercel).
 - **Backups e acesso:** quem tem acesso ao painel do Supabase e da Vercel, e se o plano tem backup diário.
+
+## Aplicado em 2026-11-12 (versão 3.29.1, autorizado pelo dono do app: "faz tudo o que for deixar o app melhor")
+Sem mudar visual nem funções:
+1. **Notas, envios, gols e prêmios lidos em páginas de 1000** (`lib/fetch-all.ts`, usado em `group-scores.ts`, `match-goals.ts` e `league.ts`); a função de paginação foi testada com 0, 5, 999, 1000, 1001 e 2500 linhas. A pelada tinha 294 notas brutas em 2026-11-12.
+2. **Cabeçalhos de segurança** em todas as rotas (`nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy` sem restringir a câmera), conferidos num servidor de produção local.
+3. **`shadcn` passou para `devDependencies`**: `npm audit --omit=dev` foi de 6 avisos para 0.
+4. **Cache de 1 dia (+7 dias servindo o antigo enquanto atualiza)** para `/cartas`, `/mesa`, `/rarity`, `/icons`, `/patch-notes` e `/mediapipe`.
+5. **Home** busca o bônus de boas-vindas e os objetivos junto com a liga.
+6. **Migration pronta e NÃO aplicada:** `20261115120000_extra_indexes.sql` (7 índices, `if not exists`). Não depende do app.
+
+Ficam para decidir: limite de uso do recorte de foto por conta, revalidação por rota e guardar as notas válidas ao fechar a rodada.

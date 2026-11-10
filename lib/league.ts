@@ -1,5 +1,6 @@
 import "server-only";
 import { parseCardTheme } from "@/lib/card-themes";
+import { fetchAllRows } from "@/lib/fetch-all";
 import { getGroupEvaluations } from "@/lib/group-scores";
 import { getGroupGoals } from "@/lib/match-goals";
 import { toPlayerPhoto } from "@/lib/player-photo";
@@ -81,10 +82,10 @@ export async function getLeague(nextPath = "/") {
     { membersResult, profilesResult },
     matchesResult,
     evaluations,
-    givenResult,
+    givenRows,
     submissionsResult,
-    awardsResult,
-    memberSubmissionsResult,
+    awardRows,
+    memberSubmissions,
     groupGoals,
   ] = await Promise.all([
       membersWithProfiles,
@@ -95,23 +96,26 @@ export async function getLeague(nextPath = "/") {
         .order("round"),
       getGroupEvaluations(membership.groupId),
       // O RLS só devolve as notas que o próprio usuário deu.
-      supabase.from("evaluations").select("id, match_id, evaluator_id, player_id"),
+      fetchAllRows((from, to) => supabase.from("evaluations").select("id, match_id, evaluator_id, player_id").order("id").range(from, to)),
       supabase.rpc("get_match_submissions", { target_group: membership.groupId }),
-      supabase
-        .from("awards")
-        .select("id, match_id, member_id, kind, theme, votes, score, position, ovr, attributes")
-        .eq("group_id", membership.groupId),
+      fetchAllRows((from, to) =>
+        supabase
+          .from("awards")
+          .select("id, match_id, member_id, kind, theme, votes, score, position, ovr, attributes")
+          .eq("group_id", membership.groupId)
+          .order("id")
+          .range(from, to),
+      ),
       // Quem enviou notas em cada rodada fechada (para o XP e as CanchaCoins).
-      supabase.rpc("get_member_submissions", { target_group: membership.groupId }),
+      fetchAllRows((from, to) =>
+        supabase.rpc("get_member_submissions", { target_group: membership.groupId }).order("match_id").order("member_id").range(from, to),
+      ),
       getGroupGoals(membership.groupId),
     ]);
 
   if (membersResult.error) throw membersResult.error;
   if (matchesResult.error) throw matchesResult.error;
-  if (givenResult.error) throw givenResult.error;
   if (submissionsResult.error) throw submissionsResult.error;
-  if (awardsResult.error) throw awardsResult.error;
-  if (memberSubmissionsResult.error) throw memberSubmissionsResult.error;
 
   const matches: Match[] = matchesResult.data.map((match) => ({
     id: match.id,
@@ -124,13 +128,13 @@ export async function getLeague(nextPath = "/") {
 
   // XP, nível e CanchaCoins de cada um, do histórico (rodadas fechadas).
   const submissions = new Set(
-    memberSubmissionsResult.data.map((row) => submissionKey(row.match_id, row.member_id)),
+    memberSubmissions.map((row) => submissionKey(row.match_id, row.member_id)),
   );
   // Rodada fechada não aceita mais confirmação: os gols confirmados ali não mudam.
   const confirmedGoals = new Map(
     groupGoals.filter((goal) => goal.isConfirmed).map((goal) => [submissionKey(goal.matchId, goal.memberId), goal.goals]),
   );
-  const progressionAwards = awardsResult.data.map((award) => ({
+  const progressionAwards = awardRows.map((award) => ({
     kind: award.kind,
     matchId: award.match_id,
     memberId: award.member_id,
@@ -186,7 +190,7 @@ export async function getLeague(nextPath = "/") {
   });
   const profileById = new Map(playerProfiles.map((profile) => [profile.id, profile]));
 
-  const givenEvaluations: Evaluation[] = givenResult.data.map((evaluation) => ({
+  const givenEvaluations: Evaluation[] = givenRows.map((evaluation) => ({
     id: evaluation.id,
     matchId: evaluation.match_id,
     evaluatorId: evaluation.evaluator_id,
@@ -199,7 +203,7 @@ export async function getLeague(nextPath = "/") {
       .map((evaluation) => ratedKey(evaluation.matchId, evaluation.playerId)),
   );
 
-  const awards: Award[] = awardsResult.data
+  const awards: Award[] = awardRows
     .flatMap((award) => {
       const profile = profileById.get(award.member_id);
       const match = matchById.get(award.match_id);

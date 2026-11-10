@@ -1,3 +1,4 @@
+import { fetchAllRows } from "@/lib/fetch-all";
 import "server-only";
 import { computeCareerCard } from "@/lib/ovr";
 import { createClient } from "@/lib/supabase/server";
@@ -19,8 +20,9 @@ const SCORE_COLUMNS = [
  */
 export async function getGroupEvaluations(groupId: string): Promise<Evaluation[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("get_group_scores", { target_group: groupId });
-  if (error) throw error;
+  const data = await fetchAllRows((from, to) =>
+    supabase.rpc("get_group_scores", { target_group: groupId }).order("evaluation_id").range(from, to),
+  );
 
   return data.map((row) => {
     const scores: Partial<Record<PlayerAttribute, number>> = {};

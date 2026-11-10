@@ -39,7 +39,19 @@ const nextConfig: NextConfig = {
   },
   // Service worker do PWA: sem cache, para a versão nova chegar logo a quem instalou.
   async headers() {
+    // Cabeçalhos de segurança de todas as rotas (auditoria de 2026-11-12). A câmera fica liberada ("Tirar foto" em Eu).
+    const securityHeaders = [
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "X-Frame-Options", value: "DENY" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      { key: "Permissions-Policy", value: "geolocation=(), microphone=(), payment=(), usb=(), interest-cohort=()" },
+    ];
+    // Imagens, vídeo e modelos estáticos de public/: a Vercel manda `max-age=0, must-revalidate` e cada arquivo era conferido a cada visita.
+    // 1 dia fresco + 7 dias servindo o antigo enquanto atualiza (arte trocada com o mesmo nome aparece em até 1 dia).
+    const staticCache = [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }];
     return [
+      { source: "/:path*", headers: securityHeaders },
+      ...["/cartas", "/mesa", "/rarity", "/icons", "/patch-notes", "/mediapipe"].map((base) => ({ source: `${base}/:path*`, headers: staticCache })),
       {
         source: "/sw.js",
         headers: [

@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { fetchAllRows } from "@/lib/fetch-all";
 import { isGoalConfirmed, type MatchGoal, type RoundGoalsState } from "@/lib/goal-rules";
 import { createClient } from "@/lib/supabase/server";
 
@@ -8,8 +9,9 @@ export type { MatchGoal, RoundGoalsState };
 /** Gols informados em todas as rodadas da pelada, com as contagens (deduplicado por requisição). */
 export const getGroupGoals = cache(async (groupId: string): Promise<MatchGoal[]> => {
   const supabase = await createClient();
-  const { data, error } = await supabase.rpc("get_group_goals", { target_group: groupId });
-  if (error) throw error;
+  const data = await fetchAllRows((from, to) =>
+    supabase.rpc("get_group_goals", { target_group: groupId }).order("match_id").order("member_id").range(from, to),
+  );
   return data.map((row) => {
     const goal = { goals: row.goals, yes: row.yes_count };
     return {
