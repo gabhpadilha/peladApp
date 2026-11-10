@@ -29,6 +29,9 @@ export const CARD_SKINS = [
   // Evento "Destino" de dezembro de 2026 (decisão do dono do app em 2026-11-05; alude a um vilão de cinema sem copiar nada): à venda só em dezembro de 2026.
   // Carta de prestígio, como a Lenda do Trovão. Reator e Fúria (nível 3, 200 CC) entram aqui quando as artes chegarem.
   { key: "destino", name: "Destino", level: 5, price: 600, event: { theme: "destino", year: 2026 } },
+  // Skins que só saem de pacote (nunca à venda na Loja; sem nível nem preço de tabela, então o Mercado usa a faixa da raridade).
+  // Tormenta: lendária do conjunto de novembro de 2026 (tema Toró), 3D por fora, por dentro e por trás (2026-11-10).
+  { key: "tormenta", name: "Tormenta", level: 0, price: 0, packOnly: true },
 ] as const;
 
 export type CardSkin = (typeof CARD_SKINS)[number];
@@ -44,6 +47,7 @@ export function getCardSkin(key: CardSkinKey): CardSkin {
 
 /** Carta de evento ainda à venda em `today` (`AAAA-MM-DD`, horário de Brasília)? As outras, sempre. */
 export function isCardSkinOnSale(skin: CardSkin, today: string): boolean {
+  if ("packOnly" in skin) return false;
   if (!("event" in skin)) return true;
   return today.startsWith(`${skin.event.year}-`) && getCurrentShopEvent(today).key === skin.event.theme;
 }
