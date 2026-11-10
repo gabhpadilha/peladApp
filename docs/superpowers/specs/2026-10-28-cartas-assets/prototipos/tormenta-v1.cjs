@@ -13,7 +13,7 @@ const sharp = require(path.resolve(process.argv[3], "node_modules/sharp"));
 const OUT = process.argv[2];
 const F = (n) => path.join(__dirname, `tormenta-${n}-dono.jpg`);
 const SRC = { w: 1696, h: 2528, card: { x: 166, y: 338, w: 1366, h: 1978 }, fundo: { x: 164, y: 340, w: 1368, h: 1884 } };
-const BW = 714, BH = 1000, OUT_W = 800;
+const BW = 714, BH = 1000, OUT_W = 800, WIDE = 2000;
 const CW = BW * 0.84, CH = BH * 0.84, CX0 = BW * 0.08, CY0 = BH * 0.08;
 const SX = CW / SRC.card.w, SY = CH / SRC.card.h;
 const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
@@ -24,12 +24,14 @@ const grow = (b, w, h, r) => step(b, w, h, (i) => i.blur(r).threshold(8));
 const shrink = (b, w, h, r) => step(b, w, h, (i) => i.blur(r).threshold(247));
 
 /** Luz sobre preto: o alfa sai do brilho e a cor volta sem o preto misturado (o brilho de fora da borda fica um véu dourado-claro). */
-async function cutFrame() {
+async function cutFrame(renderAlpha) {
   const { data, info } = await sharp(F("borda")).removeAlpha().raw().toBuffer({ resolveWithObject: true });
   const n = info.width * info.height, out = Buffer.alloc(n * 4);
   for (let i = 0; i < n; i++) {
     const r = data[i * 3], g = data[i * 3 + 1], b = data[i * 3 + 2], mx = Math.max(r, g, b);
-    const a = smooth(6, 120, mx);
+    let a = smooth(6, 120, mx);
+    // Onde o render está, a moldura some por inteiro (o fio de bronze aparecia através dos cristais translúcidos como um risco): o render fica por cima da borda, sem nada entre ele e o fundo.
+    if (renderAlpha) { const x = i % info.width, y = (i / info.width) | 0; a *= 1 - smooth(0.04, 0.4, renderAlpha[(y * WIDE + x) * 4 + 3] / 255); }
     out[i * 4 + 3] = Math.round(a * 255);
     const k = a > 0.02 ? Math.min(255 / Math.max(mx, 1), 1 / a) : 1;
     out[i * 4] = Math.min(255, r * k); out[i * 4 + 1] = Math.min(255, g * k); out[i * 4 + 2] = Math.min(255, b * k);
@@ -75,7 +77,7 @@ async function cutRender() {
   };
 
   // Render maior e reposicionado numa tela 2000 x 2400 da arte (cabe o que passa da borda direita).
-  const RS = 0.72, RC = [1200, 1323], RT = [1531, 1323], WIDE = 2000;
+  const RS = 0.72, RC = [1200, 1323], RT = [1531, 1323];
   const small = await sharp(await cutRender()).resize(Math.round(SRC.w * RS), Math.round(SRC.h * RS), { kernel: "lanczos3" }).png().toBuffer();
   const wide = await sharp({ create: { width: WIDE, height: SRC.h, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
     .composite([{ input: small, left: Math.round(RT[0] - RC[0] * RS), top: Math.round(RT[1] - RC[1] * RS) }]).png().toBuffer();
@@ -98,7 +100,7 @@ async function cutRender() {
   const ix = Math.round(c.w * 0.0143), iy = Math.round(c.h * 0.0102);
   await sharp(card).extract({ left: ix, top: iy, width: c.w - 2 * ix, height: c.h - 2 * iy }).resize(600, 850, { fit: "fill" }).webp({ quality: 92 }).toFile(`${OUT}/premium-tormenta.webp`);
 
-  const frame = await place(await cutFrame(), SRC.w, SRC.h);
+  const frame = await place(await cutFrame(await sharp(wide).raw().toBuffer()), SRC.w, SRC.h);
   const render = await place(outerPng, WIDE, SRC.h);
   const layer = await sharp({ create: { width: OUT_W, height: BH, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
     .composite([frame, render]).raw().toBuffer();
