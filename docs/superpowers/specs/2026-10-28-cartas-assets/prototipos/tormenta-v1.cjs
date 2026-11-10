@@ -31,7 +31,7 @@ async function cutFrame(renderAlpha) {
     const r = data[i * 3], g = data[i * 3 + 1], b = data[i * 3 + 2], mx = Math.max(r, g, b);
     let a = smooth(6, 120, mx);
     // Onde o render está, a moldura some por inteiro (o fio de bronze aparecia através dos cristais translúcidos como um risco): o render fica por cima da borda, sem nada entre ele e o fundo.
-    if (renderAlpha) { const x = i % info.width, y = (i / info.width) | 0; a *= 1 - smooth(0.04, 0.4, renderAlpha[(y * WIDE + x) * 4 + 3] / 255); }
+    if (renderAlpha) { const x = i % info.width, y = (i / info.width) | 0; a *= 1 - smooth(0.01, 0.12, renderAlpha[(y * WIDE + x) * 4 + 3] / 255); }
     out[i * 4 + 3] = Math.round(a * 255);
     const k = a > 0.02 ? Math.min(255 / Math.max(mx, 1), 1 / a) : 1;
     out[i * 4] = Math.min(255, r * k); out[i * 4 + 1] = Math.min(255, g * k); out[i * 4 + 2] = Math.min(255, b * k);
@@ -50,32 +50,31 @@ async function cutRender() {
   const W = info.width, H = info.height, n = W * H;
   const mx = Buffer.alloc(n);
   for (let i = 0; i < n; i++) mx[i] = Math.max(data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
+  // O brilho dos raios é um azul profundo (mx 60 a 100) colado no cristal: por brilho dá para separar o CORPO (faces claras, mx > 150) do brilho e dos raios (finos).
+  // Com limiar mais baixo o brilho se fundia ao cristal e o vão escuro entre os raios e o cristal virava "buraco fechado", preenchido de preto (a mancha).
   const solid = Buffer.alloc(n);
-  // limiar alto: o contorno do render tem uma borda escura (mx 20 a 80) que, entrando no corpo, virava um contorno preto opaco em volta dos cristais
-  for (let i = 0; i < n; i++) solid[i] = mx[i] > 95 ? 255 : 0;
-  // só o grosso: erode e volta (os raios de poucos pixels somem; os cristais e os fios de bronze ficam com o contorno original)
+  for (let i = 0; i < n; i++) solid[i] = mx[i] > 150 ? 255 : 0;
+  // só o grosso: erode e volta; o corpo nunca passa do que já era claro (interseção com o sólido), então não ganha contorno escuro
   let body = await shrink(solid, W, H, 5);
   body = await grow(body, W, H, 5);
-  body = await shrink(body, W, H, 1.8); // mais um respiro para dentro: o corpo nunca passa do contorno de luz
-  // buracos fechados dentro do corpo: tudo o que não é alcançado a partir da borda da imagem sem atravessar o corpo
-  const outside = new Uint8Array(n), st = [];
-  const push = (x, y) => { if (x < 0 || y < 0 || x >= W || y >= H) return; const i = y * W + x; if (outside[i] || body[i] > 127) return; outside[i] = 1; st.push(i); };
-  for (let x = 0; x < W; x++) { push(x, 0); push(x, H - 1); }
-  for (let y = 0; y < H; y++) { push(0, y); push(W - 1, y); }
-  while (st.length) { const i = st.pop(), x = i % W, y = (i / W) | 0; push(x + 1, y); push(x - 1, y); push(x, y + 1); push(x, y - 1); }
-  const filled = Buffer.alloc(n);
-  for (let i = 0; i < n; i++) filled[i] = body[i] > 127 ? 255 : outside[i] ? 0 : (mx[i] >= 12 ? 255 : 0); // buraco fechado só vira corpo se não for preto de fundo
+  for (let i = 0; i < n; i++) if (!solid[i]) body[i] = 0;
+  // Sem preencher buracos: o preenchimento "fechado por dentro" pegava o vão escuro entre os raios e o cristal (os raios formam um laço em volta do cristal) e o pintava de preto opaco.
+  // As faces escuras dos cristais ficam parcialmente transparentes pelo brilho, o que lê como vidro.
+  const filled = body;
   const mask = await step(filled, W, H, (im) => im.blur(1.1));
   const out = Buffer.alloc(n * 4);
   for (let i = 0; i < n; i++) {
-    const ramp = smooth(8, 90, mx[i]);
+    const ramp = smooth(10, 100, mx[i]);
     // o render vem com os cristais encostando na borda direita da imagem, cortados retos: esmaece nos últimos 90 px
     const x = i % W, edge = smooth(0, 90, W - 1 - x) * smooth(0, 40, x);
     const m = mask[i] / 255;
-    const a = Math.max(ramp, m);
+    // O bronze (pára-raios e fios) é quente (r > b) e tem lados na sombra com brilho baixo: pelo brilho ficava meio transparente, "fantasma". Pelo tom ele entra opaco.
+    const warm = Math.min(1, Math.max(0, (data[i * 3] - data[i * 3 + 2]) / 40)) * smooth(20, 70, mx[i]);
+    const a = Math.max(ramp, m, warm);
     out[i * 4 + 3] = Math.round(a * edge * 255);
-    // corpo: cor como está. Luz (raios e brilho): cor despremultiplicada, sem o preto do fundo.
-    const k = m >= 0.98 ? 1 : 1 / Math.max(ramp, m, 0.04);
+    // corpo: cor como está. Luz (raios e brilho): a cor vai para o brilho máximo (maior canal = 255) e só o alfa diz o quanto dela entra. O brilho do render é um azul
+    // fundo (0, 40, 130): mesmo despremultiplicado, em meia transparência ele escurecia as nuvens como uma mancha. Com a cor no máximo, o meio-transparente só ACENDE o que está atrás.
+    const k = 1 + (255 / Math.max(mx[i], 1) - 1) * (1 - a); // opaco: cor como está; meio-transparente: cor no brilho máximo
     for (let c = 0; c < 3; c++) out[i * 4 + c] = Math.min(255, Math.round(data[i * 3 + c] * k));
   }
   return sharp(out, { raw: { width: W, height: H, channels: 4 } }).png().toBuffer();
