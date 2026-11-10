@@ -87,7 +87,7 @@ export function RevealRewards({ round, rewards, onDone }: RevealRewardsProps) {
           )}
           <dl className="flex min-w-0 flex-1 flex-col gap-3">
             <div>
-              <dt className="text-xs text-muted-foreground uppercase">Sua nota</dt>
+              <dt className="text-xs text-muted-foreground uppercase">Sua nota na rodada</dt>
               <dd className="flex items-baseline gap-2">
                 <span className="font-display text-5xl leading-none font-extrabold tabular-nums">
                   {score === null ? "–" : formatRoundScore(score / 10)}
@@ -98,7 +98,7 @@ export function RevealRewards({ round, rewards, onDone }: RevealRewardsProps) {
               </dd>
             </div>
             <div>
-              <dt className="text-xs text-muted-foreground uppercase">Seu OVR</dt>
+              <dt className="text-xs text-muted-foreground uppercase">Sua média (OVR)</dt>
               <dd className="flex items-baseline gap-2 font-display font-extrabold tabular-nums">
                 {ovrBefore !== null && <span className="text-2xl text-muted-foreground">{Math.round(ovrBefore)} →</span>}
                 <span className="animate-[reveal-slam_0.5s_ease-out_0.7s_both] text-4xl leading-none">

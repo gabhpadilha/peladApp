@@ -1,4 +1,4 @@
-import { computeCareerCard, getRoundScore } from "@/lib/ovr";
+import { computeCareerCard, computeRoundOvr, getRoundScore } from "@/lib/ovr";
 import { getClosedMatches } from "@/lib/players";
 import { AWARD_LABELS, type AwardKind } from "@/types/award";
 import { isOvrEvaluation, type Evaluation, type Match } from "@/types/match";
@@ -254,7 +254,11 @@ function* walkRounds({ playerId, matches, evaluations, awards, submissions, conf
     }
     const ovrBefore = previousOvr;
     if (ovr !== null) previousOvr = ovr;
-    yield { match, gains, ovrBefore, ovrAfter: ovr, score: getRoundScore(match.date, received), ratings: received.length };
+    yield { match, gains, ovrBefore, ovrAfter: ovr,
+      // Nota que o jogador vê (a mesma do histórico, com os gols da rodada); XP e moedas usam `getRoundScore` acima.
+      score: computeRoundOvr(received, confirmedGoals.get(submissionKey(match.id, playerId)) ?? 0),
+      ratings: received.length,
+    };
   }
 }
 
