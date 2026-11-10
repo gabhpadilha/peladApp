@@ -109,12 +109,15 @@ export type CareerCard = {
 /** Quantas rodadas contam na carta (decisão do dono do app em 2026-11-10: "o desempenho do último mês"). */
 export const CAREER_WINDOW_ROUNDS = 5;
 
+/** Uma rodada na escala da carta: atributos (0–99) e OVR. */
+export type RoundCard = { attributes: Partial<Record<PlayerAttribute, number>>; ovr: number | null };
+
 /**
  * Uma rodada na escala da carta, **com os gols dela**: cada gol confirmado na rodada soma 1 no Ataque (VEL e CHU, teto de
  * `GOAL_ATTACK_BONUS_MAX`, sem goleiro) e o OVR da rodada sobe o quanto o Ataque maior fizer subir a média das 2 maiores
  * estatísticas (decisão do dono do app em 2026-11-10: os gols somam na nota da rodada, não na média geral).
  */
-function roundCard(totals: OvrTotals, goals: number): { attributes: Partial<Record<PlayerAttribute, number>>; ovr: number | null } {
+function roundCard(totals: OvrTotals, goals: number): RoundCard {
   const attributes = Object.fromEntries(
     [...totals].map(([key, total]) => [key, toCardScale(total.sum / total.count)]),
   ) as Partial<Record<PlayerAttribute, number>>;
@@ -125,6 +128,13 @@ function roundCard(totals: OvrTotals, goals: number): { attributes: Partial<Reco
     attributes.chu = Math.min(CARD_SCALE_MAX, (attributes.chu ?? 0) + bonus);
   }
   return { attributes, ovr: totals.size === 0 ? null : getOvrFromStats(getStatsFromAttributes(isGoalkeeper ? "goalkeeper" : "outfield", attributes)) };
+}
+
+/** A carta de UMA rodada (atributos e OVR), com os gols dela; `null` sem notas. Alimenta a animação "Sua rodada". */
+export function computeRoundCard(evaluations: readonly Evaluation[], goals = 0): RoundCard | null {
+  const totals: OvrTotals = new Map();
+  for (const evaluation of evaluations) addToOvrTotals(totals, evaluation);
+  return totals.size === 0 ? null : roundCard(totals, goals);
 }
 
 /** Nota de UMA rodada (OVR da rodada) já com os gols que o jogador fez nela. É a que aparece no histórico e na mesa tática. */

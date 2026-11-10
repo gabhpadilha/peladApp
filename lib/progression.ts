@@ -1,4 +1,4 @@
-import { computeCareerCard, computeRoundOvr, getRoundScore } from "@/lib/ovr";
+import { computeCareerCard, computeRoundCard, computeRoundOvr, getRoundScore, type CareerCard, type RoundCard } from "@/lib/ovr";
 import { getClosedMatches } from "@/lib/players";
 import { AWARD_LABELS, type AwardKind } from "@/types/award";
 import { isOvrEvaluation, type Evaluation, type Match } from "@/types/match";
@@ -175,6 +175,7 @@ function indexByPlayerAndMatch<Item>(
 /** Rodada a rodada (só as fechadas), na ordem: o que cada uma deu ao jogador. */
 function* walkRounds({ playerId, matches, evaluations, awards, submissions, confirmedGoals }: ProgressionInput) {
   let previousOvr: number | null = null;
+  let previousCard: CareerCard | null = null;
   // OVR de carreira (média dos OVRs das últimas 5 rodadas + bônus de gols delas), acumulado rodada a rodada.
   const ovrEvaluations: Evaluation[] = [];
   const goalsByMatch = new Map<string, number>();
@@ -194,7 +195,8 @@ function* walkRounds({ playerId, matches, evaluations, awards, submissions, conf
     }
     roundOrder.set(match.id, match.round);
     goalsByMatch.set(match.id, confirmedGoals.get(submissionKey(match.id, playerId)) ?? 0);
-    const ovr = computeCareerCard(ovrEvaluations, roundOrder, goalsByMatch).ovr;
+    const careerCard = computeCareerCard(ovrEvaluations, roundOrder, goalsByMatch);
+    const ovr = careerCard.ovr;
     const gains: RoundGain[] = [];
     const isLegacyRound = match.date < AWARD_XP_CUTOFF;
     const bestPlayerXp = isLegacyRound ? LEGACY_XP_BEST_PLAYER : XP_BEST_PLAYER;
@@ -253,8 +255,10 @@ function* walkRounds({ playerId, matches, evaluations, awards, submissions, conf
       gains.unshift({ key: `award-${award.kind}`, label: `Prêmio: ${AWARD_LABELS[award.kind].title}`, xp: bestPlayerXp, coins: COINS_BEST_PLAYER });
     }
     const ovrBefore = previousOvr;
+    const careerBefore = previousCard;
     if (ovr !== null) previousOvr = ovr;
-    yield { match, gains, ovrBefore, ovrAfter: ovr,
+    previousCard = careerCard;
+    yield { match, gains, ovrBefore, ovrAfter: ovr, careerBefore, careerAfter: careerCard, received,
       // Nota que o jogador vê (a mesma do histórico, com os gols da rodada); XP e moedas usam `getRoundScore` acima.
       score: computeRoundOvr(received, confirmedGoals.get(submissionKey(match.id, playerId)) ?? 0),
       ratings: received.length,
@@ -295,12 +299,41 @@ export type RoundRewards = {
   /** OVR antes e depois da rodada (0–99); `null` enquanto não tinha notas. */
   ovrBefore: number | null;
   ovrAfter: number | null;
+  /** A "fusão" da tela: sua carta antes, a carta da rodada (com os gols) e a carta depois; `null` sem notas na posição. */
+  fusion: RoundFusion | null;
 };
+
+/** Dados da animação de fusão do fim da rodada. */
+export type RoundFusion = {
+  before: CareerCard | null;
+  round: RoundCard;
+  /** A carta da rodada sem os gols (para contar o Ataque subindo); só jogador de linha. */
+  roundWithoutGoals: RoundCard | null;
+  after: CareerCard;
+  goals: number;
+  /** Pontos de Ataque que os gols somaram na rodada (0 no goleiro). */
+  attackBonus: number;
+};
+
+function buildFusion(
+  received: readonly Evaluation[],
+  before: CareerCard | null,
+  after: CareerCard,
+  goals: number,
+): RoundFusion | null {
+  // Só as notas na posição do cadastro entram na carta (quem jogou fora da posição não tem fusão).
+  const onPosition = received.filter(isOvrEvaluation);
+  const round = computeRoundCard(onPosition, goals);
+  if (!round || after.ovr === null) return null;
+  const roundWithoutGoals = goals > 0 ? computeRoundCard(onPosition, 0) : null;
+  const attackBonus = roundWithoutGoals ? Math.max(0, (round.attributes.chu ?? 0) - (roundWithoutGoals.attributes.chu ?? 0)) : 0;
+  return { before, round, roundWithoutGoals, after, goals, attackBonus };
+}
 
 /** O que uma rodada fechada deu ao jogador; `null` se ela não deu nada (ou não está fechada). */
 export function computeRoundRewards(input: ProgressionInput & { matchId: string }): RoundRewards | null {
   let xpBefore = 0;
-  for (const { match, gains, ovrBefore, ovrAfter, score, ratings } of walkRounds(input)) {
+  for (const { match, gains, ovrBefore, ovrAfter, score, ratings, careerBefore, careerAfter, received } of walkRounds(input)) {
     const round = sumGains(gains);
     if (match.id !== input.matchId) {
       xpBefore += round.xp;
@@ -321,6 +354,7 @@ export function computeRoundRewards(input: ProgressionInput & { matchId: string 
       ratings,
       ovrBefore,
       ovrAfter,
+      fusion: buildFusion(received, careerBefore, careerAfter, input.confirmedGoals.get(submissionKey(match.id, input.playerId)) ?? 0),
     };
   }
   return null;

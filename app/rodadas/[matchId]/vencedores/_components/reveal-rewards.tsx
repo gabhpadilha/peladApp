@@ -19,6 +19,7 @@ import type { MyPack } from "@/lib/packs";
 import type { RoundRewards } from "@/lib/progression";
 import { cn } from "@/lib/utils";
 import { PackReward } from "./pack-reward";
+import { RevealFusion } from "./reveal-fusion";
 import { formatRoundScore } from "@/types/award";
 import type { Player } from "@/types/player";
 
@@ -60,6 +61,8 @@ export function RevealRewards({ round, rewards, onDone }: RevealRewardsProps) {
   const tierChanged =
     ovrBefore !== null && ovrAfter !== null && getCardTier(Math.round(ovrBefore)) !== getCardTier(Math.round(ovrAfter));
   const hasLeveledUp = after.level > before.level;
+  // A fusão (sua carta + a da rodada) no lugar do bloco simples, quando há como montá-la.
+  const showFusion = Boolean(card && rewards.fusion?.before && rewards.fusion.after.ovr !== null);
   const fillTo = Math.round((after.xpIntoLevel / after.xpNeeded) * 100);
   // Subiu de nível: a barra do nível novo começa vazia.
   const fillFrom = hasLeveledUp ? 0 : Math.round((before.xpIntoLevel / before.xpNeeded) * 100);
@@ -78,45 +81,56 @@ export function RevealRewards({ round, rewards, onDone }: RevealRewardsProps) {
           <h1 className="font-display text-4xl leading-none font-extrabold uppercase">Sua rodada</h1>
         </div>
 
-        {/* A sua carta de hoje, a nota da rodada e o OVR antes → depois. */}
-        <div className="flex animate-[reveal-pop_0.45s_ease-out_0.1s_both] items-center gap-4 rounded-xl border bg-card/80 p-3">
-          {card && (
-            <div className="w-28 shrink-0">
-              <PlayerCard player={card} size="fill" />
-            </div>
-          )}
-          <dl className="flex min-w-0 flex-1 flex-col gap-3">
-            <div>
-              <dt className="text-xs text-muted-foreground uppercase">Sua nota na rodada</dt>
-              <dd className="flex items-baseline gap-2">
-                <span className="font-display text-5xl leading-none font-extrabold tabular-nums">
-                  {score === null ? "–" : formatRoundScore(score / 10)}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {ratings === 1 ? "1 avaliação" : `${ratings} avaliações`}
-                </span>
-              </dd>
-            </div>
-            <div>
-              <dt className="text-xs text-muted-foreground uppercase">Sua média (OVR)</dt>
-              <dd className="flex items-baseline gap-2 font-display font-extrabold tabular-nums">
-                {ovrBefore !== null && <span className="text-2xl text-muted-foreground">{Math.round(ovrBefore)} →</span>}
-                <span className="animate-[reveal-slam_0.5s_ease-out_0.7s_both] text-4xl leading-none">
-                  {ovrAfter === null ? "–" : Math.round(ovrAfter)}
-                </span>
-                {ovrDelta !== 0 && (
-                  <span className={cn("flex items-center text-lg", ovrDelta > 0 ? "text-success" : "text-destructive")}>
-                    {ovrDelta > 0 ? <ArrowUpIcon aria-hidden className="size-4" /> : <ArrowDownIcon aria-hidden className="size-4" />}
-                    {Math.abs(ovrDelta)}
+        {showFusion && card && rewards.fusion ? (
+          <RevealFusion card={card} fusion={rewards.fusion} round={round} />
+        ) : (
+          <div className="flex animate-[reveal-pop_0.45s_ease-out_0.1s_both] items-center gap-4 rounded-xl border bg-card/80 p-3">
+            {card && (
+              <div className="w-28 shrink-0">
+                <PlayerCard player={card} size="fill" />
+              </div>
+            )}
+            <dl className="flex min-w-0 flex-1 flex-col gap-3">
+              <div>
+                <dt className="text-xs text-muted-foreground uppercase">Sua nota na rodada</dt>
+                <dd className="flex items-baseline gap-2">
+                  <span className="font-display text-5xl leading-none font-extrabold tabular-nums">
+                    {score === null ? "–" : formatRoundScore(score / 10)}
                   </span>
+                  <span className="text-xs text-muted-foreground">
+                    {ratings === 1 ? "1 avaliação" : `${ratings} avaliações`}
+                  </span>
+                </dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted-foreground uppercase">Sua média (OVR)</dt>
+                <dd className="flex items-baseline gap-2 font-display font-extrabold tabular-nums">
+                  {ovrBefore !== null && <span className="text-2xl text-muted-foreground">{Math.round(ovrBefore)} →</span>}
+                  <span className="animate-[reveal-slam_0.5s_ease-out_0.7s_both] text-4xl leading-none">
+                    {ovrAfter === null ? "–" : Math.round(ovrAfter)}
+                  </span>
+                  {ovrDelta !== 0 && (
+                    <span className={cn("flex items-center text-lg", ovrDelta > 0 ? "text-success" : "text-destructive")}>
+                      {ovrDelta > 0 ? <ArrowUpIcon aria-hidden className="size-4" /> : <ArrowDownIcon aria-hidden className="size-4" />}
+                      {Math.abs(ovrDelta)}
+                    </span>
+                  )}
+                </dd>
+                {tierChanged && ovrAfter !== null && (
+                  <p className="mt-1 text-xs font-medium text-primary">Você subiu para {CARD_TIER_LABELS[getCardTier(ovrAfter)]}!</p>
                 )}
-              </dd>
-              {tierChanged && ovrAfter !== null && (
-                <p className="mt-1 text-xs font-medium text-primary">Você subiu para {CARD_TIER_LABELS[getCardTier(ovrAfter)]}!</p>
-              )}
-            </div>
-          </dl>
-        </div>
+              </div>
+            </dl>
+          </div>
+        )}
+
+        <div className={cn("flex flex-col gap-4", showFusion && "fusion-after")}>
+          {showFusion && (
+            <p className="text-center text-sm text-muted-foreground">
+              Sua nota na rodada <span className="font-semibold text-foreground">{score === null ? "–" : formatRoundScore(score / 10)}</span> ·{" "}
+              {ratings === 1 ? "1 avaliação" : `${ratings} avaliações`}
+            </p>
+          )}
 
         <div className="flex animate-[reveal-pop_0.45s_ease-out_0.3s_both] gap-3">
           <Tile value={Math.round(rewards.xp)} unit="XP" label="Experiência" className="border-primary/40 bg-primary/10 text-primary" />
@@ -197,6 +211,7 @@ export function RevealRewards({ round, rewards, onDone }: RevealRewardsProps) {
           <Button asChild size="lg" variant="outline" className="h-11 text-base">
             <Link href="/loja">Gastar na Loja</Link>
           </Button>
+        </div>
         </div>
       </div>
     </section>
