@@ -88,7 +88,7 @@ export function PackOpener({ packs, onClose }: { packs: readonly Pick<MyPack, "i
           skin={step.pack.skin}
           round={current.round}
           oddsPercent={oddsPercent}
-          duplicateCoins={step.pack.wasDuplicate ? step.pack.coinsAwarded : null}
+          isDuplicate={step.pack.wasDuplicate}
           reduced={reduced}
         />
       )}

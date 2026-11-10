@@ -21,6 +21,8 @@ export type ShopItem = {
   /** Preço de tabela quando há promoção (para riscar); `null` sem promoção. */
   originalPrice: number | null;
   state: ShopItemState;
+  /** Cópias extras (repetidas de pacote) desta skin, para vender; 0 na Loja. */
+  spareCopies?: number;
 };
 
 /** Uma vitrine da Loja (cartas de evento ou cartas premium, as fixas). */
@@ -71,19 +73,23 @@ export async function getOwnPurchases(memberId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("card_skin_purchases")
-    .select("skin, price, transferred_at")
+    .select("skin, price, transferred_at, is_spare")
     .eq("member_id", memberId);
   if (error) throw error;
-  const owned = new Set(data.filter((purchase) => purchase.transferred_at === null).map((purchase) => purchase.skin).filter(isCardSkinKey));
+  const held = data.filter((purchase) => purchase.transferred_at === null);
+  const owned = new Set(held.map((purchase) => purchase.skin).filter(isCardSkinKey));
+  // Cópias extras (repetidas de pacote) por skin: só servem para vender.
+  const spares = new Map<string, number>();
+  for (const purchase of held) if (purchase.is_spare) spares.set(purchase.skin, (spares.get(purchase.skin) ?? 0) + 1);
   const spent = data.reduce((total, purchase) => total + purchase.price, 0);
-  return { owned, spent };
+  return { owned, spent, spares };
 }
 
 /**
  * "Minhas cartas" (página Eu): a padrão e as compradas, inclusive de eventos que
  * já acabaram, com a que está em uso marcada.
  */
-export function getMyCards(me: Player, owned: ReadonlySet<CardSkinKey>): ShopItem[] {
+export function getMyCards(me: Player, owned: ReadonlySet<CardSkinKey>, spares: ReadonlyMap<string, number> = new Map()): ShopItem[] {
   const equipped = me.cardSkin ?? null;
   return [
     { skin: null, name: "Padrão", level: 0, price: 0, originalPrice: null, state: equipped === null ? "equipped" : "owned" },
@@ -95,6 +101,7 @@ export function getMyCards(me: Player, owned: ReadonlySet<CardSkinKey>): ShopIte
         price: skin.price,
         originalPrice: null,
         state: equipped === skin.key ? "equipped" : "owned",
+        spareCopies: spares.get(skin.key) ?? 0,
       }),
     ),
   ];

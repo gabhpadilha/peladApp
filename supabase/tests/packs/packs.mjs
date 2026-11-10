@@ -120,12 +120,13 @@ const R10 = await round("R10", 10);
   const afterOpen = await attempt(u, "select * from public.get_my_packs()");
   check(S, "depois de aberto, a skin aparece na lista", afterOpen.rows[0].skin === sealed);
 
-  // Repetida: o jogador 8 já tem a skin do pacote dele (posse prévia) e a raridade define as moedas.
+  // Repetida: o jogador 8 já tem a skin do pacote dele (posse prévia); desde 2026-11-14 ela vira cópia extra, sem moedas na hora.
   const p8 = (await db.query("select id, skin, rarity from public.packs where member_id = $1 and match_id = $2", [R10.ids[8], R10.match])).rows[0];
   await db.query("insert into public.card_skin_purchases (group_id, member_id, skin, price, source) values ($1,$2,$3,0,'pack')", [R10.group, R10.ids[8], p8.skin]);
   const dup = await attempt(R10.users[8], "select * from public.open_pack($1)", [p8.id]);
-  const expectedCoins = { comum: 10, rara: 20, epica: 50, lendaria: 100 }[p8.rarity];
-  check(S, `repetida vira moedas pela raridade (${p8.rarity} = ${expectedCoins})`, dup.ok && dup.rows[0].was_duplicate === true && dup.rows[0].coins_awarded === expectedCoins);
+  check(S, "repetida vira cópia extra, sem moedas na hora", dup.ok && dup.rows[0].was_duplicate === true && dup.rows[0].coins_awarded === 0);
+  const spares = (await db.query("select count(*)::int c from public.card_skin_purchases where member_id = $1 and skin = $2 and is_spare and transferred_at is null", [R10.ids[8], p8.skin])).rows[0].c;
+  check(S, "a cópia extra fica guardada (is_spare)", spares === 1);
 }
 
 // 5. Exclusão de rodada fechada: lacrados somem, revelados continuam

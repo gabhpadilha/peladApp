@@ -44,7 +44,7 @@ export async function getMe(): Promise<Me | null> {
   if (!me) return null;
 
   const supabase = await createClient();
-  const [{ owned, spent }, claimsResult, listings] = await Promise.all([
+  const [{ owned, spent, spares }, claimsResult, listings] = await Promise.all([
     getOwnPurchases(me.id),
     supabase.auth.getClaims(),
     getMyListings(league.membership.groupId),
@@ -66,7 +66,7 @@ export async function getMe(): Promise<Me | null> {
     groupName: league.membership.groupName,
     progression,
     balance: Math.max(0, progression.coinsEarned - spent),
-    cards: getMyCards(me, owned),
+    cards: getMyCards(me, owned, spares),
     career: {
       rankPosition:
         rankByPoints(league.activePlayers, league.getRankingPoints()).find((entry) => entry.player.id === me.id)?.position ?? null,

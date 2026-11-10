@@ -137,6 +137,7 @@ export type Database = {
           created_at: string
           group_id: string
           id: string
+          is_spare: boolean
           member_id: string
           price: number
           quick_sell_coins: number | null
@@ -148,6 +149,7 @@ export type Database = {
           created_at?: string
           group_id: string
           id?: string
+          is_spare?: boolean
           member_id: string
           price: number
           skin: string
@@ -158,6 +160,7 @@ export type Database = {
           created_at?: string
           group_id?: string
           id?: string
+          is_spare?: boolean
           member_id?: string
           price?: number
           quick_sell_coins?: number | null

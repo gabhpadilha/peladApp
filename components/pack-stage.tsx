@@ -88,20 +88,20 @@ export type PackStageProps = {
   round: number | null;
   /** Chance real desta raridade neste pacote, em %. */
   oddsPercent: number | null;
-  /** Skin repetida: moedas recebidas no lugar. */
-  duplicateCoins: number | null;
+  /** Skin repetida: vira cópia extra, para vender no Mercado ou na venda rápida. */
+  isDuplicate: boolean;
   /** Movimento reduzido: mostra só o resultado, sem a animação. */
   reduced: boolean;
 };
 
 /** A abertura do pacote (protótipo aprovado): pacote que treme, estouro de luz e a carta que gira mostrando a skin. */
-export function PackStage({ rarity, tier, month, skin, round, oddsPercent, duplicateCoins, reduced }: PackStageProps) {
+export function PackStage({ rarity, tier, month, skin, round, oddsPercent, isDuplicate, reduced }: PackStageProps) {
   const cfg = RARITY_LOOKS[rarity];
   const skinKey = isCardSkinKey(skin) ? skin : "esmeralda";
   const skinName = getCardSkin(skinKey).name;
   const label = PACK_RARITY_NAMES[rarity];
   const odds = oddsPercent === null ? null : `${String(oddsPercent).replace(".", ",")}%`;
-  const note = duplicateCoins !== null ? `Repetida · +${duplicateCoins} CC` : null;
+  const note = isDuplicate ? "Repetida · fica guardada em Minhas cartas para vender" : null;
   const color = `rgb(${cfg.rgb})`;
   const vars = { "--k": reduced ? 0 : cfg.k } as CSSProperties;
   const mystery = { ...SAMPLE_PLAYER, photo: null, nickname: "", fullName: "", cardSkin: skinKey };

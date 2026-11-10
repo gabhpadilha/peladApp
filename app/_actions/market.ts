@@ -45,6 +45,9 @@ export async function listSkin(input: { skin: string; price: number }): Promise<
     .eq("member_id", membership.memberId)
     .eq("skin", skin)
     .is("transferred_at", null)
+    // A cópia extra (repetida) é a primeira a ser vendida.
+    .order("is_spare", { ascending: false })
+    .limit(1)
     .maybeSingle();
   if (readError) {
     console.error("listSkin: leitura da posse falhou", readError);
@@ -86,6 +89,9 @@ export async function quickSellSkin(input: { skin: string }): Promise<MarketActi
     .eq("member_id", membership.memberId)
     .eq("skin", skin)
     .is("transferred_at", null)
+    // A cópia extra (repetida) é a primeira a ser vendida.
+    .order("is_spare", { ascending: false })
+    .limit(1)
     .maybeSingle();
   if (readError) {
     console.error("quickSellSkin: leitura da posse falhou", readError);

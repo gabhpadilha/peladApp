@@ -43,6 +43,27 @@ export function MyCards({ me, cards, market }: MyCardsProps) {
 
   function renderActions(item: ShopItem) {
     const info = item.skin ? market[item.skin] : undefined;
+    const spare = item.spareCopies ?? 0;
+    const spareBadge = spare > 0 && (
+      <span className="rounded-full border border-amber-400/40 bg-amber-400/10 px-2 py-0.5 text-xs font-semibold text-amber-300">
+        Repetida ×{spare}
+      </span>
+    );
+    const sellButton = (
+      <Button
+        type="button"
+        variant="outline"
+        className="h-10 w-full gap-1"
+        disabled={isPending}
+        onClick={() => {
+          setMessage(null);
+          setSelling(item);
+        }}
+      >
+        <TagIcon aria-hidden className="size-4" />
+        {spare > 0 && item.state === "equipped" ? "Vender repetida" : "Vender"}
+      </Button>
+    );
     if (item.state === "equipped") {
       return (
         <>
@@ -50,7 +71,9 @@ export function MyCards({ me, cards, market }: MyCardsProps) {
             <CheckIcon aria-hidden className="size-4" />
             Em uso
           </span>
-          {info?.range && <p className="text-center text-xs text-muted-foreground">Para vender, use outra carta antes.</p>}
+          {spareBadge}
+          {spare > 0 && info?.range && !info.listing ? sellButton : null}
+          {spare === 0 && info?.range && <p className="text-center text-xs text-muted-foreground">Para vender, use outra carta antes.</p>}
         </>
       );
     }
@@ -58,6 +81,7 @@ export function MyCards({ me, cards, market }: MyCardsProps) {
       const { listing } = info;
       return (
         <>
+          {spareBadge}
           <span className="flex h-10 w-full items-center justify-center gap-1.5 rounded-md border border-amber-400/40 bg-amber-400/10 text-sm font-semibold text-amber-300 tabular-nums">
             <TagIcon aria-hidden className="size-4" />
             No Mercado · {listing.price}
@@ -85,28 +109,20 @@ export function MyCards({ me, cards, market }: MyCardsProps) {
     if (!info?.range) {
       return (
         <>
+          {spareBadge}
           {useButton}
           {item.skin && <p className="text-center text-xs text-muted-foreground">Carta grátis: não dá para vender.</p>}
         </>
       );
     }
     return (
-      <div className="grid w-full grid-cols-2 gap-2">
-        {useButton}
-        <Button
-          type="button"
-          variant="outline"
-          className="h-10 w-full gap-1"
-          disabled={isPending}
-          onClick={() => {
-            setMessage(null);
-            setSelling(item);
-          }}
-        >
-          <TagIcon aria-hidden className="size-4" />
-          Vender
-        </Button>
-      </div>
+      <>
+        {spareBadge}
+        <div className="grid w-full grid-cols-2 gap-2">
+          {useButton}
+          {sellButton}
+        </div>
+      </>
     );
   }
 
