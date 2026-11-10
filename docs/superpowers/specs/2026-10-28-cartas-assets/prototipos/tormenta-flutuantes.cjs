@@ -28,8 +28,11 @@ async function cutout(srcFile, box, size, name, { fill }) {
   for (let i = 0; i < N; i++) {
     const glow = smooth(12, 80, lum[i]);
     const x = i % W, y = (i / W) | 0, edge = box ? smooth(14, 34, x) * smooth(14, 34, W - 1 - x) * smooth(14, 34, y) * smooth(14, 34, H - 1 - y) : 1; // pedaços de cacos vizinhos na borda do recorte somem
-    const a = Math.max(glow, solidSoft ? solidSoft[i] / 255 : 0) * edge;
-    rgba[i * 4] = data[i * 3]; rgba[i * 4 + 1] = data[i * 3 + 1]; rgba[i * 4 + 2] = data[i * 3 + 2]; rgba[i * 4 + 3] = Math.round(a * 255);
+    const body = solidSoft ? solidSoft[i] / 255 : 0;
+    const a = Math.max(glow, body) * edge;
+    // Luz sobre preto: fora do corpo sólido a cor é despremultiplicada (sem o preto do fundo misturado), senão o meio-transparente vira uma mancha escura por cima das nuvens.
+    const k = body >= 0.98 ? 1 : 1 / Math.max(glow, body, 0.04);
+    rgba[i * 4] = Math.min(255, data[i * 3] * k); rgba[i * 4 + 1] = Math.min(255, data[i * 3 + 1] * k); rgba[i * 4 + 2] = Math.min(255, data[i * 3 + 2] * k); rgba[i * 4 + 3] = Math.round(a * 255);
   }
   await sharp(rgba, { raw: { width: W, height: H, channels: 4 } }).webp({ quality: 88, alphaQuality: 92 }).toFile(path.join(OUT, name));
 }
@@ -38,7 +41,7 @@ const pad = (b, n = 90) => ({ left: Math.max(0, b.left - n), top: Math.max(0, b.
 (async () => {
   await cutout("tormenta-anel-dono.jpg", null, 640, "tormenta-anel.webp", { fill: false });
   const drops = [["a", { left: 220, top: 132, width: 684, height: 1076 }], ["b", { left: 1332, top: 132, width: 388, height: 604 }], ["c", { left: 1176, top: 848, width: 696, height: 1080 }], ["d", { left: 372, top: 1296, width: 388, height: 600 }]];
-  for (const [k, box] of drops) await cutout("tormenta-gotas-dono.jpg", pad(box, 90), 300, `tormenta-gota-${k}.webp`, { fill: true });
+  for (const [k, box] of drops) await cutout("tormenta-gotas-dono.jpg", pad(box, 90), 300, `tormenta-gota-${k}.webp`, { fill: false });
   const shards = [["a", { left: 228, top: 238, width: 763, height: 1416 }, 110], ["b", { left: 1177, top: 201, width: 646, height: 1060 }, 70], ["c", { left: 1102, top: 1166, width: 403, height: 626 }, 60]];
   for (const [k, box, margin] of shards) await cutout("tormenta-cacos-dono.jpg", pad(box, margin), 300, `tormenta-caco-${k}.webp`, { fill: true });
   console.log("ok");

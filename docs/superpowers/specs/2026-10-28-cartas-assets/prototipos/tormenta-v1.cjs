@@ -39,28 +39,43 @@ async function cutFrame(renderAlpha) {
   return sharp(out, { raw: { width: info.width, height: info.height, channels: 4 } }).png().toBuffer();
 }
 
-/** Render: corpo opaco (buracos escuros entre as peças fechados) + brilho fraco em volta como véu. */
+/**
+ * Render (refeito em 2026-11-10: a primeira versão deixava uma mancha preta em volta dos raios). O fundo do render é preto puro, então ele é "luz sobre preto":
+ *  - os raios e o brilho são só LUZ: alfa pelo brilho e a cor sem o preto misturado (despremultiplicada), como a moldura. Assim o preto nunca vira pixel opaco;
+ *  - o corpo sólido (cristais e fios de bronze) é opaco, mas só o que é GROSSO: uma abertura morfológica tira os raios finos da máscara do corpo;
+ *  - os buracos escuros que ficam fechados por dentro do corpo (o miolo escuro dos cristais) são preenchidos; os vãos abertos para fora (entre pontas, entre raios) não.
+ */
 async function cutRender() {
   const { data, info } = await sharp(F("render")).removeAlpha().raw().toBuffer({ resolveWithObject: true });
   const W = info.width, H = info.height, n = W * H;
   const mx = Buffer.alloc(n);
   for (let i = 0; i < n; i++) mx[i] = Math.max(data[i * 3], data[i * 3 + 1], data[i * 3 + 2]);
-  const seed = Buffer.alloc(n);
-  for (let i = 0; i < n; i++) seed[i] = mx[i] > 48 ? 255 : 0;
-  let m = await shrink(seed, W, H, 1.2);
-  m = await grow(m, W, H, 2.5);
-  m = await grow(m, W, H, 14);
-  m = await shrink(m, W, H, 14);
-  m = await shrink(m, W, H, 1.4);
-  m = await step(m, W, H, (i) => i.blur(1));
+  const solid = Buffer.alloc(n);
+  // limiar alto: o contorno do render tem uma borda escura (mx 20 a 80) que, entrando no corpo, virava um contorno preto opaco em volta dos cristais
+  for (let i = 0; i < n; i++) solid[i] = mx[i] > 95 ? 255 : 0;
+  // só o grosso: erode e volta (os raios de poucos pixels somem; os cristais e os fios de bronze ficam com o contorno original)
+  let body = await shrink(solid, W, H, 5);
+  body = await grow(body, W, H, 5);
+  body = await shrink(body, W, H, 1.8); // mais um respiro para dentro: o corpo nunca passa do contorno de luz
+  // buracos fechados dentro do corpo: tudo o que não é alcançado a partir da borda da imagem sem atravessar o corpo
+  const outside = new Uint8Array(n), st = [];
+  const push = (x, y) => { if (x < 0 || y < 0 || x >= W || y >= H) return; const i = y * W + x; if (outside[i] || body[i] > 127) return; outside[i] = 1; st.push(i); };
+  for (let x = 0; x < W; x++) { push(x, 0); push(x, H - 1); }
+  for (let y = 0; y < H; y++) { push(0, y); push(W - 1, y); }
+  while (st.length) { const i = st.pop(), x = i % W, y = (i / W) | 0; push(x + 1, y); push(x - 1, y); push(x, y + 1); push(x, y - 1); }
+  const filled = Buffer.alloc(n);
+  for (let i = 0; i < n; i++) filled[i] = body[i] > 127 ? 255 : outside[i] ? 0 : (mx[i] >= 12 ? 255 : 0); // buraco fechado só vira corpo se não for preto de fundo
+  const mask = await step(filled, W, H, (im) => im.blur(1.1));
   const out = Buffer.alloc(n * 4);
   for (let i = 0; i < n; i++) {
-    const ramp = smooth(12, 70, mx[i]);
+    const ramp = smooth(8, 90, mx[i]);
     // o render vem com os cristais encostando na borda direita da imagem, cortados retos: esmaece nos últimos 90 px
     const x = i % W, edge = smooth(0, 90, W - 1 - x) * smooth(0, 40, x);
-    const a = Math.max(ramp, m[i] / 255);
+    const m = mask[i] / 255;
+    const a = Math.max(ramp, m);
     out[i * 4 + 3] = Math.round(a * edge * 255);
-    const k = m[i] > 128 || ramp >= 1 ? 1 : 1 / Math.max(a, 0.05);
+    // corpo: cor como está. Luz (raios e brilho): cor despremultiplicada, sem o preto do fundo.
+    const k = m >= 0.98 ? 1 : 1 / Math.max(ramp, m, 0.04);
     for (let c = 0; c < 3; c++) out[i * 4 + c] = Math.min(255, Math.round(data[i * 3 + c] * k));
   }
   return sharp(out, { raw: { width: W, height: H, channels: 4 } }).png().toBuffer();
