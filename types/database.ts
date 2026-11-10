@@ -847,6 +847,7 @@ export type Database = {
         Row: {
           coins_awarded: number
           created_at: string
+          goal_choice_id: string | null
           group_id: string
           id: string
           match_id: string
@@ -856,6 +857,7 @@ export type Database = {
           opened_at: string | null
           rarity: string
           skin: string
+          source: string
           tier: string
           was_duplicate: boolean | null
           was_forced: boolean
@@ -863,6 +865,7 @@ export type Database = {
         Insert: {
           coins_awarded?: number
           created_at?: string
+          goal_choice_id?: string | null
           group_id: string
           id?: string
           match_id: string
@@ -872,6 +875,7 @@ export type Database = {
           opened_at?: string | null
           rarity: string
           skin: string
+          source?: string
           tier: string
           was_duplicate?: boolean | null
           was_forced?: boolean
@@ -879,6 +883,7 @@ export type Database = {
         Update: {
           coins_awarded?: number
           created_at?: string
+          goal_choice_id?: string | null
           group_id?: string
           id?: string
           match_id?: string
@@ -888,6 +893,7 @@ export type Database = {
           opened_at?: string | null
           rarity?: string
           skin?: string
+          source?: string
           tier?: string
           was_duplicate?: boolean | null
           was_forced?: boolean
@@ -1093,6 +1099,25 @@ export type Database = {
           votes: number
         }[]
       }
+      accept_goal: {
+        Args: { chosen_key: string; target_group: string }
+        Returns: undefined
+      }
+      get_my_goals: {
+        Args: { target_group: string }
+        Returns: {
+          accepted_at: string | null
+          chosen: boolean
+          completed_at: string | null
+          label: string
+          level: string
+          option_key: string
+          progress: number | null
+          sort_order: number
+          target: number
+          tier: string
+        }[]
+      }
       get_group_goals: {
         Args: { target_group: string }
         Returns: {
@@ -1215,6 +1240,7 @@ export type Database = {
           rarity: string
           round: number
           skin: string
+          source: string
           tier: string
           was_duplicate: boolean
         }[]

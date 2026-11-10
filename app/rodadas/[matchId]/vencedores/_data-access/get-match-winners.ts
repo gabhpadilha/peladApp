@@ -67,7 +67,7 @@ export async function getMatchWinners(matchId: string): Promise<MatchWinners | n
         ...roundRewards,
         balance: Math.max(0, league.getProgression(memberId).coinsEarned - (await getOwnPurchases(memberId)).spent),
         card: league.players.find((player) => player.id === memberId) ?? null,
-        pack: (await getMyPacks()).find((pack) => pack.matchId === match.id) ?? null,
+        pack: (await getMyPacks()).find((pack) => pack.matchId === match.id && pack.source === "round") ?? null,
       }
     : null;
 

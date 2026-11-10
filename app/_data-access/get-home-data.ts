@@ -1,5 +1,6 @@
 import { getCurrentCardEvent, type CardThemeKey, type CurrentCardEvent } from "@/lib/card-themes";
 import { getActiveSale, type ShopSale } from "@/lib/shop-sale";
+import { getMyGoals, type MyGoals } from "@/app/objetivos/_data-access/get-goals";
 import { getLeague } from "@/lib/league";
 import { getRoundScore } from "@/lib/ovr";
 import { getMatchPerformances, type PendingEvaluation } from "@/lib/players";
@@ -52,6 +53,8 @@ export type HomeData = {
   winnersAlert: WinnersAlert | null;
   /** Aviso do bônus de boas-vindas, enquanto o jogador não o fechar. */
   showWelcomeBonus: boolean;
+  /** Objetivos do mês, ou `null` em pelada sem pacotes ligados (o cartão nem aparece). */
+  goals: MyGoals | null;
 };
 
 /** O jogador ainda não viu o aviso do bônus de primeiro login. */
@@ -122,9 +125,10 @@ export async function getHomeData(): Promise<HomeData> {
     : [];
 
   const openMatch = league.matches.findLast((match) => match.status === "open");
-  const [winnersAlert, showWelcomeBonus] = await Promise.all([
+  const [winnersAlert, showWelcomeBonus, goals] = await Promise.all([
     getWinnersAlert(league.currentMemberId, latestMatch, league.awards),
     hasUnseenWelcomeBonus(league.currentMemberId),
+    getMyGoals(league.membership.groupId),
   ]);
 
   return {
@@ -168,5 +172,6 @@ export async function getHomeData(): Promise<HomeData> {
     shopSale: getActiveSale(today),
     winnersAlert,
     showWelcomeBonus,
+    goals,
   };
 }

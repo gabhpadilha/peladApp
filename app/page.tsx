@@ -8,6 +8,7 @@ import { EmptyState } from "@/components/state-panels";
 import { NewsSlider } from "./_components/news-slider";
 import { LatestRoundCard } from "./_components/latest-round-card";
 import { MyCardSummary } from "./_components/my-card-summary";
+import { GoalsCard } from "./_components/goals-card";
 import { OpenRoundCard } from "./_components/open-round-card";
 import { WinnersBanner } from "./_components/winners-banner";
 import { WelcomeBonusDialog } from "./_components/welcome-bonus-dialog";
@@ -86,6 +87,7 @@ async function HomeContent() {
               shopSale={data.shopSale}
               player={data.currentPlayer}
             />
+            {data.goals && <GoalsCard goals={data.goals} />}
             <Link
               href="/comunidade"
               className="flex min-h-16 items-center gap-3 rounded-xl border bg-card px-4 transition-colors hover:bg-muted"

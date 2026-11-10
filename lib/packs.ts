@@ -66,6 +66,8 @@ export type MyPack = {
   rarity: PackRarity | null;
   wasDuplicate: boolean;
   coinsAwarded: number;
+  /** `round` = ganhou ao fechar uma rodada · `goal` = ganhou cumprindo um objetivo do mês. */
+  source: "round" | "goal";
 };
 
 export type OpenedPack = { skin: string; rarity: PackRarity; wasDuplicate: boolean; coinsAwarded: number };

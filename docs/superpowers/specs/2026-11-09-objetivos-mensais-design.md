@@ -73,7 +73,7 @@ Premissa: ~4 rodadas por mês. "Nota" = nota da rodada (o OVR da rodada). Os nú
 - **Cumprir é decidido ao fechar a rodada**, dentro da mesma transação do `close_match`, junto com os prêmios (assim o pacote nasce uma vez só e o fechamento já é atômico). Rodada excluída pelo admin não conta (o dado some junto).
 - **Pacote do objetivo:** a tabela `packs` hoje exige `match_id` e tem `unique (match_id, member_id)`, então o pacote do objetivo precisa de uma origem própria (ex.: coluna `source` e referência ao objetivo, com unicidade por objetivo escolhido). Reaproveita o sorteio de skin por faixa (`pack_tier_odds`, conjunto do mês, proteção contra azar não se aplica ou se aplica como definir o construtor).
 - **Dependência:** só entrega pacote em pelada com `packs_enabled` e com conjunto do mês cadastrado (`pack_sets`), como o pacote da rodada. Sem isso, o cartão de objetivos nem aparece.
-- **Quem escolhe o catálogo:** fica em código (`lib/goals.ts`, como `lib/market.ts`), com dois conjuntos (linha e goleiro) escolhidos pela posição do cadastro. Mudar um número não exige migration.
+- **Catálogo no banco, não no código** (mudou na construção, porque quem avalia é o banco): tabela `goal_options` (chave, nível, linha ou goleiro, métrica, meta, nota mínima, texto), lida pelo app. Mudar um número = um `update`, sem migration de código. O app só guarda os nomes dos níveis e a faixa do pacote (`lib/goals.ts`).
 - **Segurança:** a escolha e a leitura do próprio progresso por funções `security definer`/Server Action que conferem quem chama, como a Comunidade e o Mercado; nada de acesso direto às tabelas novas.
 - **Goleiro que joga na linha (ou o contrário) numa rodada:** a posição da rodada decide quais regras valem para a nota (como já é no OVR); a escolha do jogador continua a do catálogo do cadastro. Chamada minha, simples.
 - **Mês:** o mês do calendário, no fuso de Brasília, como o ranking mensal. Objetivo não aceito até o fim do mês some, sem pacote.
@@ -88,3 +88,13 @@ No PGlite, como os pacotes e o Mercado: escolha só uma vez por nível e mês; a
 - Os números exatos do catálogo, conferidos com o histórico real.
 - Como o sorteio de skin do pacote de objetivo reaproveita o do pacote da rodada.
 - Slide novo no `NewsSlider` quando for ao ar.
+
+## Como ficou no banco (construído em 2026-11-10; migration `20261110120000_monthly_goals.sql`, teste `supabase/tests/goals/goals.mjs`, 68 verificações)
+
+- `goal_options` (catálogo semeado com as opções do desenho) e `goal_choices` (uma escolha por jogador, mês e nível; `accepted_at`; `completed_at`), sem acesso direto.
+- `accept_goal(grupo, opção)` e `get_my_goals(grupo)` para o logado (erros PA040 a PA042); `goal_progress`, `draw_goal_pack` e `evaluate_goals` internas. `close_match` chama `evaluate_goals` depois dos prêmios e dos pacotes da rodada.
+- **Conta do progresso:** conta a rodada fechada depois do aceite, com data não anterior ao dia do aceite (Brasília) e no mês da escolha. Gols = confirmados (3 "sim"); "nota acima de N" = nota da rodada x 10 maior que N (estrito); carta de prêmio = prêmio individual (sem Bola Murcha, Time da Semana, Time do Mês e Campeão do Mês).
+- **Pacote do objetivo** na tabela `packs` com `source = 'goal'` e `goal_choice_id`; `match_id` = a rodada que cumpriu. Unicidade: um pacote por rodada e jogador só vale para `source = 'round'`. Sorteio simples pelas chances da faixa (fácil C, médio B, difícil A), **sem** a proteção contra azar nem o boost de design (chamada minha). `get_my_packs` ganhou a coluna `source`.
+- Só funciona com `packs_enabled` na pelada e `pack_sets` do mês; senão o cartão nem aparece.
+- Rodada excluída pelo admin leva embora o progresso e, em cascata, o pacote de objetivo que ela tenha gerado (o objetivo continua marcado como cumprido). Caso raro, aceito.
+- App: `app/_actions/goals.ts`, `app/objetivos/` (página e leitura), `app/_components/goals-card.tsx` (Home), "Objetivo cumprido" nos pacotes da Loja.

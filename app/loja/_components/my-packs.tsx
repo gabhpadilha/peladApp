@@ -44,7 +44,7 @@ export function MyPacks({ packs }: { packs: readonly MyPack[] }) {
               <PackCover tier={pack.tier} className="h-11 shrink-0" />
               <div className="flex min-w-0 flex-1 flex-col">
                 <span className="truncate font-display text-base leading-tight font-bold tracking-wide uppercase">{PACK_TIER_NAMES[pack.tier]}</span>
-                <span className="text-xs text-muted-foreground">Rodada {pack.round} · {monthName(pack.month)}</span>
+                <span className="text-xs text-muted-foreground">{pack.source === "goal" ? `Objetivo cumprido · ${monthName(pack.month)}` : `Rodada ${pack.round} · ${monthName(pack.month)}`}</span>
               </div>
               <Button size="sm" onClick={() => setOpening([pack])}>
                 Abrir

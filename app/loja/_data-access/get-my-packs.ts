@@ -36,6 +36,7 @@ export async function getMyPacks(): Promise<MyPack[]> {
         rarity: pack.rarity !== null && isPackRarity(pack.rarity) ? pack.rarity : null,
         wasDuplicate: pack.was_duplicate,
         coinsAwarded: pack.coins_awarded,
+        source: pack.source === "goal" ? "goal" : "round",
       };
     })
     .toSorted((a, b) => b.round - a.round);
