@@ -1,7 +1,7 @@
 import { ShowcaseCard } from "@/components/showcase-card";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowRightIcon, CloudLightningIcon, TagIcon, GhostIcon, MedalIcon, SparklesIcon, StoreIcon, TrophyIcon, type LucideIcon } from "lucide-react";
+import { ArrowLeftRightIcon, ArrowRightIcon, CloudLightningIcon, GiftIcon, GemIcon, TagIcon, GhostIcon, MedalIcon, SparklesIcon, StoreIcon, TrophyIcon, type LucideIcon } from "lucide-react";
 import { formatCoins } from "@/components/coin-pill";
 import { RankInsignia } from "@/components/cancha-card";
 import { CARD_RANK_LABELS, getCardRank, RANK_FLAT_CLASSES, type CardRank } from "@/lib/card-rank";
@@ -15,6 +15,7 @@ import { CARD_SKINS, isCardSkinOnSale, type CardSkinKey } from "@/types/card-ski
 import { getSalePrice, type ShopSale } from "@/lib/shop-sale";
 import type { Player } from "@/types/player";
 import { cn } from "@/lib/utils";
+import { MarketGuideVisual, PacksGuideVisual, RarityGuideVisual } from "./news-guide";
 import { NewsCarousel } from "./news-carousel";
 
 type NewsSliderProps = {
@@ -250,7 +251,7 @@ export function NewsSlider({ event, today, shopSale, player }: NewsSliderProps) 
                 eyebrow="Promoção na Loja"
                 title={shopSale.label}
                 meta={`-${shopSale.percent}% em tudo até ${formatShortDate(shopSale.end)}`}
-                text={`Todas as cartas da Loja com ${shopSale.percent}% de desconto, inclusive as do evento. O preço novo já aparece na Loja; o que você comprar é seu para sempre.`}
+                text={`Pacotes e cartas da Loja com ${shopSale.percent}% de desconto. O preço novo já aparece na Loja; o que você comprar é seu para sempre.`}
                 visual={<SaleBanner sale={shopSale} skins={saleSkins} />}
                 href="/loja"
                 cta="Aproveitar na Loja"
@@ -259,6 +260,52 @@ export function NewsSlider({ event, today, shopSale, player }: NewsSliderProps) 
           },
         ]
       : []),
+    {
+      key: "pacotes",
+      title: "Pacotes de skins",
+      content: (
+        <Slide
+          icon={GiftIcon}
+          eyebrow="Novidade · pacotes"
+          title="Pacotes de skins"
+          meta={shopEvent.label ? `Conjunto do mês: ${shopEvent.label}` : undefined}
+          text="Cada pacote traz uma skin sorteada do conjunto do mês. Quem joga a rodada ganha um pacote ao fechar, e dá para comprar mais na Loja. O que sair é seu para sempre."
+          visual={<PacksGuideVisual month={today.slice(0, 7)} />}
+          href="/loja"
+          cta="Ver os pacotes"
+        />
+      ),
+    },
+    {
+      key: "raridade",
+      title: "Raridade",
+      content: (
+        <Slide
+          icon={GemIcon}
+          eyebrow="Novidade · coleção"
+          title="Skins por raridade"
+          text="As skins dos pacotes têm quatro raridades: comum, rara, épica e lendária. Toque numa carta em Minhas cartas e ela vira para mostrar a raridade no verso."
+          visual={<RarityGuideVisual />}
+          href="/eu#minhas-cartas"
+          cta="Ver minhas cartas"
+        />
+      ),
+    },
+    {
+      key: "mercado",
+      title: "Mercado",
+      content: (
+        <Slide
+          icon={ArrowLeftRightIcon}
+          eyebrow="Novidade · Mercado"
+          title="Mercado e venda rápida"
+          text="Skin repetida ou que ninguém usa? Venda para outros jogadores, de todas as peladas, ou faça uma venda rápida e receba na hora."
+          visual={<MarketGuideVisual />}
+          href="/loja/mercado"
+          cta="Ir para o Mercado"
+        />
+      ),
+    },
     {
       key: "ranking",
       title: "Ranking por pontos",
