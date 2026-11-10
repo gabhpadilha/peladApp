@@ -1280,6 +1280,7 @@ export type Database = {
         }
         Returns: string
       }
+      give_welcome_packs: { Args: never; Returns: number }
       quick_sell_skin: {
         Args: { sale_coins: number; seller: string; target_purchase: string }
         Returns: undefined

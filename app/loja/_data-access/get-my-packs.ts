@@ -32,7 +32,7 @@ export async function getMyPacks(): Promise<MyPack[]> {
         rarity: pack.rarity !== null && isPackRarity(pack.rarity) ? pack.rarity : null,
         wasDuplicate: pack.was_duplicate,
         coinsAwarded: pack.coins_awarded,
-        source: pack.source === "goal" ? "goal" : pack.source === "shop" ? "shop" : "round",
+        source: pack.source === "goal" || pack.source === "shop" || pack.source === "gift" ? pack.source : "round",
         price: pack.price,
       };
     });

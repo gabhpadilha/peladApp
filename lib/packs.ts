@@ -86,8 +86,8 @@ export type MyPack = {
   rarity: PackRarity | null;
   wasDuplicate: boolean;
   coinsAwarded: number;
-  /** `round` = ganhou ao fechar uma rodada · `goal` = ganhou cumprindo um objetivo do mês · `shop` = comprou na Loja. */
-  source: "round" | "goal" | "shop";
+  /** `round` = ganhou ao fechar uma rodada · `goal` = ganhou cumprindo um objetivo do mês · `shop` = comprou na Loja · `gift` = presente (boas-vindas). */
+  source: "round" | "goal" | "shop" | "gift";
   /** CanchaCoins pagas (só no pacote da Loja). */
   price: number | null;
 };
