@@ -549,3 +549,48 @@ body:has([data-rate-bar]):has([data-bottom-nav]) {
 .fusion-cap-2 { opacity: 0; animation: fusion-fade-in 0.4s 4.5s both; }
 .fusion-delta { opacity: 0; animation: fusion-fade-in 0.4s 5.5s both; }
 .fusion-after { opacity: 0; animation: fusion-fade-in 0.6s 6s both; }
+
+/* ---- Noite de premiação: cortina que abre, envelopes e túnel do estádio (revelação dos vencedores) ---- */
+@keyframes curtain-left { from { transform: translateX(0); } to { transform: translateX(-104%); } }
+@keyframes curtain-right { from { transform: translateX(0); } to { transform: translateX(104%); } }
+@keyframes curtain-text-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(0.94); } }
+@keyframes curtain-beam { 0%, 100% { transform: rotate(var(--r0)); opacity: 0.5; } 50% { transform: rotate(var(--r1)); opacity: 0.85; } }
+@keyframes curtain-beam-on { from { opacity: 0.35; } to { opacity: 1; } }
+.curtain-panel { background:
+  repeating-linear-gradient(90deg, rgba(0,0,0,0.34) 0 14px, rgba(255,255,255,0.05) 14px 28px, rgba(0,0,0,0.2) 28px 40px),
+  linear-gradient(180deg, #7a1022, #4a0a16 70%, #2b050c); }
+.curtain-left { animation: none; }
+.curtain-opening .curtain-left { animation: curtain-left 1.15s cubic-bezier(0.6, 0, 0.3, 1) 0.3s both; }
+.curtain-opening .curtain-right { animation: curtain-right 1.15s cubic-bezier(0.6, 0, 0.3, 1) 0.3s both; }
+.curtain-opening .curtain-text { animation: curtain-text-out 0.4s ease-in both; }
+.curtain-opening .curtain-stage { animation: curtain-beam-on 1s ease-out 0.5s both; }
+.curtain-beam { animation: curtain-beam 5s ease-in-out infinite; transform-origin: 50% 0; }
+
+/* Envelope do prêmio: aparece, a aba abre e a carta sobe. `--d` = quando o envelope entra. */
+@keyframes env-in { from { opacity: 0; transform: translateY(14px) scale(0.85); } to { opacity: 1; transform: none; } }
+@keyframes env-flap { from { transform: rotateX(0deg); } to { transform: rotateX(-180deg); } }
+@keyframes env-seal-out { from { opacity: 1; transform: scale(1); } to { opacity: 0; transform: scale(0.4); } }
+@keyframes env-card { from { opacity: 0; transform: translateY(42%) scale(0.78); } to { opacity: 1; transform: none; } }
+@keyframes env-gone { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(18%); } }
+@keyframes env-sag { 0%, 100% { transform: none; } 40% { transform: scaleY(0.88) scaleX(1.06); } 70% { transform: scaleY(1.03); } }
+.env-envelope { opacity: 0; perspective: 500px; animation: env-in 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) var(--d) both, env-gone 0.4s ease-in calc(var(--d) + 1.35s) forwards; }
+.env-flap { transform-origin: 50% 0; animation: env-flap 0.5s ease-in-out calc(var(--d) + 0.6s) both; }
+.env-seal { animation: env-seal-out 0.25s ease-in calc(var(--d) + 0.6s) both; }
+.env-card { opacity: 0; animation: env-card 0.6s cubic-bezier(0.2, 0.9, 0.3, 1.15) calc(var(--d) + 0.95s) both; }
+.env-sagging { animation: env-sag 0.7s ease-out calc(var(--d) + 1.55s) both; }
+
+/* Túnel do estádio (Melhor Jogador): os anéis do túnel passam, a silhueta caminha até a luz, clarão e a carta chega. */
+@keyframes tunnel-ring { 0% { transform: scale(0.05); opacity: 0; } 18% { opacity: 0.9; } 100% { transform: scale(3.4); opacity: 0; } }
+@keyframes tunnel-light { from { opacity: 0.35; transform: scale(0.5); } to { opacity: 1; transform: scale(1.7); } }
+@keyframes tunnel-walk { from { opacity: 0.5; transform: translateY(2%) scale(0.1); } to { opacity: 1; transform: translateY(10%) scale(0.92); } }
+@keyframes tunnel-flash { 0% { opacity: 0; } 35% { opacity: 1; } 100% { opacity: 0; } }
+@keyframes tunnel-hide { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }
+@keyframes tunnel-card { 0% { opacity: 0; transform: scale(1.55) translateY(8%); } 60% { opacity: 1; transform: scale(0.96); } 100% { opacity: 1; transform: none; } }
+@keyframes tunnel-cam { 0%, 100% { opacity: 0; } 8% { opacity: 1; } 16% { opacity: 0; } }
+.tunnel-layer { animation: tunnel-hide 0.25s ease-in 2.4s forwards; }
+.tunnel-ring { animation: tunnel-ring 1.5s linear var(--d) infinite; }
+.tunnel-light { animation: tunnel-light 2.4s ease-in both; }
+.tunnel-walker { animation: tunnel-walk 2.4s cubic-bezier(0.3, 0.1, 0.6, 1) both; }
+.tunnel-flash { opacity: 0; animation: tunnel-flash 0.9s ease-out 2.3s both; }
+.tunnel-card { opacity: 0; animation: tunnel-card 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.1) 2.5s both; }
+.tunnel-cam { opacity: 0; animation: tunnel-cam 1.1s linear var(--d) infinite; }

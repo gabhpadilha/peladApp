@@ -1,9 +1,11 @@
+import type { CSSProperties } from "react";
 import { SparklesIcon } from "lucide-react";
 import { PlayerCard } from "@/components/player-card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AWARD_LABELS, formatAwardResult, type Award, type AwardKind } from "@/types/award";
 import type { CardThemeKey } from "@/lib/card-themes";
+import { AwardEnvelope } from "./award-envelope";
 import { PACK_THEMES, revealColorStyle } from "./reveal-theme";
 
 type RevealHighlightsProps = {
@@ -30,29 +32,16 @@ const ROWS: readonly (readonly AwardKind[])[] = [
   ["drible", "motor"],
 ];
 
-// Atraso de entrada de cada carta, na ordem do quadro (classes literais para o Tailwind).
-const POP_DELAYS = [
-  "[animation-delay:0.5s]",
-  "[animation-delay:0.75s]",
-  "[animation-delay:1s]",
-  "[animation-delay:1.25s]",
-  "[animation-delay:1.5s]",
-  "[animation-delay:1.75s]",
-  "[animation-delay:2s]",
-  "[animation-delay:2.25s]",
-];
-
 function HighlightCard({ award, order }: { award: Award; order: number }) {
   return (
-    <div
-      style={revealColorStyle(award.kind, award.theme)}
-      className={cn(
-        "flex w-[clamp(5rem,26vw,6.5rem)] animate-[reveal-pop_0.45s_cubic-bezier(0.2,0.9,0.3,1.3)_both] flex-col items-center gap-1",
-        POP_DELAYS[order % POP_DELAYS.length],
-      )}
-    >
-      <PlayerCard player={award.card} award={award} size="fill" />
-      <span className="max-w-full truncate rounded-full bg-(--reveal-color) px-2 text-[0.6875rem] font-semibold text-black tabular-nums">
+    <div style={revealColorStyle(award.kind, award.theme)} className="flex w-[clamp(5rem,26vw,6.5rem)] flex-col items-center gap-1">
+      <AwardEnvelope order={order} label={AWARD_LABELS[award.kind].title}>
+        <PlayerCard player={award.card} award={award} size="fill" />
+      </AwardEnvelope>
+      <span
+        className="env-card max-w-full truncate rounded-full bg-(--reveal-color) px-2 text-[0.6875rem] font-semibold text-black tabular-nums"
+        style={{ "--d": `${0.5 + order * 0.45}s` } as CSSProperties}
+      >
         {formatAwardResult(award)}
       </span>
     </div>
@@ -113,7 +102,7 @@ export function RevealHighlights({ awards, fieldTheme, nextLabel, onNext }: Reve
       </div>
 
       {extras.length > 0 && (
-        <div className="relative flex animate-[reveal-fade_0.4s_ease-out_2.6s_both] flex-col items-center gap-2">
+        <div className="relative flex animate-[reveal-fade_0.4s_ease-out_4.6s_both] flex-col items-center gap-2">
           <p className="text-xs text-muted-foreground uppercase">Empates e outros destaques</p>
           <div className="flex flex-wrap justify-center gap-[clamp(1rem,6vw,2rem)]">
             {extras.map((award) => (
@@ -128,7 +117,7 @@ export function RevealHighlights({ awards, fieldTheme, nextLabel, onNext }: Reve
 
       <Button
         size="lg"
-        className="relative h-11 w-full max-w-sm shrink-0 animate-[reveal-fade_0.4s_ease-out_2.8s_both] text-base"
+        className="relative h-11 w-full max-w-sm shrink-0 animate-[reveal-fade_0.4s_ease-out_4.8s_both] text-base"
         onClick={onNext}
       >
         {nextLabel}

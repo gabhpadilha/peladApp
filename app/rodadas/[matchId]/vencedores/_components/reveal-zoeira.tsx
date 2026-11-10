@@ -1,8 +1,10 @@
+import type { CSSProperties } from "react";
 import { FrownIcon } from "lucide-react";
 import { PlayerCard } from "@/components/player-card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AWARD_LABELS, formatAwardResult, type Award } from "@/types/award";
+import { AwardEnvelope } from "./award-envelope";
 
 type RevealZoeiraProps = {
   /** Bola Murcha (empate: mais de uma carta; cartas antigas de Fominha também caem aqui). */
@@ -10,9 +12,6 @@ type RevealZoeiraProps = {
   nextLabel: string;
   onNext: () => void;
 };
-
-// Atraso de cada carta caindo (classes literais para o Tailwind).
-const DROP_DELAYS = ["[animation-delay:0.6s]", "[animation-delay:1.1s]", "[animation-delay:1.6s]", "[animation-delay:2.1s]"];
 
 /**
  * A zoeira abre o pacote: a carta da Bola Murcha (a menor nota da rodada) cai e
@@ -40,12 +39,11 @@ export function RevealZoeira({ awards, nextLabel, onNext }: RevealZoeiraProps) {
 
       <ul className={cn("relative grid w-full max-w-sm gap-4", awards.length === 1 ? "max-w-48 grid-cols-1" : "grid-cols-2")}>
         {awards.map((award, index) => (
-          <li
-            key={award.id}
-            className={`flex min-w-0 animate-[reveal-deflate_1s_cubic-bezier(0.3,0.7,0.4,1)_both] flex-col items-center gap-2 text-center ${DROP_DELAYS[index % DROP_DELAYS.length]}`}
-          >
-            <PlayerCard player={award.card} award={award} size="fill" />
-            <span className="flex flex-col leading-tight">
+          <li key={award.id} className="flex min-w-0 flex-col items-center gap-2 text-center">
+            <AwardEnvelope order={index} start={0.6} gap={0.6} tone="ash" label={AWARD_LABELS[award.kind].title}>
+              <PlayerCard player={award.card} award={award} size="fill" />
+            </AwardEnvelope>
+            <span className="env-card flex flex-col leading-tight" style={{ "--d": `${0.6 + index * 0.6}s` } as CSSProperties}>
               <span className="font-display text-xl font-bold uppercase">{AWARD_LABELS[award.kind].title}</span>
               <span className="text-sm text-muted-foreground">
                 {award.card.nickname} · {formatAwardResult(award)}
@@ -57,7 +55,7 @@ export function RevealZoeira({ awards, nextLabel, onNext }: RevealZoeiraProps) {
 
       <Button
         size="lg"
-        className="relative mt-auto h-11 w-full max-w-sm shrink-0 animate-[reveal-fade_0.4s_ease-out_2.6s_both] text-base"
+        className="relative mt-auto h-11 w-full max-w-sm shrink-0 animate-[reveal-fade_0.4s_ease-out_3.2s_both] text-base"
         onClick={onNext}
       >
         {nextLabel}

@@ -14,14 +14,31 @@ type RoundRankingListProps = {
   entries: readonly RoundRankingEntry[];
   /** Quem está vendo (a linha dele fica em destaque). */
   myId?: string | null;
-  /** Leva ao perfil ao tocar no nome? (no modal, tocar abre o detalhe) */
   className?: string;
+  /** Entrada animada, do último para o primeiro (na revelação). */
+  animated?: boolean;
 };
 
 /** A linha de uma posição: posição, apelido, pontos, pacote ganho, e, ao tocar, de onde vieram os pontos. */
-function RankingRow({ entry, isMine, isOpen, onToggle }: { entry: RoundRankingEntry; isMine: boolean; isOpen: boolean; onToggle: () => void }) {
+function RankingRow({
+  entry,
+  isMine,
+  isOpen,
+  onToggle,
+  delay,
+}: {
+  entry: RoundRankingEntry;
+  isMine: boolean;
+  isOpen: boolean;
+  onToggle: () => void;
+  /** Atraso da entrada (s); `null` = sem animação. */
+  delay: number | null;
+}) {
   return (
-    <li className={cn("rounded-xl border", isMine ? "border-primary/50 bg-primary/10" : "bg-card/60")}>
+    <li
+      className={cn("rounded-xl border", isMine ? "border-primary/50 bg-primary/10" : "bg-card/60", delay !== null && "animate-[reveal-pop_0.4s_ease-out_both]")}
+      style={delay === null ? undefined : { animationDelay: `${delay}s` }}
+    >
       <button
         type="button"
         onClick={onToggle}
@@ -76,14 +93,15 @@ function RankingRow({ entry, isMine, isOpen, onToggle }: { entry: RoundRankingEn
 }
 
 /** A lista completa da classificação da rodada (usada no modal da home e na revelação). */
-export function RoundRankingList({ entries, myId = null, className }: RoundRankingListProps) {
+export function RoundRankingList({ entries, myId = null, className, animated = false }: RoundRankingListProps) {
   const [openId, setOpenId] = useState<string | null>(null);
   return (
     <ol className={cn("flex flex-col gap-2", className)}>
-      {entries.map((entry) => (
+      {entries.map((entry, index) => (
         <RankingRow
           key={entry.playerId}
           entry={entry}
+          delay={animated ? 0.3 + (entries.length - 1 - index) * 0.14 : null}
           isMine={entry.playerId === myId}
           isOpen={openId === entry.playerId}
           onToggle={() => setOpenId((current) => (current === entry.playerId ? null : entry.playerId))}

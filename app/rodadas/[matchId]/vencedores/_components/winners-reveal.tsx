@@ -9,9 +9,11 @@ import type { MatchWinners } from "../_data-access/get-match-winners";
 import { markAwardsSeen } from "../_actions/mark-awards-seen";
 import { RevealAward } from "./reveal-award";
 import { RevealHighlights } from "./reveal-highlights";
-import { RevealPack } from "./reveal-pack";
+import { RevealCurtain } from "./reveal-curtain";
+import { RevealRanking } from "./reveal-ranking";
 import { RevealRewards } from "./reveal-rewards";
 import { RevealSummary } from "./reveal-summary";
+import { RevealTunnel } from "./reveal-tunnel";
 import { RevealTeam } from "./reveal-team";
 import { PACK_THEMES, ZOEIRA_AWARDS } from "./reveal-theme";
 import { RevealZoeira } from "./reveal-zoeira";
@@ -28,6 +30,7 @@ type Step =
   | { type: "team" }
   | { type: "month"; awards: Award[] }
   | { type: "award"; award: Award }
+  | { type: "ranking" }
   | { type: "rewards" };
 
 /**
@@ -36,7 +39,7 @@ type Step =
  * quadro (atributos, Goleiro e Gol), o Time da Semana, o Time do Mês (só na última
  * quinta), o Campeão do Mês (na mesma rodada), o Melhor Jogador sozinho e, fechando, a sua rodada.
  */
-function buildSteps(revealed: Award[], hasTeam: boolean, hasRewards: boolean): Step[] {
+function buildSteps(revealed: Award[], hasTeam: boolean, hasRanking: boolean, hasRewards: boolean): Step[] {
   const zoeira = revealed.filter((award) => ZOEIRA_AWARDS.includes(award.kind));
   const month = revealed.filter((award) => award.kind === "jogador_do_mes");
   const champions = revealed.filter((award) => award.kind === "campeao_do_mes");
@@ -56,6 +59,7 @@ function buildSteps(revealed: Award[], hasTeam: boolean, hasRewards: boolean): S
   // O Campeão do Mês (ranking de pontos) é revelado logo depois do Time do Mês, uma carta por vez.
   for (const award of champions) steps.push({ type: "award", award });
   for (const award of best) steps.push({ type: "award", award });
+  if (hasRanking) steps.push({ type: "ranking" });
   if (hasRewards) steps.push({ type: "rewards" });
   return steps;
 }
@@ -66,6 +70,8 @@ function nextLabel(steps: Step[], index: number): string {
   const next = steps[index + 1];
   if (!next || current.type === "rewards") return "Ver quem ganhou";
   switch (next.type) {
+    case "ranking":
+      return "Ver a classificação";
     case "highlights":
       return "Ver os destaques da rodada";
     case "team":
@@ -94,11 +100,11 @@ function describeContents(cardCount: number, hasTeam: boolean): string {
 
 /** Abertura do pacote da rodada: um passo por vez (`buildSteps`), depois o resumo. */
 export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) {
-  const { match, theme, revealed, team, rewards } = winners;
+  const { match, theme, revealed, team, rewards, ranking } = winners;
   const [stage, setStage] = useState<Stage>({ type: "pack" });
   const [, startTransition] = useTransition();
   const openingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const steps = buildSteps(revealed, team.length > 0, Boolean(rewards));
+  const steps = buildSteps(revealed, team.length > 0, ranking.length > 0, Boolean(rewards));
 
   useEffect(() => {
     return () => {
@@ -162,10 +168,12 @@ export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) 
         {isPlaying ? (
           <button
             type="button"
-            // Pular leva à "Sua rodada" (se houver), para ninguém perder o que ganhou.
+            // Pular leva à classificação (ou, depois dela, à "Sua rodada"), para ninguém perder o que ganhou.
             onClick={() => {
+              const rankingIndex = steps.findIndex((candidate) => candidate.type === "ranking");
               const rewardsIndex = steps.findIndex((candidate) => candidate.type === "rewards");
-              goToStep(rewardsIndex >= 0 && current?.type !== "rewards" ? rewardsIndex : steps.length);
+              const target = rankingIndex >= 0 && (step ?? 0) < rankingIndex ? rankingIndex : rewardsIndex;
+              goToStep(target >= 0 && (step ?? 0) < target ? target : steps.length);
             }}
             className="h-11 px-3 text-sm text-muted-foreground hover:text-foreground"
           >
@@ -191,16 +199,24 @@ export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) 
       )}
 
       {(stage.type === "pack" || stage.type === "opening") && (
-        <RevealPack
+        <RevealCurtain
           round={match.round}
-          theme={theme}
           contents={describeContents(revealed.length, team.length > 0)}
           isOpening={stage.type === "opening"}
           onOpen={handleOpen}
         />
       )}
 
-      {step !== null && current?.type === "award" && (
+      {step !== null && current?.type === "award" && current.award.kind === "craque" && (
+        <RevealTunnel
+          key={current.award.id}
+          award={current.award}
+          nextLabel={nextLabel(steps, step)}
+          onNext={() => goToStep(step + 1)}
+        />
+      )}
+
+      {step !== null && current?.type === "award" && current.award.kind !== "craque" && (
         <RevealAward
           // Nova `key` a cada carta: a sequência de animações recomeça.
           key={current.award.id}
@@ -237,6 +253,16 @@ export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) 
           subtitle="As 4 maiores médias do mês na linha e a maior do gol"
           doneLabel={nextLabel(steps, step)}
           onDone={() => goToStep(step + 1)}
+        />
+      )}
+
+      {step !== null && current?.type === "ranking" && (
+        <RevealRanking
+          round={match.round}
+          entries={ranking}
+          myId={currentMemberId}
+          nextLabel={nextLabel(steps, step)}
+          onNext={() => goToStep(step + 1)}
         />
       )}
 
