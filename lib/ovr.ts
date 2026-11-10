@@ -104,6 +104,8 @@ export type CareerCard = {
   ovr: number | null;
   /** Média de cada atributo ao longo das rodadas, na escala da carta (Ataque já com o bônus de gols). */
   attributes: Partial<Record<PlayerAttribute, number>>;
+  /** A conta do OVR: média das rodadas da janela, pontos que os gols somaram e quantas rodadas entraram. */
+  breakdown: { base: number; goalPoints: number; goals: number; rounds: number } | null;
 };
 
 /** Quantas rodadas contam na carta (decisão do dono do app em 2026-11-10: "o desempenho do último mês"). */
@@ -149,7 +151,7 @@ export function computeCareerCard(
       else attributeRounds.set(key, [value]);
     }
   }
-  if (roundOvrs.length === 0) return { ovr: null, attributes: {} };
+  if (roundOvrs.length === 0) return { ovr: null, attributes: {}, breakdown: null };
 
   const attributes: Partial<Record<PlayerAttribute, number>> = {};
   for (const [key, values] of attributeRounds) attributes[key] = toCardScale(average(values) ?? 0);
@@ -157,7 +159,8 @@ export function computeCareerCard(
 
   const isGoalkeeper = GOALKEEPER_ATTRIBUTES.some((key) => attributeRounds.has(key));
   const bonus = isGoalkeeper ? 0 : getGoalAttackBonus(goals);
-  if (bonus === 0) return { ovr: Math.round(baseOvr), attributes };
+  const base = Math.round(baseOvr);
+  if (bonus === 0) return { ovr: base, attributes, breakdown: { base, goalPoints: 0, goals, rounds: roundOvrs.length } };
 
   const role = "outfield";
   const withBonus = {
@@ -166,7 +169,8 @@ export function computeCareerCard(
     chu: Math.min(CARD_SCALE_MAX, (attributes.chu ?? 0) + bonus),
   };
   const gain = statsAverage(getStatsFromAttributes(role, withBonus)) - statsAverage(getStatsFromAttributes(role, attributes));
-  return { ovr: Math.min(CARD_SCALE_MAX, Math.round(baseOvr + gain)), attributes: withBonus };
+  const ovr = Math.min(CARD_SCALE_MAX, Math.round(baseOvr + gain));
+  return { ovr, attributes: withBonus, breakdown: { base, goalPoints: ovr - base, goals, rounds: roundOvrs.length } };
 }
 
 /** Média das 2 maiores estatísticas, sem arredondar (para medir quanto o bônus de gols soma ao OVR). */

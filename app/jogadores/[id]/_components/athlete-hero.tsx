@@ -56,6 +56,16 @@ export function AthleteHero({ profile }: AthleteHeroProps) {
           <p className="text-muted-foreground">{player.fullName}</p>
         </div>
 
+        {player.ovr !== null && player.ovrBreakdown && (
+          <p className="rounded-lg bg-muted/50 px-3 py-2 text-center text-sm text-muted-foreground md:text-left">
+            <span className="font-semibold text-foreground">OVR {player.ovr}</span> = {player.ovrBreakdown.base} da média das{" "}
+            {player.ovrBreakdown.rounds === 1 ? "sua rodada" : `suas últimas ${player.ovrBreakdown.rounds} rodadas`}
+            {player.ovrBreakdown.goalPoints > 0 &&
+              ` + ${player.ovrBreakdown.goalPoints} dos ${player.ovrBreakdown.goals} gols`}
+            . A nota de cada rodada está no histórico, na mesma conta.
+          </p>
+        )}
+
         <dl className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {stats.map((stat) => (
             <div key={stat.label} className="rounded-lg bg-muted/50 px-3 py-2">

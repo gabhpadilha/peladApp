@@ -2,7 +2,7 @@ import { getCurrentCardEvent, type CardThemeKey, type CurrentCardEvent } from "@
 import { getActiveSale, type ShopSale } from "@/lib/shop-sale";
 import { getMyGoals, type MyGoals } from "@/app/objetivos/_data-access/get-goals";
 import { getLeague } from "@/lib/league";
-import { getRoundScore } from "@/lib/ovr";
+import { computeOvr } from "@/lib/ovr";
 import { getMatchPerformances, type PendingEvaluation } from "@/lib/players";
 import { rankScorers, type Scorer } from "@/lib/goal-ranking";
 import { rankByPoints, type RankedByPoints } from "@/lib/ranking-points";
@@ -124,7 +124,7 @@ export async function getHomeData(): Promise<HomeData> {
             (evaluation) =>
               evaluation.matchId === latestMatch.id && evaluation.playerId === player.id,
           );
-          const score = getRoundScore(latestMatch.date, received);
+          const score = computeOvr(received);
           return score === null ? [] : [{ player, score }];
         })
         .toSorted((a, b) => b.score - a.score)

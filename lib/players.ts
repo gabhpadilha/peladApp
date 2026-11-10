@@ -1,4 +1,4 @@
-import { computeCareerCard, getRoundScore } from "@/lib/ovr";
+import { computeCareerCard, computeOvr } from "@/lib/ovr";
 import { isOvrEvaluation, type Evaluation, type Match } from "@/types/match";
 import {
   GOALKEEPER_ATTRIBUTES,
@@ -51,11 +51,11 @@ function buildPlayer(
   roundOrder: ReadonlyMap<string, number>,
   goalsByMatch: ReadonlyMap<string, number>,
 ): Player {
-  const { ovr, attributes } = computeCareerCard(evaluations, roundOrder, goalsByMatch);
+  const { ovr, attributes, breakdown } = computeCareerCard(evaluations, roundOrder, goalsByMatch);
   if (profile.role === "goalkeeper") {
-    return { ...profile, ovr, attributes: pickAttributes(attributes, GOALKEEPER_ATTRIBUTES) };
+    return { ...profile, ovr, ovrBreakdown: breakdown, attributes: pickAttributes(attributes, GOALKEEPER_ATTRIBUTES) };
   }
-  return { ...profile, ovr, attributes: pickAttributes(attributes, OUTFIELD_ATTRIBUTES) };
+  return { ...profile, ovr, ovrBreakdown: breakdown, attributes: pickAttributes(attributes, OUTFIELD_ATTRIBUTES) };
 }
 
 /**
@@ -127,7 +127,8 @@ export function getMatchPerformances(
     return {
       match,
       wasPresent: match.presentPlayerIds.includes(playerId),
-      score: getRoundScore(match.date, received),
+      // Mesma régua em todas as rodadas (OVR da rodada), inclusive as de antes de 2/11: só exibição; XP e moedas seguem `getRoundScore`.
+      score: computeOvr(received),
       evaluationCount: received.length,
       offPosition: received.some((evaluation) => evaluation.offPosition),
     };

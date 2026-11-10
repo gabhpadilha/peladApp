@@ -64,13 +64,18 @@ export type PlayerProfile = OutfieldProfile | GoalkeeperProfile;
  * Jogador com OVR e atributos calculados pelas avaliações (escala 0–99).
  * `null` = ainda não avaliado.
  */
+/** De onde vem o OVR da carta: média das rodadas da janela + pontos dos gols (para explicar a conta na tela). */
+export type OvrBreakdown = { base: number; goalPoints: number; goals: number; rounds: number };
+
 export type OutfieldPlayer = OutfieldProfile & {
   ovr: number | null;
+  ovrBreakdown?: OvrBreakdown | null;
   attributes: Record<OutfieldAttribute, number | null>;
 };
 
 export type GoalkeeperPlayer = GoalkeeperProfile & {
   ovr: number | null;
+  ovrBreakdown?: OvrBreakdown | null;
   attributes: Record<GoalkeeperAttribute, number | null>;
 };
 

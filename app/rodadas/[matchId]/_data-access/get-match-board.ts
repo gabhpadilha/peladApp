@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { getLeague } from "@/lib/league";
 import { getRoundGoalsState, type MatchGoal, type RoundGoalsState } from "@/lib/match-goals";
-import { getRoundScore } from "@/lib/ovr";
+import { computeOvr } from "@/lib/ovr";
 import { getRoundRole, getRoundSlotPosition, type PlayerRole, type PlaysInGoal } from "@/lib/round-position";
 import { createClient } from "@/lib/supabase/server";
 import { teamName } from "@/lib/teams";
@@ -104,7 +104,7 @@ export async function getMatchBoard(matchId: string): Promise<MatchBoard | null>
     }
   }
   const scoreByPlayer = new Map(
-    [...receivedByPlayer].map(([playerId, received]) => [playerId, getRoundScore(match.date, received)]),
+    [...receivedByPlayer].map(([playerId, received]) => [playerId, computeOvr(received)]),
   );
 
   const onBoard: BoardPlayer[] = attendance.flatMap((row) => {
