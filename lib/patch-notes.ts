@@ -52,7 +52,7 @@ export const PATCH_NOTES: readonly PatchMonth[] = [
         text: "Outras mudanças do mês.",
         items: [
           ["Comunidade", "Veja outras peladas, rankings e perfis"],
-          ["OVR de carreira", "Cada gol confirmado soma +1 no Ataque"],
+          ["OVR de carreira", "O OVR passa a refletir suas últimas 5 rodadas"],
           ["Desempate dos prêmios", "Regra clara quando a nota empata"],
           ["Corrigir a lista da rodada", "O organizador ajusta antes de as notas abrirem"],
           ["Termos e privacidade", "Aceite no primeiro acesso"],
