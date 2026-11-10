@@ -19,7 +19,7 @@ import {
   type Progression,
   type RoundRewards,
 } from "@/lib/progression";
-import { computeRankingPoints } from "@/lib/ranking-points";
+import { computeRankingPoints, computeRoundRanking, type RoundRankingEntry } from "@/lib/ranking-points";
 import { computeGoalTotals } from "@/lib/goal-ranking";
 import { requireActiveMembership } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
@@ -87,6 +87,7 @@ export async function getLeague(nextPath = "/") {
     awardRows,
     memberSubmissions,
     groupGoals,
+    groupConfig,
   ] = await Promise.all([
       membersWithProfiles,
       supabase
@@ -111,6 +112,7 @@ export async function getLeague(nextPath = "/") {
         supabase.rpc("get_member_submissions", { target_group: membership.groupId }).order("match_id").order("member_id").range(from, to),
       ),
       getGroupGoals(membership.groupId),
+      supabase.from("groups").select("packs_enabled, pack_min_players").eq("id", membership.groupId).maybeSingle(),
     ]);
 
   if (membersResult.error) throw membersResult.error;
@@ -300,6 +302,14 @@ export async function getLeague(nextPath = "/") {
         trackedMatchIds: new Set(groupGoals.map((goal) => goal.matchId)),
         month,
       }),
+    /** Classificação de uma rodada por pontos (quem jogou), com o pacote de cada um quando os pacotes valem. */
+    getRoundRanking: (matchId: string): RoundRankingEntry[] => {
+      const match = matches.find((candidate) => candidate.id === matchId);
+      if (!match) return [];
+      const packsApply =
+        Boolean(groupConfig.data?.packs_enabled) && match.presentPlayerIds.length >= (groupConfig.data?.pack_min_players ?? 10);
+      return computeRoundRanking({ match, players, evaluations, awards: progressionAwards, confirmedGoals, packsApply });
+    },
     getRankingPoints: (month?: string) =>
       computeRankingPoints({
         playerIds: activePlayers.map((player) => player.id),

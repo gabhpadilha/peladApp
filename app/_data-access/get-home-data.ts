@@ -2,7 +2,7 @@ import { getCurrentCardEvent, type CardThemeKey, type CurrentCardEvent } from "@
 import { getActiveSale, type ShopSale } from "@/lib/shop-sale";
 import { getMyGoals, type MyGoals } from "@/app/objetivos/_data-access/get-goals";
 import { getLeague } from "@/lib/league";
-import { computeRoundOvr } from "@/lib/ovr";
+import type { RoundRankingEntry } from "@/lib/ranking-points";
 import { getMatchPerformances, type PendingEvaluation } from "@/lib/players";
 import { rankScorers, type Scorer } from "@/lib/goal-ranking";
 import { rankByPoints, type RankedByPoints } from "@/lib/ranking-points";
@@ -12,7 +12,6 @@ import type { Award } from "@/types/award";
 import type { Match } from "@/types/match";
 import type { Player } from "@/types/player";
 
-const TOP_PERFORMERS_SIZE = 3;
 const monthFormatter = new Intl.DateTimeFormat("pt-BR", { timeZone: "America/Sao_Paulo", month: "long" });
 
 /** "Hoje" no fuso da pelada, `AAAA-MM-DD` (o servidor roda em UTC). */
@@ -20,7 +19,6 @@ const todayFormatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao
 
 export type RankedPlayer = RankedByPoints<Player>;
 export type TopScorer = Scorer<Player>;
-export type RoundPerformer = { player: Player; score: number };
 /** Rodada fechada com cartas que o jogador ainda não abriu ("Confira os vencedores"). */
 export type WinnersAlert = { matchId: string; round: number; cardCount: number; hasTeam: boolean; theme: CardThemeKey };
 
@@ -35,7 +33,7 @@ export type HomeData = {
   /** Cartas especiais do jogador logado (coleção). */
   myAwardCount: number;
   pending: PendingEvaluation[];
-  latestRound: { match: Match; topPerformers: RoundPerformer[]; awards: Award[] } | null;
+  latestRound: { match: Match; awards: Award[]; ranking: RoundRankingEntry[] } | null;
   openRound: { match: Match; submitted: number; expected: number } | null;
   /** Ranking por pontos do mês (`AAAA-MM`, o de hoje) e de todos os tempos; todos numa lista só. */
   monthRanking: RankedPlayer[];
@@ -117,20 +115,6 @@ export async function getHomeData(): Promise<HomeData> {
   const performances = getMatchPerformances(currentPlayer.id, league.matches, league.evaluations, league.confirmedGoals);
 
   const latestMatch = league.latestClosedMatch;
-  const topPerformers = latestMatch
-    ? league.players
-        .flatMap((player) => {
-          const received = league.evaluations.filter(
-            (evaluation) =>
-              evaluation.matchId === latestMatch.id && evaluation.playerId === player.id,
-          );
-          const score = computeRoundOvr(received, league.confirmedGoals.get(`${latestMatch.id}:${player.id}`) ?? 0);
-          return score === null ? [] : [{ player, score }];
-        })
-        .toSorted((a, b) => b.score - a.score)
-        .slice(0, TOP_PERFORMERS_SIZE)
-    : [];
-
   const openMatch = league.matches.findLast((match) => match.status === "open");
   const winnersAlert = await getWinnersAlert(league.currentMemberId, latestMatch, league.awards);
 
@@ -153,8 +137,8 @@ export async function getHomeData(): Promise<HomeData> {
     latestRound: latestMatch
       ? {
           match: latestMatch,
-          topPerformers,
           awards: league.awards.filter((award) => award.matchId === latestMatch.id),
+          ranking: league.getRoundRanking(latestMatch.id),
         }
       : null,
     openRound: openMatch

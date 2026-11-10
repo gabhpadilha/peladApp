@@ -5,12 +5,14 @@ import { SectionTitle } from "@/components/section-title";
 import { formatShortDate } from "@/lib/format-date";
 import { AWARD_LABELS, formatAwardResult, type Award } from "@/types/award";
 import type { Match } from "@/types/match";
-import type { RoundPerformer } from "../_data-access/get-home-data";
+import { RoundRankingSheet } from "@/components/round-ranking";
+import type { RoundRankingEntry } from "@/lib/ranking-points";
 
 type LatestRoundCardProps = {
   match: Match;
-  topPerformers: RoundPerformer[];
   awards: Award[];
+  ranking: RoundRankingEntry[];
+  myId: string;
 };
 
 /** Cartas do leque ao lado do Melhor Jogador (as primeiras ficam por cima). */
@@ -55,7 +57,7 @@ function FeaturedAward({ award, others }: { award: Award; others: Award[] }) {
  * Última rodada fechada: o Melhor Jogador em destaque (aprovado pelo dono do app em 2026-10-24,
  * "muita informação de cara"), os outros prêmios atrás de "Ver todos os destaques" e o top 3 de notas.
  */
-export function LatestRoundCard({ match, topPerformers, awards }: LatestRoundCardProps) {
+export function LatestRoundCard({ match, awards, ranking, myId }: LatestRoundCardProps) {
   // Sem Melhor Jogador na rodada, a primeira carta faz o papel de destaque.
   const featured = awards.find((award) => award.kind === "craque") ?? awards.at(0);
   const others = awards.filter((award) => award !== featured);
@@ -105,23 +107,25 @@ export function LatestRoundCard({ match, topPerformers, awards }: LatestRoundCar
         </Link>
       )}
 
-      {topPerformers.length > 0 && (
-        <div className="flex flex-col gap-1 border-t pt-3">
-          <h3 className="text-xs font-medium text-muted-foreground uppercase">Maiores notas</h3>
+      {ranking.length > 0 && (
+        <div className="flex flex-col gap-2 border-t pt-3">
+          <h3 className="text-xs font-medium text-muted-foreground uppercase">Classificação da rodada</h3>
           <ol className="flex flex-col">
-            {topPerformers.map(({ player, score }, index) => (
-              <li key={player.id}>
+            {ranking.slice(0, 3).map((entry) => (
+              <li key={entry.playerId}>
                 <Link
-                  href={`/jogadores/${player.id}`}
+                  href={`/jogadores/${entry.playerId}`}
                   className="flex items-center gap-3 rounded-lg px-2 py-1.5 transition-colors hover:bg-muted"
                 >
-                  <span className="w-4 text-sm text-muted-foreground tabular-nums">{index + 1}</span>
-                  <span className="min-w-0 flex-1 truncate font-medium">{player.nickname}</span>
-                  <span className="font-display text-lg font-bold tabular-nums">{score}</span>
+                  <span className="w-4 text-sm text-muted-foreground tabular-nums">{entry.position}</span>
+                  <span className="min-w-0 flex-1 truncate font-medium">{entry.nickname}</span>
+                  <span className="font-display text-lg font-bold tabular-nums">{entry.points}</span>
+                  <span className="text-xs text-muted-foreground">pts</span>
                 </Link>
               </li>
             ))}
           </ol>
+          <RoundRankingSheet round={match.round} entries={ranking} myId={myId} />
         </div>
       )}
     </section>

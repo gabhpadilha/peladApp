@@ -95,6 +95,21 @@ const R10 = await round("R10", 10);
   check(S, "o próximo (3º lugar) vira B", tierOf(7) === "B");
 }
 
+// 3b. A faixa segue os PONTOS da rodada (nota + prêmios + 10 por gol), não só a nota
+{
+  const S = "3b pontos";
+  const pts = await round("PTS", 10);
+  // O jogador 0 (nota mais baixa) fez 9 gols confirmados: +90 pontos o colocam em 2º, atrás de quem leva o Melhor Jogador e os outros prêmios.
+  await db.query("insert into public.match_goals (group_id, match_id, member_id, goals, reported_by) values ($1,$2,$3,9,$3)", [pts.group, pts.match, pts.ids[0]]);
+  for (const voter of [1, 2, 3]) {
+    await db.query("insert into public.match_goal_confirmations (group_id, match_id, member_id, voter_id, confirmed) values ($1,$2,$3,$4,true)", [pts.group, pts.match, pts.ids[0], pts.ids[voter]]);
+  }
+  pass(S, "fecha rodada com gols confirmados", await closeRound(pts));
+  const packs = await packsOf(pts);
+  const tierOf = (p) => packs.find((x) => x.member_id === pts.ids[p])?.tier;
+  check(S, "quem fez 9 gols (menor nota, seria D) sobe para B pelos pontos, atrás do dono dos prêmios", tierOf(0) === "B" && tierOf(9) === "A", `faixas ${tierOf(0)} e ${tierOf(9)}`);
+}
+
 // 4. Sigilo e abertura
 {
   const S = "4 sigilo e abertura";

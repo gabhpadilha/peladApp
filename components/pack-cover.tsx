@@ -17,6 +17,9 @@ const TIER_LOOKS: Record<PackTier, TierLook> = {
   D: { rgb: "212,212,216", from: "#2a2d2f", to: "#101213", name: "Reserva" },
 };
 
+/** Nome de cada faixa (Craque, Destaque, Pelada, Reserva). */
+export const PACK_TIER_NAMES: Record<PackTier, string> = { A: TIER_LOOKS.A.name, B: TIER_LOOKS.B.name, C: TIER_LOOKS.C.name, D: TIER_LOOKS.D.name };
+
 /** Padrão de fundo por evento (mês do conjunto, `AAAA-MM`). Evento novo = uma linha aqui e um caso em `PatternLayer`. */
 type PackPatternKind = "storm" | "plain";
 const PACK_PATTERNS: Record<string, { kind: PackPatternKind; label: string }> = {
