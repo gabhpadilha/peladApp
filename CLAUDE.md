@@ -38,6 +38,8 @@ Design mobile-first é inegociável: a interação principal (dar notas no vesti
 
 **Design system:** todas as decisões visuais e de UX (tema, paleta, raridade, anatomia da carta, atributos de linha/goleiro, foto, tela de notas, Draft) estão em `.claude/rules/design-system.md` (carregado automaticamente). Leia antes de criar UI.
 
+**Carta-base dos prêmios (2026-11-09, decisão do dono do app):** os prêmios individuais de dezembro em diante usam **uma carta só** (a vermelha de Natal `natalCraque`) com um medalhão de ícone por prêmio (`AwardMedal`, `AWARD_ICONS`); a Bola Murcha tem a sua (`natalMurcha`). `awardRoupa` (`components/cancha-card.tsx`) só mantém o desenho antigo para os temas `halloween` e `temporal` (`LEGACY_AWARD_THEMES`). Esforço de arte vai para a Loja e os pacotes; detalhes em `.claude/rules/design-system.md` e `docs/calendario-eventos.md`.
+
 ## 🛠️ Tech Stack
 - **Instalado:** Next.js 16.4.3 (App Router, Turbopack; versão fixa, sem `^`: a 16.4.0 tinha falhas críticas de segurança, atualizada em 2026-10-28), React 19.3, TypeScript 5 (`strict`), Tailwind CSS 4, ESLint 9 (flat config), shadcn/ui (base Radix, preset `nova`, ícones Lucide; config em `components.json`), React Hook Form + Zod 4 + `@hookform/resolvers`, `modern-screenshot` (story das cartas especiais).
 - **Supabase** (`@supabase/ssr` + `@supabase/supabase-js`, CLI `supabase` como devDependency): projeto remoto "gabhpadilha's Project" (ref `kmpdmbowtkzxmsanddio`, região us-east-1), já linkado. A conta também tem o projeto `vitrine-guaratuba`, que **não** é deste app: nunca rode comandos nele.

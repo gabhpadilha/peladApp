@@ -42,6 +42,10 @@ export const CARD_SKINS = [
   { key: "chuvarubi", name: "Chuva Rubi", level: 0, price: 0, packOnly: true },
   { key: "cerracao", name: "Cerração", level: 0, price: 0, packOnly: true },
   { key: "crepusculo", name: "Crepúsculo", level: 0, price: 0, packOnly: true },
+  // Segunda carta de prestígio de dezembro (2026-11-09): tempestade nórdica (martelo de runas, peles e raios azuis), só alusões à mitologia.
+  { key: "tormenta", name: "Tormenta", level: 5, price: 600, event: { theme: "destino", year: 2026 } },
+  // Terceira de prestígio de dezembro (2026-11-09): o trapaceiro nórdico (chifres dourados, fumaça verde e runas), só alusões à mitologia.
+  { key: "embuste", name: "Embuste", level: 5, price: 600, event: { theme: "destino", year: 2026 } },
 ] as const;
 
 export type CardSkin = (typeof CARD_SKINS)[number];
