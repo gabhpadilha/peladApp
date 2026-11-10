@@ -30,8 +30,8 @@ export const CARD_SKINS = [
   // Carta de prestígio, como a Lenda do Trovão. Reator e Fúria (nível 3, 200 CC) entram aqui quando as artes chegarem.
   { key: "destino", name: "Destino", level: 5, price: 600, event: { theme: "destino", year: 2026 } },
   // Skins que só saem de pacote (nunca à venda na Loja; sem nível nem preço de tabela, então o Mercado usa a faixa da raridade).
-  // Tormenta: lendária do conjunto de novembro de 2026 (tema Toró), 3D por fora, por dentro e por trás (2026-11-10).
-  { key: "tormenta", name: "Tormenta", level: 0, price: 0, packOnly: true },
+  // Dilúvio: lendária do conjunto de novembro de 2026 (tema Toró), 3D por fora, por dentro e por trás (2026-11-10).
+  { key: "diluvio", name: "Dilúvio", level: 0, price: 0, packOnly: true },
   // Raras (Aguaceiro, em azul, e Chuva Violeta, o mesmo desenho em violeta) e comuns (Nublado e Neblina, em cinza-azulado e verde-musgo) do mesmo conjunto,
   // feitas em código por Claude a pedido do dono do app (2026-11-10).
   { key: "aguaceiro", name: "Aguaceiro", level: 0, price: 0, packOnly: true },

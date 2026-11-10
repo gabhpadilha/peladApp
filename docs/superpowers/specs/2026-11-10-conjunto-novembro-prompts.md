@@ -10,7 +10,7 @@ Decisão do dono do app em 2026-11-10: beta dos pacotes ainda em novembro, com s
 - **Rara:** 1 desenho novo, 2 peças (fundo e borda), em 2 cores.
 - **Comum:** 1 desenho novo, 1 peça, em 2 cores.
 
-## Tormenta (lendária): azul elétrico, vidro de tempestade, bronze e ferro
+## Dilúvio (lendária): azul elétrico, vidro de tempestade, bronze e ferro
 Objetos 3D: raios de plasma em vidro, cristais de tempestade, pára-raios de bronze, gotas gigantes de chuva, nuvens volumétricas. Ordem: borda, fundo, render; cada uma numa mensagem, anexando o gabarito 5:7 e a peça anterior. Carta ocupando 70% da largura, à esquerda do centro, em 2:3.
 
 1. **Borda (3D por fora e na moldura):** moldura 5:7 sobre preto puro, ferro negro e bronze envelhecido, fina (~3%), fio interno mais fino; pequenos raios de plasma azul-elétrico em relevo 3D correndo pelos cantos; no centro do topo, uma coroa de três pára-raios de bronze com faíscas curtas rente às pontas; cristais azuis engastados nos cantos de cima; enfeites de baixo pequenos; miolo preto puro; bem iluminada, sem áreas escuras; sem texto.
@@ -24,7 +24,7 @@ Objetos 3D: raios de plasma em vidro, cristais de tempestade, pára-raios de bro
 
 ## Conjunto final de novembro (11 skins, 5 desenhos), decidido com o dono em 2026-11-10
 Raras e comuns feitas em código por Claude a pedido do dono (`prototipos/aguaceiro.cjs`, `nublado.cjs`); as épicas novas ficam para o Gemini (dono, 2026-11-11).
-- **Lendária:** Tormenta. **Épicas (já existem):** Relâmpago e Nuvem carregada.
+- **Lendária:** Dilúvio. **Épicas (já existem):** Relâmpago e Nuvem carregada.
 - **Raras (design `aguaceiro`):** Aguaceiro (azul), Chuva Violeta, Chuva Esmeralda, Chuva Rubi.
 - **Comuns (design `nublado`):** Nublado (cinza-azulado), Neblina (verde-musgo), Cerração (bronze/areia), Crepúsculo (vinho).
 - A garantia de fim de mês conta por **design**, então cores novas não pesam nela; desenho novo pesa (em novembro só há 2 rodadas depois do dia 15).

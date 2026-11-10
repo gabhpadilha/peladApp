@@ -183,16 +183,16 @@ const DESTINO_FLOATERS: readonly Floater[] = [
   { src: "destino-caco-c", x: 52, y: 3.5, w: 8, layer: "back", anim: "float", dur: 8, delay: 0.8 },
 ];
 
-/** Peças 3D que flutuam atrás e em volta da Tormenta (`prototipos/tormenta-flutuantes.cjs`): um anel de raio gira atrás da carta (só aparece nas laterais), gotas gigantes e cacos de cristal flutuam. */
-const TORMENTA_FLOATERS: readonly Floater[] = [
-  { src: "tormenta-anel", x: 50, y: 50, w: 100, layer: "back", anim: "spin", dur: 80 },
-  { src: "tormenta-gota-a", x: 9, y: 28, w: 14, layer: "front", anim: "float", dur: 7, rot: -6 },
-  { src: "tormenta-gota-b", x: 8, y: 80, w: 10, layer: "front", anim: "orbit", dur: 9, delay: 1.5, rot: 5 },
-  { src: "tormenta-gota-c", x: 93, y: 20, w: 11, layer: "back", anim: "float", dur: 8, delay: 0.6, rot: 8 },
-  { src: "tormenta-gota-d", x: 52, y: 96, w: 8, layer: "back", anim: "orbit", dur: 10, delay: 2.2 },
-  { src: "tormenta-caco-a", x: 94, y: 78, w: 11, layer: "front", anim: "float", dur: 6, delay: 1.2, rot: 12 },
-  { src: "tormenta-caco-b", x: 5, y: 54, w: 9, layer: "front", anim: "orbit", dur: 8, delay: 3, rot: -10 },
-  { src: "tormenta-caco-c", x: 50, y: 3, w: 8, layer: "back", anim: "float", dur: 7, delay: 0.8 },
+/** Peças 3D que flutuam atrás e em volta do Dilúvio (`prototipos/diluvio-flutuantes.cjs`): um anel de raio gira atrás da carta (só aparece nas laterais), gotas gigantes e cacos de cristal flutuam. */
+const DILUVIO_FLOATERS: readonly Floater[] = [
+  { src: "diluvio-anel", x: 50, y: 50, w: 100, layer: "back", anim: "spin", dur: 80 },
+  { src: "diluvio-gota-a", x: 9, y: 28, w: 14, layer: "front", anim: "float", dur: 7, rot: -6 },
+  { src: "diluvio-gota-b", x: 8, y: 80, w: 10, layer: "front", anim: "orbit", dur: 9, delay: 1.5, rot: 5 },
+  { src: "diluvio-gota-c", x: 93, y: 20, w: 11, layer: "back", anim: "float", dur: 8, delay: 0.6, rot: 8 },
+  { src: "diluvio-gota-d", x: 52, y: 96, w: 8, layer: "back", anim: "orbit", dur: 10, delay: 2.2 },
+  { src: "diluvio-caco-a", x: 94, y: 78, w: 11, layer: "front", anim: "float", dur: 6, delay: 1.2, rot: 12 },
+  { src: "diluvio-caco-b", x: 5, y: 54, w: 9, layer: "front", anim: "orbit", dur: 8, delay: 3, rot: -10 },
+  { src: "diluvio-caco-c", x: 50, y: 3, w: 8, layer: "back", anim: "float", dur: 7, delay: 0.8 },
 ];
 
 const ROUPAS = {
@@ -222,9 +222,9 @@ const ROUPAS = {
   natalTimeDoMes: { background: "premium-natal-timedomes", overflow: "premium-natal-timedomes-vaza", statsLift: 4, statsPadX: 12, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#b8902f", "#b8902f", "#fff1c2"], accent: "#f3d27a", light: "220 180 255", bar: "#1a0a26", muted: "#f1dcc0", sparkles: false, neon: "#f3d27a" },
   // Destino (2026-11-05, evento "Destino" da Loja de dezembro, carta de prestígio, nível 5, 600 CC, em `CARD_SKINS` só para dezembro de 2026; design original que só alude a um vilão de cinema, sem nome, logo ou traje): ferro forjado e aço com runas
   // de um alfabeto inventado brilhando em verde-esmeralda, pano verde-musgo e cristais, e moldura de aço escovado com runas verdes, cristais nos cantos de cima e um capuz verde no topo (arte do dono em `prototipos/destino-fundo-dono.jpg` e `destino-borda-capuz-dono.jpg`).
-  // Tormenta (2026-11-10, lendária do conjunto de novembro, só de pacote; tema Toró): fundo de nuvens de tempestade em relevo com cristais e gotas de vidro, moldura de ferro e bronze com raios de plasma e uma coroa de pára-raios no topo,
-  // aglomerado de cristais de tempestade que passa pela borda direita (meio dentro, meio fora) e peças 3D flutuando atrás (anel de raio, gotas e cacos). Arte do dono no Gemini (`prototipos/tormenta-*-dono.jpg`, `tormenta-v1.cjs`).
-  tormenta: { background: "premium-tormenta", overflow: "premium-tormenta-vaza", overflowWidth: 800 / 714, floaters: TORMENTA_FLOATERS, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#5a4a33", "#5a4a33", "#d9b988"], accent: "#7fb6ff", light: "150 200 255", bar: "#050a14", muted: "#a9c8ff", sparkles: false, neon: "#3aa0ff" },
+  // Dilúvio (2026-11-10, lendária do conjunto de novembro, só de pacote; tema Toró): fundo de nuvens de tempestade em relevo com cristais e gotas de vidro, moldura de ferro e bronze com raios de plasma e uma coroa de pára-raios no topo,
+  // aglomerado de cristais de tempestade que passa pela borda direita (meio dentro, meio fora) e peças 3D flutuando atrás (anel de raio, gotas e cacos). Arte do dono no Gemini (`prototipos/diluvio-*-dono.jpg`, `diluvio-v1.cjs`).
+  diluvio: { background: "premium-diluvio", overflow: "premium-diluvio-vaza", overflowWidth: 800 / 714, floaters: DILUVIO_FLOATERS, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#5a4a33", "#5a4a33", "#d9b988"], accent: "#7fb6ff", light: "150 200 255", bar: "#050a14", muted: "#a9c8ff", sparkles: false, neon: "#3aa0ff" },
   // Aguaceiro e Chuva Violeta (raras de novembro de 2026, só de pacote; feitas em código por Claude, `prototipos/aguaceiro.cjs`): chuva em diagonal sobre vidro azul-noite com gotas, e moldura de aço azul-petróleo trabalhada de leve com suportes de canto,
   // raios e gotas em relevo e uma gota pendente embaixo. Chuva Violeta é o mesmo desenho girado para o violeta. Nublado e Neblina (comuns, `prototipos/nublado.cjs`): céu de toró de textura leve em cinza-azulado e em verde-musgo, com o tubo de neon de sempre.
   aguaceiro: { background: "premium-aguaceiro", overflow: "premium-aguaceiro-vaza", artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#4e6b82", "#4e6b82", "#d4e6f3"], accent: "#a6c8e6", light: "170 210 255", bar: "#050d18", muted: "#b8d4ec", sparkles: false, neon: "#6fb2ff" },
@@ -484,7 +484,7 @@ function skinRoupa(skin: CardSkinKey): RoupaKey {
     case "rubi": return "rubi";
     case "icone": return "icone";
     case "destino": return "destino";
-    case "tormenta": return "tormenta";
+    case "diluvio": return "diluvio";
     case "aguaceiro": return "aguaceiro";
     case "chuvavioleta": return "chuvavioleta";
     case "nublado": return "nublado";

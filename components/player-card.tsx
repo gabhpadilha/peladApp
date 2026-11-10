@@ -538,7 +538,7 @@ const SKIN_CLASSES: Record<CardSkinKey, string> = {
   lenda: "card-skin-icone",
   relampago: "card-skin-icone",
   destino: "card-skin-icone",
-  tormenta: "card-skin-icone",
+  diluvio: "card-skin-icone",
   aguaceiro: "card-skin-icone",
   chuvavioleta: "card-skin-icone",
   nublado: "card-skin-icone",

@@ -45,7 +45,7 @@ export const SKIN_RARITIES: Readonly<Record<string, PackRarity>> = {
   relampago: "epica",
   lenda: "epica",
   destino: "lendaria",
-  tormenta: "lendaria",
+  diluvio: "lendaria",
   aguaceiro: "rara",
   chuvavioleta: "rara",
   nublado: "comum",

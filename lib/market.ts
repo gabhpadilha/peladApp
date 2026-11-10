@@ -86,7 +86,7 @@ export const SKIN_COLORS: Readonly<Record<string, string>> = {
   relampago: "Dourada",
   lenda: "Azul",
   destino: "Verde",
-  tormenta: "Azul",
+  diluvio: "Azul",
   aguaceiro: "Azul",
   chuvavioleta: "Roxa",
   nublado: "Azul",

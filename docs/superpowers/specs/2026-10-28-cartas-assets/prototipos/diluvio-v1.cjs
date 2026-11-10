@@ -1,4 +1,4 @@
-// Tormenta (lendária de novembro de 2026, tema Toró; 2026-11-10): as três peças do Gemini do dono, todas 1696 x 2528 com a carta no mesmo lugar
+// Dilúvio (lendária de novembro de 2026, tema Toró; 2026-11-10): as três peças do Gemini do dono, todas 1696 x 2528 com a carta no mesmo lugar
 // (fundo = nuvens de tempestade em relevo com cristais e gotas de vidro; borda = ferro e bronze com raios de plasma, cristais nos cantos e uma coroa
 // de pára-raios no topo; render = aglomerado de cristais de tempestade com pára-raios de bronze e arcos elétricos). Mesma receita do Ícone v4 e da Lenda:
 // fundo -> borda -> render, a borda por cima do conteúdo.
@@ -6,12 +6,12 @@
 // uns 5% mais baixo que a moldura: é esticado até cobrir a caixa toda, por baixo da borda (`artInset` na roupa). O render veio quase todo DENTRO da carta
 // (só 84 px passavam da borda): aqui ele é reduzido a 72% e posto com o centro na borda direita (meio dentro, meio fora), ATRÁS do jogador por dentro
 // (no fundo) e POR CIMA da borda só do lado de fora (`-vaza`). A coroa do topo passa da folga de 8% da caixa: o alto das faíscas esmaece.
-// Saem `premium-tormenta.webp` (fundo) e `premium-tormenta-vaza.webp` (borda + render, 800 x 1000).
-// Uso: node tormenta-v1.cjs <pasta de saída> <raiz do repo>
+// Saem `premium-diluvio.webp` (fundo) e `premium-diluvio-vaza.webp` (borda + render, 800 x 1000).
+// Uso: node diluvio-v1.cjs <pasta de saída> <raiz do repo>
 const path = require("path");
 const sharp = require(path.resolve(process.argv[3], "node_modules/sharp"));
 const OUT = process.argv[2];
-const F = (n) => path.join(__dirname, `tormenta-${n}-dono.jpg`);
+const F = (n) => path.join(__dirname, `diluvio-${n}-dono.jpg`);
 const SRC = { w: 1696, h: 2528, card: { x: 166, y: 338, w: 1366, h: 1978 }, fundo: { x: 164, y: 340, w: 1368, h: 1884 } };
 const BW = 714, BH = 1000, OUT_W = 800, WIDE = 2000;
 const CW = BW * 0.84, CH = BH * 0.84, CX0 = BW * 0.08, CY0 = BH * 0.08;
@@ -112,7 +112,7 @@ async function cutRender() {
   const renderOnCard = await sharp(wide).extract({ left: c.x, top: c.y, width: Math.min(c.w, WIDE - c.x), height: c.h }).png().toBuffer();
   const card = await sharp(stretched).composite([{ input: renderOnCard, left: 0, top: 0 }]).png().toBuffer();
   const ix = Math.round(c.w * 0.0143), iy = Math.round(c.h * 0.0102);
-  await sharp(card).extract({ left: ix, top: iy, width: c.w - 2 * ix, height: c.h - 2 * iy }).resize(600, 850, { fit: "fill" }).webp({ quality: 92 }).toFile(`${OUT}/premium-tormenta.webp`);
+  await sharp(card).extract({ left: ix, top: iy, width: c.w - 2 * ix, height: c.h - 2 * iy }).resize(600, 850, { fit: "fill" }).webp({ quality: 92 }).toFile(`${OUT}/premium-diluvio.webp`);
 
   const frame = await place(await cutFrame(await sharp(wide).raw().toBuffer()), SRC.w, SRC.h);
   const render = await place(outerPng, WIDE, SRC.h);
@@ -120,6 +120,6 @@ async function cutRender() {
     .composite([frame, render]).raw().toBuffer();
   // A coroa passa da folga de cima da caixa: o alto das faíscas esmaece nos primeiros 26 px em vez de sair cortado reto.
   for (let y = 0; y < 26; y++) for (let x = 0; x < OUT_W; x++) { const o = (y * OUT_W + x) * 4 + 3; layer[o] = Math.round(layer[o] * smooth(0, 26, y)); }
-  await sharp(layer, { raw: { width: OUT_W, height: BH, channels: 4 } }).webp({ quality: 92, alphaQuality: 100 }).toFile(`${OUT}/premium-tormenta-vaza.webp`);
+  await sharp(layer, { raw: { width: OUT_W, height: BH, channels: 4 } }).webp({ quality: 92, alphaQuality: 100 }).toFile(`${OUT}/premium-diluvio-vaza.webp`);
   console.log("ok");
 })().catch((e) => { console.error(e); process.exit(1); });

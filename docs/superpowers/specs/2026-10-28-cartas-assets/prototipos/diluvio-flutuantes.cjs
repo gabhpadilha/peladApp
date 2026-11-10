@@ -1,7 +1,7 @@
-// Peças flutuantes da Tormenta (lendária de novembro, 2026-11-10): três artes do Gemini sobre preto (anel de raio, gotas de vidro e cacos de cristal) viram WebP com
+// Peças flutuantes da Dilúvio (lendária de novembro, 2026-11-10): três artes do Gemini sobre preto (anel de raio, gotas de vidro e cacos de cristal) viram WebP com
 // transparência: alfa pelo brilho, com o miolo fechado nas peças sólidas (as gotas e os cacos de vidro escuro ficam opacos, sem "fantasma"); o anel não é fechado, o furo do meio
-// fica transparente. Saem `tormenta-anel.webp`, `tormenta-gota-a|b|c|d.webp` e `tormenta-caco-a|b|c.webp`. Mesma receita de `destino-runas.cjs`.
-// Uso: node tormenta-flutuantes.cjs <pasta de saída> <raiz do repo>
+// fica transparente. Saem `diluvio-anel.webp`, `diluvio-gota-a|b|c|d.webp` e `diluvio-caco-a|b|c.webp`. Mesma receita de `destino-runas.cjs`.
+// Uso: node diluvio-flutuantes.cjs <pasta de saída> <raiz do repo>
 const path = require("path");
 const sharp = require(path.resolve(process.argv[3], "node_modules/sharp"));
 const OUT = process.argv[2];
@@ -39,10 +39,10 @@ async function cutout(srcFile, box, size, name, { fill }) {
 
 const pad = (b, n = 90) => ({ left: Math.max(0, b.left - n), top: Math.max(0, b.top - n), width: Math.min(2048 - Math.max(0, b.left - n), b.width + 2 * n), height: Math.min(2048 - Math.max(0, b.top - n), b.height + 2 * n) });
 (async () => {
-  await cutout("tormenta-anel-dono.jpg", null, 640, "tormenta-anel.webp", { fill: false });
+  await cutout("diluvio-anel-dono.jpg", null, 640, "diluvio-anel.webp", { fill: false });
   const drops = [["a", { left: 220, top: 132, width: 684, height: 1076 }], ["b", { left: 1332, top: 132, width: 388, height: 604 }], ["c", { left: 1176, top: 848, width: 696, height: 1080 }], ["d", { left: 372, top: 1296, width: 388, height: 600 }]];
-  for (const [k, box] of drops) await cutout("tormenta-gotas-dono.jpg", pad(box, 90), 300, `tormenta-gota-${k}.webp`, { fill: false });
+  for (const [k, box] of drops) await cutout("diluvio-gotas-dono.jpg", pad(box, 90), 300, `diluvio-gota-${k}.webp`, { fill: false });
   const shards = [["a", { left: 228, top: 238, width: 763, height: 1416 }, 110], ["b", { left: 1177, top: 201, width: 646, height: 1060 }, 70], ["c", { left: 1102, top: 1166, width: 403, height: 626 }, 60]];
-  for (const [k, box, margin] of shards) await cutout("tormenta-cacos-dono.jpg", pad(box, margin), 300, `tormenta-caco-${k}.webp`, { fill: true });
+  for (const [k, box, margin] of shards) await cutout("diluvio-cacos-dono.jpg", pad(box, margin), 300, `diluvio-caco-${k}.webp`, { fill: true });
   console.log("ok");
 })().catch((e) => { console.error(e); process.exit(1); });
