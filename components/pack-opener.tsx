@@ -25,7 +25,7 @@ type Step =
  * Abre os pacotes em sequência em tela cheia: cada abertura chama o banco (que revela a skin sorteada no fechamento) e toca a animação.
  * Com movimento reduzido, mostra só o resultado. Fechar atualiza a página (saldo, ponto da Loja e coleção).
  */
-export function PackOpener({ packs, onClose }: { packs: readonly Pick<MyPack, "id" | "round" | "odds">[]; onClose: () => void }) {
+export function PackOpener({ packs, onClose }: { packs: readonly Pick<MyPack, "id" | "round" | "odds" | "tier" | "month">[]; onClose: () => void }) {
   const router = useRouter();
   const reduced = useSyncExternalStore(
     subscribeReducedMotion,
@@ -83,6 +83,8 @@ export function PackOpener({ packs, onClose }: { packs: readonly Pick<MyPack, "i
         <PackStage
           key={current.id}
           rarity={step.pack.rarity}
+          tier={current.tier}
+          month={current.month}
           skin={step.pack.skin}
           round={current.round}
           oddsPercent={oddsPercent}

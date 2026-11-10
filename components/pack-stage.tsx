@@ -1,11 +1,11 @@
 "use client";
 
 import type { CSSProperties } from "react";
-import { BrandMark } from "@/components/brand-logo";
+import { PackCover, PACK_CAP_PERCENT } from "@/components/pack-cover";
 import { CardBack } from "@/components/card-back";
 import { CanchaCard } from "@/components/cancha-card";
 import { SAMPLE_PLAYER } from "@/lib/sample-player";
-import { PACK_RARITY_NAMES, type PackRarity } from "@/lib/packs";
+import { PACK_RARITY_NAMES, type PackRarity, type PackTier } from "@/lib/packs";
 import { getCardSkin, isCardSkinKey } from "@/types/card-skin";
 
 type RarityLook = {
@@ -41,8 +41,6 @@ function rand(seed: number): number {
 
 const ms = (value: number): string => `calc(var(--k) * ${value}ms)`;
 
-const CRIMP =
-  "polygon(0% 10px,5% 0,10% 10px,15% 0,20% 10px,25% 0,30% 10px,35% 0,40% 10px,45% 0,50% 10px,55% 0,60% 10px,65% 0,70% 10px,75% 0,80% 10px,85% 0,90% 10px,95% 0,100% 10px,100% 100%,0% 100%)";
 
 /**
  * Verso da carta na abertura: o mesmo verso da raridade que a carta tem no app (`CardBack`, com a quadra e a moeda da logo), com os nomes
@@ -82,6 +80,9 @@ function HoodPlug() {
 
 export type PackStageProps = {
   rarity: PackRarity;
+  /** Faixa do pacote e mês do conjunto: a capa é a mesma do app. */
+  tier: PackTier;
+  month: string;
   /** Chave da skin sorteada (a carta que gira). */
   skin: string;
   round: number;
@@ -94,7 +95,7 @@ export type PackStageProps = {
 };
 
 /** A abertura do pacote (protótipo aprovado): pacote que treme, estouro de luz e a carta que gira mostrando a skin. */
-export function PackStage({ rarity, skin, round, oddsPercent, duplicateCoins, reduced }: PackStageProps) {
+export function PackStage({ rarity, tier, month, skin, round, oddsPercent, duplicateCoins, reduced }: PackStageProps) {
   const cfg = RARITY_LOOKS[rarity];
   const skinKey = isCardSkinKey(skin) ? skin : "esmeralda";
   const skinName = getCardSkin(skinKey).name;
@@ -190,16 +191,12 @@ export function PackStage({ rarity, skin, round, oddsPercent, duplicateCoins, re
         {/* O pacote (o da primeira versão, aprovado pelo dono do app). */}
         <div className="absolute top-[42%] left-1/2 -ml-[105px] -mt-[160px] h-[320px] w-[210px]" style={{ animation: "pl-float 3.2s ease-in-out infinite" }}>
           <div className="relative size-full" style={{ animation: "pl-charge 0.9s linear both", animationDelay: ms(600) }}>
-            <div className="absolute inset-x-0 top-0 h-[46px]" style={{ clipPath: CRIMP, background: "linear-gradient(180deg,#2a3b31,#18251e)", animation: "pl-cap 0.85s ease-in both", animationDelay: ms(1950) }} />
-            <div className="absolute inset-x-0 top-[44px] bottom-0 overflow-hidden" style={{ clipPath: CRIMP, background: "linear-gradient(165deg,#1d2c24 0%,#0e1712 55%,#17261e 100%)", animation: "pl-body 0.75s ease-in both", animationDelay: ms(2000) }}>
-              <div className="absolute inset-2 rounded-md border border-[#b6f23c]/45" />
-              <div className="absolute inset-y-0 left-0 w-[28%]" style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,.16),transparent)", animation: "pl-sweep 2.6s ease-in-out infinite" }} />
-              <div className="relative flex h-full flex-col items-center justify-center gap-3 font-display">
-                <BrandMark className="h-16 w-auto" />
-                <span className="text-[19px] leading-none font-extrabold tracking-[0.3em]">CANCHA CLUB</span>
-                <span className="text-[44px] leading-none font-extrabold">RODADA {round}</span>
-                <span className="font-sans text-xs tracking-wide text-white/70 uppercase">1 skin exclusiva</span>
-              </div>
+            <div className="absolute inset-0" style={{ clipPath: `inset(0 0 ${100 - PACK_CAP_PERCENT}% 0)`, animation: "pl-cap 0.85s ease-in both", animationDelay: ms(1950) }}>
+              <PackCover tier={tier} month={month} round={round} className="size-full" />
+            </div>
+            <div className="absolute inset-0" style={{ clipPath: `inset(${PACK_CAP_PERCENT}% 0 0 0)`, animation: "pl-body 0.75s ease-in both", animationDelay: ms(2000) }}>
+              <PackCover tier={tier} month={month} round={round} className="size-full" />
+              <div className="absolute inset-y-0 left-0 w-[28%]" style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent)", animation: "pl-sweep 2.6s ease-in-out infinite" }} />
             </div>
           </div>
         </div>
