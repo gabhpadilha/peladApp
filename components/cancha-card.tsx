@@ -198,6 +198,16 @@ const TORMENTA_FLOATERS: readonly Floater[] = [
   { src: "tormenta-raio-a", x: 7, y: 92, w: 6, layer: "front", anim: "thunder-strike", dur: 3.8, delay: 2.1 },
 ];
 
+/** Fumaça, runas, rochas e adaga que flutuam em volta do Embuste (`prototipos/embuste-pecas.cjs`); a fumaça gira devagar atrás da carta. */
+const EMBUSTE_FLOATERS: readonly Floater[] = [
+  { src: "embuste-fumaca", x: 50, y: 50, w: 108, layer: "back", anim: "spin", dur: 140 },
+  { src: "embuste-pedra-a", x: 8, y: 27, w: 14, layer: "front", anim: "float", dur: 8, rot: -10 },
+  { src: "embuste-runa", x: 92, y: 60, w: 13, layer: "front", anim: "orbit", dur: 9, delay: 1, rot: 8 },
+  { src: "embuste-pedra-b", x: 91, y: 12, w: 10, layer: "front", anim: "orbit", dur: 10, delay: 0.5, rot: 14 },
+  { src: "embuste-adaga", x: 7, y: 80, w: 10, layer: "front", anim: "float", dur: 7, delay: 2, rot: 24 },
+  { src: "embuste-runa", x: 93, y: 88, w: 9, layer: "front", anim: "float", dur: 6, delay: 1.4, rot: -8 },
+];
+
 const ROUPAS = {
   // Grafite fosco (aprovado pelo dono do app em 2026-10-29): menos premium que as skins, de propósito.
   padrao: { background: "fosco-grafite", metal: ["#2a312d", "#2a312d", "rgb(255 255 255 / 0.1)"], accent: "#8fa197", light: "255 255 255", bar: "#121714", muted: "#9fb0a4", matte: true },
@@ -229,6 +239,10 @@ const ROUPAS = {
   // Tormenta (2026-11-09, evento "Destino" da Loja de dezembro, segunda carta de prestígio, nível 5, 600 CC; só alusões à mitologia nórdica, sem nome, logo ou traje de obra): tempestade azul com raios, moldura de ferro com runas azuis brilhando,
   // um martelo de nós celtas no topo e peles nos cantos de cima, com rochas de cristal, runas e raios flutuando em volta (arte do dono em `prototipos/tormenta-{fundo,borda,pecas}-dono.*`; o fundo com `montar-carta.cjs tormenta ... 60,75,704,965 - 12 0,0,765,1024` e a moldura com `tormenta-borda.cjs`, recorte próprio: ferro e peles opacos, raios só por luz, sem mancha preta).
   tormenta: { background: "premium-tormenta", overflow: "premium-tormenta-vaza", floaters: TORMENTA_FLOATERS, statsLift: 5, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#5d6672", "#5d6672", "#cfe6ff"], accent: "#7fc4ff", light: "120 190 255", bar: "#050b18", muted: "#bcd8ff", sparkles: false, neon: "#4aa8ff" },
+  // Embuste (2026-11-09, evento "Destino" da Loja de dezembro, terceira carta de prestígio, nível 5, 600 CC; só alusões à mitologia nórdica): floresta sob aurora verde com fumaça em serpente, moldura de ferro com runas verdes,
+  // chifres dourados e esmeralda no topo, dragões e panos nos cantos de cima (arte do dono em `prototipos/embuste-{fundo,borda,pecas}-dono.*`; fundo com `montar-carta.cjs embuste ... 48,88,692,965 - 12 0,0,728,1024`
+  // e moldura com `embuste-borda.cjs`, recorte de luz: ferro e peças opacos, fumaça só por luz).
+  embuste: { background: "premium-embuste", overflow: "premium-embuste-vaza", floaters: EMBUSTE_FLOATERS, statsLift: 5, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#56604f", "#56604f", "#e2f5c9"], accent: "#6ef0a4", light: "90 255 170", bar: "#040f09", muted: "#c3f0d4", sparkles: false, neon: "#3dffa0" },
   // GUARDADAS, fora da Loja (sem entrada em `CARD_SKINS`; para usar: entrada lá, `case` em `skinRoupa` e `SKIN_CLASSES`): Voltagem e Maré.
   // Voltagem (2026-11-05, pedido do dono do app: o estilo da borda da referência dele no nosso retângulo): fio duplo de ouro pálido por dentro e
   // linhas de neon por fora, com o degrau onde se dividem (`prototipos/voltagem.cjs`). Janela `ring` recuada até o fio de dentro.
@@ -488,6 +502,7 @@ function skinRoupa(skin: CardSkinKey): RoupaKey {
     case "icone": return "icone";
     case "destino": return "destino";
     case "tormenta": return "tormenta";
+    case "embuste": return "embuste";
     case "lobisomem": return "lobisomem";
     case "nuvem": return "nuvem";
     case "relampago": return "relampago";

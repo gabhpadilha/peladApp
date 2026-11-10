@@ -46,6 +46,7 @@ export const SKIN_RARITIES: Readonly<Record<string, PackRarity>> = {
   lenda: "epica",
   destino: "lendaria",
   tormenta: "lendaria",
+  embuste: "lendaria",
 };
 
 export function getSkinRarity(skin: string | null | undefined): PackRarity | null {

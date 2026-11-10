@@ -87,6 +87,7 @@ export const SKIN_COLORS: Readonly<Record<string, string>> = {
   lenda: "Azul",
   destino: "Verde",
   tormenta: "Azul",
+  embuste: "Verde",
 };
 
 export const MARKET_COLOR_OPTIONS: readonly string[] = ["Azul", "Roxa", "Vermelha", "Branca", "Dourada", "Verde"];
