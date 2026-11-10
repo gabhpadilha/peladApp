@@ -85,7 +85,7 @@ export type PackStageProps = {
   month: string;
   /** Chave da skin sorteada (a carta que gira). */
   skin: string;
-  round: number;
+  round: number | null;
   /** Chance real desta raridade neste pacote, em %. */
   oddsPercent: number | null;
   /** Skin repetida: moedas recebidas no lugar. */

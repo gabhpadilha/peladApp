@@ -850,11 +850,12 @@ export type Database = {
           goal_choice_id: string | null
           group_id: string
           id: string
-          match_id: string
+          match_id: string | null
           member_id: string
           month: string
           odds: Json
           opened_at: string | null
+          price: number | null
           rarity: string
           skin: string
           source: string
@@ -868,11 +869,12 @@ export type Database = {
           goal_choice_id?: string | null
           group_id: string
           id?: string
-          match_id: string
+          match_id?: string | null
           member_id: string
           month: string
           odds: Json
           opened_at?: string | null
+          price?: number | null
           rarity: string
           skin: string
           source?: string
@@ -886,11 +888,12 @@ export type Database = {
           goal_choice_id?: string | null
           group_id?: string
           id?: string
-          match_id?: string
+          match_id?: string | null
           member_id?: string
           month?: string
           odds?: Json
           opened_at?: string | null
+          price?: number | null
           rarity?: string
           skin?: string
           source?: string
@@ -1232,13 +1235,15 @@ export type Database = {
         Returns: {
           coins_awarded: number
           created_at: string
-          match_id: string
+          group_id: string
+          match_id: string | null
           month: string
           odds: Json
           opened_at: string
           pack_id: string
+          price: number | null
           rarity: string
-          round: number
+          round: number | null
           skin: string
           source: string
           tier: string
@@ -1271,6 +1276,10 @@ export type Database = {
           member_nickname: string
           member_position: Database["public"]["Enums"]["player_position"]
         }
+        Returns: string
+      }
+      shop_buy_pack: {
+        Args: { buyer: string; earned_gross: number; target_price: number; target_tier: string }
         Returns: string
       }
       market_buy: {

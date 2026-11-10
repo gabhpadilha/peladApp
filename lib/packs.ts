@@ -12,6 +12,14 @@ export const PACK_TIER_NAMES: Record<PackTier, string> = {
   D: "Pacote Reserva",
 };
 
+/**
+ * Preço dos pacotes da Loja, em CanchaCoins (tabela, antes de promoção). Chute inicial perto do valor médio da skin sorteada
+ * (ver faixas do Mercado em `lib/market.ts`): para ajustar, é só mudar aqui, o servidor cobra o que está aqui.
+ */
+export const PACK_SHOP_PRICES: Record<PackTier, number> = { A: 320, B: 220, C: 150, D: 100 };
+
+export const PACK_SHOP_TIERS: readonly PackTier[] = ["A", "B", "C", "D"];
+
 export const PACK_RARITY_NAMES: Record<PackRarity, string> = {
   comum: "Comum",
   rara: "Rara",
@@ -65,8 +73,9 @@ export function getSkinRarity(skin: string | null | undefined): PackRarity | nul
 /** Um pacote do jogador. A skin e a raridade só vêm depois de aberto (o banco não as entrega antes). */
 export type MyPack = {
   id: string;
-  matchId: string;
-  round: number;
+  /** `null` no pacote comprado na Loja (não nasce de rodada). */
+  matchId: string | null;
+  round: number | null;
   /** Mês do conjunto (`AAAA-MM`). */
   month: string;
   tier: PackTier;
@@ -77,8 +86,10 @@ export type MyPack = {
   rarity: PackRarity | null;
   wasDuplicate: boolean;
   coinsAwarded: number;
-  /** `round` = ganhou ao fechar uma rodada · `goal` = ganhou cumprindo um objetivo do mês. */
-  source: "round" | "goal";
+  /** `round` = ganhou ao fechar uma rodada · `goal` = ganhou cumprindo um objetivo do mês · `shop` = comprou na Loja. */
+  source: "round" | "goal" | "shop";
+  /** CanchaCoins pagas (só no pacote da Loja). */
+  price: number | null;
 };
 
 export type OpenedPack = { skin: string; rarity: PackRarity; wasDuplicate: boolean; coinsAwarded: number };

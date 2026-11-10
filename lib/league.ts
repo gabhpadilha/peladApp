@@ -150,12 +150,17 @@ export async function getLeague(nextPath = "/") {
   ]);
   if (packsResult.error) throw packsResult.error;
   const packCoins = packsResult.data
-    .filter((pack) => matchById.has(pack.match_id))
+    .filter((pack) => pack.match_id !== null && matchById.has(pack.match_id))
     .reduce((total, pack) => total + pack.coins_awarded, 0);
+  // Pacotes comprados na Loja: o preço pago sai das moedas ganhas, e assim o saldo (ganhas − gastas) fica certo em todas as telas.
+  // `shopPackSpend` é o total gasto (o servidor soma de volta para conferir o saldo na hora de comprar).
+  const shopPackSpend = packsResult.data
+    .filter((pack) => pack.group_id === membership.groupId && pack.source === "shop")
+    .reduce((total, pack) => total + (pack.price ?? 0), 0);
   if (marketResult.error) throw marketResult.error;
-  const extraCoins = packCoins + (marketResult.data ?? 0);
+  const extraCoins = packCoins + (marketResult.data ?? 0) - shopPackSpend;
   const ownProgression = progressionById.get(membership.memberId);
-  if (ownProgression && extraCoins > 0) {
+  if (ownProgression && extraCoins !== 0) {
     progressionById.set(membership.memberId, { ...ownProgression, coinsEarned: ownProgression.coinsEarned + extraCoins });
   }
 
@@ -277,6 +282,8 @@ export async function getLeague(nextPath = "/") {
     /** XP, nível e CanchaCoins ganhas de cada membro. */
     getProgression: (memberId: string): Progression =>
       progressionById.get(memberId) ?? { level: 0, xpIntoLevel: 0, xpNeeded: 60, xp: 0, coinsEarned: WELCOME_BONUS_COINS },
+    /** CanchaCoins que o logado gastou em pacotes da Loja (já descontadas de `coinsEarned`). */
+    shopPackSpend,
     /** Pontos e rodadas de quem está na pelada: de um mês (`AAAA-MM`) ou, sem ele, de todos os tempos. */
     /** Gols confirmados e jogos de quem está na pelada: de um mês (`AAAA-MM`) ou, sem ele, de todos os tempos. */
     getGoalTotals: (month?: string) =>

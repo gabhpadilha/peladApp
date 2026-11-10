@@ -1,5 +1,7 @@
 import "server-only";
 import { getLeague } from "@/lib/league";
+import { PACK_RARITY_ORDER, PACK_SHOP_PRICES, PACK_SHOP_TIERS, isPackRarity, isPackTier, type PackRarity, type PackTier } from "@/lib/packs";
+import { createAdminClient, hasAdminEnv } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
 import { getActiveSale, getSalePrice, type ShopSale } from "@/lib/shop-sale";
 import { getCurrentShopEvent, type CurrentShopEvent } from "@/lib/shop-events";
@@ -30,14 +32,28 @@ export type ShopSection = {
   items: ShopItem[];
 };
 
+/** Um pacote à venda (uma faixa), com o preço de hoje e as chances de cada raridade neste mês. */
+export type ShopPack = {
+  tier: PackTier;
+  price: number;
+  /** Preço de tabela quando há promoção (para riscar); `null` sem promoção. */
+  originalPrice: number | null;
+  odds: Partial<Record<PackRarity, number>>;
+};
+
+/** Os pacotes do mês na Loja, ou `null` quando o conjunto do mês ainda não foi cadastrado. */
+export type ShopPacks = { month: string; eventLabel: string | null; items: ShopPack[] };
+
 export type Shop = {
   me: Player;
   groupName: string;
   progression: Progression;
   /** CanchaCoins ganhas − o que já gastou. */
   balance: number;
-  /** Cartas à venda que o jogador ainda não tem: evento do mês primeiro. */
+  /** Cartas à venda que o jogador ainda não tem (as fixas; as de evento só saem em pacote). */
   sections: ShopSection[];
+  /** Pacotes à venda neste mês (`null` = sem conjunto cadastrado). */
+  packs: ShopPacks | null;
   /** Promoção valendo hoje (ex.: Black Friday), ou nenhuma. */
   sale: ShopSale | null;
   /** Próxima carta à venda liberada por nível (ou nenhuma). */
@@ -84,6 +100,39 @@ export function getMyCards(me: Player, owned: ReadonlySet<CardSkinKey>): ShopIte
   ];
 }
 
+/**
+ * Pacotes do mês: as raridades que existem no conjunto (`pack_sets`) e as chances de cada faixa (`pack_tier_odds`), normalizadas como o
+ * sorteio do banco faz. As duas tabelas não têm acesso pelo login do jogador, então a leitura vai pela chave secreta (só leitura).
+ */
+async function getShopPacks(today: string, sale: ShopSale | null): Promise<ShopPacks | null> {
+  if (!hasAdminEnv()) return null;
+  const month = today.slice(0, 7);
+  const admin = createAdminClient();
+  const [setResult, oddsResult] = await Promise.all([
+    admin.from("pack_sets").select("rarity").eq("month", month),
+    admin.from("pack_tier_odds").select("tier, rarity, weight"),
+  ]);
+  if (setResult.error || oddsResult.error) {
+    console.error("getShopPacks: leitura falhou", setResult.error ?? oddsResult.error);
+    return null;
+  }
+  const present = new Set(setResult.data.map((row) => row.rarity).filter(isPackRarity));
+  if (present.size === 0) return null;
+
+  const items = PACK_SHOP_TIERS.map((tier): ShopPack => {
+    const weights = oddsResult.data.filter((row) => row.tier === tier && isPackRarity(row.rarity) && present.has(row.rarity));
+    const total = weights.reduce((sum, row) => sum + Number(row.weight), 0);
+    const odds: ShopPack["odds"] = {};
+    for (const rarity of PACK_RARITY_ORDER) {
+      const row = weights.find((candidate) => candidate.rarity === rarity);
+      if (row && total > 0) odds[rarity] = Math.round((1000 * Number(row.weight)) / total) / 10;
+    }
+    const tablePrice = PACK_SHOP_PRICES[tier];
+    return { tier, price: getSalePrice(tablePrice, sale), originalPrice: sale ? tablePrice : null, odds };
+  }).filter((item) => isPackTier(item.tier));
+  return { month, eventLabel: getCurrentShopEvent(today).label, items };
+}
+
 export async function getShop(): Promise<Shop | null> {
   const league = await getLeague("/loja");
   const me = league.players.find((player) => player.id === league.currentMemberId);
@@ -125,6 +174,7 @@ export async function getShop(): Promise<Shop | null> {
     progression,
     balance: Math.max(0, progression.coinsEarned - spent),
     sections,
+    packs: await getShopPacks(today, sale),
     sale,
     nextUnlock: forSale.filter((skin) => skin.level > progression.level).sort((a, b) => a.level - b.level)[0] ?? null,
   };

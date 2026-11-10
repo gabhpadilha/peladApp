@@ -10,6 +10,7 @@ import { COIN_RULES } from "@/lib/progression";
 import { CoinPill } from "@/components/coin-pill";
 import { MyPacks } from "./_components/my-packs";
 import { ShopContent } from "./_components/shop-content";
+import { ShopPacksSection } from "./_components/shop-packs";
 import { ShopTabs } from "./_components/shop-tabs";
 import { getMyPacks } from "./_data-access/get-my-packs";
 import { getShop } from "./_data-access/get-shop";
@@ -43,7 +44,7 @@ async function ShopPageContent() {
             <p className="text-sm text-muted-foreground">{shop.groupName}</p>
             <h1 className="font-display text-4xl leading-none font-extrabold uppercase">Loja</h1>
             <p className="text-sm text-muted-foreground">
-              Personalize a sua carta com CanchaCoins. As que você já tem ficam em{" "}
+              Compre pacotes de skins e personalize a sua carta com CanchaCoins. As que você já tem ficam em{" "}
               <Link href="/eu#minhas-cartas" className="text-primary underline-offset-2 hover:underline">
                 Eu → Minhas cartas
               </Link>
@@ -62,7 +63,9 @@ async function ShopPageContent() {
           hint={shop.nextUnlock ? `no nível ${shop.nextUnlock.level} libera a ${shop.nextUnlock.name}` : undefined}
         />
 
-        <ShopContent sections={shop.sections} balance={shop.balance} sale={shop.sale} />
+        <ShopContent sections={shop.sections} balance={shop.balance} sale={shop.sale}>
+          {shop.packs && <ShopPacksSection packs={shop.packs} balance={shop.balance} />}
+        </ShopContent>
 
         <section className="flex flex-col gap-2 rounded-xl border bg-card p-4">
           <h2 className="flex items-center gap-2 font-display text-lg font-bold tracking-wide uppercase">

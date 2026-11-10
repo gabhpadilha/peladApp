@@ -22,13 +22,13 @@ export const CARD_SKINS = [
   { key: "vampiro", name: "Vampiro", level: 3, price: 200, event: { theme: "halloween", year: 2026 } },
   // Evento Temporal de 2026 (aprovado pelo dono do app em 2026-10-30): à venda só em novembro de 2026.
   // A Nuvem carregada entrou no lugar do Trovão em 2026-10-31 (ninguém tinha comprado).
-  { key: "nuvem", name: "Nuvem carregada", level: 3, price: 200, event: { theme: "temporal", year: 2026 } },
-  { key: "relampago", name: "Relâmpago", level: 3, price: 200, event: { theme: "temporal", year: 2026 } },
+  { key: "nuvem", name: "Nuvem carregada", level: 3, price: 200, event: { theme: "temporal", year: 2026 }, packOnly: true },
+  { key: "relampago", name: "Relâmpago", level: 3, price: 200, event: { theme: "temporal", year: 2026 }, packOnly: true },
   // Carta de prestígio do evento (decisão do dono do app em 2026-10-31): a moldura de metal do concept dele.
-  { key: "lenda", name: "Lenda do Trovão", level: 5, price: 600, event: { theme: "temporal", year: 2026 } },
+  { key: "lenda", name: "Lenda do Trovão", level: 5, price: 600, event: { theme: "temporal", year: 2026 }, packOnly: true },
   // Evento "Destino" de dezembro de 2026 (decisão do dono do app em 2026-11-05; alude a um vilão de cinema sem copiar nada): à venda só em dezembro de 2026.
   // Carta de prestígio, como a Lenda do Trovão. Reator e Fúria (nível 3, 200 CC) entram aqui quando as artes chegarem.
-  { key: "destino", name: "Destino", level: 5, price: 600, event: { theme: "destino", year: 2026 } },
+  { key: "destino", name: "Destino", level: 5, price: 600, event: { theme: "destino", year: 2026 }, packOnly: true },
   // Skins que só saem de pacote (nunca à venda na Loja; sem nível nem preço de tabela, então o Mercado usa a faixa da raridade).
   // Dilúvio: lendária do conjunto de novembro de 2026 (tema Toró), 3D por fora, por dentro e por trás (2026-11-10).
   { key: "diluvio", name: "Dilúvio", level: 0, price: 0, packOnly: true },
@@ -43,9 +43,9 @@ export const CARD_SKINS = [
   { key: "cerracao", name: "Cerração", level: 0, price: 0, packOnly: true },
   { key: "crepusculo", name: "Crepúsculo", level: 0, price: 0, packOnly: true },
   // Segunda carta de prestígio de dezembro (2026-11-09): tempestade nórdica (martelo de runas, peles e raios azuis), só alusões à mitologia.
-  { key: "tormenta", name: "Tormenta", level: 5, price: 600, event: { theme: "destino", year: 2026 } },
+  { key: "tormenta", name: "Tormenta", level: 5, price: 600, event: { theme: "destino", year: 2026 }, packOnly: true },
   // Terceira de prestígio de dezembro (2026-11-09): o trapaceiro nórdico (chifres dourados, fumaça verde e runas), só alusões à mitologia.
-  { key: "embuste", name: "Embuste", level: 5, price: 600, event: { theme: "destino", year: 2026 } },
+  { key: "embuste", name: "Embuste", level: 5, price: 600, event: { theme: "destino", year: 2026 }, packOnly: true },
 ] as const;
 
 export type CardSkin = (typeof CARD_SKINS)[number];

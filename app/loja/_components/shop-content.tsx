@@ -1,7 +1,7 @@
 "use client";
 
 import { ShowcaseCard } from "@/components/showcase-card";
-import { useState, useTransition } from "react";
+import { useState, useTransition, type ReactNode } from "react";
 import { CloudLightningIcon, CoinsIcon, CrownIcon, GhostIcon, SparklesIcon, type LucideIcon } from "lucide-react";
 import { CardSkinTile } from "@/components/card-skin-tile";
 import type { ShopEventKey } from "@/lib/shop-events";
@@ -21,6 +21,8 @@ type ShopContentProps = {
   balance: number;
   /** Promoção valendo hoje (faixa no topo e preços riscados). */
   sale: ShopSale | null;
+  /** Vitrine que vem logo depois da faixa da promoção e antes das cartas (os pacotes). */
+  children?: ReactNode;
 };
 
 /** Ícone da vitrine de evento, pelo evento da Loja (evento novo: entre aqui). */
@@ -47,7 +49,7 @@ function SaleBanner({ sale }: { sale: ShopSale }) {
     <div className="flex items-center justify-between gap-3 rounded-xl bg-black px-4 py-3 ring-1 ring-amber-300/40">
       <div className="min-w-0">
         <p className="font-display text-2xl leading-none font-extrabold tracking-wide text-white uppercase">{sale.label}</p>
-        <p className="text-xs text-amber-200/80">Só até {formatShortDate(sale.end)} · em todas as personalizações</p>
+        <p className="text-xs text-amber-200/80">Só até {formatShortDate(sale.end)} · em pacotes e personalizações</p>
       </div>
       <span className="shrink-0 rounded-md bg-amber-300 px-2.5 py-1 font-display text-2xl font-extrabold text-black">
         -{sale.percent}%
@@ -83,7 +85,7 @@ function withSkin(item: ShopItem): Player {
 }
 
 /** Grade de cartas da Loja; tocar numa à venda abre a confirmação de compra. */
-export function ShopContent({ sections, balance, sale }: ShopContentProps) {
+export function ShopContent({ sections, balance, sale, children }: ShopContentProps) {
   const [selected, setSelected] = useState<ShopItem | null>(null);
   const [message, setMessage] = useState<{ kind: "error" | "saved"; text: string } | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -143,6 +145,8 @@ export function ShopContent({ sections, balance, sale }: ShopContentProps) {
       )}
 
       {sale && <SaleBanner sale={sale} />}
+
+      {children}
 
       {sections.map((section) => (
         <section key={section.key} aria-label={section.title} className="flex flex-col gap-3">
