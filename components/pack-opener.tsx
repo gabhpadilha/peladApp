@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { getPackAnimationMs, PackStage } from "@/components/pack-stage";
 import { Button } from "@/components/ui/button";
-import { openPack } from "@/app/loja/_actions/open-pack";
+import { openPack, refreshAfterPack } from "@/app/loja/_actions/open-pack";
 import type { MyPack, OpenedPack } from "@/lib/packs";
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
@@ -70,7 +70,8 @@ export function PackOpener({ packs, onClose }: { packs: readonly Pick<MyPack, "i
   }
 
   function handleClose() {
-    router.refresh();
+    // Atualiza a página só agora (a action de abrir não faz isso, para não travar nem remontar a animação).
+    void refreshAfterPack().catch(() => router.refresh());
     onClose();
   }
 

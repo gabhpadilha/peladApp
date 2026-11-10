@@ -69,6 +69,6 @@ export async function buyShopPack(input: { tier: string }): Promise<BuyShopPackR
     const value = raw[rarity];
     if (isPackRarity(rarity) && typeof value === "number") odds[rarity] = value;
   }
-  revalidatePath("/", "layout");
+  // A página (saldo, Meus pacotes) é atualizada ao fechar a abertura; revalidar aqui refaria a tela antes da animação.
   return { success: true, pack: { id: row.id, round: null, month: row.month, tier: row.tier, odds } };
 }

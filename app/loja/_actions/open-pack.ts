@@ -25,9 +25,16 @@ export async function openPack(packId: string): Promise<OpenPackResult> {
     console.error("openPack: abertura falhou", error);
     return { success: false, message: "Não foi possível abrir o pacote. Confira a conexão e tente de novo." };
   }
-  revalidatePath("/", "layout");
+  // Sem `revalidatePath` aqui, de propósito: a resposta da action já traria a página inteira refeita (lenta, e podia remontar a tela
+  // no meio da animação). A página só é atualizada ao fechar a abertura (`refreshAfterPack`).
   return {
     success: true,
     pack: { skin: row.skin, rarity: row.rarity, wasDuplicate: row.was_duplicate, coinsAwarded: row.coins_awarded },
   };
+}
+
+/** Chamada ao fechar a abertura do pacote: atualiza saldo, coleção e o ponto da Loja de uma vez. */
+export async function refreshAfterPack(): Promise<void> {
+  await requireActiveMembership("/loja");
+  revalidatePath("/", "layout");
 }
