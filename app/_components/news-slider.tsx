@@ -1,11 +1,10 @@
+import { PackCover } from "@/components/pack-cover";
 import { ShowcaseCard } from "@/components/showcase-card";
+import { PACK_SHOP_PRICES, PACK_SHOP_TIERS, PACK_TIER_NAMES } from "@/lib/packs";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowLeftRightIcon, ArrowRightIcon, CloudLightningIcon, GiftIcon, GemIcon, TagIcon, GhostIcon, MedalIcon, SparklesIcon, StoreIcon, TrophyIcon, type LucideIcon } from "lucide-react";
+import { ArrowLeftRightIcon, ArrowRightIcon, CloudLightningIcon, GiftIcon, GemIcon, TagIcon, TargetIcon, GhostIcon, SparklesIcon, StoreIcon, TrophyIcon, type LucideIcon } from "lucide-react";
 import { formatCoins } from "@/components/coin-pill";
-import { RankInsignia } from "@/components/cancha-card";
-import { CARD_RANK_LABELS, getCardRank, RANK_FLAT_CLASSES, type CardRank } from "@/lib/card-rank";
-import { CARD_TIER_MIN_OVR, getTierProgress } from "@/lib/card-tier";
 import { type CardThemeKey, type CurrentCardEvent } from "@/lib/card-themes";
 import { getCurrentShopEvent } from "@/lib/shop-events";
 import { formatShortDate } from "@/lib/format-date";
@@ -15,7 +14,7 @@ import { CARD_SKINS, isCardSkinOnSale, type CardSkinKey } from "@/types/card-ski
 import { getSalePrice, type ShopSale } from "@/lib/shop-sale";
 import type { Player } from "@/types/player";
 import { cn } from "@/lib/utils";
-import { MarketGuideVisual, PacksGuideVisual, RarityGuideVisual } from "./news-guide";
+import { GoalsGuideVisual, MarketGuideVisual, PacksGuideVisual, RarityGuideVisual } from "./news-guide";
 import { NewsCarousel } from "./news-carousel";
 
 type NewsSliderProps = {
@@ -102,81 +101,32 @@ function Chips({ items, isCoin = false, className }: { items: readonly Chip[]; i
 }
 
 /**
- * Arte da Black Friday (pedido do dono do app em 2026-10-31): etiqueta preta com o desconto
- * grande e, ao lado, as cartas em destaque com o preço de tabela riscado e o novo.
+ * Arte da Black Friday (pedido do dono do app em 2026-10-31; desde 2026-11-12 o foco são os pacotes da Loja): etiqueta preta com o
+ * desconto grande e, ao lado, os 4 pacotes com o preço de tabela riscado e o novo.
  */
-function SaleBanner({ sale, skins }: { sale: ShopSale; skins: readonly { key: CardSkinKey; name: string; price: number }[] }) {
+function SaleBanner({ sale, month }: { sale: ShopSale; month: string }) {
   return (
     <div className="grid w-full grid-cols-[auto_minmax(0,1fr)] items-center gap-3 overflow-hidden rounded-xl border border-white/15 bg-black p-3 sm:gap-5 sm:p-4">
       <div className="flex flex-col items-center rounded-lg bg-white px-2.5 py-2 text-black">
         <span className="text-[0.5625rem] font-bold tracking-[0.15em] whitespace-nowrap uppercase">{sale.label}</span>
         <span className="font-display text-4xl leading-none font-extrabold tabular-nums sm:text-5xl">-{sale.percent}%</span>
-        <span className="text-[0.625rem] font-semibold tracking-widest uppercase">em tudo</span>
+        <span className="text-[0.625rem] font-semibold tracking-widest uppercase">nos pacotes</span>
       </div>
       <ul className="flex min-w-0 flex-col gap-2">
-        {skins.map((skin) => (
-          <li key={skin.key} className="flex items-center gap-2">
-            <div className="w-8 shrink-0">
-              <ShowcaseCard skin={skin.key} />
-            </div>
+        {PACK_SHOP_TIERS.map((tier) => (
+          <li key={tier} className="flex items-center gap-2">
+            <PackCover tier={tier} month={month} className="h-11 shrink-0" />
             <div className="flex min-w-0 flex-col leading-tight">
-              <span className="text-sm">{skin.name}</span>
+              <span className="text-sm">{PACK_TIER_NAMES[tier]}</span>
               <span className="flex items-baseline gap-1.5">
-                <span className="text-xs text-muted-foreground tabular-nums line-through">{formatCoins(skin.price)}</span>
-                <span className="text-sm font-semibold text-amber-200 tabular-nums">{formatCoins(getSalePrice(skin.price, sale))} CC</span>
+                <span className="text-xs text-muted-foreground tabular-nums line-through">{formatCoins(PACK_SHOP_PRICES[tier])}</span>
+                <span className="text-sm font-semibold text-amber-200 tabular-nums">{formatCoins(getSalePrice(PACK_SHOP_PRICES[tier], sale))} CC</span>
               </span>
             </div>
           </li>
         ))}
       </ul>
     </div>
-  );
-}
-
-/** As patentes em ordem, com a faixa de OVR de cada uma (mesmos cortes de `CARD_TIER_MIN_OVR`). */
-const RANK_LADDER: readonly { rank: CardRank; range: string }[] = [
-  { rank: "peneira", range: "sem OVR" },
-  { rank: "base", range: `até ${CARD_TIER_MIN_OVR.silver - 1}` },
-  { rank: "profissional", range: `${CARD_TIER_MIN_OVR.silver}–${CARD_TIER_MIN_OVR.gold - 1}` },
-  { rank: "selecao", range: `${CARD_TIER_MIN_OVR.gold}–${CARD_TIER_MIN_OVR.rare - 1}` },
-  { rank: "lenda", range: `${CARD_TIER_MIN_OVR.rare}+` },
-];
-
-const RANK_BY_TIER = { bronze: "base", silver: "profissional", gold: "selecao", rare: "lenda" } as const;
-
-/** Onde o jogador está e quanto falta para a próxima patente. */
-function rankStatus(ovr: number | null): string {
-  if (ovr === null) return "Você está na Peneira: receba notas numa rodada fechada para ganhar o seu OVR.";
-  const progress = getTierProgress(ovr);
-  const current = CARD_RANK_LABELS[getCardRank(ovr)];
-  if (!progress.next) return `Você é ${current}: a patente mais alta.`;
-  return `Você é ${current} · faltam ${progress.next.missing} de OVR para ${CARD_RANK_LABELS[RANK_BY_TIER[progress.next.tier]]}`;
-}
-
-/** A escada das patentes: selo com a insígnia, nome e faixa de OVR; a do jogador em destaque. */
-function RankLadder({ current }: { current: CardRank }) {
-  return (
-    <ol className="flex w-full justify-between gap-1 sm:mx-auto sm:max-w-xl">
-      {RANK_LADDER.map(({ rank, range }) => {
-        const isCurrent = rank === current;
-        return (
-          <li key={rank} className={cn("flex flex-col items-center gap-1 text-center", !isCurrent && "opacity-60")}>
-            <span
-              className={cn(
-                "flex h-11 w-9 flex-col items-center justify-center pb-1.5 sm:h-16 sm:w-13 sm:pb-2.5 [clip-path:polygon(0_0,100%_0,100%_76%,50%_100%,0_76%)]",
-                RANK_FLAT_CLASSES[rank],
-              )}
-            >
-              <RankInsignia rank={rank} className="h-3.5 w-6 sm:h-5 sm:w-9" />
-            </span>
-            <span className={cn("text-[0.6875rem] leading-tight font-semibold whitespace-nowrap sm:text-sm", isCurrent && "text-primary")}>
-              {CARD_RANK_LABELS[rank]}
-            </span>
-            <span className="text-[0.625rem] leading-none text-muted-foreground tabular-nums sm:text-xs">{range}</span>
-          </li>
-        );
-      })}
-    </ol>
   );
 }
 
@@ -236,8 +186,6 @@ export function NewsSlider({ event, today, shopSale, player }: NewsSliderProps) 
   const shopFan: [CardSkinKey, CardSkinKey, CardSkinKey] =
     flagship && sideSkins.length >= 2 ? [sideSkins[1].key, flagship.key, sideSkins[0].key] : SHOP_FAN;
 
-  // Na Black Friday: as cartas do evento (ou as premium mais caras) com o preço novo.
-  const saleSkins = (eventSkins.length > 0 ? eventSkins : CARD_SKINS.filter((skin) => !("event" in skin) && skin.price > 0)).slice(0, 3);
 
   const slides = [
     ...(shopSale
@@ -250,9 +198,9 @@ export function NewsSlider({ event, today, shopSale, player }: NewsSliderProps) 
                 icon={TagIcon}
                 eyebrow="Promoção na Loja"
                 title={shopSale.label}
-                meta={`-${shopSale.percent}% em tudo até ${formatShortDate(shopSale.end)}`}
-                text={`Pacotes e cartas da Loja com ${shopSale.percent}% de desconto. O preço novo já aparece na Loja; o que você comprar é seu para sempre.`}
-                visual={<SaleBanner sale={shopSale} skins={saleSkins} />}
+                meta={`-${shopSale.percent}% nos pacotes até ${formatShortDate(shopSale.end)}`}
+                text={`Os pacotes de skins da Loja estão com ${shopSale.percent}% de desconto. O preço novo já aparece na Loja; as skins que saírem são suas para sempre.`}
+                visual={<SaleBanner sale={shopSale} month={today.slice(0, 7)} />}
                 href="/loja"
                 cta="Aproveitar na Loja"
               />
@@ -303,6 +251,21 @@ export function NewsSlider({ event, today, shopSale, player }: NewsSliderProps) 
           visual={<MarketGuideVisual />}
           href="/loja/mercado"
           cta="Ir para o Mercado"
+        />
+      ),
+    },
+    {
+      key: "objetivos",
+      title: "Objetivos do mês",
+      content: (
+        <Slide
+          icon={TargetIcon}
+          eyebrow="Novidade · objetivos"
+          title="Objetivos do mês"
+          text="Todo mês você escolhe 3 objetivos, um fácil, um médio e um difícil. Cumpriu, ganha um pacote de skin: quanto mais difícil, melhor o pacote."
+          visual={<GoalsGuideVisual month={today.slice(0, 7)} />}
+          href="/objetivos"
+          cta="Ver os objetivos"
         />
       ),
     },
@@ -392,22 +355,6 @@ export function NewsSlider({ event, today, shopSale, player }: NewsSliderProps) 
           }
           href="/loja"
           cta="Ir para a Loja"
-        />
-      ),
-    },
-    {
-      key: "patentes",
-      title: "Patentes",
-      content: (
-        <Slide
-          icon={MedalIcon}
-          eyebrow="Novidade · sua carta"
-          title="Patentes"
-          meta={rankStatus(player.ovr)}
-          text="A patente sobe e desce com o seu OVR, a média das 2 melhores estatísticas da carta (Ataque, Criação, Defesa), a cada rodada fechada."
-          visual={<RankLadder current={getCardRank(player.ovr)} />}
-          href={`/jogadores/${player.id}`}
-          cta="Ver minha carreira"
         />
       ),
     },

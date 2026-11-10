@@ -2,7 +2,8 @@ import { ArrowLeftRightIcon, ZapIcon } from "lucide-react";
 import { PackCover } from "@/components/pack-cover";
 import { ShowcaseCard } from "@/components/showcase-card";
 import { QUICK_SELL_COINS } from "@/lib/market";
-import { PACK_RARITY_NAMES, PACK_RARITY_ORDER, type PackRarity, type PackTier } from "@/lib/packs";
+import { GOAL_LEVEL_NAMES, GOAL_LEVEL_TIER, GOAL_LEVELS } from "@/lib/goals";
+import { PACK_RARITY_NAMES, PACK_RARITY_ORDER, PACK_TIER_NAMES, type PackRarity, type PackTier } from "@/lib/packs";
 import type { CardSkinKey } from "@/types/card-skin";
 import { cn } from "@/lib/utils";
 
@@ -92,6 +93,40 @@ export function MarketGuideVisual() {
           ))}
         </ul>
       </div>
+    </div>
+  );
+}
+
+/** Exemplos de objetivo por nível (do catálogo; os de verdade ficam na página Objetivos). */
+const GOAL_EXAMPLES: Record<"easy" | "medium" | "hard", readonly string[]> = {
+  easy: ["Jogar 2 rodadas", "Fazer 2 gols no mês"],
+  medium: ["Fazer 5 gols no mês", "Ganhar 1 carta de prêmio"],
+  hard: ["Fazer 3 gols num jogo só", "Nota acima de 75 em 3 rodadas"],
+};
+
+/** Os 3 níveis, com exemplos de objetivo e o pacote que cada um paga, mais as regras em uma linha. */
+export function GoalsGuideVisual({ month }: { month: string }) {
+  return (
+    <div className="flex w-full max-w-md flex-col gap-3">
+      <ul className="flex flex-col gap-2">
+        {GOAL_LEVELS.map((level) => (
+          <li key={level} className="flex items-center gap-3 rounded-lg border p-2.5">
+            <PackCover tier={GOAL_LEVEL_TIER[level]} month={month} className="h-14 shrink-0" />
+            <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+              <p className="flex flex-wrap items-baseline gap-x-2 font-display text-base leading-tight font-bold tracking-wide uppercase">
+                {GOAL_LEVEL_NAMES[level]}
+                <span className="font-sans text-xs font-medium tracking-normal text-amber-200 normal-case">{PACK_TIER_NAMES[GOAL_LEVEL_TIER[level]]}</span>
+              </p>
+              {GOAL_EXAMPLES[level].map((example) => (
+                <p key={example} className="text-xs text-muted-foreground">{example}</p>
+              ))}
+            </div>
+          </li>
+        ))}
+      </ul>
+      <p className="text-center text-xs text-muted-foreground">
+        Escolha uma opção por nível: depois de aceitar, não troca. Só conta o que você fizer a partir do aceite.
+      </p>
     </div>
   );
 }
