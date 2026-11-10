@@ -543,6 +543,10 @@ const SKIN_CLASSES: Record<CardSkinKey, string> = {
   chuvavioleta: "card-skin-icone",
   nublado: "card-skin-icone",
   neblina: "card-skin-icone",
+  chuvaesmeralda: "card-skin-icone",
+  chuvarubi: "card-skin-icone",
+  cerracao: "card-skin-icone",
+  crepusculo: "card-skin-icone",
 };
 
 const GOLD_FILL = "[background:var(--card-gold)]";

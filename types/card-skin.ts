@@ -38,6 +38,10 @@ export const CARD_SKINS = [
   { key: "chuvavioleta", name: "Chuva Violeta", level: 0, price: 0, packOnly: true },
   { key: "nublado", name: "Nublado", level: 0, price: 0, packOnly: true },
   { key: "neblina", name: "Neblina", level: 0, price: 0, packOnly: true },
+  { key: "chuvaesmeralda", name: "Chuva Esmeralda", level: 0, price: 0, packOnly: true },
+  { key: "chuvarubi", name: "Chuva Rubi", level: 0, price: 0, packOnly: true },
+  { key: "cerracao", name: "Cerração", level: 0, price: 0, packOnly: true },
+  { key: "crepusculo", name: "Crepúsculo", level: 0, price: 0, packOnly: true },
 ] as const;
 
 export type CardSkin = (typeof CARD_SKINS)[number];

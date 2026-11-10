@@ -231,6 +231,10 @@ const ROUPAS = {
   chuvavioleta: { background: "premium-chuvavioleta", overflow: "premium-chuvavioleta-vaza", artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#5f5a86", "#5f5a86", "#e1dbf5"], accent: "#c9c0ee", light: "205 190 255", bar: "#0a0818", muted: "#d6cdf5", sparkles: false, neon: "#a58bff" },
   nublado: { background: "skin-nublado", metal: ["#5f7388", "#5f7388", "#dbe7f3"], accent: "#cfe0f1", light: "200 220 245", bar: "#0a121b", muted: "#c3d3e4", sparkles: false, neon: "#a9c6e4", trim: null },
   neblina: { background: "skin-neblina", metal: ["#5f7a6a", "#5f7a6a", "#dcefe3"], accent: "#c5dccd", light: "190 235 215", bar: "#08130e", muted: "#bcd8c7", sparkles: false, neon: "#9fd4b5", trim: null },
+  chuvaesmeralda: { background: "premium-chuvaesmeralda", overflow: "premium-chuvaesmeralda-vaza", artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#3f7a63", "#3f7a63", "#d5f5e5"], accent: "#a5e3c4", light: "170 255 210", bar: "#04120c", muted: "#bfe9d3", sparkles: false, neon: "#4fe0a0" },
+  chuvarubi: { background: "premium-chuvarubi", overflow: "premium-chuvarubi-vaza", artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#8a3a48", "#8a3a48", "#ffe0e5"], accent: "#f0a5b2", light: "255 190 200", bar: "#14060a", muted: "#f2c4cc", sparkles: false, neon: "#ff5a7a" },
+  cerracao: { background: "skin-cerracao", metal: ["#8a7a62", "#8a7a62", "#f0e6d2"], accent: "#e6d5b8", light: "255 235 200", bar: "#120e08", muted: "#dccfb6", sparkles: false, neon: "#e0c99a", trim: null },
+  crepusculo: { background: "skin-crepusculo", metal: ["#7a5f78", "#7a5f78", "#f0dcee"], accent: "#e0c5dc", light: "240 200 235", bar: "#10080f", muted: "#d8c0d4", sparkles: false, neon: "#d9a6d1", trim: null },
   destino: { background: "premium-destino", overflow: "premium-destino-vaza", floaters: DESTINO_FLOATERS, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#6b6f73", "#6b6f73", "#d6c07a"], accent: "#c9a85c", light: "120 255 170", bar: "#06100b", muted: "#b9e8c8", sparkles: false, neon: "#3dffa0" },
   // GUARDADAS, fora da Loja (sem entrada em `CARD_SKINS`; para usar: entrada lá, `case` em `skinRoupa` e `SKIN_CLASSES`): Voltagem e Maré.
   // Voltagem (2026-11-05, pedido do dono do app: o estilo da borda da referência dele no nosso retângulo): fio duplo de ouro pálido por dentro e
@@ -485,6 +489,10 @@ function skinRoupa(skin: CardSkinKey): RoupaKey {
     case "chuvavioleta": return "chuvavioleta";
     case "nublado": return "nublado";
     case "neblina": return "neblina";
+    case "chuvaesmeralda": return "chuvaesmeralda";
+    case "chuvarubi": return "chuvarubi";
+    case "cerracao": return "cerracao";
+    case "crepusculo": return "crepusculo";
     case "lobisomem": return "lobisomem";
     case "nuvem": return "nuvem";
     case "relampago": return "relampago";

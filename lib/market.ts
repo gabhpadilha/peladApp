@@ -91,6 +91,10 @@ export const SKIN_COLORS: Readonly<Record<string, string>> = {
   chuvavioleta: "Roxa",
   nublado: "Azul",
   neblina: "Verde",
+  chuvaesmeralda: "Verde",
+  chuvarubi: "Vermelha",
+  cerracao: "Dourada",
+  crepusculo: "Roxa",
 };
 
 export const MARKET_COLOR_OPTIONS: readonly string[] = ["Azul", "Roxa", "Vermelha", "Branca", "Dourada", "Verde"];

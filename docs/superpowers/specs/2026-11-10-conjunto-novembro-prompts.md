@@ -21,3 +21,10 @@ Objetos 3D: raios de plasma em vidro, cristais de tempestade, pára-raios de bro
 6. **Cacos de cristal (por trás):** três cacos de cristal de tempestade azul-elétrico, de tamanhos diferentes, bem separados, facetas nítidas, preto puro.
 
 ## Rara e comum: a definir depois da Tormenta.
+
+## Conjunto final de novembro (11 skins, 5 desenhos), decidido com o dono em 2026-11-10
+Raras e comuns feitas em código por Claude a pedido do dono (`prototipos/aguaceiro.cjs`, `nublado.cjs`); as épicas novas ficam para o Gemini (dono, 2026-11-11).
+- **Lendária:** Tormenta. **Épicas (já existem):** Relâmpago e Nuvem carregada.
+- **Raras (design `aguaceiro`):** Aguaceiro (azul), Chuva Violeta, Chuva Esmeralda, Chuva Rubi.
+- **Comuns (design `nublado`):** Nublado (cinza-azulado), Neblina (verde-musgo), Cerração (bronze/areia), Crepúsculo (vinho).
+- A garantia de fim de mês conta por **design**, então cores novas não pesam nela; desenho novo pesa (em novembro só há 2 rodadas depois do dia 15).

@@ -3,7 +3,7 @@
 // desfocadas e um clarão de relâmpago distante; moldura = aço azul-petróleo escovado de ~3% da carta, fio de prata por dentro, suportes de canto com raio e gota
 // em relevo e uma gota pendente no meio de baixo. Tudo desenhado em SVG e assado em WebP (sem `filter` na carta, por causa do iPhone).
 // Saem `premium-aguaceiro.webp` (fundo, 700 x 1004, como a Maré) e `premium-aguaceiro-vaza.webp` (moldura, 1000 x 1400 com a caixa da carta nos 84% do meio: 840 x 1176),
-// e as mesmas duas peças com o tom girado para o violeta: `premium-chuvavioleta.webp` e `premium-chuvavioleta-vaza.webp`.
+// e as mesmas duas peças com o tom girado: Chuva Violeta, Chuva Esmeralda e Chuva Rubi (`premium-chuva<cor>.webp` e `-vaza.webp`).
 // Uso: node aguaceiro.cjs <pasta de saída> <raiz do repo>
 const path = require("path");
 const sharp = require(path.resolve(process.argv[3], "node_modules/sharp"));
@@ -98,9 +98,11 @@ const frameSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${CW}" height="
   const moldura = await sharp(Buffer.from(frameSvg)).png().toBuffer();
   await sharp(fundo).webp({ quality: 90 }).toFile(path.join(OUT, "premium-aguaceiro.webp"));
   await sharp(moldura).webp({ quality: 92, alphaQuality: 100 }).toFile(path.join(OUT, "premium-aguaceiro-vaza.webp"));
-  // segunda cor: o mesmo desenho girado para o violeta
-  const tone = { hue: 30, saturation: 1.05 };
-  await sharp(fundo).modulate(tone).webp({ quality: 90 }).toFile(path.join(OUT, "premium-chuvavioleta.webp"));
-  await sharp(moldura).modulate(tone).webp({ quality: 92, alphaQuality: 100 }).toFile(path.join(OUT, "premium-chuvavioleta-vaza.webp"));
+  // outras cores: o mesmo desenho com o tom girado (violeta, esmeralda e rubi); a moldura de aço gira junto
+  const tones = { chuvavioleta: { hue: 30, saturation: 1.05 }, chuvaesmeralda: { hue: -85, saturation: 1.15 }, chuvarubi: { hue: 110, saturation: 1.15 } };
+  for (const [name, tone] of Object.entries(tones)) {
+    await sharp(fundo).modulate(tone).webp({ quality: 90 }).toFile(path.join(OUT, `premium-${name}.webp`));
+    await sharp(moldura).modulate(tone).webp({ quality: 92, alphaQuality: 100 }).toFile(path.join(OUT, `premium-${name}-vaza.webp`));
+  }
   console.log("ok");
 })().catch((e) => { console.error(e); process.exit(1); });

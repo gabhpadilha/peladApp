@@ -1,7 +1,7 @@
 // Nublado e Neblina (comuns do conjunto de novembro de 2026, tema Toró; 2026-11-10): o dono pediu para eu mesmo fazer as raras e as comuns por aqui, sem o Gemini.
 // Fundo de textura leve (regra da comum: borda simples, que o app desenha como tubo de neon, e fundo padrão ou textura leve): céu de toró em cinza-azulado, nuvens
 // suaves em duas camadas de ruído fractal (feTurbulence), névoa embaixo, um brilho frio no alto e poucas gotas pequenas. Sem raios e sem objetos 3D.
-// Saem `skin-nublado.webp` (cinza-azulado) e `skin-neblina.webp` (o mesmo desenho girado para o verde-musgo), 600 x 860 como as outras comuns.
+// Saem `skin-nublado.webp` (cinza-azulado) e o mesmo desenho girado para o verde-musgo (`skin-neblina`), o bronze/areia (`skin-cerracao`) e o vinho (`skin-crepusculo`), 600 x 860 como as outras comuns.
 // Uso: node nublado.cjs <pasta de saída> <raiz do repo>
 const path = require("path");
 const sharp = require(path.resolve(process.argv[3], "node_modules/sharp"));
@@ -51,6 +51,7 @@ ${dropSvg}
 (async () => {
   const base = await sharp(Buffer.from(svg)).png().toBuffer();
   await sharp(base).webp({ quality: 90 }).toFile(path.join(OUT, "skin-nublado.webp"));
-  await sharp(base).modulate({ hue: -58, saturation: 0.95, brightness: 0.97 }).webp({ quality: 90 }).toFile(path.join(OUT, "skin-neblina.webp"));
+  const tones = { neblina: { hue: -58, saturation: 0.95, brightness: 0.97 }, cerracao: { hue: 150, saturation: 0.8 }, crepusculo: { hue: 92, saturation: 1.2 } };
+  for (const [name, tone] of Object.entries(tones)) await sharp(base).modulate(tone).webp({ quality: 90 }).toFile(path.join(OUT, `skin-${name}.webp`));
   console.log("ok");
 })().catch((e) => { console.error(e); process.exit(1); });
