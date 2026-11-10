@@ -322,7 +322,7 @@ export function NewsSlider({ event, today, shopSale, player }: NewsSliderProps) 
                 {MONTH_CARDS.map((card) => (
                   <div key={card.kind} className="flex min-w-0 flex-col items-center gap-1.5 text-center">
                     <div className="w-[5.5rem] sm:w-36">
-<ShowcaseCard award={{ kind: card.kind, theme: "default" }} />
+<ShowcaseCard award={{ kind: card.kind, theme: event.theme }} />
                     </div>
                     <p className="font-display text-base leading-none font-bold uppercase">{card.title}</p>
                     <p className="text-[0.6875rem] leading-snug text-muted-foreground sm:text-xs">{card.text}</p>
