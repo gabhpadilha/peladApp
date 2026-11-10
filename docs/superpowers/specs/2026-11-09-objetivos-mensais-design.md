@@ -16,6 +16,7 @@ Dar a cada jogador metas pessoais do mês, tiradas do que ele já faz no jogo (j
 - **Só conta o que acontece depois de aceitar o objetivo no app.** Quem escolhe no dia 20 não leva o que fez antes (6 gols no dia 10 não valem se ele aceita "10 gols no mês" no dia 20).
 - **Quanto mais difícil o objetivo, melhor o pacote.** Palpite meu para o mapa, a confirmar: fácil = faixa **C** (Pelada), médio = faixa **B** (Destaque), difícil = faixa **A** (Craque), as faixas que os pacotes já têm.
 - **Justiça entre linha e goleiro:** o goleiro tem catálogo próprio, com a mesma escada de dificuldade.
+- **Os objetivos só existem quando os pacotes estiverem no ar** (decisão do dono, 2026-11-10): o prêmio é um pacote. Dá para construir antes, desligado, e ligar junto com os pacotes (lançamento planejado para 1/12); sem `packs_enabled` na pelada, o cartão nem aparece.
 - Só mensal agora. Os objetivos são os mesmos para todos; cada um só escolhe a opção dentro de cada nível.
 
 ## Catálogo da primeira versão (números são palpite meu; o dono aprovou o desenho)
