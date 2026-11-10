@@ -139,6 +139,7 @@ export type Database = {
           id: string
           member_id: string
           price: number
+          quick_sell_coins: number | null
           skin: string
           source: string
           transferred_at: string | null
@@ -159,6 +160,7 @@ export type Database = {
           id?: string
           member_id?: string
           price?: number
+          quick_sell_coins?: number | null
           skin?: string
           source?: string
           transferred_at?: string | null
@@ -1277,6 +1279,10 @@ export type Database = {
           member_position: Database["public"]["Enums"]["player_position"]
         }
         Returns: string
+      }
+      quick_sell_skin: {
+        Args: { sale_coins: number; seller: string; target_purchase: string }
+        Returns: undefined
       }
       shop_buy_pack: {
         Args: { buyer: string; earned_gross: number; target_price: number; target_tier: string }

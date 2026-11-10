@@ -60,6 +60,16 @@ export const MARKET_ERROR_MESSAGES: Readonly<Record<string, string>> = {
   PA031: "CanchaCoins insuficientes para essa compra.",
 };
 
+/** Venda rápida (2026-11-12, pedido do dono do app): o que a casa paga por uma skin, por raridade, bem abaixo do Mercado. */
+export const QUICK_SELL_COINS: Readonly<Record<PackRarity, number>> = { comum: 20, rara: 40, epica: 70, lendaria: 150 };
+
+/** Valor da venda rápida da skin, ou `null` quando ela não pode ser vendida (a Esmeralda é grátis; skin sem raridade). */
+export function getQuickSellCoins(skin: string): number | null {
+  if (skin === "esmeralda") return null;
+  const rarity = getSkinRarity(skin);
+  return rarity ? QUICK_SELL_COINS[rarity] : null;
+}
+
 /** Passo do botão − / + do preço no formulário de anunciar. */
 export const MARKET_PRICE_STEP = 10;
 

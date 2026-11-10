@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { getLeague } from "@/lib/league";
-import { MARKET_ERROR_MESSAGES, MARKET_LISTING_HOURS, getMarketPriceRange } from "@/lib/market";
+import { MARKET_ERROR_MESSAGES, MARKET_LISTING_HOURS, getMarketPriceRange, getQuickSellCoins } from "@/lib/market";
 import { requireActiveMembership } from "@/lib/session";
 import { createAdminClient, hasAdminEnv } from "@/lib/supabase/admin";
 import { getCardSkin, isCardSkinKey } from "@/types/card-skin";
@@ -62,6 +62,42 @@ export async function listSkin(input: { skin: string; price: number }): Promise<
 
   revalidatePath("/", "layout");
   return { success: true, message: `A ${getCardSkin(skin).name} está no Mercado por ${price} CC.` };
+}
+
+const quickSellSchema = z.object({ skin: z.string().min(1).max(40) });
+
+/** Venda rápida: a skin sai da coleção na hora e a casa paga o valor fixo da raridade (entra no saldo). */
+export async function quickSellSkin(input: { skin: string }): Promise<MarketActionResult> {
+  const membership = await requireActiveMembership("/eu");
+  const parsed = quickSellSchema.safeParse(input);
+  if (!parsed.success || !isCardSkinKey(parsed.data.skin)) return { success: false, message: "Não achei essa carta. Recarregue a página." };
+  const { skin } = parsed.data;
+  const coins = getQuickSellCoins(skin);
+  if (coins === null) return { success: false, message: MARKET_ERROR_MESSAGES.PA022 };
+  if (!hasAdminEnv()) {
+    console.error("Falta a SUPABASE_SECRET_KEY (cliente admin indisponível).");
+    return { success: false, message: UNAVAILABLE };
+  }
+
+  const admin = createAdminClient();
+  const { data: purchase, error: readError } = await admin
+    .from("card_skin_purchases")
+    .select("id")
+    .eq("member_id", membership.memberId)
+    .eq("skin", skin)
+    .is("transferred_at", null)
+    .maybeSingle();
+  if (readError) {
+    console.error("quickSellSkin: leitura da posse falhou", readError);
+    return { success: false, message: FALLBACK };
+  }
+  if (!purchase) return { success: false, message: MARKET_ERROR_MESSAGES.PA021 };
+
+  const { error } = await admin.rpc("quick_sell_skin", { seller: membership.memberId, target_purchase: purchase.id, sale_coins: coins });
+  if (error) return { success: false, message: friendly(error, "quickSellSkin") };
+
+  revalidatePath("/", "layout");
+  return { success: true, message: `A ${getCardSkin(skin).name} foi vendida por ${coins} CC.` };
 }
 
 const cancelSchema = z.object({ listingId: z.uuid() });

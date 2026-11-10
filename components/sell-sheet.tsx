@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { MinusIcon, PlusIcon, TagIcon } from "lucide-react";
-import { listSkin } from "@/app/_actions/market";
+import { CoinsIcon, MinusIcon, PlusIcon, TagIcon } from "lucide-react";
+import { listSkin, quickSellSkin } from "@/app/_actions/market";
 import { RarityLabel } from "@/components/rarity-label";
 import { ShowcaseCard } from "@/components/showcase-card";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import { MARKET_LISTING_HOURS, MARKET_PRICE_STEP, type PriceRange } from "@/lib/market";
+import { MARKET_LISTING_HOURS, MARKET_PRICE_STEP, getQuickSellCoins, type PriceRange } from "@/lib/market";
 import { getSkinRarity } from "@/lib/packs";
 import { cn } from "@/lib/utils";
 import type { CardSkinKey } from "@/types/card-skin";
@@ -50,6 +50,8 @@ function SellForm({ skin, name, range, suggestedPrice, onClose, onDone }: SellFo
   const [draft, setDraft] = useState(String(suggestedPrice));
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [isConfirmingQuick, setIsConfirmingQuick] = useState(false);
+  const quickCoins = getQuickSellCoins(skin);
   const rarity = getSkinRarity(skin);
   const isValid = Number.isInteger(price) && price >= range.min && price <= range.max;
 
@@ -75,6 +77,24 @@ function SellForm({ skin, name, range, suggestedPrice, onClose, onDone }: SellFo
       } catch (caught) {
         console.error("Falha ao anunciar", caught);
         setError("Não foi possível falar com o servidor. Confira a conexão.");
+      }
+    });
+  }
+
+  function handleQuickSell() {
+    setError(null);
+    startTransition(async () => {
+      try {
+        const result = await quickSellSkin({ skin });
+        if (result.success) onDone(result.message);
+        else {
+          setError(result.message);
+          setIsConfirmingQuick(false);
+        }
+      } catch (caught) {
+        console.error("Falha na venda rápida", caught);
+        setError("Não foi possível falar com o servidor. Confira a conexão.");
+        setIsConfirmingQuick(false);
       }
     });
   }
@@ -163,6 +183,28 @@ function SellForm({ skin, name, range, suggestedPrice, onClose, onDone }: SellFo
           <TagIcon aria-hidden className="size-5" />
           {isPending ? "Anunciando…" : `Anunciar por ${isValid ? price : "–"} CC`}
         </Button>
+        {quickCoins !== null && (
+          <div className="flex w-full flex-col gap-2 rounded-xl border border-dashed p-3">
+            <p className="text-center text-xs text-muted-foreground">
+              Sem querer esperar comprador? Venda rápida: a carta sai da sua coleção agora, por bem menos.
+            </p>
+            {isConfirmingQuick ? (
+              <div className="flex gap-2">
+                <Button type="button" variant="destructive" className="h-11 flex-1 gap-1.5" disabled={isPending} onClick={handleQuickSell}>
+                  {isPending ? "Vendendo…" : `Sim, vender por ${quickCoins} CC`}
+                </Button>
+                <Button type="button" variant="outline" className="h-11" disabled={isPending} onClick={() => setIsConfirmingQuick(false)}>
+                  Voltar
+                </Button>
+              </div>
+            ) : (
+              <Button type="button" variant="outline" className="h-11 w-full gap-2" disabled={isPending} onClick={() => setIsConfirmingQuick(true)}>
+                <CoinsIcon aria-hidden className="size-4 text-amber-300" />
+                Venda rápida · {quickCoins} CC
+              </Button>
+            )}
+          </div>
+        )}
         <Button type="button" variant="ghost" className="h-11 w-full" disabled={isPending} onClick={onClose}>
           Agora não
         </Button>
