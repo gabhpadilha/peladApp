@@ -16,7 +16,7 @@ export const PACK_TIER_NAMES: Record<PackTier, string> = {
  * Preço dos pacotes da Loja, em CanchaCoins (tabela, antes de promoção). Referência: um jogador médio junta uns 250 CC por mês e o topo do ranking bem mais; os valores são de luxo (as skins dos pacotes de rodada saem de graça)
  * (ver faixas do Mercado em `lib/market.ts`): para ajustar, é só mudar aqui, o servidor cobra o que está aqui.
  */
-export const PACK_SHOP_PRICES: Record<PackTier, number> = { A: 1500, B: 900, C: 500, D: 250 };
+export const PACK_SHOP_PRICES: Record<PackTier, number> = { A: 1000, B: 700, C: 400, D: 200 };
 
 export const PACK_SHOP_TIERS: readonly PackTier[] = ["A", "B", "C", "D"];
 
