@@ -22,7 +22,11 @@ export async function getMyGoals(groupId: string): Promise<MyGoals | null> {
     supabase.rpc("get_my_goals", { target_group: groupId }),
     supabase.rpc("get_my_packs"),
   ]);
-  if (goalsResult.error) throw goalsResult.error;
+  // Antes de a migration dos objetivos ser aplicada no banco a função não existe: a Home segue sem o cartão, em vez de quebrar.
+  if (goalsResult.error) {
+    if (goalsResult.error.code === "PGRST202" || /could not find the function/i.test(goalsResult.error.message)) return null;
+    throw goalsResult.error;
+  }
   if (packsResult.error) throw packsResult.error;
   if (goalsResult.data.length === 0) return null;
 
