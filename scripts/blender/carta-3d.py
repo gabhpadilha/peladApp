@@ -430,7 +430,7 @@ if FOG:
     v = nt.nodes.new('ShaderNodeVolumePrincipled'); v.inputs['Density'].default_value = 0.005; v.inputs['Color'].default_value = (0.7, 0.95, 0.8, 1); v.inputs['Anisotropy'].default_value = 0.4
     o = nt.nodes.new('ShaderNodeOutputMaterial'); nt.links.new(v.outputs[0], o.inputs['Volume']); fog.data.materials.append(m)
 
-# ---------- camadas: `camada=carta|circulo|runas|cacos|poeira` renderiza só uma parte, no mesmo enquadramento,
+# ---------- camadas: `camada=carta|circulo|runas|cacos|poeira`, ou `fundo` e `moldura` (com info=0) para o app pôr a foto e os números ao vivo entre as duas; renderiza só uma parte, no mesmo enquadramento,
 # para o app animar cada camada por cima da outra (o círculo gira, as runas flutuam) sem vídeo
 CAMADA = ARGS.get('camada')
 if CAMADA:
@@ -443,6 +443,8 @@ if CAMADA:
         if tn.startswith('caco'): return 'cacos'
         if tn.startswith('Icosphere'): return 'poeira'
         if tn.startswith('Cube') : return 'nevoa'
+        if tn.startswith('placa'): return 'fundo' if CAMADA in ('fundo', 'moldura') else 'carta'
+        if tn.startswith(('moldura', 'capuz', 'cacho')): return 'moldura' if CAMADA in ('fundo', 'moldura') else 'carta'
         return 'carta'
     for ob in scene.objects:
         if ob.type in ('MESH',):
