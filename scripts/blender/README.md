@@ -18,6 +18,10 @@ Argumentos: `frames` (lista `1,5,9` ou faixa `a-b`), `rx`/`ry` (resolução), `s
   só assentam a simulação e não se renderizam.
 - `revelacao-melhor-jogador.py`: pedestal de mármore com aro dourado, piso molhado, holofote que acende com falha, névoa, poeira e fagulhas.
   A carta (foto + skin de cada jogador) entra por cima do vídeo, ao vivo, no clarão do quadro ~62.
+- `bola-murcha.py`: zoeira da rodada (3 s, 90 quadros): bola de futsal velha, meio vazia e amassada (icosfera com gomos pentagonais
+  em cor de vértice, amassado côncavo e rugas), entra quicando sem força, rola, desliza e para murcha sob uma lâmpada fria que
+  tremelica; o preenchimento e a contraluz só iluminam a bola (light linking), para o piso sumir no escuro sem horizonte.
+  ~16 s/quadro em 720x1280 com 24 amostras. Saída `public/revelacao/bola-murcha.*`; a carta cai por cima no app depois que a bola para.
 - `quadra-toro.py`: quadra de futsal molhada (tema Toró) para o fundo do quadro tático, imagem única 800x1480 (`public/mesa/temporal.webp`); as cartas entram por cima pela grade do app.
 - `tunel-rascunho.py`: rascunho do túnel do estádio, descartado pelo dono do app.
 
