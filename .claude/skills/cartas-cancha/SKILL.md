@@ -23,6 +23,7 @@ O dono do app aprova tudo por prévia (print no tamanho do celular). **Sempre** 
 - Preto e dourado fora do Melhor Jogador, cantos em ponta (formato de escudo), logos e bandeiras de clube.
 
 ## Fluxo de uma carta nova
+0. **Pasta da carta (regra do dono do app, 2026-11-11):** toda carta ganha `docs/cartas/<chave>/` com `pecas/` (cada imagem do Gemini como veio: `fundo`, `borda`, `enfeite-*`, `render-*`, `flutuante-*`), `montada/` (`<chave>-2d.webp` e, se houver, `<chave>-3d.webp`, sem foto) e um `README.md` com o que é cada peça e o estado. Guarde as peças assim que chegarem e atualize a tabela de `docs/cartas/README.md`. Nunca trabalhe só com a carta achatada: tirar uma peça de cima da borda deixa defeito.
 1. **Prompt para o Gemini** (o dono gera; você escreve). Primeiro a carta inteira para ele escolher; depois **uma camada por mensagem**: fundo, borda e, só se houver, o render.
    - Formato 5:7, cantos arredondados, simétrica; imagem 2:3 com a carta em ~70% da largura e fundo da imagem **preto puro**, sem contorno branco e sem xadrez.
    - Layout dentro da carta: nome e posição em cima à esquerda, selo vertical "88" em cima à direita, foto grande, faixa "PRÊMIO · R12" e 3 estatísticas no rodapé (ATAQUE, CRIAÇÃO, DEFESA). Nada de bandeira, escudo, preço, estrelas.
