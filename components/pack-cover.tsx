@@ -65,17 +65,19 @@ type PackCoverProps = {
   /** Número da rodada (some nas miniaturas). */
   round?: number | null;
   className?: string;
+  /** Sem o recorte serrilhado de cima: a arte plana, usada como textura do pacote 3D (`scripts/blender/pacote.py`). */
+  flat?: boolean;
 };
 
 /** A capa inteira (proporção 21:32). O tamanho vem de `className` (largura ou altura). */
-export function PackCover({ tier, month, round, className }: PackCoverProps) {
+export function PackCover({ tier, month, round, className, flat = false }: PackCoverProps) {
   const look = TIER_LOOKS[tier];
   const pattern = getPackPattern(month);
   const rgb = look.rgb;
   const inset = `${PACK_CAP_PERCENT + 3.5}% 5.5% 4.5% 5.5%`;
   return (
     <div aria-hidden className={cn("@container relative aspect-[21/32] shrink-0", className)}>
-      <div className="absolute inset-0" style={{ clipPath: CRIMP, background: `linear-gradient(165deg, ${look.from} 0%, ${look.to} 62%, ${look.from} 100%)` }}>
+      <div className="absolute inset-0" style={{ clipPath: flat ? undefined : CRIMP, background: `linear-gradient(165deg, ${look.from} 0%, ${look.to} 62%, ${look.from} 100%)` }}>
         <PatternLayer kind={pattern.kind} rgb={rgb} />
         {/* Tampa: faixa mais escura com a emenda embaixo. */}
         <div className="absolute inset-x-0 top-0" style={{ height: `${PACK_CAP_PERCENT}%`, background: "linear-gradient(180deg, rgba(255,255,255,.1), rgba(0,0,0,.28))" }} />
