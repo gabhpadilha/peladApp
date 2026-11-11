@@ -106,7 +106,9 @@ export function TeamPitch({ team, mode, ratingOf, onRate, theme }: TeamPitchProp
 
       <div
         className={cn(
-          "relative overflow-hidden rounded-2xl border px-[5%] py-[6%]",
+          "relative overflow-hidden rounded-2xl border px-[5%]",
+          // A arte 3D da quadra tem os gols nas pontas: mais espaço em cima e embaixo para as cartas não cobrirem os gols.
+          SCENES_WITH_OWN_LINES.has(theme) ? "py-[15%]" : "py-[6%]",
           scene ?? "bg-gradient-to-b from-card to-background/40",
         )}
       >
