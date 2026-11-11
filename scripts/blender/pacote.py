@@ -1,9 +1,11 @@
 import bpy, bmesh, math, sys, os, time, random
 from mathutils import Vector
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from render_device import setup_device
 ARGS = dict(a.split('=') for a in sys.argv[sys.argv.index('--')+1:]) if '--' in sys.argv else {}
 RES_X = int(ARGS.get('rx', 270)); RES_Y = int(ARGS.get('ry', 480)); SAMPLES = int(ARGS.get('samples', 12)); OUT = ARGS.get('out', '/tmp/pk_out')
 TIER = ARGS.get('tier', 'A'); MODE = ARGS.get('mode', 'anim'); _fr = ARGS.get('frames', '1')
-TEXDIR = ARGS.get('texdir', '/tmp/claude-0/-home-user-peladApp/6e7ba169-6d28-5298-a24b-d3d6b3295bff/scratchpad/pk')
+TEXDIR = ARGS.get('texdir', os.path.join(os.path.dirname(os.path.abspath(__file__)), 'texturas'))
 FRAMES = (list(range(int(_fr.split('-')[0]), int(_fr.split('-')[1]) + 1)) if '-' in _fr else [int(x) for x in _fr.split(',')])
 TIER_RGB = {'A': (1.0, 0.82, 0.3), 'B': (0.72, 0.95, 0.24), 'C': (0.49, 0.83, 0.99), 'D': (0.83, 0.83, 0.85)}[TIER]
 random.seed(3)
@@ -78,7 +80,7 @@ for p in panels: p.ob.parent = root
 # ---- materiais: papel metalizado impresso (frente) e folha lisa (costas)
 def foil_front():
     m = mat('FolhaFrente'); nt = m.node_tree; b = nt.nodes['Principled BSDF']
-    tex = nt.nodes.new('ShaderNodeTexImage'); tex.image = bpy.data.images.load(f'{TEXDIR}/tex_{TIER}.png'); tex.image.colorspace_settings.name = 'sRGB'
+    tex = nt.nodes.new('ShaderNodeTexImage'); tex.image = bpy.data.images.load(os.path.join(TEXDIR, f'capa-{TIER}.jpg')); tex.image.colorspace_settings.name = 'sRGB'
     nz = nt.nodes.new('ShaderNodeTexNoise'); nz.inputs['Scale'].default_value = 9.0; nz.inputs['Detail'].default_value = 8.0; nz.inputs['Roughness'].default_value = 0.65
     nz2 = nt.nodes.new('ShaderNodeTexNoise'); nz2.inputs['Scale'].default_value = 90.0; nz2.inputs['Detail'].default_value = 3.0
     tc = nt.nodes.new('ShaderNodeTexCoord'); nt.links.new(tc.outputs['Object'], nz.inputs['Vector']); nt.links.new(tc.outputs['Object'], nz2.inputs['Vector'])
@@ -179,7 +181,7 @@ def apply(f):
 
 if MODE == 'still':
     co.location = (0, -9.0, 2.2); co.rotation_euler = (CAM_TGT - co.location).to_track_quat('-Z', 'Y').to_euler(); cam.dof.use_dof = False; cam.lens = 50
-scene.render.engine = 'CYCLES'; cy = scene.cycles; cy.device = 'CPU'; cy.samples = SAMPLES; cy.use_denoising = True; cy.denoiser = 'OPENIMAGEDENOISE'; cy.use_adaptive_sampling = True; cy.adaptive_threshold = 0.03
+scene.render.engine = 'CYCLES'; cy = scene.cycles; cy.device = 'CPU'; setup_device(scene, ARGS); cy.samples = SAMPLES; cy.use_denoising = True; cy.denoiser = 'OPENIMAGEDENOISE'; cy.use_adaptive_sampling = True; cy.adaptive_threshold = 0.03
 cy.max_bounces = 7; cy.volume_bounces = 1; cy.sample_clamp_indirect = 10.0
 scene.render.resolution_x = RES_X; scene.render.resolution_y = RES_Y; scene.render.image_settings.file_format = 'PNG'
 if MODE == 'still': scene.render.film_transparent = True; scene.render.image_settings.color_mode = 'RGBA'

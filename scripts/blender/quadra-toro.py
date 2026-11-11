@@ -1,5 +1,7 @@
 import bpy, bmesh, math, sys, os, time, random, json
 from mathutils import Vector
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from render_device import setup_device
 from bpy_extras.object_utils import world_to_camera_view
 ARGS = dict(a.split('=') for a in sys.argv[sys.argv.index('--')+1:]) if '--' in sys.argv else {}
 RES_X = int(ARGS.get('rx', 400)); RES_Y = int(ARGS.get('ry', 740)); SAMPLES = int(ARGS.get('samples', 24)); OUT = ARGS.get('out', '/tmp/q_out.png')
@@ -51,8 +53,8 @@ for y0, sgn in ((0, 1), (Ln, -1)):
     d.line([X(-1.5), Y(y0 + sgn * 6), X(1.5), Y(y0 + sgn * 6)], fill=WH, width=lw)
     for dist in (6.0, 10.0):
         d.ellipse([X(-0.12), Y(y0 + sgn * dist) - 0.12 * S, X(0.12), Y(y0 + sgn * dist) + 0.12 * S], fill=WH)
-img.save('/tmp/quadra_tex.png')
-tex = nt.nodes.new('ShaderNodeTexImage'); tex.image = bpy.data.images.load('/tmp/quadra_tex.png'); tex.image.colorspace_settings.name = 'sRGB'
+img.save(os.path.join(tempfile.gettempdir(), 'quadra_tex.png'))
+tex = nt.nodes.new('ShaderNodeTexImage'); tex.image = bpy.data.images.load(os.path.join(tempfile.gettempdir(), 'quadra_tex.png')); tex.image.colorspace_settings.name = 'sRGB'
 nt.links.new(tc.outputs['UV'], tex.inputs['Vector']); nt.links.new(tex.outputs['Color'], b.inputs['Base Color'])
 # rugosidade: poças
 n1 = nt.nodes.new('ShaderNodeTexNoise'); n1.inputs['Scale'].default_value = 1.1; n1.inputs['Detail'].default_value = 9
@@ -136,7 +138,7 @@ cam = bpy.data.cameras.new('Cam'); cam.lens = 40; co = bpy.data.objects.new('Cam
 if not FLIP: co.location = (0, -8.0, 19.0); tg = Vector((0, 12.0, 0))
 else: co.location = (0, Ln + 8.0, 19.0); tg = Vector((0, Ln - 12.0, 0))
 co.rotation_euler = (tg - co.location).to_track_quat('-Z', 'Y').to_euler(); cam.dof.use_dof = False
-scene.render.engine = 'CYCLES'; cy = scene.cycles; cy.device = 'CPU'; cy.samples = SAMPLES; cy.use_denoising = True; cy.denoiser = 'OPENIMAGEDENOISE'; cy.max_bounces = 6; cy.volume_bounces = 1; cy.sample_clamp_indirect = 8.0
+scene.render.engine = 'CYCLES'; cy = scene.cycles; cy.device = 'CPU'; setup_device(scene, ARGS); cy.samples = SAMPLES; cy.use_denoising = True; cy.denoiser = 'OPENIMAGEDENOISE'; cy.max_bounces = 6; cy.volume_bounces = 1; cy.sample_clamp_indirect = 8.0
 scene.render.resolution_x = RES_X; scene.render.resolution_y = RES_Y; scene.render.image_settings.file_format = 'PNG'
 scene.view_settings.view_transform = 'AgX'; scene.view_settings.exposure = -0.5
 w = bpy.data.worlds.new('W'); scene.world = w; w.use_nodes = True; w.node_tree.nodes['Background'].inputs['Color'].default_value = (0.012, 0.016, 0.04, 1)

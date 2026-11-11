@@ -1,5 +1,7 @@
 import bpy, math, sys, os, time, random
 from mathutils import Vector
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from render_device import setup_device
 ARGS = dict(a.split('=') for a in sys.argv[sys.argv.index('--')+1:]) if '--' in sys.argv else {}
 RES_X = int(ARGS.get('rx', 270)); RES_Y = int(ARGS.get('ry', 480)); SAMPLES = int(ARGS.get('samples', 12)); OUT = ARGS.get('out', '/tmp/dest_out'); _fr = ARGS.get('frames', '1')
 FRAMES = (list(range(int(_fr.split('-')[0]), int(_fr.split('-')[1]) + 1)) if '-' in _fr else [int(x) for x in _fr.split(',')])
@@ -81,7 +83,7 @@ for fr_ in range(1, 151, 3):
     co.location = campos(fr_); co.keyframe_insert('location', frame=fr_)
     cam.dof.focus_distance = (tgt.location - co.location).length; cam.dof.keyframe_insert('focus_distance', frame=fr_)
 co.location = campos(150); co.keyframe_insert('location', frame=150)
-scene.render.engine = 'CYCLES'; cy = scene.cycles; cy.device = 'CPU'; cy.samples = SAMPLES; cy.use_denoising = True; cy.denoiser = 'OPENIMAGEDENOISE'
+scene.render.engine = 'CYCLES'; cy = scene.cycles; cy.device = 'CPU'; setup_device(scene, ARGS); cy.samples = SAMPLES; cy.use_denoising = True; cy.denoiser = 'OPENIMAGEDENOISE'
 cy.use_adaptive_sampling = True; cy.adaptive_threshold = 0.03; cy.max_bounces = 5; cy.volume_bounces = 1; cy.volume_step_rate = 2.0; cy.sample_clamp_indirect = 8.0
 scene.render.resolution_x = RES_X; scene.render.resolution_y = RES_Y; scene.render.image_settings.file_format = 'PNG'
 scene.view_settings.view_transform = 'AgX'; scene.view_settings.exposure = -0.2

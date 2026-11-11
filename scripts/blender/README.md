@@ -40,3 +40,36 @@ O repositório depende do Blender aberto com o addon MCP e da Meshy (paga), ent�
 
 **Final sem travar:** a última pose de cada trecho tem que estar quase parada (câmera desacelerando, luzes estáveis,
 faíscas encolhendo até sumir), porque o app para o vídeo no último quadro.
+
+## Renderizar na placa de vídeo (máquina do dono)
+
+Todo script aceita `device=gpu`: `render_device.py` liga o Cycles em OptiX (NVIDIA RTX), CUDA (NVIDIA), HIP (AMD),
+oneAPI (Intel) ou Metal (Mac), nessa ordem; sem placa, avisa e segue na CPU. As texturas ficam em `texturas/`.
+
+**No Windows (recomendado; no WSL a GPU só funciona com NVIDIA e o OptiX nem sempre):** instale o Python 3.13
+(python.org) e, no PowerShell, dentro da pasta do projeto:
+
+```powershell
+py -3.13 -m venv .blender-venv
+.blender-venv\Scripts\pip install bpy==5.3.0 pillow numpy
+.blender-venv\Scripts\python scripts\blender\destaques.py -- device=gpu rx=720 ry=1280 samples=64 frames=1-150 out=C:\renders\destaques
+```
+
+A primeira linha impressa diz a placa usada (`GPU OPTIX NVIDIA GeForce ...`). Os quadros saem em PNG na pasta `out`;
+para virar vídeo, com o ffmpeg:
+
+```powershell
+ffmpeg -framerate 30 -i C:\renders\destaques\d_%04d.png -c:v libx264 -pix_fmt yuv420p -crf 20 -movflags +faststart destaques.mp4
+ffmpeg -framerate 30 -i C:\renders\destaques\d_%04d.png -c:v libvpx-vp9 -b:v 0 -crf 34 destaques.webm
+```
+
+Na GPU dá para subir as amostras (`samples=64` a `128`) e a resolução (`rx=1080 ry=1920`) sem esperar horas.
+`.blender-venv/` não vai para o Git.
+
+| Script | Quadros | Saída (prefixo) |
+| --- | --- | --- |
+| `cortina.py` | 1-160 | `f_` |
+| `destaques.py` | 1-150 (e `slots.json`, posição de cada pedestal na tela) | `d_` |
+| `spot2.py` (Melhor Jogador, final suave) | 1-150 | `s_` |
+| `pacote.py` (`tier=A..D`, `mode=anim` ou `mode=still`) | 1-120 | `p_` |
+| `quadra-toro.py` (`flip=1` = lado do time Preto) | imagem única | `out=arquivo.png` |

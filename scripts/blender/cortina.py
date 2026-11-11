@@ -1,5 +1,7 @@
 import bpy, bmesh, math, sys, os, time
 from mathutils import Vector
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from render_device import setup_device
 
 ARGS = dict(a.split('=') for a in sys.argv[sys.argv.index('--')+1:]) if '--' in sys.argv else {}
 RES_X = int(ARGS.get('rx', 270)); RES_Y = int(ARGS.get('ry', 480)); SAMPLES = int(ARGS.get('samples', 16))
@@ -169,7 +171,7 @@ def cam_at(frame):
 for fr_ in range(1, 151, 3): cam_at(fr_)
 
 # ---------- render ----------
-scene.render.engine = 'CYCLES'; cy = scene.cycles; cy.device = 'CPU'; cy.samples = SAMPLES; cy.use_denoising = True; cy.denoiser = 'OPENIMAGEDENOISE'
+scene.render.engine = 'CYCLES'; cy = scene.cycles; cy.device = 'CPU'; setup_device(scene, ARGS); cy.samples = SAMPLES; cy.use_denoising = True; cy.denoiser = 'OPENIMAGEDENOISE'
 cy.use_adaptive_sampling = True; cy.adaptive_threshold = 0.03; cy.max_bounces = 6; cy.volume_bounces = 1; cy.volume_step_rate = 2.0
 scene.render.resolution_x = RES_X; scene.render.resolution_y = RES_Y; scene.render.resolution_percentage = 100
 scene.render.image_settings.file_format = 'PNG'; scene.render.film_transparent = False
