@@ -148,7 +148,7 @@ type RoundRankingInput = {
   packsApply: boolean;
 };
 
-/** Classificação de UMA rodada por pontos (a mesma conta do ranking da temporada), só de quem jogou. */
+/** Classificação de UMA rodada, só de quem jogou: ordem pela nota da rodada; os pontos (a conta do ranking do mês) vão ao lado. */
 export function computeRoundRanking({ match, players, evaluations, awards, confirmedGoals, packsApply }: RoundRankingInput): RoundRankingEntry[] {
   const present = new Set(match.presentPlayerIds);
   const nickById = new Map(players.map((player) => [player.id, player.nickname]));
@@ -177,13 +177,16 @@ export function computeRoundRanking({ match, players, evaluations, awards, confi
     const points = Math.round(score ?? 0) + playerAwards.reduce((sum, award) => sum + award.points, 0) + goalPoints;
     return { playerId, nickname: nickById.get(playerId) ?? "?", points, score, goals, goalPoints, awards: playerAwards };
   });
-  rows.sort((a, b) => b.points - a.points || (b.score ?? -1) - (a.score ?? -1) || a.nickname.localeCompare(b.nickname, "pt-BR"));
+  // Ordem pela nota da rodada (decisão do dono do app em 2026-11-11): o 1º é sempre o Melhor Jogador e a posição é a
+  // mesma do sorteio do pacote no banco (`pack_round_ranking`, empate na nota divide a posição). Os pontos só desempatam
+  // a ordem na tela e seguem para o ranking do mês.
+  rows.sort((a, b) => (b.score ?? -1) - (a.score ?? -1) || b.points - a.points || a.nickname.localeCompare(b.nickname, "pt-BR"));
 
-  let lastPoints = Number.NaN;
+  let lastScore: number | null | undefined;
   let lastPosition = 0;
   return rows.map((row, index) => {
-    const position = row.points === lastPoints ? lastPosition : index + 1;
-    lastPoints = row.points;
+    const position = index > 0 && row.score === lastScore ? lastPosition : index + 1;
+    lastScore = row.score;
     lastPosition = position;
     return {
       ...row,

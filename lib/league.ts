@@ -19,11 +19,13 @@ import {
   type Progression,
   type RoundRewards,
 } from "@/lib/progression";
+import { computeRoundCard } from "@/lib/ovr";
+import { THREE_STAT_RATINGS_FROM } from "@/lib/rating-stats";
 import { computeRankingPoints, computeRoundRanking, type RoundRankingEntry } from "@/lib/ranking-points";
 import { computeGoalTotals } from "@/lib/goal-ranking";
 import { requireActiveMembership } from "@/lib/session";
 import { createClient } from "@/lib/supabase/server";
-import { awardOrder, type Award } from "@/types/award";
+import { awardOrder, type Award, type AwardKind } from "@/types/award";
 import { isCardSkinKey } from "@/types/card-skin";
 import type { Json } from "@/types/database";
 import type { Evaluation, Match } from "@/types/match";
@@ -47,6 +49,19 @@ export function readFrozenAttributes<Key extends PlayerAttribute>(
       return [key, typeof attribute === "number" ? attribute : null];
     }),
   ) as Record<Key, number | null>;
+}
+
+/** Prêmios do mês: a carta é a foto da carta geral no dia (não há uma rodada só para mostrar). */
+const MONTH_AWARD_KINDS: ReadonlySet<AwardKind> = new Set(["jogador_do_mes", "campeao_do_mes"]);
+
+/**
+ * Carta da rodada nos prêmios (decisão do dono do app em 2026-11-11): nas rodadas com 3 notas (desde
+ * `THREE_STAT_RATINGS_FROM`), a carta de um prêmio da rodada mostra o desempenho daquela rodada (as 3 estatísticas e o
+ * OVR das notas que contam nela), sem o +1 e sem os gols, para bater com o selo ("CRI 7,7", "nota 8,2"). O que está
+ * gravado em `awards` (a carta geral com +1) segue valendo para os prêmios do mês e para as rodadas de antes.
+ */
+function usesRoundCard(kind: AwardKind, matchDate: string): boolean {
+  return !MONTH_AWARD_KINDS.has(kind) && matchDate >= THREE_STAT_RATINGS_FROM;
 }
 
 /**
@@ -205,28 +220,47 @@ export async function getLeague(nextPath = "/") {
       .map((evaluation) => ratedKey(evaluation.matchId, evaluation.playerId)),
   );
 
+  // Notas que contam de cada jogador em cada rodada, para a carta da rodada dos prêmios (montado uma vez).
+  const roundEvaluations = new Map<string, Evaluation[]>();
+  for (const evaluation of evaluations) {
+    const key = ratedKey(evaluation.matchId, evaluation.playerId);
+    const list = roundEvaluations.get(key);
+    if (list) list.push(evaluation);
+    else roundEvaluations.set(key, [evaluation]);
+  }
+
   const awards: Award[] = awardRows
     .flatMap((award) => {
       const profile = profileById.get(award.member_id);
       const match = matchById.get(award.match_id);
       if (!profile || !match) return [];
 
-      // Apelido e foto atuais; posição, OVR e atributos congelados no prêmio.
+      // Apelido e foto atuais; posição, OVR e atributos congelados no prêmio, ou a carta da rodada (abaixo).
+      const isGoalkeeperCard = award.position === "GOL";
+      const roundCard = usesRoundCard(award.kind, match.date)
+        ? computeRoundCard(roundEvaluations.get(ratedKey(award.match_id, award.member_id)) ?? [])
+        : null;
+      const roundAttributes =
+        roundCard && roundCard.ovr !== null && GOALKEEPER_ATTRIBUTES.some((key) => key in roundCard.attributes) === isGoalkeeperCard
+          ? (roundCard.attributes as Json)
+          : null;
+      const ovr = roundAttributes !== null && roundCard ? roundCard.ovr : award.ovr;
+      const attributes = roundAttributes ?? award.attributes;
       const card: Player =
         award.position === "GOL"
           ? {
               ...profile,
               role: "goalkeeper",
               position: "GOL",
-              ovr: award.ovr,
-              attributes: readFrozenAttributes(award.attributes, GOALKEEPER_ATTRIBUTES),
+              ovr,
+              attributes: readFrozenAttributes(attributes, GOALKEEPER_ATTRIBUTES),
             }
           : {
               ...profile,
               role: "outfield",
               position: award.position,
-              ovr: award.ovr,
-              attributes: readFrozenAttributes(award.attributes, OUTFIELD_ATTRIBUTES),
+              ovr,
+              attributes: readFrozenAttributes(attributes, OUTFIELD_ATTRIBUTES),
             };
 
       return [

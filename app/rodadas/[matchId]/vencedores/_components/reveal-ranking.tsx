@@ -12,8 +12,8 @@ type RevealRankingProps = {
 };
 
 /**
- * A classificação da rodada por pontos, depois dos prêmios (pedido do dono do app em 2026-11-10): entra do último para o
- * primeiro, com o pacote que cada um ganhou; tocar num nome mostra como os pontos foram compostos.
+ * A classificação da rodada pela nota, depois dos prêmios (pedido do dono do app em 2026-11-10): entra do último para o
+ * primeiro, com o pacote que cada um ganhou; tocar num nome mostra os pontos que ela somou no mês.
  */
 export function RevealRanking({ round, entries, myId, nextLabel, onNext }: RevealRankingProps) {
   const hasPacks = entries.some((entry) => entry.packTier !== null);
@@ -28,7 +28,8 @@ export function RevealRanking({ round, entries, myId, nextLabel, onNext }: Revea
         </span>
         <h2 className="font-display text-4xl leading-none font-extrabold uppercase">Classificação da rodada {round}</h2>
         <p className="text-sm text-muted-foreground">
-          {hasPacks ? "Os pontos decidem o pacote de cada um. " : ""}Toque num nome para ver como foi composta a pontuação.
+          Ordem pela nota da rodada{hasPacks ? ", que também decide o pacote de cada um" : ""}. Toque num nome para ver os pontos que
+          ele somou no ranking do mês.
         </p>
       </div>
       <RoundRankingList entries={entries} myId={myId} animated className="w-full max-w-sm" />

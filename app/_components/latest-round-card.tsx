@@ -3,7 +3,7 @@ import { ChevronDownIcon, PackageOpenIcon } from "lucide-react";
 import { PlayerCard } from "@/components/player-card";
 import { SectionTitle } from "@/components/section-title";
 import { formatShortDate } from "@/lib/format-date";
-import { AWARD_LABELS, formatAwardResult, type Award } from "@/types/award";
+import { AWARD_LABELS, formatAwardResult, formatRoundScore, type Award } from "@/types/award";
 import type { Match } from "@/types/match";
 import { RoundRankingSheet } from "@/components/round-ranking";
 import type { RoundRankingEntry } from "@/lib/ranking-points";
@@ -119,8 +119,10 @@ export function LatestRoundCard({ match, awards, ranking, myId }: LatestRoundCar
                 >
                   <span className="w-4 text-sm text-muted-foreground tabular-nums">{entry.position}</span>
                   <span className="min-w-0 flex-1 truncate font-medium">{entry.nickname}</span>
-                  <span className="font-display text-lg font-bold tabular-nums">{entry.points}</span>
-                  <span className="text-xs text-muted-foreground">pts</span>
+                  <span className="text-xs text-muted-foreground">nota</span>
+                  <span className="font-display text-lg font-bold tabular-nums">
+                    {entry.score === null ? "–" : formatRoundScore(entry.score / 10)}
+                  </span>
                 </Link>
               </li>
             ))}

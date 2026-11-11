@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { POINTS_PER_GOAL, type RoundRankingEntry } from "@/lib/ranking-points";
 import { cn } from "@/lib/utils";
-import { AWARD_LABELS } from "@/types/award";
+import { AWARD_LABELS, formatRoundScore } from "@/types/award";
 
 type RoundRankingListProps = {
   entries: readonly RoundRankingEntry[];
@@ -19,7 +19,7 @@ type RoundRankingListProps = {
   animated?: boolean;
 };
 
-/** A linha de uma posição: posição, apelido, pontos, pacote ganho, e, ao tocar, de onde vieram os pontos. */
+/** A linha de uma posição: posição, apelido, nota da rodada, pacote ganho e, ao tocar, os pontos que ela somou no mês. */
 function RankingRow({
   entry,
   isMine,
@@ -50,17 +50,21 @@ function RankingRow({
         </span>
         <span className="min-w-0 flex-1">
           <span className="block truncate font-medium">{entry.nickname}</span>
-          {entry.packTier && <span className="block text-xs text-muted-foreground">Pacote {PACK_TIER_NAMES[entry.packTier]}</span>}
+          <span className="block truncate text-xs text-muted-foreground">
+            {entry.packTier ? `Pacote ${PACK_TIER_NAMES[entry.packTier]} · ` : ""}
+            {entry.points} pts no mês
+          </span>
         </span>
         {entry.packTier && <PackCover tier={entry.packTier} className="h-10 shrink-0" />}
-        <span className="flex shrink-0 items-baseline gap-1 font-display font-extrabold tabular-nums">
-          <span className="text-2xl">{entry.points}</span>
-          <span className="text-xs text-muted-foreground">pts</span>
+        <span className="flex shrink-0 flex-col items-end font-display leading-none font-extrabold tabular-nums">
+          <span className="text-xs font-semibold text-muted-foreground uppercase">nota</span>
+          <span className="text-2xl">{entry.score === null ? "–" : formatRoundScore(entry.score / 10)}</span>
         </span>
         <ChevronDownIcon aria-hidden className={cn("size-4 shrink-0 text-muted-foreground transition-transform", isOpen && "rotate-180")} />
       </button>
       {isOpen && (
         <dl className="flex flex-col gap-1.5 border-t px-3 py-3 text-sm">
+          <p className="text-xs text-muted-foreground">Pontos que essa rodada soma no ranking do mês:</p>
           <div className="flex justify-between">
             <dt className="text-muted-foreground">Nota da rodada</dt>
             <dd className="font-semibold tabular-nums">{entry.score === null ? "sem notas" : `+${Math.round(entry.score)}`}</dd>
@@ -136,8 +140,8 @@ export function RoundRankingSheet({ round, entries, myId = null, label = "Ver cl
         <SheetHeader>
           <SheetTitle className="font-display text-2xl uppercase">Classificação da rodada {round}</SheetTitle>
           <SheetDescription>
-            Pontos da rodada: a nota, os prêmios e os gols. Toque num nome para ver como foi composta
-            {hasPacks ? "; ao lado, o pacote que cada um ganhou" : ""}.
+            Ordem pela nota da rodada{hasPacks ? ", que também decide o pacote de cada um" : ""}. Toque num nome para ver os
+            pontos que ele somou no ranking do mês.
           </SheetDescription>
         </SheetHeader>
         <div className="overflow-y-auto px-4 pb-6">
