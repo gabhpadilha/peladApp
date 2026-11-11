@@ -28,6 +28,14 @@ const PITCH_SCENES: Record<CardThemeKey, string | null> = {
   temporal: "border-sky-300/25 bg-[#060a12] bg-[url(/mesa/temporal.webp)] bg-[length:100%_100%]",
 };
 
+/**
+ * Arte do Time Preto, quando ela é diferente: a quadra do Toró é um render 3D da quadra inteira vista de trás do gol do time
+ * (cada time vê a quadra a partir do seu gol, que fica embaixo, e o do adversário lá em cima).
+ */
+const PITCH_SCENES_TEAM_2: Partial<Record<CardThemeKey, string>> = {
+  temporal: "border-sky-300/25 bg-[#060a12] bg-[url(/mesa/temporal-preto.webp)] bg-[length:100%_100%]",
+};
+
 /** Cenários que já trazem as linhas da quadra na própria arte (render 3D do Blender): sem as linhas de código por cima. */
 const SCENES_WITH_OWN_LINES: ReadonlySet<CardThemeKey> = new Set<CardThemeKey>(["temporal"]);
 
@@ -78,7 +86,7 @@ export function TeamPitch({ team, mode, ratingOf, onRate, theme }: TeamPitchProp
     () => assignFormation(team.starters.map((entry) => ({ ...entry, position: entry.slotPosition }))),
     [team.starters],
   );
-  const scene = PITCH_SCENES[theme];
+  const scene = (team.number === 2 ? PITCH_SCENES_TEAM_2[theme] : undefined) ?? PITCH_SCENES[theme];
   const cardFor = (entry: BoardPlayer) => (
     <BoardCard entry={entry} mode={mode} rating={ratingOf(entry.player.id)} onRate={onRate} />
   );
