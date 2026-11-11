@@ -31,9 +31,12 @@ SKINS = {
                       cor=(0.25, 1.0, 0.55), capuz=True, cachos=True, circulo='destino-circulo.webp', aros=True, runas=True, cacos=(0.01, 0.62, 0.2)),
     'diluvio':   dict(bg='premium-diluvio.webp', vaza='premium-diluvio-vaza.webp', box=None, luz='bright',
                       cor=(0.45, 0.7, 1.0), circulo='diluvio-anel.webp', circulo_tam=3.0, placa_justa=True, luz_lo=0.8, gotas=True, cacos=(0.05, 0.3, 0.85)),
-    'relampago': dict(bg='premium-relampago.webp', vaza='premium-relampago-vaza.webp', box=None, luz='bright', cor=(1.0, 0.68, 0.28)),
-    'nuvem':     dict(bg='premium-nuvem.webp', vaza='premium-nuvem-vaza.webp', box=None, luz='bright', cor=(0.82, 0.88, 1.0)),
-    'lenda':     dict(bg='skin-lenda.webp', vaza='skin-lenda-vaza.webp', box=None, luz='bright', cor=(0.5, 0.65, 1.0)),
+    'relampago': dict(bg='premium-relampago.webp', vaza='premium-relampago-vaza.webp', box=None, luz='bright', cor=(1.0, 0.68, 0.28),
+                      peca='nuvem', faixa=(150, 600), nuvem_cor=(0.08, 0.07, 0.07), nuvem_brasa=0.9, brasa=(1.0, 0.55, 0.15), raio_cor=(1.0, 0.8, 0.45)),
+    'nuvem':     dict(bg='premium-nuvem.webp', vaza='premium-nuvem-vaza.webp', box=None, luz='bright', cor=(0.82, 0.88, 1.0),
+                      peca='nuvem', faixa=(180, 600), nuvem_cor=(0.42, 0.46, 0.54), brasa=(0.75, 0.85, 1.0), raio_cor=(0.9, 0.95, 1.0)),
+    'lenda':     dict(bg='skin-lenda.webp', vaza='skin-lenda-vaza.webp', box=None, luz='bright', cor=(0.5, 0.65, 1.0),
+                      peca='cristal', faixa=(190, 740), cristal_cor=(0.12, 0.42, 1.0), brasa=(1.0, 0.55, 0.15), raio_cor=(0.6, 0.85, 1.0)),
 }
 CFG = SKINS[SKIN]
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
@@ -195,6 +198,15 @@ if CFG.get('capuz'):
     HOOD_PX = (376, 0, 624, 214)
     va_np = np.array(va); va_np[HOOD_PX[1]:HOOD_PX[3], HOOD_PX[0]:HOOD_PX[2], 3] = 0
     va_np[HOOD_PX[3]:248, 392:608, 3] = 0           # a presilha de baixo do capuz pintado
+    va = Image.fromarray(va_np)
+if CFG.get('peca'):
+    # a peça pintada que vazava pela direita sai; a moldura embaixo dela é refeita espelhando o lado esquerdo
+    va_np = np.array(va); Hh, Ww = va_np.shape[:2]; ow = round(Hh * 5 / 7); y0, y1 = CFG['faixa']; x0 = int(ow * 0.8)
+    mir = np.zeros_like(va_np[y0:y1, x0:])
+    for x in range(x0, Ww):
+        if ow - 1 - x >= 0: mir[:, x - x0] = va_np[y0:y1, ow - 1 - x]
+    fe = 40; w8 = np.ones(y1 - y0, np.float32); w8[:fe] = np.linspace(0, 1, fe); w8[-fe:] = np.linspace(1, 0, fe)
+    seg = va_np[y0:y1, x0:].astype(np.float32); va_np[y0:y1, x0:] = (seg * (1 - w8[:, None, None]) + mir * w8[:, None, None]).astype(np.uint8)
     va = Image.fromarray(va_np)
 VAZA_PATH = os.path.join(OUT, '_moldura-sem-capuz.png'); va.save(VAZA_PATH)
 a = np.asarray(va.split()[3].filter(ImageFilter.GaussianBlur(4)), dtype=np.float32) / 255.0
@@ -404,6 +416,86 @@ if CFG.get('cachos'):
     for side, px in ((-1, 95), (1, 905)):
         x, y = vaza_xy(px, 150); cluster(x, y, side, rig)
 
+# ---------- a peça que vaza, feita do zero: nuvem volumétrica (Relâmpago, Nuvem carregada) ou cristal (Lenda do Trovão) ----------
+def bolt(start, end, col, k=40, seed=0, jitter=0.028, branches=2, width=0.0022, name='raio'):
+    """Raio em zigue-zague (curva com espessura e luz própria), com galhos."""
+    rnd = random.Random(seed)
+    def path(a, b, n, jit):
+        pts = []
+        for i in range(n + 1):
+            t = i / n; p = a.lerp(b, t)
+            if 0 < i < n: p += Vector((rnd.uniform(-jit, jit), rnd.uniform(-jit, jit), rnd.uniform(-jit, jit) * 0.5))
+            pts.append(p)
+        return pts
+    cu = bpy.data.curves.new(name, 'CURVE'); cu.dimensions = '3D'; cu.bevel_depth = width; cu.bevel_resolution = 2
+    main = path(Vector(start), Vector(end), k, jitter)
+    lines = [main]
+    for _ in range(branches):
+        i = rnd.randint(k // 4, 3 * k // 4); a = main[i]
+        d = (Vector(end) - Vector(start)).normalized(); side = Vector((-d.y, d.x, 0)) * rnd.choice((-1, 1))
+        lines.append(path(a, a + d * rnd.uniform(0.12, 0.25) + side * rnd.uniform(0.08, 0.18), k // 3, jitter * 0.7))
+    for ln in lines:
+        sp = cu.splines.new('POLY'); sp.points.add(len(ln) - 1)
+        for j, p in enumerate(ln): sp.points[j].co = (*p, 1)
+    ob = link(bpy.data.objects.new(name, cu), rig); ob.data.materials.append(emit_mat(name + '-luz', col, 25))
+    return ob
+
+if CFG.get('peca'):
+    y0, y1 = CFG['faixa']; ow = VAZA_PX[1] * 5 / 7
+    _, ytop = vaza_xy(0, y0); _, ybot = vaza_xy(0, y1); cy_ = (ytop + ybot) / 2; hh_ = (ytop - ybot)
+    edge = W / 2                                               # borda direita da carta
+    if CFG['peca'] == 'nuvem':
+        # cúmulo de bolhas volumétricas (ruído dentro de cada esfera): a nuvem atravessa a moldura pela direita
+        m = bpy.data.materials.new('nuvem3d'); m.use_nodes = True; nt = m.node_tree; nt.nodes.clear()
+        tc = nt.nodes.new('ShaderNodeTexCoord')
+        nz = nt.nodes.new('ShaderNodeTexNoise'); nz.inputs['Scale'].default_value = 1.8; nz.inputs['Detail'].default_value = 12; nz.inputs['Roughness'].default_value = 0.68
+        nt.links.new(tc.outputs['Object'], nz.inputs['Vector'])
+        gr = nt.nodes.new('ShaderNodeTexGradient'); gr.gradient_type = 'SPHERICAL'; nt.links.new(tc.outputs['Object'], gr.inputs['Vector'])
+        add = nt.nodes.new('ShaderNodeMath'); add.operation = 'MULTIPLY_ADD'; add.inputs[1].default_value = 0.9
+        nt.links.new(gr.outputs['Fac'], add.inputs[0]); nt.links.new(nz.outputs['Fac'], add.inputs[2])
+        sub = nt.nodes.new('ShaderNodeMath'); sub.operation = 'SUBTRACT'; sub.inputs[1].default_value = 0.78; nt.links.new(add.outputs[0], sub.inputs[0])
+        den = nt.nodes.new('ShaderNodeMath'); den.operation = 'MULTIPLY'; den.use_clamp = False; den.inputs[1].default_value = 120
+        nt.links.new(sub.outputs[0], den.inputs[0])
+        mx = nt.nodes.new('ShaderNodeMath'); mx.operation = 'MAXIMUM'; mx.inputs[1].default_value = 0.0; nt.links.new(den.outputs[0], mx.inputs[0])
+        vol = nt.nodes.new('ShaderNodeVolumePrincipled'); vol.inputs['Color'].default_value = (*CFG['nuvem_cor'], 1); vol.inputs['Anisotropy'].default_value = 0.25
+        nt.links.new(mx.outputs[0], vol.inputs['Density'])
+        if CFG.get('nuvem_brasa'):                          # brasa acesa por dentro da nuvem (Relâmpago)
+            vol.inputs['Emission Color'].default_value = (*CFG['brasa'], 1)
+            em_ = nt.nodes.new('ShaderNodeMath'); em_.operation = 'MULTIPLY'; em_.inputs[1].default_value = CFG['nuvem_brasa']
+            nt.links.new(nz.outputs['Fac'], em_.inputs[0]); nt.links.new(em_.outputs[0], vol.inputs['Emission Strength'])
+        o = nt.nodes.new('ShaderNodeOutputMaterial'); nt.links.new(vol.outputs[0], o.inputs['Volume'])
+        rnd = random.Random(5)
+        for i in range(9):
+            t = i / 8; r = rnd.uniform(0.15, 0.26) * (1.3 if 2 <= i <= 6 else 0.85)
+            bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=3, radius=1,
+                location=(edge + 0.04 + rnd.uniform(0.0, 0.2) * (1 - abs(t - 0.5)), ytop - t * hh_ + rnd.uniform(-0.03, 0.03), 0.12 + rnd.uniform(-0.04, 0.06)))
+            pf = bpy.context.active_object; pf.name = 'peca-nuvem'; pf.scale = (r * 1.25, r, r); pf.parent = rig; pf.data.materials.append(m)   # coordenadas do objeto de -1 a 1
+        for dy, pw in ((0.18, 10), (-0.12, 8), (0.0, 6)):         # brasa/clarão dentro da nuvem
+            L = bpy.data.lights.new('brasa', 'POINT'); L.energy = pw; L.color = CFG['brasa']; L.shadow_soft_size = 0.15
+            link(bpy.data.objects.new('brasa', L), rig).location = (edge + 0.03, cy_ + dy * hh_, 0.12)
+        bolt((edge - 0.05, cy_ + hh_ * 0.42, 0.2), (edge + 0.22, cy_ - hh_ * 0.05, 0.22), CFG['raio_cor'], seed=3, name='raio-a')
+        bolt((edge + 0.18, cy_ + hh_ * 0.1, 0.18), (edge + 0.02, cy_ - hh_ * 0.45, 0.2), CFG['raio_cor'], seed=8, branches=1, name='raio-b')
+    else:
+        # cristal de rocha: cacho de prismas de vidro azul atravessando a borda, raios azuis e fagulhas laranja
+        CRI = glass_mat('cristal-lenda', CFG['cristal_cor'], emit=0.35); CRI.node_tree.nodes['Principled BSDF'].inputs['Roughness'].default_value = 0.1
+        hub = link(bpy.data.objects.new('peca-cristal', None), rig); hub.location = (edge + 0.1, cy_, 0.1)
+        rnd = random.Random(11)
+        for i in range(16):
+            L = rnd.uniform(0.14, 0.4) * (1.35 if i < 3 else 1); r = L * rnd.uniform(0.2, 0.28)
+            ob = link(bpy.data.objects.new('cristal', crystal(L, r)), hub); ob.data.materials.append(CRI)
+            ob.rotation_euler = Euler((rnd.uniform(-0.5, 0.5), rnd.uniform(0, 6.28), math.radians(-90 + rnd.uniform(-55, 55))), 'XYZ')   # apontam para fora da carta
+            ob.location = (rnd.uniform(-0.08, 0.04), rnd.uniform(-hh_ * 0.22, hh_ * 0.22), rnd.uniform(-0.04, 0.06))
+            ob.modifiers.new('b', 'BEVEL').width = 0.004
+        L = bpy.data.lights.new('brilho-cristal', 'POINT'); L.energy = 30; L.color = CFG['cristal_cor']; L.shadow_soft_size = 0.2
+        link(bpy.data.objects.new('brilho-cristal', L), hub).location = (0, 0, 0.15)
+        for j, (a, b) in enumerate((((-0.12, 0.3), (0.25, 0.05)), ((0.2, -0.05), (-0.05, -0.38)), ((0.0, 0.1), (0.3, -0.2)))):
+            bolt((edge + a[0], cy_ + a[1] * hh_, 0.2), (edge + b[0], cy_ + b[1] * hh_, 0.22), CFG['raio_cor'], seed=20 + j, branches=1, name=f'raio-{j}')
+        SPARK = emit_mat('fagulha', CFG['brasa'], 30)
+        for _ in range(26):
+            bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=rnd.uniform(0.003, 0.008),
+                location=(edge + rnd.uniform(-0.12, 0.32), cy_ + rnd.uniform(-hh_ * 0.5, hh_ * 0.5), rnd.uniform(0.05, 0.3)))
+            sp = bpy.context.active_object; sp.name = 'raio-fagulha'; sp.data.materials.append(SPARK); sp.parent = rig
+
 # ---------- círculo arcano atrás da carta ----------
 if CFG.get('circulo'):
     bpy.ops.mesh.primitive_plane_add(size=1)
@@ -515,10 +607,11 @@ if CAMADA:
         if tn.startswith('Icosphere'): return 'poeira'
         if tn.startswith('Cube') : return 'nevoa'
         if tn.startswith('placa'): return 'fundo' if CAMADA in ('fundo', 'moldura') else 'carta'
-        if tn.startswith(('moldura', 'capuz', 'cacho')): return 'moldura' if CAMADA in ('fundo', 'moldura') else 'carta'
+        if tn.startswith('raio'): return 'raios'
+        if tn.startswith(('moldura', 'capuz', 'cacho', 'peca')): return 'moldura' if CAMADA in ('fundo', 'moldura') else 'carta'
         return 'carta'
     for ob in scene.objects:
-        if ob.type in ('MESH',):
+        if ob.type in ('MESH', 'CURVE'):
             g = group(ob)
             ob.hide_render = g != CAMADA
 # ---------- render ----------
