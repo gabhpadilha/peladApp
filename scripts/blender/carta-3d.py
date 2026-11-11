@@ -22,6 +22,20 @@ OUT = ARGS.get('out', '/tmp/carta3d'); VIEW = ARGS.get('view', '34'); FOG = ARGS
 INFO = ARGS.get('info', '1') == '1'
 FOTO = ARGS.get('foto')                  # recorte da foto (PNG com fundo transparente, 1,18:1, enquadramento modelo C do app)
 NOME = ARGS.get('nome', 'Craque')
+SKIN = ARGS.get('skin', 'destino')
+# Cada skin: as artes do Gemini que o app já usa (fundo + moldura com o que vaza) e o que ganha em 3D.
+# `box`: caixa da carta dentro da arte de moldura; None = a regra do app (moldura com a altura da caixa externa e a carta
+# nos 84% do meio dela, `TRIMMED_CARD`). `luz`: o que vira luz própria (green = runas verdes; bright = o mais claro, neon e raios).
+SKINS = {
+    'destino':   dict(bg='premium-destino.webp', vaza='premium-destino-vaza.webp', box=(79, 118, 919, 1293), luz='green',
+                      cor=(0.25, 1.0, 0.55), capuz=True, cachos=True, circulo='destino-circulo.webp', aros=True, runas=True, cacos=(0.01, 0.62, 0.2)),
+    'diluvio':   dict(bg='premium-diluvio.webp', vaza='premium-diluvio-vaza.webp', box=None, luz='bright',
+                      cor=(0.45, 0.7, 1.0), circulo='diluvio-anel.webp', circulo_luz=1.5, luz_lo=0.8, gotas=True, cacos=(0.05, 0.3, 0.85)),
+    'relampago': dict(bg='premium-relampago.webp', vaza='premium-relampago-vaza.webp', box=None, luz='bright', cor=(1.0, 0.68, 0.28)),
+    'nuvem':     dict(bg='premium-nuvem.webp', vaza='premium-nuvem-vaza.webp', box=None, luz='bright', cor=(0.82, 0.88, 1.0)),
+    'lenda':     dict(bg='skin-lenda.webp', vaza='skin-lenda-vaza.webp', box=None, luz='bright', cor=(0.5, 0.65, 1.0)),
+}
+CFG = SKINS[SKIN]
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '..'))
 ART = os.path.join(ROOT, 'public', 'cartas', 'fundos')
 os.makedirs(OUT, exist_ok=True)
@@ -53,6 +67,15 @@ def green_mask(nt, color_socket, gain=6.0):
     nt.links.new(sub.outputs[0], mul.inputs[0]); mul.inputs[1].default_value = gain
     return mul.outputs[0]
 
+def bright_mask(nt, color_socket, lo=None, gain=3.0):
+    lo = CFG.get('luz_lo', 0.62) if lo is None else lo
+    """O que é mais claro (tubo de neon, raios, brilho do render) vira luz própria."""
+    bw = nt.nodes.new('ShaderNodeRGBToBW'); nt.links.new(color_socket, bw.inputs[0])
+    sub = nt.nodes.new('ShaderNodeMath'); sub.operation = 'SUBTRACT'; nt.links.new(bw.outputs[0], sub.inputs[0]); sub.inputs[1].default_value = lo
+    mul = nt.nodes.new('ShaderNodeMath'); mul.operation = 'MULTIPLY'; mul.use_clamp = True
+    nt.links.new(sub.outputs[0], mul.inputs[0]); mul.inputs[1].default_value = gain
+    return mul.outputs[0]
+
 def art_material(name, image, metallic=0.85, rough=0.38, glow=4.0, bump=0.25, use_alpha=True):
     """Arte do Gemini como cor; o verde vira emissão; o brilho vira relevo fino."""
     m, nt, bsdf = new_mat(name)
@@ -60,7 +83,7 @@ def art_material(name, image, metallic=0.85, rough=0.38, glow=4.0, bump=0.25, us
     nt.links.new(tex.outputs['Color'], bsdf.inputs['Base Color'])
     if use_alpha:
         nt.links.new(tex.outputs['Alpha'], bsdf.inputs['Alpha'])
-    g = green_mask(nt, tex.outputs['Color'])
+    g = green_mask(nt, tex.outputs['Color']) if CFG['luz'] == 'green' else bright_mask(nt, tex.outputs['Color'])
     inv = nt.nodes.new('ShaderNodeMath'); inv.operation = 'SUBTRACT'; inv.inputs[0].default_value = metallic
     nt.links.new(g, inv.inputs[1]); inv.use_clamp = True
     nt.links.new(inv.outputs[0], bsdf.inputs['Metallic'])
@@ -106,7 +129,12 @@ def link(ob, parent=None):
 # ---------- medidas: carta 5:7, a caixa da carta dentro da arte de moldura ----------
 W, H, T = 2.0, 2.8, 0.06          # largura, altura, espessura da placa
 R = 0.15                          # raio do canto
-VAZA_PX = (1000, 1400); BOX = (79, 118, 919, 1293)   # lado de fora da moldura na arte (medido pelo alfa)
+from PIL import Image, ImageFilter
+VAZA_PX = Image.open(os.path.join(ART, CFG['vaza'])).size
+if CFG['box']:
+    BOX = CFG['box']                              # medido pelo alfa
+else:
+    _ow = VAZA_PX[1] * 5 / 7; BOX = (0.08 * _ow, 0.08 * VAZA_PX[1], 0.92 * _ow, 0.92 * VAZA_PX[1])
 px2u = W / (BOX[2] - BOX[0])
 FW, FH = VAZA_PX[0] * px2u, VAZA_PX[1] * px2u
 FCX = (VAZA_PX[0] / 2 - (BOX[0] + BOX[2]) / 2) * px2u
@@ -137,19 +165,20 @@ for f in bm.faces:
 bm.to_mesh(me); bm.free()
 placa = link(bpy.data.objects.new('placa', me), rig)
 bev = placa.modifiers.new('bev', 'BEVEL'); bev.width = 0.012; bev.segments = 3; bev.limit_method = 'ANGLE'
-placa.data.materials.append(art_material('fundo', img('premium-destino.webp'), metallic=0.55, rough=0.45, glow=5.0, bump=0.35, use_alpha=False))
+placa.data.materials.append(art_material('fundo', img(CFG['bg']), metallic=0.55, rough=0.45, glow=5.0, bump=0.35, use_alpha=False))
 _, nt, b = new_mat('ferro'); b.inputs['Base Color'].default_value = (0.05, 0.055, 0.06, 1); b.inputs['Metallic'].default_value = 1; b.inputs['Roughness'].default_value = 0.42
 placa.data.materials.append(bpy.data.materials['ferro'])
 for p in placa.data.polygons: p.use_smooth = False
 
 # ---------- moldura em relevo: o alfa da arte vira altura ----------
 from PIL import Image, ImageFilter
-va = Image.open(os.path.join(ART, 'premium-destino-vaza.webp')).convert('RGBA')
-# o capuz pintado sai da arte (o miolo dele é vazado e ficava chapado): entra um capuz 3D de pano no lugar
-HOOD_PX = (376, 0, 624, 214)
-va_np = np.array(va); va_np[HOOD_PX[1]:HOOD_PX[3], HOOD_PX[0]:HOOD_PX[2], 3] = 0
-va_np[HOOD_PX[3]:248, 392:608, 3] = 0           # a presilha de baixo do capuz pintado
-va = Image.fromarray(va_np)
+va = Image.open(os.path.join(ART, CFG['vaza'])).convert('RGBA')
+if CFG.get('capuz'):
+    # o capuz pintado sai da arte (o miolo dele é vazado e ficava chapado): entra a peça 3D do capuz no lugar
+    HOOD_PX = (376, 0, 624, 214)
+    va_np = np.array(va); va_np[HOOD_PX[1]:HOOD_PX[3], HOOD_PX[0]:HOOD_PX[2], 3] = 0
+    va_np[HOOD_PX[3]:248, 392:608, 3] = 0           # a presilha de baixo do capuz pintado
+    va = Image.fromarray(va_np)
 VAZA_PATH = os.path.join(OUT, '_moldura-sem-capuz.png'); va.save(VAZA_PATH)
 a = np.asarray(va.split()[3].filter(ImageFilter.GaussianBlur(4)), dtype=np.float32) / 255.0
 lum = np.asarray(va.convert('L').filter(ImageFilter.GaussianBlur(1.2)), dtype=np.float32) / 255.0
@@ -170,36 +199,37 @@ mold.data.materials.append(art_material('moldura', bpy.data.images.load(VAZA_PAT
 # ---------- capuz 3D de pano verde-musgo no meio do topo ----------
 # capuz: a peça 3D que o dono do app mandou (render sobre preto, recortado em `texturas/destino-capuz.png`),
 # numa placa com relevo (o brilho e o recorte viram altura; o miolo escuro fica fundo)
-CAPUZ = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'texturas', 'destino-capuz.png')
-cap = Image.open(CAPUZ).convert('RGBA'); cw_, ch_ = cap.size
-from PIL import ImageEnhance                     # mais verde-musgo e mais escuro (a névoa e o AgX lavavam o pano)
-cap_rgb = ImageEnhance.Brightness(ImageEnhance.Color(cap.convert('RGB')).enhance(1.6)).enhance(0.72)
-cap_tex = Image.merge('RGBA', (*cap_rgb.split(), cap.split()[3])); CAP_TEX = os.path.join(OUT, '_capuz.png'); cap_tex.save(CAP_TEX)
-CAP_W = float(ARGS.get('capuz_w', 0.62)); CAP_H = CAP_W * ch_ / cw_
-cap_a = np.asarray(cap.split()[3].filter(ImageFilter.GaussianBlur(3)), np.float32) / 255
-cap_l = np.asarray(cap.convert('L').filter(ImageFilter.GaussianBlur(2)), np.float32) / 255
-cap_h = np.clip(cap_a ** 0.6 * 0.55 + cap_l * cap_a * 0.45, 0, 1)
-cap_hp = os.path.join(OUT, '_altura-capuz.png'); Image.fromarray((cap_h * 255).astype(np.uint8)).save(cap_hp)
-bpy.ops.mesh.primitive_grid_add(x_subdivisions=260, y_subdivisions=int(260 * ch_ / cw_), size=1)
-hood = bpy.context.active_object; hood.name = 'capuz'; hood.scale = (CAP_W, CAP_H, 1)
-bpy.ops.object.transform_apply(scale=True); hood.parent = rig
-hood.location = (0, H / 2 - CAP_H / 2 + float(ARGS.get('capuz_y', 0.41)), 0.06)
-ct = bpy.data.textures.new('altura-capuz', 'IMAGE'); ct.image = bpy.data.images.load(cap_hp); ct.extension = 'EXTEND'
-cd_ = hood.modifiers.new('relevo', 'DISPLACE'); cd_.texture = ct; cd_.texture_coords = 'UV'; cd_.strength = 0.09; cd_.mid_level = 0.0
-hood.modifiers.new('suave', 'SMOOTH').factor = 0.5
-bpy.ops.object.shade_smooth()
-m, nt, b = new_mat('capuz')
-tx = nt.nodes.new('ShaderNodeTexImage'); tx.image = bpy.data.images.load(CAP_TEX); tx.extension = 'CLIP'; tx.interpolation = 'Cubic'
-dim = nt.nodes.new('ShaderNodeMix'); dim.data_type = 'RGBA'; dim.blend_type = 'MULTIPLY'; dim.inputs['Factor'].default_value = 1.0
-nt.links.new(tx.outputs['Color'], dim.inputs['A']); dim.inputs['B'].default_value = (0.3, 0.3, 0.3, 1)
-nt.links.new(dim.outputs['Result'], b.inputs['Base Color']); nt.links.new(tx.outputs['Alpha'], b.inputs['Alpha'])
-# o capuz já veio iluminado no render do dono: a cor dele entra quase toda como luz própria, e a cena só soma relevo e sombra
-nt.links.new(tx.outputs['Color'], b.inputs['Emission Color']); b.inputs['Emission Strength'].default_value = 0.75
-b.inputs['Roughness'].default_value = 0.85; b.inputs['Sheen Weight'].default_value = 0.3
-bw_ = nt.nodes.new('ShaderNodeRGBToBW'); nt.links.new(tx.outputs['Color'], bw_.inputs[0])
-bp = nt.nodes.new('ShaderNodeBump'); bp.inputs['Strength'].default_value = 0.3; bp.inputs['Distance'].default_value = 0.003
-nt.links.new(bw_.outputs[0], bp.inputs['Height']); nt.links.new(bp.outputs[0], b.inputs['Normal'])
-hood.data.materials.append(m)
+if CFG.get('capuz'):
+    CAPUZ = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'texturas', 'destino-capuz.png')
+    cap = Image.open(CAPUZ).convert('RGBA'); cw_, ch_ = cap.size
+    from PIL import ImageEnhance                     # mais verde-musgo e mais escuro (a névoa e o AgX lavavam o pano)
+    cap_rgb = ImageEnhance.Brightness(ImageEnhance.Color(cap.convert('RGB')).enhance(1.6)).enhance(0.72)
+    cap_tex = Image.merge('RGBA', (*cap_rgb.split(), cap.split()[3])); CAP_TEX = os.path.join(OUT, '_capuz.png'); cap_tex.save(CAP_TEX)
+    CAP_W = float(ARGS.get('capuz_w', 0.62)); CAP_H = CAP_W * ch_ / cw_
+    cap_a = np.asarray(cap.split()[3].filter(ImageFilter.GaussianBlur(3)), np.float32) / 255
+    cap_l = np.asarray(cap.convert('L').filter(ImageFilter.GaussianBlur(2)), np.float32) / 255
+    cap_h = np.clip(cap_a ** 0.6 * 0.55 + cap_l * cap_a * 0.45, 0, 1)
+    cap_hp = os.path.join(OUT, '_altura-capuz.png'); Image.fromarray((cap_h * 255).astype(np.uint8)).save(cap_hp)
+    bpy.ops.mesh.primitive_grid_add(x_subdivisions=260, y_subdivisions=int(260 * ch_ / cw_), size=1)
+    hood = bpy.context.active_object; hood.name = 'capuz'; hood.scale = (CAP_W, CAP_H, 1)
+    bpy.ops.object.transform_apply(scale=True); hood.parent = rig
+    hood.location = (0, H / 2 - CAP_H / 2 + float(ARGS.get('capuz_y', 0.41)), 0.06)
+    ct = bpy.data.textures.new('altura-capuz', 'IMAGE'); ct.image = bpy.data.images.load(cap_hp); ct.extension = 'EXTEND'
+    cd_ = hood.modifiers.new('relevo', 'DISPLACE'); cd_.texture = ct; cd_.texture_coords = 'UV'; cd_.strength = 0.09; cd_.mid_level = 0.0
+    hood.modifiers.new('suave', 'SMOOTH').factor = 0.5
+    bpy.ops.object.shade_smooth()
+    m, nt, b = new_mat('capuz')
+    tx = nt.nodes.new('ShaderNodeTexImage'); tx.image = bpy.data.images.load(CAP_TEX); tx.extension = 'CLIP'; tx.interpolation = 'Cubic'
+    dim = nt.nodes.new('ShaderNodeMix'); dim.data_type = 'RGBA'; dim.blend_type = 'MULTIPLY'; dim.inputs['Factor'].default_value = 1.0
+    nt.links.new(tx.outputs['Color'], dim.inputs['A']); dim.inputs['B'].default_value = (0.3, 0.3, 0.3, 1)
+    nt.links.new(dim.outputs['Result'], b.inputs['Base Color']); nt.links.new(tx.outputs['Alpha'], b.inputs['Alpha'])
+    # o capuz já veio iluminado no render do dono: a cor dele entra quase toda como luz própria, e a cena só soma relevo e sombra
+    nt.links.new(tx.outputs['Color'], b.inputs['Emission Color']); b.inputs['Emission Strength'].default_value = 0.75
+    b.inputs['Roughness'].default_value = 0.85; b.inputs['Sheen Weight'].default_value = 0.3
+    bw_ = nt.nodes.new('ShaderNodeRGBToBW'); nt.links.new(tx.outputs['Color'], bw_.inputs[0])
+    bp = nt.nodes.new('ShaderNodeBump'); bp.inputs['Strength'].default_value = 0.3; bp.inputs['Distance'].default_value = 0.003
+    nt.links.new(bw_.outputs[0], bp.inputs['Height']); nt.links.new(bp.outputs[0], b.inputs['Normal'])
+    hood.data.materials.append(m)
 LIFT = 5                                        # statsLift das lendárias
 
 # ---------- informações do atleta (como o app desenha a CanchaCard da Destino; dados de exemplo, sem foto) ----------
@@ -336,7 +366,7 @@ def crystal(length, radius, sides=6):
         bm.faces.new([base[i], base[j], mid[j], mid[i]]); bm.faces.new([mid[i], mid[j], tip])
     bm.to_mesh(me); bm.free(); return me
 
-EMER = glass_mat('esmeralda', (0.01, 0.62, 0.2), emit=0.6)
+EMER = glass_mat('cristal', CFG.get('cacos') or (0.01, 0.62, 0.2), emit=0.6)
 def cluster(cx, cy, side, parent, n=7):
     hub = link(bpy.data.objects.new('cacho', None), parent); hub.location = (cx, cy, 0.09)
     for i in range(n):
@@ -347,19 +377,21 @@ def cluster(cx, cy, side, parent, n=7):
         ob.rotation_euler = Euler((random.uniform(-0.5, 0.6), random.uniform(0, 6.28), -side * random.uniform(0.0, 1.1)), 'XYZ')
         ob.location = (random.uniform(-0.07, 0.07), random.uniform(-0.05, 0.05), random.uniform(-0.03, 0.05))
         ob.modifiers.new('b', 'BEVEL').width = 0.004
-for side, px in ((-1, 95), (1, 905)):
-    x, y = vaza_xy(px, 150); cluster(x, y, side, rig)
+if CFG.get('cachos'):
+    for side, px in ((-1, 95), (1, 905)):
+        x, y = vaza_xy(px, 150); cluster(x, y, side, rig)
 
 # ---------- círculo arcano atrás da carta ----------
-bpy.ops.mesh.primitive_plane_add(size=1)
-circ = bpy.context.active_object; circ.name = 'circulo'; circ.scale = (3.5, 3.5, 1); circ.location = (0, 0.05, -0.7)
-bpy.ops.object.transform_apply(scale=True); circ.parent = rig
-circ.data.materials.append(art_material('circulo', img('destino-circulo.webp'), metallic=0.8, rough=0.3, glow=7.0, bump=0.4))
-for rr in (1.71, 1.255):
-    bpy.ops.mesh.primitive_torus_add(major_radius=rr, minor_radius=0.022, major_segments=160, minor_segments=12, location=(0, 0.05, -0.71))
-    t = bpy.context.active_object; t.parent = rig
-    _, nt, b = new_mat('ouro'); b.inputs['Base Color'].default_value = (0.85, 0.62, 0.3, 1); b.inputs['Metallic'].default_value = 1; b.inputs['Roughness'].default_value = 0.25
-    t.data.materials.append(bpy.data.materials[-1])
+if CFG.get('circulo'):
+    bpy.ops.mesh.primitive_plane_add(size=1)
+    circ = bpy.context.active_object; circ.name = 'circulo'; circ.scale = (3.5, 3.5, 1); circ.location = (0, 0.05, -0.7)
+    bpy.ops.object.transform_apply(scale=True); circ.parent = rig
+    circ.data.materials.append(art_material('circulo', img(CFG['circulo']), metallic=0.8, rough=0.3, glow=CFG.get('circulo_luz', 7.0), bump=0.4))
+    for rr in ((1.71, 1.255) if CFG.get('aros') else ()):
+        bpy.ops.mesh.primitive_torus_add(major_radius=rr, minor_radius=0.022, major_segments=160, minor_segments=12, location=(0, 0.05, -0.71))
+        t = bpy.context.active_object; t.parent = rig
+        _, nt, b = new_mat('ouro'); b.inputs['Base Color'].default_value = (0.85, 0.62, 0.3, 1); b.inputs['Metallic'].default_value = 1; b.inputs['Roughness'].default_value = 0.25
+        t.data.materials.append(bpy.data.materials[-1])
 circ_spin = Euler((math.radians(-8), math.radians(14), 0), 'XYZ')
 
 # ---------- runas de pedra (prisma hexagonal + a arte na frente) ----------
@@ -374,7 +406,7 @@ def rune(x, y, z, size, rot):
 
 def card_xy(fx, fy):           # posições em % da caixa da carta, como nos floaters do app
     return ((fx / 100 - 0.5) * W, (0.5 - fy / 100) * H)
-for fx, fy, sz, z, rz in ((-9, 30, 0.58, 0.55, -8), (109, 60, 0.5, 0.35, 10), (-7, 84, 0.42, 0.25, 6), (107, 12, 0.4, 0.6, -12)):
+for fx, fy, sz, z, rz in (((-9, 30, 0.58, 0.55, -8), (109, 60, 0.5, 0.35, 10), (-7, 84, 0.42, 0.25, 6), (107, 12, 0.4, 0.6, -12)) if CFG.get('runas') else ()):
     x, y = card_xy(fx, fy)
     rune(x, y, z, sz, Euler((math.radians(random.uniform(-15, 15)), math.radians(random.uniform(-25, 25)), math.radians(rz)), 'XYZ'))
 
@@ -386,11 +418,26 @@ def shard(x, y, z, s):
     bmesh.ops.convex_hull(bm, input=bm.verts); bm.to_mesh(me); bm.free()
     ob = link(bpy.data.objects.new('caco', me), rig); ob.location = (x, y, z)
     ob.rotation_euler = (random.uniform(0, 6.3), random.uniform(0, 6.3), random.uniform(0, 6.3)); ob.data.materials.append(EMER)
-for fx, fy, z, s in ((112, 86, 0.4, 0.09), (-14, 54, 0.3, 0.07), (50, -6, -0.2, 0.07), (-12, 8, -0.1, 0.05), (118, 36, -0.2, 0.05), (20, 104, 0.5, 0.05)):
+# gotas d'água gigantes de vidro (Dilúvio), nos lugares das gotas do app (% da caixa externa, `DILUVIO_FLOATERS`)
+def drop(x, y, z, size, tilt):
+    bpy.ops.mesh.primitive_uv_sphere_add(segments=48, ring_count=32, radius=size)
+    ob = bpy.context.active_object; ob.name = 'runa-gota'
+    for v in ob.data.vertices:
+        if v.co.y > 0: f = v.co.y / size; v.co.x *= 1 - 0.85 * f ** 1.6; v.co.z *= 1 - 0.85 * f ** 1.6; v.co.y *= 1 + 0.9 * f ** 2
+    for p in ob.data.polygons: p.use_smooth = True
+    ob.parent = rig; ob.location = (x, y, z); ob.rotation_euler = (0, 0, math.radians(tilt))
+    ob.data.materials.append(WATER)
+if CFG.get('gotas'):
+    WATER = glass_mat('agua', (0.75, 0.88, 1.0), emit=0.05); WATER.node_tree.nodes['Principled BSDF'].inputs['IOR'].default_value = 1.33
+    OW = W / 0.84
+    for fx, fy, wpct, z, tilt in ((9, 28, 14, 0.45, -6), (8, 80, 10, 0.3, 5), (93, 20, 11, -0.3, 8), (52, 96, 8, -0.25, 0)):
+        drop((fx / 100 - 0.5) * OW, (0.5 - fy / 100) * H / 0.84, z, wpct / 100 * OW * 0.32, tilt)
+
+for fx, fy, z, s in (() if not CFG.get('cacos') else ((112, 86, 0.4, 0.09), (-14, 54, 0.3, 0.07), (50, -6, -0.2, 0.07), (-12, 8, -0.1, 0.05), (118, 36, -0.2, 0.05), (20, 104, 0.5, 0.05))):
     x, y = card_xy(fx, fy); shard(x, y, z, s)
 
 # ---------- poeira verde ----------
-DUST = emit_mat('poeira', (0.25, 1.0, 0.55), 18)
+DUST = emit_mat('poeira', CFG['cor'], 18)
 for _ in range(70):
     bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=1, radius=random.uniform(0.004, 0.011),
         location=(random.uniform(-2.0, 2.0), random.uniform(-2.2, 2.4), random.uniform(-0.9, 0.9)))
@@ -417,9 +464,9 @@ def area(name, loc, power, size, col, target=(0, 0, 0)):
     return ob
 area('principal', (-4.5, 3.5, 6.0), 1400, 2.5, (1.0, 0.96, 0.9))
 area('preenchimento', (5.0, -1.0, 5.0), 260, 4.0, (0.75, 0.9, 1.0))
-area('contraluz', (0.5, 4.5, -4.0), 1500, 2.5, (0.35, 1.0, 0.6))
-area('rebote', (0.0, -5.0, 2.0), 180, 4.0, (0.4, 1.0, 0.65))
-gl = bpy.data.lights.new('brilho', 'POINT'); gl.energy = 350; gl.color = (0.2, 1.0, 0.5); gl.shadow_soft_size = 0.6
+area('contraluz', (0.5, 4.5, -4.0), 1500, 2.5, CFG['cor'])
+area('rebote', (0.0, -5.0, 2.0), 180, 4.0, CFG['cor'])
+gl = bpy.data.lights.new('brilho', 'POINT'); gl.energy = 350; gl.color = CFG['cor']; gl.shadow_soft_size = 0.6
 link(bpy.data.objects.new('brilho', gl)).location = (0, 0.3, -1.2)
 
 world = bpy.data.worlds.new('mundo'); scene.world = world; world.use_nodes = True
@@ -459,6 +506,6 @@ setup_device(scene, ARGS)
 scene.view_settings.view_transform = 'AgX'
 try: scene.view_settings.look = 'AgX - Medium High Contrast'
 except TypeError: pass
-r.filepath = os.path.join(OUT, f'destino-{VIEW}' + (f'-{CAMADA}' if CAMADA else '') + '.png')
+r.filepath = os.path.join(OUT, f'{SKIN}-{VIEW}' + (f'-{CAMADA}' if CAMADA else '') + '.png')
 bpy.ops.render.render(write_still=True)
 print('ok', r.filepath, flush=True)
