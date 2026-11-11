@@ -148,6 +148,7 @@ va = Image.open(os.path.join(ART, 'premium-destino-vaza.webp')).convert('RGBA')
 # o capuz pintado sai da arte (o miolo dele é vazado e ficava chapado): entra um capuz 3D de pano no lugar
 HOOD_PX = (376, 0, 624, 214)
 va_np = np.array(va); va_np[HOOD_PX[1]:HOOD_PX[3], HOOD_PX[0]:HOOD_PX[2], 3] = 0
+va_np[HOOD_PX[3]:248, 392:608, 3] = 0           # a presilha de baixo do capuz pintado
 va = Image.fromarray(va_np)
 VAZA_PATH = os.path.join(OUT, '_moldura-sem-capuz.png'); va.save(VAZA_PATH)
 a = np.asarray(va.split()[3].filter(ImageFilter.GaussianBlur(4)), dtype=np.float32) / 255.0
@@ -167,61 +168,39 @@ bpy.ops.object.shade_smooth()
 mold.data.materials.append(art_material('moldura', bpy.data.images.load(VAZA_PATH), metallic=0.9, rough=0.3, glow=6.0, bump=0.5))
 
 # ---------- capuz 3D de pano verde-musgo no meio do topo ----------
-def smooth(e0, e1, x):
-    t = min(1.0, max(0.0, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t)
-
-def hood_mesh(a=0.27, b=0.2, c=0.22, nu=150, nv=90):
-    """Capuz de manto pesado (alusão ao vilão de capuz verde, sem copiar traje): abertura em arco redondo e funda,
-    aba grossa caída sobre a testa de quem estaria dentro, ponta para trás e o pano descendo em dobras sobre a barra."""
-    me = bpy.data.meshes.new('capuz'); bm = bmesh.new(); grid = []
-    for j in range(nv):
-        v = j / (nv - 1); row = []
-        beta = math.radians(-80 + 170 * v)
-        tt = min(1.0, max(0.0, (v - 0.22) / 0.5))                       # a abertura fecha em arco redondo lá em cima
-        amax = math.pi * (1 - 0.4 * math.sqrt(max(0.0, 1 - tt * tt)))
-        for i in range(nu):
-            u = -1 + 2 * i / (nu - 1); al = u * amax
-            r = math.cos(beta) if beta >= 0 else 1 + 0.45 * (-beta / math.radians(80)) ** 1.3          # o manto se abre embaixo
-            r *= 1 + 0.07 * (1 - v) ** 1.5 * math.sin(al * 9 + 0.6)                                 # dobras verticais do pano
-            x = a * r * math.sin(al); z = -c * r * math.cos(al)
-            y = b * math.sin(beta) * (1.55 if beta < 0 else 1.3)
-            y += 0.09 * max(0.0, v - 0.55) ** 2 / 0.2 * math.cos(al / 2) ** 2                       # ponta para trás
-            z -= 0.06 * max(0.0, v - 0.6) * math.cos(al / 2) ** 2
-            edge = max(0.0, abs(u) - 0.84) / 0.16                                                    # aba grossa virada para fora
-            x *= 1 + 0.07 * edge; z += 0.035 * edge; y -= 0.012 * edge * smooth(0.4, 0.72, v)        # na testa, a aba cai um pouco
-            row.append(bm.verts.new((x, y, z)))
-        grid.append(row)
-    for j in range(nv - 1):
-        for i in range(nu - 1):
-            bm.faces.new([grid[j][i], grid[j][i + 1], grid[j + 1][i + 1], grid[j + 1][i]])
-    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=1e-5)
-    bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-    bm.to_mesh(me); bm.free(); return me
-
-LIFT = 5                                        # statsLift das lendárias
-hood_x, hood_y = vaza_xy(500, 118)
-hood = link(bpy.data.objects.new('capuz', hood_mesh()), rig)
-hood.location = (hood_x, hood_y + 0.02, 0.18); hood.rotation_euler = (math.radians(-14), 0, 0)
-sol = hood.modifiers.new('espessura', 'SOLIDIFY'); sol.thickness = 0.022; sol.offset = 1
-wr = bpy.data.textures.new('rugas', 'CLOUDS'); wr.noise_scale = 0.06; wr.noise_depth = 3
-dw = hood.modifiers.new('rugas', 'DISPLACE'); dw.texture = wr; dw.strength = 0.014; dw.mid_level = 0.5
-hood.modifiers.new('suave', 'SUBSURF').levels = 1
-for p in hood.data.polygons: p.use_smooth = True
-m, nt, b = new_mat('pano')
-b.inputs['Base Color'].default_value = (0.014, 0.034, 0.021, 1); b.inputs['Roughness'].default_value = 0.88
-b.inputs['Sheen Weight'].default_value = 0.5; b.inputs['Sheen Tint'].default_value = (0.55, 0.9, 0.65, 1); b.inputs['Sheen Roughness'].default_value = 0.4
-wv = nt.nodes.new('ShaderNodeTexWave'); wv.inputs['Scale'].default_value = 260; wv.inputs['Distortion'].default_value = 2
-bp = nt.nodes.new('ShaderNodeBump'); bp.inputs['Strength'].default_value = 0.25
-nt.links.new(wv.outputs['Fac'], bp.inputs['Height']); nt.links.new(bp.outputs[0], b.inputs['Normal'])
+# capuz: a peça 3D que o dono do app mandou (render sobre preto, recortado em `texturas/destino-capuz.png`),
+# numa placa com relevo (o brilho e o recorte viram altura; o miolo escuro fica fundo)
+CAPUZ = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'texturas', 'destino-capuz.png')
+cap = Image.open(CAPUZ).convert('RGBA'); cw_, ch_ = cap.size
+from PIL import ImageEnhance                     # mais verde-musgo e mais escuro (a névoa e o AgX lavavam o pano)
+cap_rgb = ImageEnhance.Brightness(ImageEnhance.Color(cap.convert('RGB')).enhance(1.6)).enhance(0.72)
+cap_tex = Image.merge('RGBA', (*cap_rgb.split(), cap.split()[3])); CAP_TEX = os.path.join(OUT, '_capuz.png'); cap_tex.save(CAP_TEX)
+CAP_W = float(ARGS.get('capuz_w', 0.62)); CAP_H = CAP_W * ch_ / cw_
+cap_a = np.asarray(cap.split()[3].filter(ImageFilter.GaussianBlur(3)), np.float32) / 255
+cap_l = np.asarray(cap.convert('L').filter(ImageFilter.GaussianBlur(2)), np.float32) / 255
+cap_h = np.clip(cap_a ** 0.6 * 0.55 + cap_l * cap_a * 0.45, 0, 1)
+cap_hp = os.path.join(OUT, '_altura-capuz.png'); Image.fromarray((cap_h * 255).astype(np.uint8)).save(cap_hp)
+bpy.ops.mesh.primitive_grid_add(x_subdivisions=260, y_subdivisions=int(260 * ch_ / cw_), size=1)
+hood = bpy.context.active_object; hood.name = 'capuz'; hood.scale = (CAP_W, CAP_H, 1)
+bpy.ops.object.transform_apply(scale=True); hood.parent = rig
+hood.location = (0, H / 2 - CAP_H / 2 + float(ARGS.get('capuz_y', 0.41)), 0.06)
+ct = bpy.data.textures.new('altura-capuz', 'IMAGE'); ct.image = bpy.data.images.load(cap_hp); ct.extension = 'EXTEND'
+cd_ = hood.modifiers.new('relevo', 'DISPLACE'); cd_.texture = ct; cd_.texture_coords = 'UV'; cd_.strength = 0.09; cd_.mid_level = 0.0
+hood.modifiers.new('suave', 'SMOOTH').factor = 0.5
+bpy.ops.object.shade_smooth()
+m, nt, b = new_mat('capuz')
+tx = nt.nodes.new('ShaderNodeTexImage'); tx.image = bpy.data.images.load(CAP_TEX); tx.extension = 'CLIP'; tx.interpolation = 'Cubic'
+dim = nt.nodes.new('ShaderNodeMix'); dim.data_type = 'RGBA'; dim.blend_type = 'MULTIPLY'; dim.inputs['Factor'].default_value = 1.0
+nt.links.new(tx.outputs['Color'], dim.inputs['A']); dim.inputs['B'].default_value = (0.3, 0.3, 0.3, 1)
+nt.links.new(dim.outputs['Result'], b.inputs['Base Color']); nt.links.new(tx.outputs['Alpha'], b.inputs['Alpha'])
+# o capuz já veio iluminado no render do dono: a cor dele entra quase toda como luz própria, e a cena só soma relevo e sombra
+nt.links.new(tx.outputs['Color'], b.inputs['Emission Color']); b.inputs['Emission Strength'].default_value = 0.75
+b.inputs['Roughness'].default_value = 0.85; b.inputs['Sheen Weight'].default_value = 0.3
+bw_ = nt.nodes.new('ShaderNodeRGBToBW'); nt.links.new(tx.outputs['Color'], bw_.inputs[0])
+bp = nt.nodes.new('ShaderNodeBump'); bp.inputs['Strength'].default_value = 0.3; bp.inputs['Distance'].default_value = 0.003
+nt.links.new(bw_.outputs[0], bp.inputs['Height']); nt.links.new(bp.outputs[0], b.inputs['Normal'])
 hood.data.materials.append(m)
-# o vazio de dentro: escuro, com um brilho verde fraco lá no fundo
-bpy.ops.mesh.primitive_uv_sphere_add(radius=1, location=(0, -0.02, -0.05)); void = bpy.context.active_object
-void.scale = (0.2, 0.24, 0.14); void.parent = hood
-vm, nt, vb = new_mat('vazio'); vb.inputs['Base Color'].default_value = (0.0, 0.0, 0.0, 1); vb.inputs['Roughness'].default_value = 1
-vb.inputs['Specular IOR Level'].default_value = 0.0
-void.data.materials.append(vm)
-il = bpy.data.lights.new('dentro-capuz', 'POINT'); il.energy = 0.6; il.color = (0.3, 1.0, 0.55); il.shadow_soft_size = 0.05
-link(bpy.data.objects.new('dentro-capuz', il), hood).location = (0, 0.02, 0.02)
+LIFT = 5                                        # statsLift das lendárias
 
 # ---------- informações do atleta (como o app desenha a CanchaCard da Destino; dados de exemplo, sem foto) ----------
 if INFO:
@@ -448,7 +427,7 @@ world.node_tree.nodes['Background'].inputs['Color'].default_value = (0.004, 0.00
 if FOG:
     bpy.ops.mesh.primitive_cube_add(size=1, location=(0, 0, 0)); fog = bpy.context.active_object; fog.scale = (9, 9, 6)
     m = bpy.data.materials.new('nevoa'); m.use_nodes = True; nt = m.node_tree; nt.nodes.clear()
-    v = nt.nodes.new('ShaderNodeVolumePrincipled'); v.inputs['Density'].default_value = 0.008; v.inputs['Color'].default_value = (0.7, 0.95, 0.8, 1); v.inputs['Anisotropy'].default_value = 0.4
+    v = nt.nodes.new('ShaderNodeVolumePrincipled'); v.inputs['Density'].default_value = 0.005; v.inputs['Color'].default_value = (0.7, 0.95, 0.8, 1); v.inputs['Anisotropy'].default_value = 0.4
     o = nt.nodes.new('ShaderNodeOutputMaterial'); nt.links.new(v.outputs[0], o.inputs['Volume']); fog.data.materials.append(m)
 
 # ---------- render ----------
