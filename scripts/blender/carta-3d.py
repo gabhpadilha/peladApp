@@ -32,9 +32,9 @@ SKINS = {
     'diluvio':   dict(bg='premium-diluvio.webp', vaza='premium-diluvio-vaza.webp', box=None, luz='bright',
                       cor=(0.45, 0.7, 1.0), circulo='diluvio-anel.webp', circulo_tam=3.0, placa_justa=True, luz_lo=0.8, gotas=True, cacos=(0.05, 0.3, 0.85)),
     'relampago': dict(bg='premium-relampago.webp', vaza='premium-relampago-vaza.webp', box=None, luz='bright', cor=(1.0, 0.68, 0.28),
-                      peca='nuvem', faixa=(150, 600), nuvem_cor=(0.08, 0.07, 0.07), nuvem_brasa=0.9, brasa=(1.0, 0.55, 0.15), raio_cor=(1.0, 0.8, 0.45)),
+                      peca='nuvem', faixa=(150, 600), nuvem_cor=(0.05, 0.045, 0.045), nuvem_brasa=0.18, brasa=(1.0, 0.55, 0.15), raio_cor=(1.0, 0.8, 0.45)),
     'nuvem':     dict(bg='premium-nuvem.webp', vaza='premium-nuvem-vaza.webp', box=None, luz='bright', cor=(0.82, 0.88, 1.0),
-                      peca='nuvem', faixa=(180, 600), nuvem_cor=(0.42, 0.46, 0.54), brasa=(0.75, 0.85, 1.0), raio_cor=(0.9, 0.95, 1.0)),
+                      peca='nuvem', faixa=(180, 600), nuvem_cor=(0.22, 0.26, 0.34), brasa=(0.75, 0.85, 1.0), raio_cor=(0.9, 0.95, 1.0)),
     'lenda':     dict(bg='skin-lenda.webp', vaza='skin-lenda-vaza.webp', box=None, luz='bright', cor=(0.5, 0.65, 1.0),
                       peca='cristal', faixa=(190, 740), cristal_cor=(0.12, 0.42, 1.0), brasa=(1.0, 0.55, 0.15), raio_cor=(0.6, 0.85, 1.0)),
 }
@@ -465,12 +465,13 @@ if CFG.get('peca'):
             nt.links.new(nz.outputs['Fac'], em_.inputs[0]); nt.links.new(em_.outputs[0], vol.inputs['Emission Strength'])
         o = nt.nodes.new('ShaderNodeOutputMaterial'); nt.links.new(vol.outputs[0], o.inputs['Volume'])
         rnd = random.Random(5)
-        for i in range(9):
-            t = i / 8; r = rnd.uniform(0.15, 0.26) * (1.3 if 2 <= i <= 6 else 0.85)
-            bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=3, radius=1,
-                location=(edge + 0.04 + rnd.uniform(0.0, 0.2) * (1 - abs(t - 0.5)), ytop - t * hh_ + rnd.uniform(-0.03, 0.03), 0.12 + rnd.uniform(-0.04, 0.06)))
+        for i in range(16):                                  # um cúmulo só (não uma coluna): bolhas grandes no miolo, pequenas na beira
+            ang = rnd.uniform(0, 2 * math.pi); rad = rnd.uniform(0, 1) ** 0.7
+            px_ = edge + 0.08 + math.cos(ang) * rad * 0.2; py_ = cy_ + math.sin(ang) * rad * hh_ * 0.36
+            r = (0.24 - 0.12 * rad) * rnd.uniform(0.85, 1.15)
+            bpy.ops.mesh.primitive_ico_sphere_add(subdivisions=3, radius=1, location=(px_, py_, 0.13 + rnd.uniform(-0.05, 0.05)))
             pf = bpy.context.active_object; pf.name = 'peca-nuvem'; pf.scale = (r * 1.25, r, r); pf.parent = rig; pf.data.materials.append(m)   # coordenadas do objeto de -1 a 1
-        for dy, pw in ((0.18, 10), (-0.12, 8), (0.0, 6)):         # brasa/clarão dentro da nuvem
+        for dy, pw in ((0.18, 14), (-0.12, 12), (0.0, 9)):         # brasa/clarão dentro da nuvem
             L = bpy.data.lights.new('brasa', 'POINT'); L.energy = pw; L.color = CFG['brasa']; L.shadow_soft_size = 0.15
             link(bpy.data.objects.new('brasa', L), rig).location = (edge + 0.03, cy_ + dy * hh_, 0.12)
         bolt((edge - 0.05, cy_ + hh_ * 0.42, 0.2), (edge + 0.22, cy_ - hh_ * 0.05, 0.22), CFG['raio_cor'], seed=3, name='raio-a')
