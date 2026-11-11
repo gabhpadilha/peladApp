@@ -1,3 +1,4 @@
+import { fetchAllRows } from "@/lib/fetch-all";
 import { getGroupEvaluations, getOvrByMember } from "@/lib/group-scores";
 import { getConfirmedGoalsByMember } from "@/lib/match-goals";
 import { requireActiveMembership, type ActiveMembership, type PlayerPositionCode } from "@/lib/session";
@@ -47,7 +48,7 @@ export async function getRoundsOverview(): Promise<RoundsOverview> {
   const membership = await requireActiveMembership("/rodadas");
   const supabase = await createClient();
 
-  const [membersResult, matchesResult, submissionsResult, evaluations, awardsResult, groupResult] = await Promise.all([
+  const [membersResult, matchesResult, submissionsResult, evaluations, awards, groupResult] = await Promise.all([
     supabase
       .from("group_members")
       .select("id, nickname, position, deactivated_at")
@@ -60,14 +61,21 @@ export async function getRoundsOverview(): Promise<RoundsOverview> {
       .order("round", { ascending: false }),
     supabase.rpc("get_match_submissions", { target_group: membership.groupId }),
     getGroupEvaluations(membership.groupId),
-    supabase.from("awards").select("match_id, member_id, kind").eq("group_id", membership.groupId),
+    // ~9 prêmios por rodada: passa de 1000 linhas perto da rodada 100, e o Supabase corta sem erro.
+    fetchAllRows((from, to) =>
+      supabase
+        .from("awards")
+        .select("match_id, member_id, kind")
+        .eq("group_id", membership.groupId)
+        .order("id")
+        .range(from, to),
+    ),
     supabase.from("groups").select("play_weekday").eq("id", membership.groupId).maybeSingle(),
   ]);
 
   if (membersResult.error) throw membersResult.error;
   if (matchesResult.error) throw matchesResult.error;
   if (submissionsResult.error) throw submissionsResult.error;
-  if (awardsResult.error) throw awardsResult.error;
 
   // Ganhadores antigos podem estar desativados: o apelido vem de todos.
   const nicknameByMember = new Map(membersResult.data.map((member) => [member.id, member.nickname]));
@@ -77,6 +85,10 @@ export async function getRoundsOverview(): Promise<RoundsOverview> {
   const { goals: confirmedGoals, roundOrder } = await getConfirmedGoalsByMember(membership.groupId);
   const ovrByMember = getOvrByMember(evaluations, roundOrder, confirmedGoals);
   const kindOrder: readonly AwardKind[] = AWARD_KINDS;
+  const awardsByMatch = new Map<string, typeof awards>();
+  for (const award of awards) {
+    awardsByMatch.set(award.match_id, [...(awardsByMatch.get(award.match_id) ?? []), award]);
+  }
 
   return {
     membership,
@@ -98,8 +110,7 @@ export async function getRoundsOverview(): Promise<RoundsOverview> {
       starterCount: match.match_attendance.filter((attendance) => !attendance.reserve).length,
       reserveCount: match.match_attendance.filter((attendance) => attendance.reserve).length,
       submittedCount: submittedByMatch.get(match.id) ?? 0,
-      winners: awardsResult.data
-        .filter((award) => award.match_id === match.id)
+      winners: (awardsByMatch.get(match.id) ?? [])
         .toSorted((a, b) => kindOrder.indexOf(a.kind) - kindOrder.indexOf(b.kind))
         .map((award) => ({ kind: award.kind, nickname: nicknameByMember.get(award.member_id) ?? "?" })),
     })),
