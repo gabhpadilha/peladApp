@@ -13,7 +13,7 @@ import { CURTAIN_OPEN_MS, RevealCurtain } from "./reveal-curtain";
 import { RevealRanking } from "./reveal-ranking";
 import { RevealRewards } from "./reveal-rewards";
 import { RevealSummary } from "./reveal-summary";
-import { RevealTunnel } from "./reveal-tunnel";
+import { RevealSpotlight } from "./reveal-spotlight";
 import { RevealTeam } from "./reveal-team";
 import { PACK_THEMES, ZOEIRA_AWARDS } from "./reveal-theme";
 import { RevealZoeira } from "./reveal-zoeira";
@@ -209,7 +209,7 @@ export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) 
       )}
 
       {step !== null && current?.type === "award" && current.award.kind === "craque" && (
-        <RevealTunnel
+        <RevealSpotlight
           key={current.award.id}
           award={current.award}
           nextLabel={nextLabel(steps, step)}

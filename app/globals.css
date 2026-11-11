@@ -593,4 +593,6 @@ body:has([data-rate-bar]):has([data-bottom-nav]) {
 .tunnel-walker { animation: tunnel-walk 2.4s cubic-bezier(0.3, 0.1, 0.6, 1) both; }
 .tunnel-flash { opacity: 0; animation: tunnel-flash 0.9s ease-out 2.3s both; }
 .tunnel-card { opacity: 0; animation: tunnel-card 0.8s cubic-bezier(0.2, 0.9, 0.3, 1.1) 2.5s both; }
+@keyframes spot-card { 0% { opacity: 0; transform: translateY(38%) scale(0.45); } 55% { opacity: 1; } 100% { opacity: 1; transform: none; } }
+.spot-card { opacity: 0; animation: spot-card 1.1s cubic-bezier(0.2, 0.9, 0.3, 1.05) 2.1s both; }
 .tunnel-cam { opacity: 0; animation: tunnel-cam 1.1s linear var(--d) infinite; }
