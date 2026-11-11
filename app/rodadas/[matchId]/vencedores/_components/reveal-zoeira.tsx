@@ -12,7 +12,7 @@ type RevealZoeiraProps = {
 };
 
 /** Pedestais do palco (mesmas medidas de `reveal-highlights.tsx`): o do centro e, no empate, os do lado. */
-const SPOTS: readonly (readonly [number, number])[] = [[50.0, 48.4], [26.7, 48.4], [73.3, 48.4]];
+const SPOTS: readonly (readonly [number, number])[] = [[50.0, 47.94], [28.19, 47.94], [71.81, 47.94]];
 
 /**
  * A zoeira abre a noite (2026-11-11, no lugar do envelope): o mesmo palco do Blender dos destaques, com as luzes

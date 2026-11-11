@@ -22,9 +22,9 @@ type RevealHighlightsProps = {
  * meio e de baixo, da esquerda para a direita. Sai do `slots.json` do render (`scripts/blender/destaques.py`).
  */
 const PEDESTALS: readonly (readonly [number, number])[] = [
-  [30.0, 31.6], [50.0, 31.6], [70.0, 31.6],
-  [26.7, 48.4], [50.0, 48.4], [73.3, 48.4],
-  [22.0, 71.6], [50.0, 71.6], [78.0, 71.6],
+  [31.12, 32.56], [50.0, 32.56], [68.88, 32.56],
+  [28.19, 47.94], [50.0, 47.94], [71.81, 47.94],
+  [24.2, 68.96], [50.0, 68.96], [75.8, 68.96],
 ];
 
 /** Quando cada pedestal acende no vídeo (quadro 39 + 7 por pedestal, a 30 quadros por segundo). */
@@ -138,7 +138,7 @@ export function RevealHighlights({ awards, nextLabel, onNext }: RevealHighlights
           <SparklesIcon aria-hidden className="size-5 text-primary" />
           Destaques da rodada
         </span>
-        <p className="text-xs text-white/75">O melhor no ataque, na criação e na defesa, o goleiro e o gol mais bonito</p>
+        <p className="text-xs text-white/75">Ataque, criação, defesa, goleiro e o gol mais bonito</p>
       </div>
 
       <div
