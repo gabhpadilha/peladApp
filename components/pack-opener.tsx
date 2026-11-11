@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { getPackAnimationMs, PackStage } from "@/components/pack-stage";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { PackStage } from "@/components/pack-stage";
 import { Button } from "@/components/ui/button";
 import { openPack, refreshAfterPack } from "@/app/loja/_actions/open-pack";
 import type { MyPack, OpenedPack } from "@/lib/packs";
@@ -55,13 +55,8 @@ export function PackOpener({ packs, onClose }: { packs: readonly Pick<MyPack, "i
     };
   }, [current]);
 
-  // Os botões só aparecem quando a animação termina (ou na hora, com movimento reduzido).
-  useEffect(() => {
-    if (step.status !== "revealed") return;
-    const delay = reduced ? 0 : getPackAnimationMs(step.pack.rarity);
-    const timer = window.setTimeout(() => setIsFooterReady(true), delay);
-    return () => window.clearTimeout(timer);
-  }, [step, reduced]);
+  // Os botões só aparecem quando a skin e os textos estão na tela (o palco avisa; na hora, com movimento reduzido).
+  const handleReady = useCallback(() => setIsFooterReady(true), []);
 
   function handleNext() {
     setIsFooterReady(false);
@@ -79,7 +74,7 @@ export function PackOpener({ packs, onClose }: { packs: readonly Pick<MyPack, "i
   const oddsPercent = step.status === "revealed" && current ? (current.odds[step.pack.rarity] ?? null) : null;
 
   return (
-    <div role="dialog" aria-modal="true" aria-label="Abrindo pacote" className="fixed inset-0 z-50 bg-[#050907]">
+    <div role="dialog" aria-modal="true" aria-label="Abrindo pacote" className="fixed inset-0 z-50 bg-black">
       {step.status === "revealed" && current && (
         <PackStage
           key={current.id}
@@ -91,6 +86,7 @@ export function PackOpener({ packs, onClose }: { packs: readonly Pick<MyPack, "i
           oddsPercent={oddsPercent}
           isDuplicate={step.pack.wasDuplicate}
           reduced={reduced}
+          onReady={handleReady}
         />
       )}
       {step.status === "opening" && (
@@ -103,7 +99,7 @@ export function PackOpener({ packs, onClose }: { packs: readonly Pick<MyPack, "i
         </div>
       )}
       {step.status === "revealed" && isFooterReady && (
-        <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-center gap-2 px-4 pb-[max(1.25rem,env(safe-area-inset-bottom))] animate-in fade-in">
+        <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-center gap-2 bg-gradient-to-t from-black/80 to-transparent px-4 pt-8 pb-[max(1.25rem,env(safe-area-inset-bottom))] animate-in fade-in">
           {remaining > 0 ? (
             <Button size="lg" className="h-12 w-full max-w-xs text-base" onClick={handleNext}>
               Abrir o próximo ({remaining})
