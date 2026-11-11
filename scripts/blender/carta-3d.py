@@ -148,13 +148,6 @@ va = Image.open(os.path.join(ART, 'premium-destino-vaza.webp')).convert('RGBA')
 # o capuz pintado sai da arte (o miolo dele é vazado e ficava chapado): entra um capuz 3D de pano no lugar
 HOOD_PX = (376, 0, 624, 214)
 va_np = np.array(va); va_np[HOOD_PX[1]:HOOD_PX[3], HOOD_PX[0]:HOOD_PX[2], 3] = 0
-if FOTO:
-    # com foto, o capuz desce para a cabeça do jogador: some também a presilha de baixo e a barra de cima é refeita
-    va_np[200:250, 388:612, 3] = 0
-    tile = va_np[100:188, 255:305].copy(); x = HOOD_PX[0]; k = 0
-    while x < HOOD_PX[2]:
-        t = tile if k % 2 == 0 else tile[:, ::-1]; w_ = min(t.shape[1], HOOD_PX[2] - x)
-        va_np[100:188, x:x + w_] = t[:, :w_]; x += w_; k += 1
 va = Image.fromarray(va_np)
 VAZA_PATH = os.path.join(OUT, '_moldura-sem-capuz.png'); va.save(VAZA_PATH)
 a = np.asarray(va.split()[3].filter(ImageFilter.GaussianBlur(4)), dtype=np.float32) / 255.0
@@ -177,25 +170,25 @@ mold.data.materials.append(art_material('moldura', bpy.data.images.load(VAZA_PAT
 def smooth(e0, e1, x):
     t = min(1.0, max(0.0, (x - e0) / (e1 - e0))); return t * t * (3 - 2 * t)
 
-def hood_mesh(a=0.215, b=0.2, c=0.19, nu=72, nv=40, brow=False):
-    """Casca de capuz: abre para a frente (+z) em arco; a ponta sobe um pouco para trás e a barra se abre embaixo."""
+def hood_mesh(a=0.27, b=0.2, c=0.22, nu=150, nv=90):
+    """Capuz de manto pesado (alusão ao vilão de capuz verde, sem copiar traje): abertura em arco redondo e funda,
+    aba grossa caída sobre a testa de quem estaria dentro, ponta para trás e o pano descendo em dobras sobre a barra."""
     me = bpy.data.meshes.new('capuz'); bm = bmesh.new(); grid = []
     for j in range(nv):
         v = j / (nv - 1); row = []
-        k = a / 0.215
-        if brow:   # na cabeça do jogador: a frente fecha acima da testa (a aba cobre a testa)
-            beta = math.radians(-78 + 168 * v); tt = min(1.0, max(0.0, (v - 0.3) / 0.32)); amax = math.pi * (1 - 0.38 * math.sqrt(max(0.0, 1 - tt * tt)))   # arco redondo sobre a testa
-        else:
-            beta = math.radians(-70 + 160 * v); amax = math.pi * (0.62 + 0.30 * v ** 1.5)
+        beta = math.radians(-80 + 170 * v)
+        tt = min(1.0, max(0.0, (v - 0.22) / 0.5))                       # a abertura fecha em arco redondo lá em cima
+        amax = math.pi * (1 - 0.4 * math.sqrt(max(0.0, 1 - tt * tt)))
         for i in range(nu):
             u = -1 + 2 * i / (nu - 1); al = u * amax
-            r = math.cos(beta) if beta >= 0 else 1 + (0.45 if brow else 0.75) * (-beta / math.radians(70)) ** 1.4   # embaixo a capa se abre sobre os ombros      # a barra se abre sobre os ombros
+            r = math.cos(beta) if beta >= 0 else 1 + 0.45 * (-beta / math.radians(80)) ** 1.3          # o manto se abre embaixo
+            r *= 1 + 0.07 * (1 - v) ** 1.5 * math.sin(al * 9 + 0.6)                                 # dobras verticais do pano
             x = a * r * math.sin(al); z = -c * r * math.cos(al)
-            y = b * math.sin(beta) * ((1.7 if beta < 0 else 1.35) if brow else (1.5 if beta < 0 else 1.0))
-            y += (0.13 if brow else 0.07) * k * max(0.0, v - 0.55) ** 2 / 0.2 * math.cos(al / 2) ** 2      # ponta do capuz
-            z -= 0.04 * k * max(0.0, v - 0.6) * math.cos(al / 2) ** 2
-            rim = max(0.0, abs(u) - 0.86) / 0.14 * (1 - smooth(0.45, 0.62, v) if brow else 1)                  # dobra da borda da abertura, virada para fora
-            x *= 1 + 0.06 * rim; z += 0.025 * k * rim
+            y = b * math.sin(beta) * (1.55 if beta < 0 else 1.3)
+            y += 0.09 * max(0.0, v - 0.55) ** 2 / 0.2 * math.cos(al / 2) ** 2                       # ponta para trás
+            z -= 0.06 * max(0.0, v - 0.6) * math.cos(al / 2) ** 2
+            edge = max(0.0, abs(u) - 0.84) / 0.16                                                    # aba grossa virada para fora
+            x *= 1 + 0.07 * edge; z += 0.035 * edge; y -= 0.012 * edge * smooth(0.4, 0.72, v)        # na testa, a aba cai um pouco
             row.append(bm.verts.new((x, y, z)))
         grid.append(row)
     for j in range(nv - 1):
@@ -206,42 +199,28 @@ def hood_mesh(a=0.215, b=0.2, c=0.19, nu=72, nv=40, brow=False):
     bm.to_mesh(me); bm.free(); return me
 
 LIFT = 5                                        # statsLift das lendárias
-PHOTO_H = (99 - LIFT) * 0.01 * W                # a foto ocupa a altura da caixa (object-contain, presa embaixo)
-PHOTO_BOTTOM = -H / 2 + 0.0102 * W + (22.6 - 1.02 * 1.4 + LIFT) * 0.01 * W
-if FOTO:
-    fa_ = np.asarray(Image.open(FOTO).convert('RGBA'))[..., 3] > 128; fh_, fw_ = fa_.shape
-    ftop = np.where(fa_.any(1))[0][0]; hrows = fa_[ftop: ftop + fh_ // 4]; wrow = int(np.argmax(hrows.sum(1)))
-    xs_ = np.where(hrows[wrow])[0]; head_w = (xs_[-1] - xs_[0]) / fh_ * PHOTO_H; head_cx = ((xs_[0] + xs_[-1]) / 2 / fw_ - 0.5) * PHOTO_H * fw_ / fh_
-    head_top = PHOTO_BOTTOM + PHOTO_H * (1 - ftop / fh_); hh = head_w * 1.3
-    hb = 0.42 * hh; ha = head_w * 0.68; hc_ = hb * 0.95
-    hood = link(bpy.data.objects.new('capuz', hood_mesh(a=ha, b=hb, c=hc_, brow=True, nu=140, nv=80)), rig)
-    hood.location = (head_cx, head_top - 0.42 * hh, 0.09); hood.rotation_euler = (math.radians(-6), 0, 0)
-    print('capuz na cabeça', round(head_cx, 3), round(head_top, 3), round(head_w, 3), flush=True)
-else:
-    hood_x, hood_y = vaza_xy(500, 118)
-    hood = link(bpy.data.objects.new('capuz', hood_mesh()), rig)
-    hood.location = (hood_x, hood_y + 0.07, 0.15); hood.rotation_euler = (math.radians(-24), 0, 0); hood.scale = (1.12, 1.12, 1.12)
-sol = hood.modifiers.new('espessura', 'SOLIDIFY'); sol.thickness = 0.016; sol.offset = 1
+hood_x, hood_y = vaza_xy(500, 118)
+hood = link(bpy.data.objects.new('capuz', hood_mesh()), rig)
+hood.location = (hood_x, hood_y + 0.02, 0.18); hood.rotation_euler = (math.radians(-14), 0, 0)
+sol = hood.modifiers.new('espessura', 'SOLIDIFY'); sol.thickness = 0.022; sol.offset = 1
 wr = bpy.data.textures.new('rugas', 'CLOUDS'); wr.noise_scale = 0.06; wr.noise_depth = 3
-dw = hood.modifiers.new('rugas', 'DISPLACE'); dw.texture = wr; dw.strength = 0.03 if FOTO else 0.012; dw.mid_level = 0.5
-if FOTO: wr.noise_scale = 0.12; sol.thickness = 0.03
+dw = hood.modifiers.new('rugas', 'DISPLACE'); dw.texture = wr; dw.strength = 0.014; dw.mid_level = 0.5
 hood.modifiers.new('suave', 'SUBSURF').levels = 1
 for p in hood.data.polygons: p.use_smooth = True
 m, nt, b = new_mat('pano')
-b.inputs['Base Color'].default_value = (0.018, 0.042, 0.026, 1) if FOTO else (0.026, 0.058, 0.036, 1); b.inputs['Roughness'].default_value = 0.88
-b.inputs['Sheen Weight'].default_value = 0.35 if FOTO else 0.8; b.inputs['Sheen Tint'].default_value = (0.55, 0.9, 0.65, 1); b.inputs['Sheen Roughness'].default_value = 0.4
+b.inputs['Base Color'].default_value = (0.014, 0.034, 0.021, 1); b.inputs['Roughness'].default_value = 0.88
+b.inputs['Sheen Weight'].default_value = 0.5; b.inputs['Sheen Tint'].default_value = (0.55, 0.9, 0.65, 1); b.inputs['Sheen Roughness'].default_value = 0.4
 wv = nt.nodes.new('ShaderNodeTexWave'); wv.inputs['Scale'].default_value = 260; wv.inputs['Distortion'].default_value = 2
 bp = nt.nodes.new('ShaderNodeBump'); bp.inputs['Strength'].default_value = 0.25
 nt.links.new(wv.outputs['Fac'], bp.inputs['Height']); nt.links.new(bp.outputs[0], b.inputs['Normal'])
 hood.data.materials.append(m)
 # o vazio de dentro: escuro, com um brilho verde fraco lá no fundo
-if not FOTO:
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=1, location=(0, -0.06, -0.08)); void = bpy.context.active_object
-    void.scale = (0.15, 0.2, 0.1); void.parent = hood
-    vm, nt, vb = new_mat('vazio'); vb.inputs['Base Color'].default_value = (0.0, 0.0, 0.0, 1); vb.inputs['Roughness'].default_value = 1
-    vb.inputs['Specular IOR Level'].default_value = 0.0
-    void.data.materials.append(vm)
-il = bpy.data.lights.new('dentro-capuz', 'POINT'); il.energy = 0.8 if FOTO else 0.6; il.color = (0.3, 1.0, 0.55); il.shadow_soft_size = 0.05
+bpy.ops.mesh.primitive_uv_sphere_add(radius=1, location=(0, -0.02, -0.05)); void = bpy.context.active_object
+void.scale = (0.2, 0.24, 0.14); void.parent = hood
+vm, nt, vb = new_mat('vazio'); vb.inputs['Base Color'].default_value = (0.0, 0.0, 0.0, 1); vb.inputs['Roughness'].default_value = 1
+vb.inputs['Specular IOR Level'].default_value = 0.0
+void.data.materials.append(vm)
+il = bpy.data.lights.new('dentro-capuz', 'POINT'); il.energy = 0.6; il.color = (0.3, 1.0, 0.55); il.shadow_soft_size = 0.05
 link(bpy.data.objects.new('dentro-capuz', il), hood).location = (0, 0.02, 0.02)
 
 # ---------- informações do atleta (como o app desenha a CanchaCard da Destino; dados de exemplo, sem foto) ----------
@@ -285,12 +264,6 @@ if INFO:
     info.alpha_composite(Image.fromarray(na)); d = ImageDraw.Draw(info)
     d.rectangle((wl, wt + name_h - 0.6 * cq, wr_, wt + name_h), fill=ACC)
     if FOTO:   # a foto fica por cima da barra do nome (z-5 no app) e o degradê de baixo passa por cima dela
-        # sombra de dentro do capuz em volta da cabeça (a foto é plana: sem isso aparecia o fundo entre o rosto e o pano)
-        def w2px(x, y): return ((x + W / 2) / W * CW, (H / 2 - y) / H * CH)
-        scx, scy = w2px(head_cx, head_top - 0.55 * hh); srx = head_w * 0.78 / W * CW; sry = 0.85 * hh / H * CH
-        sh_ = 1 - np.clip((np.sqrt(((xx - scx) / srx) ** 2 + ((yy - scy) / sry) ** 2) - 0.75) / 0.3, 0, 1)
-        sa = np.zeros((CH, CW, 4), np.uint8); sa[..., 0], sa[..., 1], sa[..., 2] = 3, 8, 5; sa[..., 3] = (sh_ * 255).astype(np.uint8)
-        info.alpha_composite(Image.fromarray(sa))
         ph = int((99 - lift) * cq); fo = Image.open(FOTO).convert('RGBA'); fo = fo.resize((int(ph * fo.width / fo.height), ph), Image.LANCZOS)
         info.alpha_composite(fo, (int(CW / 2 - fo.width / 2), int(photo_bottom - ph)))
         info.alpha_composite(Image.fromarray(fa)); d = ImageDraw.Draw(info)
@@ -347,7 +320,7 @@ if INFO:
     me = bpy.data.meshes.new('info'); x0, y0 = cpx(0, CH); x1, y1 = cpx(CW, 0)
     me.from_pydata([(x0, y0, 0), (x1, y0, 0), (x1, y1, 0), (x0, y1, 0)], [], [(0, 1, 2, 3)]); card_uv(me)
     lay = link(bpy.data.objects.new('info', me), rig); lay.location.z = T / 2 + 0.0015; me.materials.append(info_mat('info'))
-    FRONT_Z = 0.6 if FOTO else 0.0                  # com o capuz na cabeça, o nome e o selo flutuam à frente dele
+    FRONT_Z = 0.0
     def to_front(ob):                               # compensa a perspectiva: de frente, fica do mesmo tamanho e no mesmo lugar
         f = (10.2 - FRONT_Z) / 10.2; ob.scale = (f, f, 1); ob.location.x = 0; ob.location.y = 0.05 * (1 - f); ob.location.z += FRONT_Z
     me2 = me.copy(); me2.materials.clear(); me2.materials.append(info_mat('info-frente', emit=0.5, path=FRONT_PATH))
