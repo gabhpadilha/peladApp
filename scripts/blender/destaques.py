@@ -36,7 +36,7 @@ for r, yy in enumerate(ROWS):
         slots.append((xx, yy)); k += 1
 # holofote geral + contraluzes
 d = bpy.data.lights.new('Holofote', 'AREA'); d.size = 9; d.size_y = 9; d.color = (1.0, 0.9, 0.74); ho = bpy.data.objects.new('Holofote', d); ho.visible_camera = False; ho.visible_glossy = False; ho.location = (0, 0, 9); scene.collection.objects.link(ho)
-for fr_, v in ((1, 0.0), (14, 900.0), (40, 1500.0), (150, 1700.0)): d.energy = v; d.keyframe_insert('energy', frame=fr_)
+for fr_, v in ((1, 300.0), (14, 900.0), (40, 1500.0), (150, 1700.0)): d.energy = v; d.keyframe_insert('energy', frame=fr_)
 def area(n, loc, rot, e, size, col):
     a = bpy.data.lights.new(n, 'AREA'); a.energy = e; a.size = size; a.color = col; o = bpy.data.objects.new(n, a); o.location = loc; o.rotation_euler = rot; scene.collection.objects.link(o); return a
 a1 = area('ContraE', (-7, 5, 2.4), (math.radians(90), 0, math.radians(-135)), 0, 4, (0.5, 0.65, 1.0))
@@ -71,17 +71,21 @@ bpy.data.objects.remove(sp)
 cam = bpy.data.cameras.new('Cam'); cam.lens = 28; cam.dof.use_dof = True; cam.dof.aperture_fstop = 3.2; co = bpy.data.objects.new('Cam', cam); scene.collection.objects.link(co); scene.camera = co
 tgt = bpy.data.objects.new('Alvo', None); tgt.location = (0, -0.4, 0.2); scene.collection.objects.link(tgt)
 def campos(fr_):
-    t = min(1.0, (fr_ - 1) / 110.0); e = t * t * (3 - 2 * t)
-    return Vector((0.3 * math.sin(fr_ * 0.03) * (1 - e), -7.2 + 0.8 * e, 10.0 - 0.8 * e))
+    # grua (técnica do blender-skills): começa baixa, olhando os pedestais de frente, e sobe até a vista de cima;
+    # ease-out longo, então o fim quase para mas não trava
+    t = min(1.0, (fr_ - 1) / 149.0); e = 1 - (1 - t) ** 3
+    low = Vector((0.6, -10.5, 1.0)); high = Vector((0.0, -6.4, 9.2))
+    return low.lerp(high, e) + Vector((0.25 * math.sin(fr_ * 0.025) * (1 - e), 0, 0))
+trk = co.constraints.new(type='TRACK_TO'); trk.target = tgt; trk.track_axis = 'TRACK_NEGATIVE_Z'; trk.up_axis = 'UP_Y'
 for fr_ in range(1, 151, 3):
-    co.location = campos(fr_); co.rotation_euler = (tgt.location - co.location).to_track_quat('-Z', 'Y').to_euler()
-    co.keyframe_insert('location', frame=fr_); co.keyframe_insert('rotation_euler', frame=fr_)
+    co.location = campos(fr_); co.keyframe_insert('location', frame=fr_)
     cam.dof.focus_distance = (tgt.location - co.location).length; cam.dof.keyframe_insert('focus_distance', frame=fr_)
+co.location = campos(150); co.keyframe_insert('location', frame=150)
 scene.render.engine = 'CYCLES'; cy = scene.cycles; cy.device = 'CPU'; cy.samples = SAMPLES; cy.use_denoising = True; cy.denoiser = 'OPENIMAGEDENOISE'
 cy.use_adaptive_sampling = True; cy.adaptive_threshold = 0.03; cy.max_bounces = 5; cy.volume_bounces = 1; cy.volume_step_rate = 2.0; cy.sample_clamp_indirect = 8.0
 scene.render.resolution_x = RES_X; scene.render.resolution_y = RES_Y; scene.render.image_settings.file_format = 'PNG'
 scene.view_settings.view_transform = 'AgX'; scene.view_settings.exposure = -0.2
-for fr_, ex in ((1, -2.0), (30, -0.2)): scene.view_settings.exposure = ex; scene.view_settings.keyframe_insert('exposure', frame=fr_)
+for fr_, ex in ((1, -2.0), (14, -0.2)): scene.view_settings.exposure = ex; scene.view_settings.keyframe_insert('exposure', frame=fr_)
 w = bpy.data.worlds.new('W'); scene.world = w; w.use_nodes = True; w.node_tree.nodes['Background'].inputs['Color'].default_value = (0.003, 0.004, 0.01, 1)
 os.makedirs(OUT, exist_ok=True)
 scene.frame_set(150); pos = []

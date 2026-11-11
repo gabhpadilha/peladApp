@@ -26,3 +26,17 @@ Cortina 540x960: ~55 s/quadro (99 quadros). Revelação: ~45 s/quadro (90 quadro
 
 ## Para o app
 Comprimir (mp4 H.264 ou WebM), guardar uma imagem de capa, carregar só quando a tela precisar e não pôr em `/public` sem cache.
+
+## Técnicas aproveitadas do `kevinbadi/blender-skills` (2026-11-11)
+
+O repositório depende do Blender aberto com o addon MCP e da Meshy (paga), então não foi instalado; ficaram as técnicas:
+
+- **Grua (low-to-high):** a câmera começa baixa, olhando de frente, e sobe até a vista final, com *ease-out* cúbico
+  (`1 - (1 - t)^3`): o fim desacelera devagar e não trava (usado em `destaques.py`).
+- **Câmera com `TRACK_TO`** num alvo (`TRACK_NEGATIVE_Z`, `UP_Y`): só a posição tem keyframes; a rotação sai do alvo.
+- **Iluminação de estúdio em 4 pontos** (principal, preenchimento, contraluz e rebote).
+- **Luzes de área fora do reflexo:** `visible_camera = False` e `visible_glossy = False` evitam a mancha no piso molhado.
+- **HDRI/texturas da PolyHaven (CC0, grátis):** a API não abre pelo proxy da sessão na nuvem; na máquina do dono dá para baixar.
+
+**Final sem travar:** a última pose de cada trecho tem que estar quase parada (câmera desacelerando, luzes estáveis,
+faíscas encolhendo até sumir), porque o app para o vídeo no último quadro.
