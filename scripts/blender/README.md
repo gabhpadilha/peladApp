@@ -22,6 +22,15 @@ Argumentos: `frames` (lista `1,5,9` ou faixa `a-b`), `rx`/`ry` (resolução), `s
   em cor de vértice, amassado côncavo e rugas), entra quicando sem força, rola, desliza e para murcha sob uma lâmpada fria que
   tremelica; o preenchimento e a contraluz só iluminam a bola (light linking), para o piso sumir no escuro sem horizonte.
   ~16 s/quadro em 720x1280 com 24 amostras. Saída `public/revelacao/bola-murcha.*`; a carta cai por cima no app depois que a bola para.
+- `pacote-palco.py`: palco da abertura do pacote de skins (2026-11-11): piso escuro espelhado, anel de metal no chão e o
+  **círculo de luz** que acende na cor da raridade (branco comum, azul rara, roxo épica, dourado escuro lendária), holofote de
+  cima, clarão no quadro 41 e fagulhas; câmera parada a partir do quadro 60, para a carta do app ficar presa ao círculo
+  (`slots.json`: caixa da carta e pontos do círculo, em % do quadro). 100 quadros. **A cena é renderizada uma vez só, em
+  camadas lineares** (`pass=base`, `pass=luz` com a luz da raridade em branco e `pass=extra` com as fagulhas a mais da
+  lendária, tudo em EXR), e `pass=compose rarity=...` monta cada cor: base + cor × curva × luz, com a falha do anel e o
+  clarão maior da lendária só na composição. Trocar uma cor ou a curva não pede render de novo. Saída
+  `public/revelacao/pacote-{comum,rara,epica,lendaria}.*`; o rasgo antes dele é o `pacote.py` (quadros 1 a 84, um por faixa,
+  `public/revelacao/pacote-rasgo-{A,B,C,D}.*`). A carta (verso e skin) entra por cima no app (`components/pack-stage.tsx`).
 - `quadra-toro.py`: quadra de futsal molhada (tema Toró) para o fundo do quadro tático, imagem única 800x1480 (`public/mesa/temporal.webp`); as cartas entram por cima pela grade do app.
 - `tunel-rascunho.py`: rascunho do túnel do estádio, descartado pelo dono do app.
 - `fusao.py`: fusão das cartas em "Sua rodada" (2026-11-11): duas plataformas sob feixes de luz, fios de energia que convergem para a
@@ -80,4 +89,5 @@ Na GPU dá para subir as amostras (`samples=64` a `128`) e a resolução (`rx=10
 | `spot2.py` (Melhor Jogador, final suave) | 1-150 | `s_` |
 | `pacote.py` (`tier=A..D`, `mode=anim` ou `mode=still`) | 1-120 | `p_` |
 | `fusao.py` (vídeo 4:5, `rx=640 ry=800`) | 1-150 (e `slots.json`, base de cada plataforma na tela) | `f_` |
+| `pacote-palco.py` (`pass=base`, `luz` e `extra`, depois `pass=compose rarity=...`) | 1-100 (extra: 38-95; e `slots.json`) | `b_`, `l_`, `x_` (EXR) e `c_` (PNG) |
 | `quadra-toro.py` (`flip=1` = lado do time Preto) | imagem única | `out=arquivo.png` |
