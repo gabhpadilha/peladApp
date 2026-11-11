@@ -18,6 +18,7 @@ Argumentos: `frames` (lista `1,5,9` ou faixa `a-b`), `rx`/`ry` (resolução), `s
   só assentam a simulação e não se renderizam.
 - `revelacao-melhor-jogador.py`: pedestal de mármore com aro dourado, piso molhado, holofote que acende com falha, névoa, poeira e fagulhas.
   A carta (foto + skin de cada jogador) entra por cima do vídeo, ao vivo, no clarão do quadro ~62.
+- `quadra-toro.py`: quadra de futsal molhada (tema Toró) para o fundo do quadro tático, imagem única 800x1480 (`public/mesa/temporal.webp`); as cartas entram por cima pela grade do app.
 - `tunel-rascunho.py`: rascunho do túnel do estádio, descartado pelo dono do app.
 
 ## Custos de renderização (4 núcleos, sem GPU)

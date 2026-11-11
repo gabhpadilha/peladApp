@@ -28,6 +28,9 @@ const PITCH_SCENES: Record<CardThemeKey, string | null> = {
   temporal: "border-sky-300/25 bg-[#060a12] bg-[url(/mesa/temporal.webp)] bg-[length:100%_100%]",
 };
 
+/** Cenários que já trazem as linhas da quadra na própria arte (render 3D do Blender): sem as linhas de código por cima. */
+const SCENES_WITH_OWN_LINES: ReadonlySet<CardThemeKey> = new Set<CardThemeKey>(["temporal"]);
+
 /** Linhas do campo (meio de campo em cima, área do goleiro embaixo), só de fundo. */
 function PitchLines() {
   return (
@@ -99,7 +102,7 @@ export function TeamPitch({ team, mode, ratingOf, onRate, theme }: TeamPitchProp
           scene ?? "bg-gradient-to-b from-card to-background/40",
         )}
       >
-        <PitchLines />
+        {!SCENES_WITH_OWN_LINES.has(theme) && <PitchLines />}
         {/* Listras do gramado, bem sutis (o cenário já traz as dele) */}
         {scene === null && (
           <div
