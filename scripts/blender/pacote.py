@@ -80,15 +80,15 @@ def foil_front():
     m = mat('FolhaFrente'); nt = m.node_tree; b = nt.nodes['Principled BSDF']
     tex = nt.nodes.new('ShaderNodeTexImage'); tex.image = bpy.data.images.load(f'{TEXDIR}/tex_{TIER}.png'); tex.image.colorspace_settings.name = 'sRGB'
     nz = nt.nodes.new('ShaderNodeTexNoise'); nz.inputs['Scale'].default_value = 9.0; nz.inputs['Detail'].default_value = 8.0; nz.inputs['Roughness'].default_value = 0.65
-    nz2 = nt.nodes.new('ShaderNodeTexNoise'); nz2.inputs['Scale'].default_value = 160.0; nz2.inputs['Detail'].default_value = 3.0
+    nz2 = nt.nodes.new('ShaderNodeTexNoise'); nz2.inputs['Scale'].default_value = 90.0; nz2.inputs['Detail'].default_value = 3.0
     tc = nt.nodes.new('ShaderNodeTexCoord'); nt.links.new(tc.outputs['Object'], nz.inputs['Vector']); nt.links.new(tc.outputs['Object'], nz2.inputs['Vector'])
     comb = nt.nodes.new('ShaderNodeMath'); comb.operation = 'ADD'; nt.links.new(nz.outputs['Fac'], comb.inputs[0]); nt.links.new(nz2.outputs['Fac'], comb.inputs[1]); comb.inputs[1].default_value = 0.0
-    bump = nt.nodes.new('ShaderNodeBump'); bump.inputs['Strength'].default_value = 0.35; bump.inputs['Distance'].default_value = 0.02
+    bump = nt.nodes.new('ShaderNodeBump'); bump.inputs['Strength'].default_value = 0.22; bump.inputs['Distance'].default_value = 0.02
     mulb = nt.nodes.new('ShaderNodeMath'); mulb.operation = 'MULTIPLY'; mulb.inputs[1].default_value = 0.5; nt.links.new(nz.outputs['Fac'], mulb.inputs[0])
     nt.links.new(mulb.outputs[0], bump.inputs['Height']); nt.links.new(bump.outputs['Normal'], b.inputs['Normal'])
     nt.links.new(tex.outputs['Color'], b.inputs['Base Color'])
     b.inputs['Metallic'].default_value = 0.72; b.inputs['Roughness'].default_value = 0.26
-    b.inputs['Coat Weight'].default_value = 0.5; b.inputs['Coat Roughness'].default_value = 0.08
+    b.inputs['Coat Weight'].default_value = 0.3; b.inputs['Coat Roughness'].default_value = 0.08
     return m
 def foil_back():
     m = mat('FolhaCostas'); nt = m.node_tree; b = nt.nodes['Principled BSDF']
@@ -121,7 +121,7 @@ def area(n, loc, tgt, e, size, col, shape='RECTANGLE', sy=None):
     o = bpy.data.objects.new(n, a); o.location = loc; o.rotation_euler = (Vector(tgt) - Vector(loc)).to_track_quat('-Z', 'Y').to_euler(); scene.collection.objects.link(o); return a, o
 area('Chave', (-4.0, -5.0, 5.0), (0, 0, 1.8), 1100, 3.5, (1.0, 0.93, 0.82), sy=5.0)
 area('Rim', (4.5, 3.5, 3.0), (0, 0, 1.6), 900, 2.0, (0.6, 0.75, 1.0), sy=4.5)
-area('Topo', (0, -1.5, 7.0), (0, 0, 1.6), 600, 4.0, (1.0, 1.0, 1.0))
+area('Topo', (0, -1.5, 7.0), (0, 0, 1.6), 260, 4.0, (1.0, 1.0, 1.0))
 inner_l = bpy.data.lights.new('Interior', 'POINT'); inner_l.energy = 0; inner_l.color = TIER_RGB; inner_l.shadow_soft_size = 0.3
 io = bpy.data.objects.new('Interior', inner_l); io.location = (0, 0.0, 3.3); scene.collection.objects.link(io); io.parent = wld
 
