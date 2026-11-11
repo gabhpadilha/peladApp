@@ -548,6 +548,8 @@ body:has([data-rate-bar]):has([data-bottom-nav]) {
 .fusion-cap-1 { opacity: 0; animation: fusion-fade-in 0.4s 0.8s both, fusion-fade-out 0.3s 3.3s forwards; }
 .fusion-cap-2 { opacity: 0; animation: fusion-fade-in 0.4s 4.5s both; }
 .fusion-delta { opacity: 0; animation: fusion-fade-in 0.4s 5.5s both; }
+/* Enquanto o vídeo da fusão não começa, a cena espera parada (os tempos casam com os quadros do vídeo). */
+.fusion-wait * { animation-play-state: paused !important; }
 .fusion-after { opacity: 0; animation: fusion-fade-in 0.6s 6s both; }
 
 /* ---- Noite de premiação: cortina que abre, envelopes e túnel do estádio (revelação dos vencedores) ---- */
