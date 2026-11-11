@@ -30,7 +30,7 @@ SKINS = {
     'destino':   dict(bg='premium-destino.webp', vaza='premium-destino-vaza.webp', box=(79, 118, 919, 1293), luz='green',
                       cor=(0.25, 1.0, 0.55), capuz=True, cachos=True, circulo='destino-circulo.webp', aros=True, runas=True, cacos=(0.01, 0.62, 0.2)),
     'diluvio':   dict(bg='premium-diluvio.webp', vaza='premium-diluvio-vaza.webp', box=None, luz='bright',
-                      cor=(0.45, 0.7, 1.0), circulo='diluvio-anel.webp', circulo_luz=1.5, luz_lo=0.8, gotas=True, cacos=(0.05, 0.3, 0.85)),
+                      cor=(0.45, 0.7, 1.0), circulo='diluvio-anel.webp', circulo_tam=3.0, placa_justa=True, luz_lo=0.8, gotas=True, cacos=(0.05, 0.3, 0.85)),
     'relampago': dict(bg='premium-relampago.webp', vaza='premium-relampago-vaza.webp', box=None, luz='bright', cor=(1.0, 0.68, 0.28)),
     'nuvem':     dict(bg='premium-nuvem.webp', vaza='premium-nuvem-vaza.webp', box=None, luz='bright', cor=(0.82, 0.88, 1.0)),
     'lenda':     dict(bg='skin-lenda.webp', vaza='skin-lenda-vaza.webp', box=None, luz='bright', cor=(0.5, 0.65, 1.0)),
@@ -75,6 +75,22 @@ def bright_mask(nt, color_socket, lo=None, gain=3.0):
     mul = nt.nodes.new('ShaderNodeMath'); mul.operation = 'MULTIPLY'; mul.use_clamp = True
     nt.links.new(sub.outputs[0], mul.inputs[0]); mul.inputs[1].default_value = gain
     return mul.outputs[0]
+
+def prelit_material(name, image, use_alpha=True, emit=0.85, bump=0.2):
+    """Arte que já veio iluminada do Gemini (neon, nuvem, cristal): a cor entra quase toda como luz própria, sem virar
+    metal (metal escurecia e sumia o que é translúcido); a luz da cena só soma relevo e um brilho leve."""
+    m, nt, b = new_mat(name)
+    tex = nt.nodes.new('ShaderNodeTexImage'); tex.image = image; tex.interpolation = 'Cubic'; tex.extension = 'CLIP'
+    dim = nt.nodes.new('ShaderNodeMix'); dim.data_type = 'RGBA'; dim.blend_type = 'MULTIPLY'; dim.inputs['Factor'].default_value = 1.0
+    nt.links.new(tex.outputs['Color'], dim.inputs['A']); dim.inputs['B'].default_value = (0.35, 0.35, 0.35, 1)
+    nt.links.new(dim.outputs['Result'], b.inputs['Base Color'])
+    if use_alpha: nt.links.new(tex.outputs['Alpha'], b.inputs['Alpha'])
+    nt.links.new(tex.outputs['Color'], b.inputs['Emission Color']); b.inputs['Emission Strength'].default_value = emit
+    b.inputs['Roughness'].default_value = 0.35; b.inputs['Metallic'].default_value = 0.15
+    bw = nt.nodes.new('ShaderNodeRGBToBW'); nt.links.new(tex.outputs['Color'], bw.inputs[0])
+    bp = nt.nodes.new('ShaderNodeBump'); bp.inputs['Strength'].default_value = bump; bp.inputs['Distance'].default_value = 0.003
+    nt.links.new(bw.outputs[0], bp.inputs['Height']); nt.links.new(bp.outputs[0], b.inputs['Normal'])
+    return m
 
 def art_material(name, image, metallic=0.85, rough=0.38, glow=4.0, bump=0.25, use_alpha=True):
     """Arte do Gemini como cor; o verde vira emissão; o brilho vira relevo fino."""
@@ -153,7 +169,7 @@ def rounded_rect(w, h, r, seg=10):
     return pts
 
 me = bpy.data.meshes.new('placa'); bm = bmesh.new()
-pts = rounded_rect(W * 0.985, H * 0.99, R)
+pts = rounded_rect(W * 0.985, H * 0.99, R) if CFG['luz'] == 'green' or CFG.get('placa_justa') else rounded_rect(W * 1.01, H * 1.007, R * 0.9)   # sem fresta embaixo de molduras finas
 front = bm.faces.new([bm.verts.new((x, y, T / 2)) for x, y in pts])
 ext = bmesh.ops.extrude_face_region(bm, geom=[front])
 for v in [e for e in ext['geom'] if isinstance(e, bmesh.types.BMVert)]: v.co.z = -T / 2
@@ -165,7 +181,8 @@ for f in bm.faces:
 bm.to_mesh(me); bm.free()
 placa = link(bpy.data.objects.new('placa', me), rig)
 bev = placa.modifiers.new('bev', 'BEVEL'); bev.width = 0.012; bev.segments = 3; bev.limit_method = 'ANGLE'
-placa.data.materials.append(art_material('fundo', img(CFG['bg']), metallic=0.55, rough=0.45, glow=5.0, bump=0.35, use_alpha=False))
+placa.data.materials.append(art_material('fundo', img(CFG['bg']), metallic=0.55, rough=0.45, glow=5.0, bump=0.35, use_alpha=False) if CFG['luz'] == 'green'
+                            else prelit_material('fundo', img(CFG['bg']), use_alpha=False, emit=0.8, bump=0.3))
 _, nt, b = new_mat('ferro'); b.inputs['Base Color'].default_value = (0.05, 0.055, 0.06, 1); b.inputs['Metallic'].default_value = 1; b.inputs['Roughness'].default_value = 0.42
 placa.data.materials.append(bpy.data.materials['ferro'])
 for p in placa.data.polygons: p.use_smooth = False
@@ -183,6 +200,11 @@ VAZA_PATH = os.path.join(OUT, '_moldura-sem-capuz.png'); va.save(VAZA_PATH)
 a = np.asarray(va.split()[3].filter(ImageFilter.GaussianBlur(4)), dtype=np.float32) / 255.0
 lum = np.asarray(va.convert('L').filter(ImageFilter.GaussianBlur(1.2)), dtype=np.float32) / 255.0
 hmap = np.clip(a ** 0.7 * 0.8 + lum * a * 0.2, 0, 1)
+if CFG['luz'] != 'green':
+    # só a moldura sólida ganha relevo; brilho, nuvem e o que é translúcido ficam planos (senão viravam degraus e sumiam)
+    solid = np.clip((np.asarray(va.split()[3], np.float32) / 255 - 0.9) / 0.1, 0, 1)
+    solid = np.asarray(Image.fromarray((solid * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(2.5)), np.float32) / 255
+    hmap = np.clip(solid * (0.55 + lum * 0.45), 0, 1)
 hpath = os.path.join(OUT, '_altura-moldura.png'); Image.fromarray((hmap * 255).astype(np.uint8)).save(hpath)
 
 bpy.ops.mesh.primitive_grid_add(x_subdivisions=460, y_subdivisions=644, size=1)
@@ -194,7 +216,8 @@ htex = bpy.data.textures.new('altura', 'IMAGE'); htex.image = bpy.data.images.lo
 dsp = mold.modifiers.new('relevo', 'DISPLACE'); dsp.texture = htex; dsp.texture_coords = 'UV'; dsp.strength = 0.07; dsp.mid_level = 0.0
 mold.modifiers.new('suave', 'SMOOTH').factor = 0.4
 bpy.ops.object.shade_smooth()
-mold.data.materials.append(art_material('moldura', bpy.data.images.load(VAZA_PATH), metallic=0.9, rough=0.3, glow=6.0, bump=0.5))
+mold.data.materials.append(art_material('moldura', bpy.data.images.load(VAZA_PATH), metallic=0.9, rough=0.3, glow=6.0, bump=0.5) if CFG['luz'] == 'green'
+                           else prelit_material('moldura', bpy.data.images.load(VAZA_PATH), emit=0.9, bump=0.35))
 
 # ---------- capuz 3D de pano verde-musgo no meio do topo ----------
 # capuz: a peça 3D que o dono do app mandou (render sobre preto, recortado em `texturas/destino-capuz.png`),
@@ -384,9 +407,10 @@ if CFG.get('cachos'):
 # ---------- círculo arcano atrás da carta ----------
 if CFG.get('circulo'):
     bpy.ops.mesh.primitive_plane_add(size=1)
-    circ = bpy.context.active_object; circ.name = 'circulo'; circ.scale = (3.5, 3.5, 1); circ.location = (0, 0.05, -0.7)
+    circ = bpy.context.active_object; circ.name = 'circulo'; circ.scale = (CFG.get('circulo_tam', 3.5),) * 2 + (1,); circ.location = (0, 0.05, -0.7)
     bpy.ops.object.transform_apply(scale=True); circ.parent = rig
-    circ.data.materials.append(art_material('circulo', img(CFG['circulo']), metallic=0.8, rough=0.3, glow=CFG.get('circulo_luz', 7.0), bump=0.4))
+    circ.data.materials.append(art_material('circulo', img(CFG['circulo']), metallic=0.8, rough=0.3, glow=CFG.get('circulo_luz', 7.0), bump=0.4) if CFG['luz'] == 'green'
+                               else prelit_material('circulo', img(CFG['circulo']), emit=0.45, bump=0.3))
     for rr in ((1.71, 1.255) if CFG.get('aros') else ()):
         bpy.ops.mesh.primitive_torus_add(major_radius=rr, minor_radius=0.022, major_segments=160, minor_segments=12, location=(0, 0.05, -0.71))
         t = bpy.context.active_object; t.parent = rig
