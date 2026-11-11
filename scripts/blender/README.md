@@ -20,6 +20,7 @@ Argumentos: `frames` (lista `1,5,9` ou faixa `a-b`), `rx`/`ry` (resolução), `s
   A carta (foto + skin de cada jogador) entra por cima do vídeo, ao vivo, no clarão do quadro ~62.
 - `quadra-toro.py`: quadra de futsal molhada (tema Toró) para o fundo do quadro tático, imagem única 800x1480 (`public/mesa/temporal.webp`); as cartas entram por cima pela grade do app.
 - `tunel-rascunho.py`: rascunho do túnel do estádio, descartado pelo dono do app.
+- `carta-3d.py` (teste, 2026-11-11): a carta **Destino** como objeto 3D (placa de ferro com espessura, moldura em relevo tirada do alfa da arte do Gemini, runas verdes acesas, cachos de esmeralda em vidro nos cantos, círculo arcano atrás, runas de pedra e cacos flutuando, poeira e névoa). Imagem única, modo "pure" (sem foto nem números); `view=34|front|low`, `fog=0` desliga a névoa. Saídas em `public/cartas/render-3d/`. Ainda não está no app (aguarda o dono).
 
 ## Custos de renderização (4 núcleos, sem GPU)
 Cortina 540x960: ~55 s/quadro (99 quadros). Revelação: ~45 s/quadro (90 quadros). Rodar uma de cada vez.
@@ -73,3 +74,4 @@ Na GPU dá para subir as amostras (`samples=64` a `128`) e a resolução (`rx=10
 | `spot2.py` (Melhor Jogador, final suave) | 1-150 | `s_` |
 | `pacote.py` (`tier=A..D`, `mode=anim` ou `mode=still`) | 1-120 | `p_` |
 | `quadra-toro.py` (`flip=1` = lado do time Preto) | imagem única | `out=arquivo.png` |
+| `carta-3d.py` (`view=34`, `front` ou `low`) | imagem única (1080x1512, 128 amostras: ~10 min na CPU) | `destino-<view>.png` |
