@@ -9,7 +9,7 @@ import type { MatchWinners } from "../_data-access/get-match-winners";
 import { markAwardsSeen } from "../_actions/mark-awards-seen";
 import { RevealAward } from "./reveal-award";
 import { RevealHighlights } from "./reveal-highlights";
-import { RevealCurtain } from "./reveal-curtain";
+import { CURTAIN_OPEN_MS, RevealCurtain } from "./reveal-curtain";
 import { RevealRanking } from "./reveal-ranking";
 import { RevealRewards } from "./reveal-rewards";
 import { RevealSummary } from "./reveal-summary";
@@ -18,8 +18,8 @@ import { RevealTeam } from "./reveal-team";
 import { PACK_THEMES, ZOEIRA_AWARDS } from "./reveal-theme";
 import { RevealZoeira } from "./reveal-zoeira";
 
-/** Tempo do pacote tremendo e abrindo antes da primeira carta (igual às animações do CSS). */
-const OPENING_MS = 1600;
+/** Com movimento reduzido a cortina não toca: o primeiro passo vem logo. */
+const REDUCED_OPENING_MS = 500;
 
 type Stage = { type: "pack" } | { type: "opening" } | { type: "step"; index: number } | { type: "summary" };
 
@@ -127,7 +127,8 @@ export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) 
         console.error("markAwardsSeen", error);
       }
     });
-    openingTimer.current = setTimeout(() => goToStep(0), OPENING_MS);
+    const isReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    openingTimer.current = setTimeout(() => goToStep(0), isReduced ? REDUCED_OPENING_MS : CURTAIN_OPEN_MS);
   }
 
   function handleReplay() {
