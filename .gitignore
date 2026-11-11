@@ -46,3 +46,5 @@ next-env.d.ts
 
 # Rascunhos do brainstorming visual (skill brainstorming)
 .superpowers/
+.blender-venv/
+scripts/blender/__pycache__/

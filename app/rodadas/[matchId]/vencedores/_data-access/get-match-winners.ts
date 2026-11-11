@@ -1,3 +1,4 @@
+import type { RoundRankingEntry } from "@/lib/ranking-points";
 import "server-only";
 import { z } from "zod";
 import { getMyPacks } from "@/app/loja/_data-access/get-my-packs";
@@ -42,6 +43,8 @@ export type MatchWinners = {
   team: Award[];
   /** O que a rodada deu a quem abriu o pacote (XP e CanchaCoins), com o saldo e a carta de hoje. */
   rewards?: (RoundRewards & { balance: number; card: Player | null; pack: MyPack | null }) | null;
+  /** Classificação da rodada por pontos (quem jogou), com o pacote de cada um quando valem. */
+  ranking: RoundRankingEntry[];
 };
 
 /** Cartas especiais de uma rodada fechada, para a animação. `null` se a rodada não existe ou está aberta. */
@@ -71,5 +74,5 @@ export async function getMatchWinners(matchId: string): Promise<MatchWinners | n
       }
     : null;
 
-  return { match, theme: awards[0]?.theme ?? "default", revealed, team, rewards };
+  return { match, theme: awards[0]?.theme ?? "default", revealed, team, rewards, ranking: league.getRoundRanking(match.id) };
 }

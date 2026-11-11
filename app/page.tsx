@@ -129,8 +129,9 @@ async function HomeContent() {
             {data.latestRound && (
               <LatestRoundCard
                 match={data.latestRound.match}
-                topPerformers={data.latestRound.topPerformers}
                 awards={data.latestRound.awards}
+                ranking={data.latestRound.ranking}
+                myId={data.currentPlayer.id}
               />
             )}
 

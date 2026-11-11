@@ -1,138 +1,170 @@
+"use client";
+
+import { useEffect, useRef, type CSSProperties } from "react";
 import { SparklesIcon } from "lucide-react";
 import { PlayerCard } from "@/components/player-card";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { AWARD_LABELS, formatAwardResult, type Award, type AwardKind } from "@/types/award";
 import type { CardThemeKey } from "@/lib/card-themes";
-import { PACK_THEMES, revealColorStyle } from "./reveal-theme";
+import { revealColorStyle } from "./reveal-theme";
 
 type RevealHighlightsProps = {
   /** Um prêmio por atributo da linha, o Melhor Goleiro e o Gol da Rodada. */
   awards: Award[];
-  /** Tema da rodada: o campinho veste o cenário do evento. */
+  /** Tema da rodada (o palco ainda é um só para todos os temas). */
   fieldTheme: CardThemeKey;
+  /** Segundos de espera antes de tocar (quando o palco abre por baixo da cortina). */
+  delay?: number;
   nextLabel: string;
   onNext: () => void;
 };
 
 /**
- * Onde cada prêmio fica no quadro: o Goleador na frente, ataque e gol em seguida, criação no meio, defesa e goleiro
- * embaixo. As duas últimas fileiras guardam os prêmios por atributo das rodadas antigas (até
- * 2026-10-29), dois por fileira para as cartas não ficarem espremidas no celular.
+ * Base de cada pedestal na tela do vídeo (em % da largura e da altura), na ordem em que acendem: fileira de cima, do
+ * meio e de baixo, da esquerda para a direita. Sai do `slots.json` do render (`scripts/blender/destaques.py`).
  */
-const ROWS: readonly (readonly AwardKind[])[] = [
-  // Goleador da Rodada (2026-11-01): sozinho na primeira fileira, à frente do ataque.
-  ["goleador"],
-  ["atacante", "gol"],
-  ["criativo"],
-  ["defensor", "goleiro"],
-  ["foguete", "garcom"],
-  ["drible", "motor"],
+const PEDESTALS: readonly (readonly [number, number])[] = [
+  [31.12, 32.56], [50.0, 32.56], [68.88, 32.56],
+  [28.19, 47.94], [50.0, 47.94], [71.81, 47.94],
+  [24.2, 68.96], [50.0, 68.96], [75.8, 68.96],
 ];
 
-// Atraso de entrada de cada carta, na ordem do quadro (classes literais para o Tailwind).
-const POP_DELAYS = [
-  "[animation-delay:0.5s]",
-  "[animation-delay:0.75s]",
-  "[animation-delay:1s]",
-  "[animation-delay:1.25s]",
-  "[animation-delay:1.5s]",
-  "[animation-delay:1.75s]",
-  "[animation-delay:2s]",
-  "[animation-delay:2.25s]",
-];
-
-function HighlightCard({ award, order }: { award: Award; order: number }) {
-  return (
-    <div
-      style={revealColorStyle(award.kind, award.theme)}
-      className={cn(
-        "flex w-[clamp(5rem,26vw,6.5rem)] animate-[reveal-pop_0.45s_cubic-bezier(0.2,0.9,0.3,1.3)_both] flex-col items-center gap-1",
-        POP_DELAYS[order % POP_DELAYS.length],
-      )}
-    >
-      <PlayerCard player={award.card} award={award} size="fill" />
-      <span className="max-w-full truncate rounded-full bg-(--reveal-color) px-2 text-[0.6875rem] font-semibold text-black tabular-nums">
-        {formatAwardResult(award)}
-      </span>
-    </div>
-  );
+/** Quando cada pedestal acende no vídeo (quadro 39 + 7 por pedestal, a 30 quadros por segundo). */
+function igniteAt(slot: number) {
+  return (39 + slot * 7) / 30;
 }
 
 /**
- * "Destaques da rodada": as cartas dos atributos (VEL, CHU, PAS, DRI, DEF, FIS),
- * do Melhor Goleiro e do Gol da Rodada entrando juntas num quadro tático, no
- * lugar de uma animação por carta (pedido do dono do app em 2026-10-21).
+ * Em que pedestal cada prêmio sobe: o Goleador no meio de cima, ataque e gol ao lado; criação no centro; defesa e
+ * goleiro embaixo (o goleiro no meio, como no gol). Os prêmios por atributo das rodadas antigas ocupam as sobras.
  */
-export function RevealHighlights({ awards, fieldTheme, nextLabel, onNext }: RevealHighlightsProps) {
-  const byKind = new Map<AwardKind, Award[]>();
-  for (const award of awards) byKind.set(award.kind, [...(byKind.get(award.kind) ?? []), award]);
-  const placedKinds = new Set(ROWS.flat());
-  // Empate (a mesma carta para mais de um) ou prêmio fora do quadro: aparece embaixo.
-  const extras = awards.filter(
-    (award) => !placedKinds.has(award.kind) || byKind.get(award.kind)?.[0]?.id !== award.id,
-  );
-  let order = 0;
+const SLOT_OF: Partial<Record<AwardKind, number>> = {
+  atacante: 0, goleador: 1, gol: 2,
+  foguete: 3, criativo: 4, garcom: 5,
+  defensor: 6, goleiro: 7, motor: 8,
+};
+/** Nome curto em cima da carta: na fileira de cima as cartas ficam coladas e o nome inteiro encavalava. */
+const SHORT_LABEL: Partial<Record<AwardKind, string>> = {
+  atacante: "Atacante", goleador: "Goleador", gol: "Gol da Rodada",
+  foguete: "Foguete", criativo: "Criativo", garcom: "Garçom",
+  defensor: "Defensor", goleiro: "Goleiro", motor: "Motor",
+};
+const FREE_ORDER = [4, 1, 7, 3, 5, 0, 2, 6, 8] as const;
+
+function placeAwards(awards: Award[]) {
+  const taken = new Map<number, Award>();
+  const extras: Award[] = [];
+  for (const award of awards) {
+    const slot = SLOT_OF[award.kind];
+    if (slot !== undefined && !taken.has(slot)) taken.set(slot, award);
+    else extras.push(award);
+  }
+  // Empates e prêmios sem pedestal próprio vão para os pedestais livres; o que sobrar aparece embaixo.
+  const rest: Award[] = [];
+  for (const award of extras) {
+    const free = FREE_ORDER.find((slot) => !taken.has(slot));
+    if (free === undefined) rest.push(award);
+    else taken.set(free, award);
+  }
+  return { placed: [...taken.entries()].sort((a, b) => a[0] - b[0]), rest };
+}
+
+/**
+ * "Destaques da rodada" no palco renderizado no Blender (2026-11-11, no lugar dos envelopes): a câmera sobe em grua
+ * sobre 9 pedestais que acendem um a um, e cada carta (desenhada ao vivo por cima do vídeo, com a foto de quem ganhou)
+ * sobe no seu pedestal quando ele acende. O vídeo para no último quadro, que já está quase parado; com movimento
+ * reduzido fica a imagem final e as cartas aparecem direto.
+ */
+export function RevealHighlights({ awards, delay = 0, nextLabel, onNext }: RevealHighlightsProps) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const { placed, rest } = placeAwards(awards);
+  const lastAt = delay + (placed.length > 0 ? igniteAt(placed[placed.length - 1][0]) : 1.5);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      video.pause();
+      return;
+    }
+    const timer = setTimeout(() => video.play().catch(() => undefined), delay * 1000);
+    return () => clearTimeout(timer);
+  }, [delay]);
 
   return (
-    <section
-      aria-live="polite"
-      aria-label="Destaques da rodada"
-      className="absolute inset-0 flex flex-col items-center gap-5 overflow-y-auto px-4 pt-20 pb-[max(2rem,env(safe-area-inset-bottom))]"
-    >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 animate-[reveal-fade_0.8s_ease-out_both] bg-[radial-gradient(circle_at_50%_15%,oklch(0.6_0.12_200/0.35),transparent_60%)]"
-      />
+    <section aria-live="polite" aria-label="Destaques da rodada" className="absolute inset-0 overflow-hidden">
+      {/* O palco ocupa a tela toda (como `object-cover`), e as cartas usam as mesmas medidas do vídeo. */}
+      <div className="absolute top-1/2 left-1/2 aspect-9/16 w-[max(100%,calc(100dvh*9/16))] -translate-1/2">
+        <video
+          ref={videoRef}
+          aria-hidden
+          muted
+          playsInline
+          preload="auto"
+          poster="/revelacao/destaques-poster.jpg"
+          className="pointer-events-none absolute inset-0 size-full motion-reduce:hidden"
+        >
+          <source src="/revelacao/destaques.webm" type="video/webm" />
+          <source src="/revelacao/destaques.mp4" type="video/mp4" />
+        </video>
+        <div
+          aria-hidden
+          className="absolute inset-0 hidden bg-cover bg-center motion-reduce:block"
+          style={{ backgroundImage: "url(/revelacao/destaques-poster.jpg)" }}
+        />
 
-      <div className="relative flex animate-[reveal-in_0.5s_ease-out_both] flex-col items-center gap-2 text-center">
-        <span className="flex size-12 items-center justify-center rounded-full border-2 border-primary text-primary">
-          <SparklesIcon aria-hidden className="size-6" />
-        </span>
-        <h2 className="font-display text-4xl leading-none font-extrabold uppercase">Destaques da rodada</h2>
-        <p className="text-sm text-muted-foreground">O melhor no ataque, na criação e na defesa, o goleiro e o gol mais bonito</p>
-      </div>
-
-      <div className={cn("relative flex w-full max-w-sm shrink-0 animate-[reveal-fade_0.5s_ease-out_0.3s_both] flex-col gap-5 overflow-hidden rounded-2xl border border-white/8 px-3 py-5", PACK_THEMES[fieldTheme].field)}>
-        <span aria-hidden className="absolute top-1/2 inset-x-0 h-px bg-white/8" />
-        <span aria-hidden className="absolute top-1/2 left-1/2 size-28 -translate-1/2 rounded-full border border-white/8" />
-        {ROWS.map((row) => (
-          <div key={row.join("-")} className="relative flex justify-center gap-[clamp(1rem,6vw,2rem)]">
-            {row.map((kind) => {
-              const award = byKind.get(kind)?.[0];
-              if (!award) return null;
-              return (
-                <div key={kind} className="flex w-[clamp(5rem,26vw,6.5rem)] flex-col items-center gap-1">
-                  <HighlightCard award={award} order={order++} />
-                  <span className="text-center text-[0.6875rem] leading-tight text-balance text-muted-foreground">{AWARD_LABELS[kind].title}</span>
+        <ul className="absolute inset-0">
+          {placed.map(([slot, award]) => {
+            const [x, y] = PEDESTALS[slot];
+            return (
+              <li
+                key={award.id}
+                style={{ ...revealColorStyle(award.kind, award.theme), left: `${x}%`, top: `${y}%`, "--d": `${delay + igniteAt(slot)}s` } as CSSProperties}
+                className="absolute w-[17%] -translate-x-1/2 -translate-y-full pb-[1%]"
+              >
+                <div className="stage-card flex flex-col items-center gap-0.5 motion-reduce:opacity-100">
+                <span className="max-w-[112%] truncate rounded-full bg-black/70 px-1.5 text-[0.625rem] font-semibold whitespace-nowrap text-white">
+                  {SHORT_LABEL[award.kind] ?? AWARD_LABELS[award.kind].title}
+                </span>
+                <div className="w-full">
+                  <PlayerCard player={award.card} award={award} size="fill" />
                 </div>
-              );
-            })}
-          </div>
-        ))}
+                <span className="max-w-[112%] truncate rounded-full bg-(--reveal-color) px-1.5 text-[0.625rem] font-semibold whitespace-nowrap text-black tabular-nums">
+                  {formatAwardResult(award)}
+                </span>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
       </div>
 
-      {extras.length > 0 && (
-        <div className="relative flex animate-[reveal-fade_0.4s_ease-out_2.6s_both] flex-col items-center gap-2">
-          <p className="text-xs text-muted-foreground uppercase">Empates e outros destaques</p>
-          <div className="flex flex-wrap justify-center gap-[clamp(1rem,6vw,2rem)]">
-            {extras.map((award) => (
-              <div key={award.id} className="flex w-[clamp(5rem,26vw,6.5rem)] flex-col items-center gap-1">
-                <HighlightCard award={award} order={0} />
-                <span className="text-center text-[0.6875rem] leading-tight text-balance text-muted-foreground">{AWARD_LABELS[award.kind].title}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-linear-to-b from-black/80 to-transparent" />
+      <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-linear-to-t from-black/85 to-transparent" />
 
-      <Button
-        size="lg"
-        className="relative h-11 w-full max-w-sm shrink-0 animate-[reveal-fade_0.4s_ease-out_2.8s_both] text-base"
-        onClick={onNext}
+      <div
+        style={{ animationDelay: `${delay > 0 ? delay + 1.3 : 0}s` }}
+        className="absolute inset-x-0 top-0 flex animate-[reveal-in_0.5s_ease-out_both] flex-col items-center gap-1 px-4 pt-16 text-center">
+        <span className="flex items-center gap-2 font-display text-3xl leading-none font-extrabold uppercase">
+          <SparklesIcon aria-hidden className="size-5 text-primary" />
+          Destaques da rodada
+        </span>
+        <p className="text-xs text-white/75">Ataque, criação, defesa, goleiro e o gol mais bonito</p>
+      </div>
+
+      <div
+        className="absolute inset-x-0 bottom-0 flex animate-[reveal-fade_0.4s_ease-out_both] flex-col items-center gap-3 px-4 pb-[max(2rem,env(safe-area-inset-bottom))]"
+        style={{ animationDelay: `${lastAt + 0.9}s` }}
       >
-        {nextLabel}
-      </Button>
+        {rest.length > 0 && (
+          <p className="text-center text-xs text-white/80">
+            Também: {rest.map((award) => `${AWARD_LABELS[award.kind].title} · ${award.card.nickname}`).join(", ")}
+          </p>
+        )}
+        <Button size="lg" className="h-11 w-full max-w-sm text-base" onClick={onNext}>
+          {nextLabel}
+        </Button>
+      </div>
     </section>
   );
 }
