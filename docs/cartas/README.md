@@ -6,7 +6,8 @@
 
 - Toda carta nova chega do Gemini em peças separadas (luz sobre preto puro): fundo, borda, enfeite-*, render-*, flutuante-*. Guardar em docs/cartas/<chave>/pecas/ como vieram.
 - Nunca trabalhar só com a carta achatada: tirar uma peça de cima da borda deixa defeito (testes 3D de novembro, 2026-11-11).
-- Raridade: comum = borda simples e fundo padrão; rara = borda trabalhada e fundo com pattern; épica = + 1 render 3D vazando; lendária = + flutuantes e animação (só 1 por conjunto). Ver .claude/rules/design-system.md.
+- Nada de render vazando para fora da carta (decisão de 2026-11-11): gerava retrabalho e não ficava bom; o premium vem da borda e dos flutuantes.
+- Raridade pela borda (desde 2026-11-11, cartas de dezembro em diante; nada vaza para fora da carta): comum = fio ou tubo simples e fundo padrão; rara = borda trabalhada de leve e fundo com pattern; épica = borda com 1 ou 2 enfeites simples, fundo sofisticado, animação opcional só dentro da carta; lendária = borda cheia de enfeites, fundo sofisticado, flutuantes atrás e em volta e animação (só 1 por conjunto). Peças do Gemini sempre separadas. Cartas antigas com algo vazando ficam como estão (novembro de 2026 é o último mês assim).
 - Na carta: sem filter, mix-blend-mode e backdrop-filter (iPhone); animações só de transform e opacity.
 - Cartas já ganhas não mudam de desenho: o tema fica gravado na carta.
 
@@ -69,6 +70,7 @@ As cartas anteriores a 2026-11-11 têm as peças na pasta de protótipos (`docs/
 
 ## Em andamento
 
+- **2026-11-11**: Nova regra de raridade pela borda registrada; as próximas cartas (dezembro) já seguem ela.
 - **2026-11-11**: Cartas em 3D no Blender: Destino aprovada (branch feat/carta-3d-teste, scripts/blender/carta-3d.py), falta ligar no app; foto e números ao vivo entre a camada do fundo e a da moldura.
 - **2026-11-08**: Pacotes de skins (conjunto de novembro: 12 skins, 6 desenhos) ainda desligados nas peladas; lançamento planejado para 1/12.
 

@@ -38,6 +38,7 @@
 - **2026-11-01**: refeita com a arte dourada do Gemini ("o melhor design até aqui")
 - **2026-11-11**: virou só de pacote
 - **2026-11-11**: teste 3D no Blender recusado; fica como está
+- **2026-11-11**: mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta
 
 ## Notas
 

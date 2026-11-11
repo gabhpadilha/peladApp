@@ -34,6 +34,7 @@
 
 - **2026-10-21**: grátis no nível 0
 - **2026-11-01**: arte de cristais do Gemini (uma só para as quatro pedras, muda o tom)
+- **2026-11-11**: mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta
 
 ## Notas
 

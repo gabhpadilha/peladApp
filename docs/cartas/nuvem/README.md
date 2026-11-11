@@ -37,6 +37,7 @@
 - **2026-11-01**: arte de tempestade do Gemini; raios separados que acendem como trovão
 - **2026-11-11**: virou só de pacote
 - **2026-11-11**: teste 3D no Blender recusado: arte achatada (peça que vaza dentro da moldura); fica como está
+- **2026-11-11**: mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta
 
 ## Notas
 

@@ -33,3 +33,4 @@
 ## Histórico
 
 - **2026-11-01**: recolor da arte de cristais
+- **2026-11-11**: mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta

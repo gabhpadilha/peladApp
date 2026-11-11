@@ -41,6 +41,7 @@
 
 - **2026-11-08**: lendária do conjunto de novembro, peças do dono no Gemini
 - **2026-11-11**: teste 3D no Blender: "quase aceitável", mas mantida como está
+- **2026-11-11**: mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta
 
 ## Notas
 

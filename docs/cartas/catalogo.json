@@ -59,6 +59,10 @@
     [
      "2026-11-01",
      "arte de cristais do Gemini (uma só para as quatro pedras, muda o tom)"
+    ],
+    [
+     "2026-11-11",
+     "mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta"
     ]
    ],
    "notas": "Não vende no Mercado. Mesma arte da Safira, Ametista e Rubi, recolorida (GEMS no script)."
@@ -89,6 +93,10 @@
     [
      "2026-11-01",
      "arte de cristais do Gemini (safira e ouro, aglomerado vazando pela direita)"
+    ],
+    [
+     "2026-11-11",
+     "mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta"
     ]
    ],
    "notas": "A arte original do Gemini é a da Safira."
@@ -119,6 +127,10 @@
     [
      "2026-11-01",
      "recolor da arte de cristais"
+    ],
+    [
+     "2026-11-11",
+     "mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta"
     ]
    ],
    "notas": ""
@@ -159,6 +171,10 @@
     [
      "2026-11-09",
      "volta ao desenho de cristais, rosa-vinho"
+    ],
+    [
+     "2026-11-11",
+     "mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta"
     ]
    ],
    "notas": "A versão de louros ficou guardada nos arquivos -fino."
@@ -209,6 +225,10 @@
     [
      "2026-11-09",
      "versão 4: cetim branco com veios de ouro, moldura de ouro com fio de luz, cristais com pepitas (3 peças próprias)"
+    ],
+    [
+     "2026-11-11",
+     "mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta"
     ]
    ],
    "notas": "Carta clara: ink escuro na roupa. Render reduzido a 70% e na lateral direita, meio dentro e meio fora."
@@ -307,6 +327,10 @@
     [
      "2026-11-11",
      "teste 3D no Blender recusado: arte achatada (peça que vaza dentro da moldura); fica como está"
+    ],
+    [
+     "2026-11-11",
+     "mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta"
     ]
    ],
    "notas": "Arte numa imagem só (sem peças separadas)."
@@ -354,6 +378,10 @@
     [
      "2026-11-11",
      "teste 3D no Blender recusado; fica como está"
+    ],
+    [
+     "2026-11-11",
+     "mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta"
     ]
    ],
    "notas": "Arte numa imagem só."
@@ -407,6 +435,10 @@
     [
      "2026-11-11",
      "teste 3D no Blender recusado; fica como está"
+    ],
+    [
+     "2026-11-11",
+     "mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta"
     ]
    ],
    "notas": "Tem peças separadas (v5), mas o render do cristal veio com a moldura no mesmo lugar; refazer em 3D exigiria o cristal sozinho."
@@ -446,6 +478,10 @@
     [
      "2026-11-11",
      "teste 3D no Blender: \"quase aceitável\", mas mantida como está"
+    ],
+    [
+     "2026-11-11",
+     "mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta"
     ]
    ],
    "notas": "Única de novembro com todas as peças separadas: candidata a refazer em 3D depois."
@@ -1149,6 +1185,10 @@
  "em_andamento": [
   [
    "2026-11-11",
+   "Nova regra de raridade pela borda registrada; as próximas cartas (dezembro) já seguem ela."
+  ],
+  [
+   "2026-11-11",
    "Cartas em 3D no Blender: Destino aprovada (branch feat/carta-3d-teste, scripts/blender/carta-3d.py), falta ligar no app; foto e números ao vivo entre a camada do fundo e a da moldura."
   ],
   [
@@ -1181,7 +1221,8 @@
  "regras": [
   "Toda carta nova chega do Gemini em peças separadas (luz sobre preto puro): fundo, borda, enfeite-*, render-*, flutuante-*. Guardar em docs/cartas/<chave>/pecas/ como vieram.",
   "Nunca trabalhar só com a carta achatada: tirar uma peça de cima da borda deixa defeito (testes 3D de novembro, 2026-11-11).",
-  "Raridade: comum = borda simples e fundo padrão; rara = borda trabalhada e fundo com pattern; épica = + 1 render 3D vazando; lendária = + flutuantes e animação (só 1 por conjunto). Ver .claude/rules/design-system.md.",
+  "Nada de render vazando para fora da carta (decisão de 2026-11-11): gerava retrabalho e não ficava bom; o premium vem da borda e dos flutuantes.",
+  "Raridade pela borda (desde 2026-11-11, cartas de dezembro em diante; nada vaza para fora da carta): comum = fio ou tubo simples e fundo padrão; rara = borda trabalhada de leve e fundo com pattern; épica = borda com 1 ou 2 enfeites simples, fundo sofisticado, animação opcional só dentro da carta; lendária = borda cheia de enfeites, fundo sofisticado, flutuantes atrás e em volta e animação (só 1 por conjunto). Peças do Gemini sempre separadas. Cartas antigas com algo vazando ficam como estão (novembro de 2026 é o último mês assim).",
   "Na carta: sem filter, mix-blend-mode e backdrop-filter (iPhone); animações só de transform e opacity.",
   "Cartas já ganhas não mudam de desenho: o tema fica gravado na carta."
  ]

@@ -4,13 +4,22 @@
 
 ## 2026-11-11
 
+- [Esmeralda](./esmeralda/README.md): mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta
+- [Safira](./safira/README.md): mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta
+- [Ametista](./ametista/README.md): mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta
+- [Rubi](./rubi/README.md): mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta
+- [Ícone](./icone/README.md): mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta
 - [Nuvem carregada](./nuvem/README.md): virou só de pacote
 - [Nuvem carregada](./nuvem/README.md): teste 3D no Blender recusado: arte achatada (peça que vaza dentro da moldura); fica como está
+- [Nuvem carregada](./nuvem/README.md): mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta
 - [Relâmpago](./relampago/README.md): virou só de pacote
 - [Relâmpago](./relampago/README.md): teste 3D no Blender recusado; fica como está
+- [Relâmpago](./relampago/README.md): mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta
 - [Lenda do Trovão](./lenda/README.md): virou só de pacote
 - [Lenda do Trovão](./lenda/README.md): teste 3D no Blender recusado; fica como está
+- [Lenda do Trovão](./lenda/README.md): mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta
 - [Dilúvio](./diluvio/README.md): teste 3D no Blender: "quase aceitável", mas mantida como está
+- [Dilúvio](./diluvio/README.md): mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta
 - [Destino](./destino/README.md): versão 3D no Blender aprovada pelo dono (capuz 3D dele no topo); ainda não ligada no app
 
 ## 2026-11-09
@@ -97,6 +106,7 @@
 
 ## Em andamento
 
+- **2026-11-11**: Nova regra de raridade pela borda registrada; as próximas cartas (dezembro) já seguem ela.
 - **2026-11-11**: Cartas em 3D no Blender: Destino aprovada (branch feat/carta-3d-teste, scripts/blender/carta-3d.py), falta ligar no app; foto e números ao vivo entre a camada do fundo e a da moldura.
 - **2026-11-08**: Pacotes de skins (conjunto de novembro: 12 skins, 6 desenhos) ainda desligados nas peladas; lançamento planejado para 1/12.
 

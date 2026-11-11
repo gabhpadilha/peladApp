@@ -44,6 +44,7 @@
 - **2026-11-02**: versão 5 em camadas do Gemini (fundo, borda, render do cristal de rocha) + animação só nos raios
 - **2026-11-11**: virou só de pacote
 - **2026-11-11**: teste 3D no Blender recusado; fica como está
+- **2026-11-11**: mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta
 
 ## Notas
 

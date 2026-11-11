@@ -37,6 +37,7 @@
 - **2026-11-01**: recolor da arte de cristais
 - **2026-11-05**: moldura fina de louros com rubis (guardada em premium-rubi-fino)
 - **2026-11-09**: volta ao desenho de cristais, rosa-vinho
+- **2026-11-11**: mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta
 
 ## Notas
 

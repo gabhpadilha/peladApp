@@ -44,6 +44,7 @@
 - **2026-11-01**: desceu do nível 16 para o 11
 - **2026-11-05**: moldura fina de louros com diamantes (guardada em premium-icone-fino)
 - **2026-11-09**: versão 4: cetim branco com veios de ouro, moldura de ouro com fio de luz, cristais com pepitas (3 peças próprias)
+- **2026-11-11**: mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta
 
 ## Notas
 

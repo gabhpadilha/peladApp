@@ -33,6 +33,7 @@
 ## Histórico
 
 - **2026-11-01**: arte de cristais do Gemini (safira e ouro, aglomerado vazando pela direita)
+- **2026-11-11**: mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta
 
 ## Notas
 
