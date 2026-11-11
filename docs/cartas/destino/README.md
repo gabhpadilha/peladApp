@@ -1,30 +1,50 @@
 # Destino
 
-Lendária do evento "Destino" da Loja de dezembro de 2026 (nível 5, 600 CC; `destino` em `CARD_SKINS` e na roupa
-`destino` de `components/cancha-card.tsx`). Design original que só alude a um vilão de capuz verde: ferro forjado,
-runas verde-esmeralda inventadas, cristais de esmeralda e capuz de pano.
+> Ficha gerada de `docs/cartas/catalogo.json` por `scripts/cartas/gerar-catalogo.py`. Edite o JSON, não este arquivo.
 
-## Peças (`pecas/`, como o dono mandou do Gemini)
+| | |
+| --- | --- |
+| Chave | `destino` |
+| Tipo | skin |
+| Raridade | Lendária |
+| Onde aparece | Pacote (evento Destino) |
+| Evento | Destino (dezembro de 2026) |
+| Nível e preço | nível 5, 600 CC |
+| Estado | no app |
+| Roupa no código | `destino` em `components/cancha-card.tsx` |
 
-| Arquivo | O que é | Usada por |
-| --- | --- | --- |
-| `fundo.jpg` | ferro forjado com runas, pano verde-musgo e cristais | `prototipos/montar-carta.cjs` → `public/cartas/fundos/premium-destino.webp` |
-| `borda.jpg` | moldura de aço escovado com runas, cristais nos cantos de cima e o capuz pintado no topo | `montar-carta.cjs` → `premium-destino-vaza.webp` |
-| `enfeite-capuz-3d.jpg` | o capuz em render 3D, sozinho sobre preto (2026-11-11) | `scripts/blender/carta-3d.py` (recorte em `scripts/blender/texturas/destino-capuz.png`) |
-| `flutuante-circulo-arcano.jpg` | círculo de aço e ouro com runas verdes (gira atrás da carta) | `prototipos/destino-runas.cjs` → `destino-circulo.webp` |
-| `flutuante-runa-pedra.jpg` | runa de pedra hexagonal | `destino-runas.cjs` → `destino-runa.webp` |
-| `flutuante-cacos-esmeralda.jpg` | cacos de esmeralda | `destino-runas.cjs` → `destino-caco-*.webp` |
+## Montada
 
-Os originais também continuam em `docs/superpowers/specs/2026-10-28-cartas-assets/prototipos/destino-*-dono.jpg`, onde os scripts os leem.
+![Destino](montada/destino-2d.webp)
+![Destino em 3D](montada/destino-3d.webp)
 
-## Montada (`montada/`)
+## Arquivos no app (`public/cartas/fundos/`)
 
-- `destino-2d.webp`: como o app mostra hoje (fundo + moldura pintada).
-- `destino-3d.webp`: a versão do Blender (`carta-3d.py skin=destino`): placa de ferro com espessura, moldura em relevo,
-  cachos de esmeralda em vidro, o capuz 3D no topo, o círculo arcano atrás, runas de pedra em prisma e cacos flutuando.
-  No app, a foto e os números entram ao vivo entre a camada do fundo e a da moldura (`camada=fundo` e `camada=moldura`).
+- Fundo: `premium-destino.webp`
+- Moldura e o que vaza: `premium-destino-vaza.webp`
+- Flutuantes: `DESTINO_FLOATERS (círculo arcano, runas, cacos)`
+
+## Peças originais (do Gemini, como o dono mandou)
+
+- `docs/cartas/destino/pecas/fundo.jpg`
+- `docs/cartas/destino/pecas/borda.jpg`
+- `docs/cartas/destino/pecas/enfeite-capuz-3d.jpg`
+- `docs/cartas/destino/pecas/flutuante-circulo-arcano.jpg`
+- `docs/cartas/destino/pecas/flutuante-runa-pedra.jpg`
+- `docs/cartas/destino/pecas/flutuante-cacos-esmeralda.jpg`
+
+## Scripts
+
+- `docs/superpowers/specs/2026-10-28-cartas-assets/prototipos/montar-carta.cjs`
+- `docs/superpowers/specs/2026-10-28-cartas-assets/prototipos/destino-runas.cjs`
+- `scripts/blender/carta-3d.py`
 
 ## Histórico
 
-- 2026-11-05: montada e guardada (2D).
-- 2026-11-11: versão 3D aprovada pelo dono do app, com o capuz dele no topo da carta (o capuz na cabeça do jogador foi descartado). Ainda não ligada no app.
+- **2026-11-05**: montada e guardada (2D), alusão a vilão de capuz verde sem copiar traje
+- **2026-11-05**: runas e cacos flutuando, círculo arcano girando
+- **2026-11-11**: versão 3D no Blender aprovada pelo dono (capuz 3D dele no topo); ainda não ligada no app
+
+## Notas
+
+Padrão de lendária. Na Loja de 1 a 31/12/2026 (hoje só de pacote).

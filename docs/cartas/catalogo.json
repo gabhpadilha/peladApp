@@ -1,0 +1,1188 @@
+{
+ "_leia": "Catálogo de todas as cartas (skins e visuais de prêmio). Fonte para consulta rápida: um registro por carta. As fichas em docs/cartas/<chave>/README.md e o índice docs/cartas/README.md são gerados a partir deste arquivo por scripts/cartas/gerar-catalogo.py (rode depois de editar). Caminhos de peças relativos à raiz do repo; 'P/' = docs/superpowers/specs/2026-10-28-cartas-assets/prototipos/. Datas no formato AAAA-MM-DD.",
+ "estados": {
+  "no-app": "em uso no app",
+  "guardada": "pronta no código ou nas artes, ainda não ligada",
+  "descartada": "recusada pelo dono do app; não repetir",
+  "saiu": "esteve no app e foi retirada (quem tem continua usando)"
+ },
+ "cartas": [
+  {
+   "chave": "padrao",
+   "nome": "Padrão",
+   "tipo": "skin",
+   "raridade": null,
+   "onde": "todos (carta base)",
+   "evento": null,
+   "estado": "no-app",
+   "roupa": "padrao",
+   "app": {
+    "fundo": "fosco-grafite"
+   },
+   "pecas": [],
+   "scripts": [],
+   "historico": [
+    [
+     "2026-10-29",
+     "carta com identidade própria (versão 2.0.0): grafite fosco e moldura fina de metal polido"
+    ]
+   ],
+   "notas": "Sem brilho. As faixas Bronze/Prata/Ouro seguem pelo OVR."
+  },
+  {
+   "chave": "esmeralda",
+   "nome": "Esmeralda",
+   "tipo": "skin",
+   "raridade": "epica",
+   "onde": "Loja (grátis, prêmio do primeiro login)",
+   "nivel": 0,
+   "preco": 0,
+   "evento": null,
+   "estado": "no-app",
+   "roupa": "esmeralda",
+   "app": {
+    "fundo": "premium-esmeralda",
+    "vaza": "premium-esmeralda-vaza",
+    "largura_vaza": 1.084
+   },
+   "pecas": [
+    "P/premium-v2-dono.jpg"
+   ],
+   "scripts": [
+    "P/premium-v2.cjs"
+   ],
+   "historico": [
+    [
+     "2026-10-21",
+     "grátis no nível 0"
+    ],
+    [
+     "2026-11-01",
+     "arte de cristais do Gemini (uma só para as quatro pedras, muda o tom)"
+    ]
+   ],
+   "notas": "Não vende no Mercado. Mesma arte da Safira, Ametista e Rubi, recolorida (GEMS no script)."
+  },
+  {
+   "chave": "safira",
+   "nome": "Safira",
+   "tipo": "skin",
+   "raridade": "epica",
+   "onde": "Loja",
+   "nivel": 4,
+   "preco": 250,
+   "evento": null,
+   "estado": "no-app",
+   "roupa": "safira",
+   "app": {
+    "fundo": "premium-safira",
+    "vaza": "premium-safira-vaza",
+    "largura_vaza": 1.084
+   },
+   "pecas": [
+    "P/premium-v2-dono.jpg"
+   ],
+   "scripts": [
+    "P/premium-v2.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-01",
+     "arte de cristais do Gemini (safira e ouro, aglomerado vazando pela direita)"
+    ]
+   ],
+   "notas": "A arte original do Gemini é a da Safira."
+  },
+  {
+   "chave": "ametista",
+   "nome": "Ametista",
+   "tipo": "skin",
+   "raridade": "epica",
+   "onde": "Loja",
+   "nivel": 6,
+   "preco": 350,
+   "evento": null,
+   "estado": "no-app",
+   "roupa": "ametista",
+   "app": {
+    "fundo": "premium-ametista",
+    "vaza": "premium-ametista-vaza",
+    "largura_vaza": 1.084
+   },
+   "pecas": [
+    "P/premium-v2-dono.jpg"
+   ],
+   "scripts": [
+    "P/premium-v2.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-01",
+     "recolor da arte de cristais"
+    ]
+   ],
+   "notas": ""
+  },
+  {
+   "chave": "rubi",
+   "nome": "Rubi",
+   "tipo": "skin",
+   "raridade": "epica",
+   "onde": "Loja",
+   "nivel": 8,
+   "preco": 450,
+   "evento": null,
+   "estado": "no-app",
+   "roupa": "rubi",
+   "app": {
+    "fundo": "premium-rubi",
+    "vaza": "premium-rubi-vaza",
+    "largura_vaza": 1.084
+   },
+   "pecas": [
+    "P/premium-v2-dono.jpg",
+    "P/borda-louros-dono.jpg"
+   ],
+   "scripts": [
+    "P/premium-v2.cjs",
+    "P/montar-carta.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-01",
+     "recolor da arte de cristais"
+    ],
+    [
+     "2026-11-05",
+     "moldura fina de louros com rubis (guardada em premium-rubi-fino)"
+    ],
+    [
+     "2026-11-09",
+     "volta ao desenho de cristais, rosa-vinho"
+    ]
+   ],
+   "notas": "A versão de louros ficou guardada nos arquivos -fino."
+  },
+  {
+   "chave": "icone",
+   "nome": "Ícone",
+   "tipo": "skin",
+   "raridade": "epica",
+   "onde": "Loja",
+   "nivel": 11,
+   "preco": 1200,
+   "evento": null,
+   "estado": "no-app",
+   "roupa": "icone",
+   "app": {
+    "fundo": "premium-marfim",
+    "vaza": "premium-marfim-vaza",
+    "largura_vaza": 1.12
+   },
+   "pecas": [
+    "P/icone-v4-fundo-dono.jpg",
+    "P/icone-v4-borda-dono.jpg",
+    "P/icone-v4-render-dono.jpg",
+    "P/icone-v3-fundo-dono.jpg",
+    "P/icone-v3-render-dono.jpg",
+    "P/icone-v3-composto-dono.jpg",
+    "P/premium-icone-dono.jpg"
+   ],
+   "scripts": [
+    "P/icone-v4.cjs",
+    "P/icone-v3.cjs",
+    "P/premium-icone.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-01",
+     "mármore, quartzo e diamantes do Gemini (clean)"
+    ],
+    [
+     "2026-11-01",
+     "desceu do nível 16 para o 11"
+    ],
+    [
+     "2026-11-05",
+     "moldura fina de louros com diamantes (guardada em premium-icone-fino)"
+    ],
+    [
+     "2026-11-09",
+     "versão 4: cetim branco com veios de ouro, moldura de ouro com fio de luz, cristais com pepitas (3 peças próprias)"
+    ]
+   ],
+   "notas": "Carta clara: ink escuro na roupa. Render reduzido a 70% e na lateral direita, meio dentro e meio fora."
+  },
+  {
+   "chave": "lobisomem",
+   "nome": "Lobisomem",
+   "tipo": "skin",
+   "raridade": "rara",
+   "onde": "Loja (evento)",
+   "nivel": 3,
+   "preco": 200,
+   "evento": "Halloween 2026 (01/10 a 30/10)",
+   "estado": "saiu",
+   "roupa": "lobisomem",
+   "app": {
+    "fundo": "skin-lobisomem"
+   },
+   "pecas": [],
+   "scripts": [
+    "P/halloween.cjs"
+   ],
+   "historico": [
+    [
+     "2026-10",
+     "neon azul-luar com garras nas laterais e presas na base; cabeça de lobo desenhada pelo dono como marca d'água"
+    ]
+   ],
+   "notas": "Fora da Loja desde o fim do Halloween; quem comprou continua usando."
+  },
+  {
+   "chave": "vampiro",
+   "nome": "Vampiro",
+   "tipo": "skin",
+   "raridade": "rara",
+   "onde": "Loja (evento)",
+   "nivel": 3,
+   "preco": 200,
+   "evento": "Halloween 2026 (01/10 a 30/10)",
+   "estado": "saiu",
+   "roupa": "vampiro",
+   "app": {
+    "fundo": "skin-vampiro"
+   },
+   "pecas": [],
+   "scripts": [
+    "P/halloween.cjs"
+   ],
+   "historico": [
+    [
+     "2026-10",
+     "neon vermelho-sangue com morcego no topo e base recortada como asa"
+    ]
+   ],
+   "notas": ""
+  },
+  {
+   "chave": "nuvem",
+   "nome": "Nuvem carregada",
+   "tipo": "skin",
+   "raridade": "epica",
+   "onde": "Pacote (era Loja)",
+   "nivel": 3,
+   "preco": 200,
+   "evento": "Toró (novembro de 2026)",
+   "estado": "no-app",
+   "roupa": "nuvem",
+   "app": {
+    "fundo": "premium-nuvem",
+    "vaza": "premium-nuvem-vaza",
+    "largura_vaza": 1.084,
+    "raios": [
+     "premium-nuvem-raios-dentro",
+     "premium-nuvem-raios"
+    ]
+   },
+   "pecas": [
+    "P/premium-nuvem-dono.jpg"
+   ],
+   "scripts": [
+    "P/premium-nuvem.cjs"
+   ],
+   "historico": [
+    [
+     "2026-10-31",
+     "no lugar do Trovão roxo"
+    ],
+    [
+     "2026-11-01",
+     "arte de tempestade do Gemini; raios separados que acendem como trovão"
+    ],
+    [
+     "2026-11-11",
+     "virou só de pacote"
+    ],
+    [
+     "2026-11-11",
+     "teste 3D no Blender recusado: arte achatada (peça que vaza dentro da moldura); fica como está"
+    ]
+   ],
+   "notas": "Arte numa imagem só (sem peças separadas)."
+  },
+  {
+   "chave": "relampago",
+   "nome": "Relâmpago",
+   "tipo": "skin",
+   "raridade": "epica",
+   "onde": "Pacote (era Loja)",
+   "nivel": 3,
+   "preco": 200,
+   "evento": "Toró (novembro de 2026)",
+   "estado": "no-app",
+   "roupa": "relampago",
+   "app": {
+    "fundo": "premium-relampago",
+    "vaza": "premium-relampago-vaza",
+    "largura_vaza": 1.084,
+    "raios": [
+     "premium-relampago-raios-dentro",
+     "premium-relampago-raios"
+    ]
+   },
+   "pecas": [
+    "P/premium-relampago-dono.jpg",
+    "P/relampago-arte-dono.jpg"
+   ],
+   "scripts": [
+    "P/premium-relampago.cjs"
+   ],
+   "historico": [
+    [
+     "2026-10-31",
+     "arte montada pelo dono"
+    ],
+    [
+     "2026-11-01",
+     "refeita com a arte dourada do Gemini (\"o melhor design até aqui\")"
+    ],
+    [
+     "2026-11-11",
+     "virou só de pacote"
+    ],
+    [
+     "2026-11-11",
+     "teste 3D no Blender recusado; fica como está"
+    ]
+   ],
+   "notas": "Arte numa imagem só."
+  },
+  {
+   "chave": "lenda",
+   "nome": "Lenda do Trovão",
+   "tipo": "skin",
+   "raridade": "epica",
+   "onde": "Pacote (era Loja)",
+   "nivel": 5,
+   "preco": 600,
+   "evento": "Toró (novembro de 2026)",
+   "estado": "no-app",
+   "roupa": "lenda",
+   "app": {
+    "fundo": "skin-lenda",
+    "vaza": "skin-lenda-vaza",
+    "largura_vaza": 1.12,
+    "raios": [
+     "skin-lenda-raios-dentro",
+     "skin-lenda-raios"
+    ]
+   },
+   "pecas": [
+    "P/lenda-v5-fundo-dono.jpg",
+    "P/lenda-v5-borda-dono.jpg",
+    "P/lenda-v5-render-dono.jpg",
+    "P/lenda-v2-fundo-dono.jpg",
+    "P/lenda-v2-moldura-dono.jpg",
+    "P/lenda-v2-raios-dono.jpg",
+    "P/lenda-concept-dono.jpg",
+    "P/lenda-fundo-dono.jpg"
+   ],
+   "scripts": [
+    "P/skin-lenda-v5.cjs"
+   ],
+   "historico": [
+    [
+     "2026-10-31",
+     "carta de prestígio do Toró (nível 5)"
+    ],
+    [
+     "2026-11-02",
+     "versão 5 em camadas do Gemini (fundo, borda, render do cristal de rocha) + animação só nos raios"
+    ],
+    [
+     "2026-11-11",
+     "virou só de pacote"
+    ],
+    [
+     "2026-11-11",
+     "teste 3D no Blender recusado; fica como está"
+    ]
+   ],
+   "notas": "Tem peças separadas (v5), mas o render do cristal veio com a moldura no mesmo lugar; refazer em 3D exigiria o cristal sozinho."
+  },
+  {
+   "chave": "diluvio",
+   "nome": "Dilúvio",
+   "tipo": "skin",
+   "raridade": "lendaria",
+   "onde": "Pacote",
+   "evento": "Toró (novembro de 2026)",
+   "estado": "no-app",
+   "roupa": "diluvio",
+   "app": {
+    "fundo": "premium-diluvio",
+    "vaza": "premium-diluvio-vaza",
+    "largura_vaza": 1.12,
+    "flutuantes": "DILUVIO_FLOATERS (anel, gotas, cacos)"
+   },
+   "pecas": [
+    "P/diluvio-fundo-dono.jpg",
+    "P/diluvio-borda-dono.jpg",
+    "P/diluvio-render-dono.jpg",
+    "P/diluvio-anel-dono.jpg",
+    "P/diluvio-gotas-dono.jpg",
+    "P/diluvio-cacos-dono.jpg"
+   ],
+   "scripts": [
+    "P/diluvio-v1.cjs",
+    "P/diluvio-flutuantes.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-08",
+     "lendária do conjunto de novembro, peças do dono no Gemini"
+    ],
+    [
+     "2026-11-11",
+     "teste 3D no Blender: \"quase aceitável\", mas mantida como está"
+    ]
+   ],
+   "notas": "Única de novembro com todas as peças separadas: candidata a refazer em 3D depois."
+  },
+  {
+   "chave": "aguaceiro",
+   "nome": "Aguaceiro",
+   "tipo": "skin",
+   "raridade": "rara",
+   "onde": "Pacote",
+   "evento": "Toró (novembro de 2026)",
+   "estado": "no-app",
+   "roupa": "aguaceiro",
+   "app": {
+    "fundo": "premium-aguaceiro",
+    "vaza": "premium-aguaceiro-vaza"
+   },
+   "pecas": [],
+   "scripts": [
+    "P/aguaceiro.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-08",
+     "feita em código por Claude"
+    ]
+   ],
+   "notas": "Desenho base das cores Chuva Violeta, Esmeralda e Rubi."
+  },
+  {
+   "chave": "chuvavioleta",
+   "nome": "Chuva Violeta",
+   "tipo": "skin",
+   "raridade": "rara",
+   "onde": "Pacote",
+   "evento": "Toró (novembro de 2026)",
+   "estado": "no-app",
+   "roupa": "chuvavioleta",
+   "app": {
+    "fundo": "premium-chuvavioleta",
+    "vaza": "premium-chuvavioleta-vaza"
+   },
+   "pecas": [],
+   "scripts": [
+    "P/aguaceiro.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-08",
+     "recolor do Aguaceiro"
+    ]
+   ],
+   "notas": ""
+  },
+  {
+   "chave": "chuvaesmeralda",
+   "nome": "Chuva Esmeralda",
+   "tipo": "skin",
+   "raridade": "rara",
+   "onde": "Pacote",
+   "evento": "Toró (novembro de 2026)",
+   "estado": "no-app",
+   "roupa": "chuvaesmeralda",
+   "app": {
+    "fundo": "premium-chuvaesmeralda",
+    "vaza": "premium-chuvaesmeralda-vaza"
+   },
+   "pecas": [],
+   "scripts": [
+    "P/aguaceiro.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-08",
+     "recolor do Aguaceiro"
+    ]
+   ],
+   "notas": ""
+  },
+  {
+   "chave": "chuvarubi",
+   "nome": "Chuva Rubi",
+   "tipo": "skin",
+   "raridade": "rara",
+   "onde": "Pacote",
+   "evento": "Toró (novembro de 2026)",
+   "estado": "no-app",
+   "roupa": "chuvarubi",
+   "app": {
+    "fundo": "premium-chuvarubi",
+    "vaza": "premium-chuvarubi-vaza"
+   },
+   "pecas": [],
+   "scripts": [
+    "P/aguaceiro.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-08",
+     "recolor do Aguaceiro"
+    ]
+   ],
+   "notas": ""
+  },
+  {
+   "chave": "nublado",
+   "nome": "Nublado",
+   "tipo": "skin",
+   "raridade": "comum",
+   "onde": "Pacote",
+   "evento": "Toró (novembro de 2026)",
+   "estado": "no-app",
+   "roupa": "nublado",
+   "app": {
+    "fundo": "skin-nublado"
+   },
+   "pecas": [],
+   "scripts": [
+    "P/nublado.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-08",
+     "feita em código por Claude"
+    ]
+   ],
+   "notas": "Borda simples em código. Desenho base de Neblina, Cerração e Crepúsculo."
+  },
+  {
+   "chave": "neblina",
+   "nome": "Neblina",
+   "tipo": "skin",
+   "raridade": "comum",
+   "onde": "Pacote",
+   "evento": "Toró (novembro de 2026)",
+   "estado": "no-app",
+   "roupa": "neblina",
+   "app": {
+    "fundo": "skin-neblina"
+   },
+   "pecas": [],
+   "scripts": [
+    "P/nublado.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-08",
+     "recolor do Nublado"
+    ]
+   ],
+   "notas": ""
+  },
+  {
+   "chave": "cerracao",
+   "nome": "Cerração",
+   "tipo": "skin",
+   "raridade": "comum",
+   "onde": "Pacote",
+   "evento": "Toró (novembro de 2026)",
+   "estado": "no-app",
+   "roupa": "cerracao",
+   "app": {
+    "fundo": "skin-cerracao"
+   },
+   "pecas": [],
+   "scripts": [
+    "P/nublado.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-08",
+     "recolor do Nublado"
+    ]
+   ],
+   "notas": ""
+  },
+  {
+   "chave": "crepusculo",
+   "nome": "Crepúsculo",
+   "tipo": "skin",
+   "raridade": "comum",
+   "onde": "Pacote",
+   "evento": "Toró (novembro de 2026)",
+   "estado": "no-app",
+   "roupa": "crepusculo",
+   "app": {
+    "fundo": "skin-crepusculo"
+   },
+   "pecas": [],
+   "scripts": [
+    "P/nublado.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-08",
+     "recolor do Nublado"
+    ]
+   ],
+   "notas": ""
+  },
+  {
+   "chave": "destino",
+   "nome": "Destino",
+   "tipo": "skin",
+   "raridade": "lendaria",
+   "onde": "Pacote (evento Destino)",
+   "nivel": 5,
+   "preco": 600,
+   "evento": "Destino (dezembro de 2026)",
+   "estado": "no-app",
+   "roupa": "destino",
+   "app": {
+    "fundo": "premium-destino",
+    "vaza": "premium-destino-vaza",
+    "flutuantes": "DESTINO_FLOATERS (círculo arcano, runas, cacos)"
+   },
+   "pecas": [
+    "docs/cartas/destino/pecas/fundo.jpg",
+    "docs/cartas/destino/pecas/borda.jpg",
+    "docs/cartas/destino/pecas/enfeite-capuz-3d.jpg",
+    "docs/cartas/destino/pecas/flutuante-circulo-arcano.jpg",
+    "docs/cartas/destino/pecas/flutuante-runa-pedra.jpg",
+    "docs/cartas/destino/pecas/flutuante-cacos-esmeralda.jpg"
+   ],
+   "scripts": [
+    "P/montar-carta.cjs",
+    "P/destino-runas.cjs",
+    "scripts/blender/carta-3d.py"
+   ],
+   "versao_3d": "docs/cartas/destino/montada/destino-3d.webp",
+   "historico": [
+    [
+     "2026-11-05",
+     "montada e guardada (2D), alusão a vilão de capuz verde sem copiar traje"
+    ],
+    [
+     "2026-11-05",
+     "runas e cacos flutuando, círculo arcano girando"
+    ],
+    [
+     "2026-11-11",
+     "versão 3D no Blender aprovada pelo dono (capuz 3D dele no topo); ainda não ligada no app"
+    ]
+   ],
+   "notas": "Padrão de lendária. Na Loja de 1 a 31/12/2026 (hoje só de pacote)."
+  },
+  {
+   "chave": "tormenta",
+   "nome": "Tormenta",
+   "tipo": "skin",
+   "raridade": "lendaria",
+   "onde": "Pacote (evento Destino)",
+   "nivel": 5,
+   "preco": 600,
+   "evento": "Destino (dezembro de 2026)",
+   "estado": "no-app",
+   "roupa": "tormenta",
+   "app": {
+    "fundo": "premium-tormenta",
+    "vaza": "premium-tormenta-vaza",
+    "flutuantes": "TORMENTA_FLOATERS"
+   },
+   "pecas": [
+    "P/tormenta-fundo-dono.webp",
+    "P/tormenta-borda-dono.webp",
+    "P/tormenta-pecas-dono.jpg"
+   ],
+   "scripts": [
+    "P/montar-carta.cjs",
+    "P/tormenta-borda.cjs",
+    "P/tormenta-pecas.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-09",
+     "fundo de tempestade azul, moldura de ferro com runas, martelo e peles; raios que estalam"
+    ]
+   ],
+   "notas": "Enfeites da moldura por cima do conteúdo (sem holeRect), statsLift 5."
+  },
+  {
+   "chave": "embuste",
+   "nome": "Embuste",
+   "tipo": "skin",
+   "raridade": "lendaria",
+   "onde": "Pacote (evento Destino)",
+   "nivel": 5,
+   "preco": 600,
+   "evento": "Destino (dezembro de 2026)",
+   "estado": "no-app",
+   "roupa": "embuste",
+   "app": {
+    "fundo": "premium-embuste",
+    "vaza": "premium-embuste-vaza",
+    "flutuantes": "EMBUSTE_FLOATERS"
+   },
+   "pecas": [
+    "P/embuste-fundo-dono.webp",
+    "P/embuste-borda-dono.webp",
+    "P/embuste-pecas-dono.jpg"
+   ],
+   "scripts": [
+    "P/montar-carta.cjs",
+    "P/embuste-borda.cjs",
+    "P/embuste-pecas.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-09",
+     "floresta sob aurora verde, moldura de ferro com chifres e dragões; fumaça girando, rochas, runas e adaga"
+    ]
+   ],
+   "notas": "statsLift 5."
+  },
+  {
+   "chave": "voltagem",
+   "nome": "Voltagem",
+   "tipo": "skin",
+   "raridade": null,
+   "onde": "nenhum",
+   "evento": null,
+   "estado": "guardada",
+   "roupa": "voltagem",
+   "app": {
+    "fundo": "premium-voltagem",
+    "vaza": "premium-voltagem-vaza",
+    "largura_vaza": 1.25
+   },
+   "pecas": [
+    "P/voltagem-referencia-dono.jpg"
+   ],
+   "scripts": [
+    "P/voltagem.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-05",
+     "guardada: fio duplo de ouro pálido e linhas de neon; sem nível e preço"
+    ]
+   ],
+   "notas": "Para ligar: CARD_SKINS, skinRoupa e SKIN_CLASSES."
+  },
+  {
+   "chave": "mare",
+   "nome": "Maré",
+   "tipo": "skin",
+   "raridade": null,
+   "onde": "nenhum",
+   "evento": null,
+   "estado": "guardada",
+   "roupa": "mare",
+   "app": {
+    "fundo": "premium-mare",
+    "vaza": "premium-mare-vaza"
+   },
+   "pecas": [],
+   "scripts": [],
+   "historico": [
+    [
+     "2026-11-05",
+     "guardada: moldura de ouro fina e água abstrata"
+    ]
+   ],
+   "notas": ""
+  },
+  {
+   "chave": "aurora",
+   "nome": "Aurora",
+   "tipo": "skin",
+   "raridade": null,
+   "onde": "nenhum",
+   "evento": null,
+   "estado": "guardada",
+   "roupa": "auroraBoreal",
+   "app": {
+    "fundo": "premium-aurora",
+    "vaza": "premium-aurora-vaza"
+   },
+   "pecas": [],
+   "scripts": [
+    "P/premium-aurora.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-04",
+     "aprovada, feita só em código (aurora, neve vazando); não ligada"
+    ]
+   ],
+   "notas": "Ver docs/calendario-eventos.md, seção Carta guardada: Aurora."
+  },
+  {
+   "chave": "premio-craque",
+   "nome": "Melhor Jogador (fora de evento e Toró)",
+   "tipo": "premio",
+   "raridade": null,
+   "onde": "prêmio da rodada",
+   "evento": "fora de evento e Toró",
+   "estado": "no-app",
+   "roupa": "CRAQUE_FOGO",
+   "app": {
+    "fundo": "premio-craque-fogo",
+    "vaza": "premio-craque-fogo-vaza",
+    "largura_vaza": 1.154
+   },
+   "pecas": [
+    "P/craque-fogo-fundo-dono.jpg",
+    "P/craque-fogo-borda-dono.jpg",
+    "P/craque-fogo-render-dono.jpg"
+   ],
+   "scripts": [
+    "P/premio-craque-fogo.cjs"
+   ],
+   "historico": [
+    [
+     "2026-10-31",
+     "sol art déco (premio-craque-default, hoje só na capa do pacote)"
+    ],
+    [
+     "2026-11-02",
+     "versão em camadas: sol com circuitos, neon dourado com fogo e coroa em chamas vazando"
+    ]
+   ],
+   "notas": "Sem animação (a da coroa foi recusada)."
+  },
+  {
+   "chave": "premio-destaques",
+   "nome": "Destaques da rodada (fora de evento)",
+   "tipo": "premio",
+   "raridade": null,
+   "onde": "prêmio da rodada (Atacante, Criativo, Defensor, Goleiro, Gol, Goleador)",
+   "evento": "fora de evento",
+   "estado": "no-app",
+   "roupa": "HIGHLIGHT_AGUA",
+   "app": {
+    "fundo": "premio-destaque-mar",
+    "vaza": "premio-destaque-mar-vaza"
+   },
+   "pecas": [
+    "P/destaques-mar-fundo-dono.jpg",
+    "P/destaques-mar-borda-dono.jpg",
+    "P/destaques-mar-composto-dono.jpg"
+   ],
+   "scripts": [
+    "P/destaques-mar.cjs"
+   ],
+   "historico": [
+    [
+     "2026-10-31",
+     "mármore líquido com nuvem chovendo em neon"
+    ],
+    [
+     "2026-11-04",
+     "tempestade no mar fotorrealista com gotas escorrendo em código"
+    ]
+   ],
+   "notas": ""
+  },
+  {
+   "chave": "premio-time-do-mes",
+   "nome": "Time do Mês",
+   "tipo": "premio",
+   "raridade": null,
+   "onde": "prêmio do mês",
+   "evento": null,
+   "estado": "no-app",
+   "roupa": "MONTH_ROUPA",
+   "app": {
+    "fundo": "premium-time-do-mes",
+    "vaza": "premium-time-do-mes-vaza"
+   },
+   "pecas": [
+    "P/time-do-mes-v4-composto-dono.jpg",
+    "P/time-do-mes-fundo-dono.jpg",
+    "P/time-do-mes-borda-dono.jpg",
+    "P/time-do-mes-render-dono.jpg"
+   ],
+   "scripts": [
+    "P/premio-time-do-mes-v4.cjs"
+   ],
+   "historico": [
+    [
+     "2026-10-21",
+     "arte do dono, fundo roxo com pontas vazando"
+    ],
+    [
+     "2026-10-31",
+     "cristal roxo com coroa (as de outubro ficam assim)"
+    ],
+    [
+     "2026-11-04",
+     "tempestade roxa com fio de ouro, neon roxo e coroa; canto refeito espelhando"
+    ]
+   ],
+   "notas": "Raios em código para vazamento foram recusados."
+  },
+  {
+   "chave": "premio-campeao-do-mes",
+   "nome": "Campeão do Mês",
+   "tipo": "premio",
+   "raridade": null,
+   "onde": "prêmio do mês (1º do ranking)",
+   "evento": null,
+   "estado": "no-app",
+   "roupa": "CAMPEAO_MES",
+   "app": {
+    "fundo": "campeao-mes",
+    "vaza": "campeao-mes-vaza",
+    "raios": [
+     "campeao-mes-raios-dentro",
+     "campeao-mes-raios"
+    ]
+   },
+   "pecas": [
+    "P/campeao-mes-dono.jpg"
+   ],
+   "scripts": [
+    "P/campeao-mes.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-02",
+     "tempestade azul e laranja, louro de platina, aglomerado vazando; raios acendendo"
+    ],
+    [
+     "2026-11-04",
+     "recorte refeito para ter o tamanho do Time do Mês"
+    ]
+   ],
+   "notas": ""
+  },
+  {
+   "chave": "premio-bola-murcha",
+   "nome": "Bola Murcha",
+   "tipo": "premio",
+   "raridade": null,
+   "onde": "prêmio da rodada (zoeira)",
+   "evento": null,
+   "estado": "no-app",
+   "roupa": "FLOP_ROUPA",
+   "app": {
+    "fundo": "premio-bola-murcha"
+   },
+   "pecas": [],
+   "scripts": [
+    "P/murcha.cjs",
+    "P/murcha-alagamento.cjs"
+   ],
+   "historico": [
+    [
+     "2026-10-31",
+     "novo desenho; as de outubro ficam em bronze oxidado"
+    ]
+   ],
+   "notas": "Neon apagado."
+  },
+  {
+   "chave": "natal-craque",
+   "nome": "Natal: carta-base dos prêmios (vermelha)",
+   "tipo": "premio",
+   "raridade": null,
+   "onde": "todos os prêmios individuais de dezembro em diante",
+   "evento": "Natal (dezembro de 2026)",
+   "estado": "guardada",
+   "roupa": "natalCraque",
+   "app": {
+    "fundo": "premium-natal-craque",
+    "vaza": "premium-natal-craque-vaza"
+   },
+   "pecas": [
+    "P/natal-craque-fundo-dono.jpg",
+    "P/natal-craque-borda-dono.jpg"
+   ],
+   "scripts": [
+    "P/montar-carta.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-05",
+     "guardada"
+    ],
+    [
+     "2026-11-09",
+     "virou a carta-base de todos os prêmios, com medalhão de ícone por prêmio"
+    ]
+   ],
+   "notas": ""
+  },
+  {
+   "chave": "natal-campeao",
+   "nome": "Natal: Campeão do Mês (verde)",
+   "tipo": "premio",
+   "raridade": null,
+   "onde": "Campeão do Mês de dezembro",
+   "evento": "Natal (dezembro de 2026)",
+   "estado": "guardada",
+   "roupa": "natalCampeao",
+   "app": {
+    "fundo": "premium-natal-campeao",
+    "vaza": "premium-natal-campeao-vaza"
+   },
+   "pecas": [
+    "P/natal-campeao-fundo-dono.jpg",
+    "P/natal-campeao-borda-dono.jpg"
+   ],
+   "scripts": [
+    "P/montar-carta.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-05",
+     "guardada"
+    ]
+   ],
+   "notas": ""
+  },
+  {
+   "chave": "natal-gelo",
+   "nome": "Natal: destaques (azul-gelo)",
+   "tipo": "premio",
+   "raridade": null,
+   "onde": "destaques de dezembro",
+   "evento": "Natal (dezembro de 2026)",
+   "estado": "guardada",
+   "roupa": "natalGelo",
+   "app": {
+    "fundo": "premium-natal-gelo",
+    "vaza": "premium-natal-gelo-vaza"
+   },
+   "pecas": [
+    "P/natal-gelo-fundo-dono.jpg",
+    "P/natal-gelo-borda-dono.jpg"
+   ],
+   "scripts": [
+    "P/montar-carta.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-05",
+     "guardada"
+    ]
+   ],
+   "notas": "Com a carta-base única (2026-11-09) pode não ser usada."
+  },
+  {
+   "chave": "natal-murcha",
+   "nome": "Natal: Bola Murcha (cinza-carvão)",
+   "tipo": "premio",
+   "raridade": null,
+   "onde": "Bola Murcha de dezembro",
+   "evento": "Natal (dezembro de 2026)",
+   "estado": "guardada",
+   "roupa": "natalMurcha",
+   "app": {
+    "fundo": "premium-natal-murcha",
+    "vaza": "premium-natal-murcha-vaza"
+   },
+   "pecas": [
+    "P/natal-murcha-fundo-dono.jpg",
+    "P/natal-murcha-borda-dono.jpg"
+   ],
+   "scripts": [
+    "P/montar-carta.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-05",
+     "guardada"
+    ]
+   ],
+   "notas": "Única com design próprio além da carta-base."
+  },
+  {
+   "chave": "natal-timedomes",
+   "nome": "Natal: Time do Mês (roxa)",
+   "tipo": "premio",
+   "raridade": null,
+   "onde": "Time do Mês de dezembro",
+   "evento": "Natal (dezembro de 2026)",
+   "estado": "guardada",
+   "roupa": "natalTimeDoMes",
+   "app": {
+    "fundo": "premium-natal-timedomes",
+    "vaza": "premium-natal-timedomes-vaza"
+   },
+   "pecas": [
+    "P/natal-timedomes-fundo-dono.jpg",
+    "P/natal-timedomes-borda-dono.jpg"
+   ],
+   "scripts": [
+    "P/montar-carta.cjs"
+   ],
+   "historico": [
+    [
+     "2026-11-05",
+     "guardada"
+    ]
+   ],
+   "notas": ""
+  }
+ ],
+ "em_andamento": [
+  [
+   "2026-11-11",
+   "Cartas em 3D no Blender: Destino aprovada (branch feat/carta-3d-teste, scripts/blender/carta-3d.py), falta ligar no app; foto e números ao vivo entre a camada do fundo e a da moldura."
+  ],
+  [
+   "2026-11-08",
+   "Pacotes de skins (conjunto de novembro: 12 skins, 6 desenhos) ainda desligados nas peladas; lançamento planejado para 1/12."
+  ]
+ ],
+ "proximos": [
+  [
+   "2026-12",
+   "Conjunto de pacotes de dezembro (tema Destino): skins e raridades a definir com o dono; lendárias já prontas: Destino, Tormenta, Embuste."
+  ],
+  [
+   "2026-12",
+   "Ligar o tema de Natal dos prêmios (carta-base vermelha com medalhão; Bola Murcha cinza-carvão)."
+  ],
+  [
+   "2026-12",
+   "Cartas novas já nascem peça por peça (fundo, borda, enfeites, renders, flutuantes) e em 3D no Blender."
+  ],
+  [
+   "futuro",
+   "Refazer a Dilúvio em 3D (tem todas as peças separadas)."
+  ],
+  [
+   "futuro",
+   "Representação da raridade fora da Loja e de Eu (Início, Carreira, mesa tática, ranking): a definir pelo dono."
+  ]
+ ],
+ "regras": [
+  "Toda carta nova chega do Gemini em peças separadas (luz sobre preto puro): fundo, borda, enfeite-*, render-*, flutuante-*. Guardar em docs/cartas/<chave>/pecas/ como vieram.",
+  "Nunca trabalhar só com a carta achatada: tirar uma peça de cima da borda deixa defeito (testes 3D de novembro, 2026-11-11).",
+  "Raridade: comum = borda simples e fundo padrão; rara = borda trabalhada e fundo com pattern; épica = + 1 render 3D vazando; lendária = + flutuantes e animação (só 1 por conjunto). Ver .claude/rules/design-system.md.",
+  "Na carta: sem filter, mix-blend-mode e backdrop-filter (iPhone); animações só de transform e opacity.",
+  "Cartas já ganhas não mudam de desenho: o tema fica gravado na carta."
+ ]
+}
