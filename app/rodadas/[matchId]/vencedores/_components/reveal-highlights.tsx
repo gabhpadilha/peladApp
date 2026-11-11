@@ -13,6 +13,8 @@ type RevealHighlightsProps = {
   awards: Award[];
   /** Tema da rodada (o palco ainda é um só para todos os temas). */
   fieldTheme: CardThemeKey;
+  /** Segundos de espera antes de tocar (quando o palco abre por baixo da cortina). */
+  delay?: number;
   nextLabel: string;
   onNext: () => void;
 };
@@ -41,6 +43,12 @@ const SLOT_OF: Partial<Record<AwardKind, number>> = {
   foguete: 3, criativo: 4, garcom: 5,
   defensor: 6, goleiro: 7, motor: 8,
 };
+/** Nome curto em cima da carta: na fileira de cima as cartas ficam coladas e o nome inteiro encavalava. */
+const SHORT_LABEL: Partial<Record<AwardKind, string>> = {
+  atacante: "Atacante", goleador: "Goleador", gol: "Gol da Rodada",
+  foguete: "Foguete", criativo: "Criativo", garcom: "Garçom",
+  defensor: "Defensor", goleiro: "Goleiro", motor: "Motor",
+};
 const FREE_ORDER = [4, 1, 7, 3, 5, 0, 2, 6, 8] as const;
 
 function placeAwards(awards: Award[]) {
@@ -67,10 +75,10 @@ function placeAwards(awards: Award[]) {
  * sobe no seu pedestal quando ele acende. O vídeo para no último quadro, que já está quase parado; com movimento
  * reduzido fica a imagem final e as cartas aparecem direto.
  */
-export function RevealHighlights({ awards, nextLabel, onNext }: RevealHighlightsProps) {
+export function RevealHighlights({ awards, delay = 0, nextLabel, onNext }: RevealHighlightsProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { placed, rest } = placeAwards(awards);
-  const lastAt = placed.length > 0 ? igniteAt(placed[placed.length - 1][0]) : 1.5;
+  const lastAt = delay + (placed.length > 0 ? igniteAt(placed[placed.length - 1][0]) : 1.5);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -79,8 +87,9 @@ export function RevealHighlights({ awards, nextLabel, onNext }: RevealHighlights
       video.pause();
       return;
     }
-    video.play().catch(() => undefined);
-  }, []);
+    const timer = setTimeout(() => video.play().catch(() => undefined), delay * 1000);
+    return () => clearTimeout(timer);
+  }, [delay]);
 
   return (
     <section aria-live="polite" aria-label="Destaques da rodada" className="absolute inset-0 overflow-hidden">
@@ -110,17 +119,17 @@ export function RevealHighlights({ awards, nextLabel, onNext }: RevealHighlights
             return (
               <li
                 key={award.id}
-                style={{ ...revealColorStyle(award.kind, award.theme), left: `${x}%`, top: `${y}%`, "--d": `${igniteAt(slot)}s` } as CSSProperties}
+                style={{ ...revealColorStyle(award.kind, award.theme), left: `${x}%`, top: `${y}%`, "--d": `${delay + igniteAt(slot)}s` } as CSSProperties}
                 className="absolute w-[17%] -translate-x-1/2 -translate-y-full pb-[1%]"
               >
                 <div className="stage-card flex flex-col items-center gap-0.5 motion-reduce:opacity-100">
-                <span className="max-w-[140%] truncate rounded-full bg-black/70 px-1.5 text-[0.625rem] font-semibold whitespace-nowrap text-white">
-                  {AWARD_LABELS[award.kind].title}
+                <span className="max-w-[112%] truncate rounded-full bg-black/70 px-1.5 text-[0.625rem] font-semibold whitespace-nowrap text-white">
+                  {SHORT_LABEL[award.kind] ?? AWARD_LABELS[award.kind].title}
                 </span>
                 <div className="w-full">
                   <PlayerCard player={award.card} award={award} size="fill" />
                 </div>
-                <span className="max-w-[140%] truncate rounded-full bg-(--reveal-color) px-1.5 text-[0.625rem] font-semibold whitespace-nowrap text-black tabular-nums">
+                <span className="max-w-[112%] truncate rounded-full bg-(--reveal-color) px-1.5 text-[0.625rem] font-semibold whitespace-nowrap text-black tabular-nums">
                   {formatAwardResult(award)}
                 </span>
                 </div>
@@ -133,7 +142,9 @@ export function RevealHighlights({ awards, nextLabel, onNext }: RevealHighlights
       <div aria-hidden className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-linear-to-b from-black/80 to-transparent" />
       <div aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-56 bg-linear-to-t from-black/85 to-transparent" />
 
-      <div className="absolute inset-x-0 top-0 flex animate-[reveal-in_0.5s_ease-out_both] flex-col items-center gap-1 px-4 pt-16 text-center">
+      <div
+        style={{ animationDelay: `${delay > 0 ? delay + 1.3 : 0}s` }}
+        className="absolute inset-x-0 top-0 flex animate-[reveal-in_0.5s_ease-out_both] flex-col items-center gap-1 px-4 pt-16 text-center">
         <span className="flex items-center gap-2 font-display text-3xl leading-none font-extrabold uppercase">
           <SparklesIcon aria-hidden className="size-5 text-primary" />
           Destaques da rodada

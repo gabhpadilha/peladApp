@@ -7,6 +7,8 @@ import { cn } from "@/lib/utils";
 
 /** Duração do vídeo da cortina (renderizado no Blender, `scripts/blender/cortina.py`): o pai segue para o primeiro passo depois dele. */
 export const CURTAIN_OPEN_MS = 3200;
+/** Quanto a cortina fica por cima do primeiro passo enquanto abre um vão no meio e some vindo para a tela (`curtain-leaving`). */
+export const CURTAIN_LEAVE_MS = 2900;
 
 type RevealCurtainProps = {
   round: number;

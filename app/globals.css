@@ -588,3 +588,17 @@ body:has([data-rate-bar]):has([data-bottom-nav]) {
 @keyframes spot-card { 0% { opacity: 0; transform: translateY(38%) scale(0.45); } 55% { opacity: 1; } 100% { opacity: 1; transform: none; } }
 .spot-card { opacity: 0; animation: spot-card 1.1s cubic-bezier(0.2, 0.9, 0.3, 1.05) 2.1s both; }
 .tunnel-cam { opacity: 0; animation: tunnel-cam 1.1s linear var(--d) infinite; }
+
+/*
+ * A cortina sai por cima do primeiro passo (2026-11-11): um vão abre no meio, no ritmo do vídeo da cortina, mostrando
+ * o palco que já toca por baixo, e o que sobra dela vem para a tela e some. Máscara só de degradê (nada de url()).
+ */
+@property --curtain-gap { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
+@keyframes curtain-gap { from { --curtain-gap: 0%; } to { --curtain-gap: 62%; } }
+@keyframes curtain-away { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(1.4); } }
+.curtain-leaving {
+  --curtain-mask: linear-gradient(to right, #000 calc(50% - var(--curtain-gap)), transparent calc(50% - var(--curtain-gap) * 0.6), transparent calc(50% + var(--curtain-gap) * 0.6), #000 calc(50% + var(--curtain-gap)));
+  -webkit-mask-image: var(--curtain-mask);
+  mask-image: var(--curtain-mask);
+  animation: curtain-gap 1.5s cubic-bezier(0.45, 0, 0.25, 1) 0.7s both, curtain-away 0.9s cubic-bezier(0.5, 0, 0.75, 0) 1.9s both;
+}

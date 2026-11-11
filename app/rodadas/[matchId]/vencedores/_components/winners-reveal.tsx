@@ -9,7 +9,7 @@ import type { MatchWinners } from "../_data-access/get-match-winners";
 import { markAwardsSeen } from "../_actions/mark-awards-seen";
 import { RevealAward } from "./reveal-award";
 import { RevealHighlights } from "./reveal-highlights";
-import { CURTAIN_OPEN_MS, RevealCurtain } from "./reveal-curtain";
+import { CURTAIN_LEAVE_MS, CURTAIN_OPEN_MS, RevealCurtain } from "./reveal-curtain";
 import { RevealRanking } from "./reveal-ranking";
 import { RevealRewards } from "./reveal-rewards";
 import { RevealSummary } from "./reveal-summary";
@@ -20,6 +20,8 @@ import { RevealZoeira } from "./reveal-zoeira";
 
 /** Com movimento reduzido a cortina não toca: o primeiro passo vem logo. */
 const REDUCED_OPENING_MS = 500;
+/** Atraso do palco dos destaques quando ele abre por baixo da cortina (o vão começa a abrir aos ~0,8 s do vídeo). */
+const HIGHLIGHTS_UNDER_CURTAIN_S = 0.7;
 
 type Stage = { type: "pack" } | { type: "opening" } | { type: "step"; index: number } | { type: "summary" };
 
@@ -52,13 +54,14 @@ function buildSteps(revealed: Award[], hasTeam: boolean, hasRanking: boolean, ha
       award.kind !== "craque",
   );
   const steps: Step[] = [];
-  if (zoeira.length > 0) steps.push({ type: "zoeira", awards: zoeira });
   if (highlights.length > 0) steps.push({ type: "highlights", awards: highlights });
   if (hasTeam) steps.push({ type: "team" });
   if (month.length > 0) steps.push({ type: "month", awards: month });
   // O Campeão do Mês (ranking de pontos) é revelado logo depois do Time do Mês, uma carta por vez.
   for (const award of champions) steps.push({ type: "award", award });
   for (const award of best) steps.push({ type: "award", award });
+  // A Bola Murcha fecha a noite, depois do Melhor Jogador (pedido do dono do app em 2026-11-11: abrir com ela quebrava o clima).
+  if (zoeira.length > 0) steps.push({ type: "zoeira", awards: zoeira });
   if (hasRanking) steps.push({ type: "ranking" });
   if (hasRewards) steps.push({ type: "rewards" });
   return steps;
@@ -74,6 +77,8 @@ function nextLabel(steps: Step[], index: number): string {
       return "Ver a classificação";
     case "highlights":
       return "Ver os destaques da rodada";
+    case "zoeira":
+      return "E a zoeira da rodada…";
     case "team":
       return "E o Time da Semana…";
     case "month":
@@ -102,6 +107,8 @@ function describeContents(cardCount: number, hasTeam: boolean): string {
 export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) {
   const { match, theme, revealed, team, rewards, ranking } = winners;
   const [stage, setStage] = useState<Stage>({ type: "pack" });
+  // A cortina abre por cima do primeiro passo, que já toca por baixo (pedido do dono do app em 2026-11-11).
+  const [isCurtainLeaving, setIsCurtainLeaving] = useState(false);
   const [, startTransition] = useTransition();
   const openingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const steps = buildSteps(revealed, team.length > 0, ranking.length > 0, Boolean(rewards));
@@ -128,7 +135,13 @@ export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) 
       }
     });
     const isReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    openingTimer.current = setTimeout(() => goToStep(0), isReduced ? REDUCED_OPENING_MS : CURTAIN_OPEN_MS);
+    if (isReduced || steps.length === 0) {
+      openingTimer.current = setTimeout(() => goToStep(0), isReduced ? REDUCED_OPENING_MS : CURTAIN_OPEN_MS);
+      return;
+    }
+    setIsCurtainLeaving(true);
+    goToStep(0);
+    openingTimer.current = setTimeout(() => setIsCurtainLeaving(false), CURTAIN_LEAVE_MS);
   }
 
   function handleReplay() {
@@ -199,13 +212,16 @@ export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) 
         </div>
       )}
 
-      {(stage.type === "pack" || stage.type === "opening") && (
-        <RevealCurtain
-          round={match.round}
-          contents={describeContents(revealed.length, team.length > 0)}
-          isOpening={stage.type === "opening"}
-          onOpen={handleOpen}
-        />
+      {(stage.type === "pack" || stage.type === "opening" || isCurtainLeaving) && (
+        // Um só elemento do começo ao fim: o vídeo da cortina já carregado segue tocando enquanto ela sai por cima do passo.
+        <div className={cn("absolute inset-0 z-30", isCurtainLeaving && "curtain-leaving pointer-events-none")}>
+          <RevealCurtain
+            round={match.round}
+            contents={describeContents(revealed.length, team.length > 0)}
+            isOpening={stage.type !== "pack"}
+            onOpen={handleOpen}
+          />
+        </div>
       )}
 
       {step !== null && current?.type === "award" && current.award.kind === "craque" && (
@@ -232,7 +248,11 @@ export function WinnersReveal({ winners, currentMemberId }: WinnersRevealProps) 
       )}
 
       {step !== null && current?.type === "highlights" && (
-        <RevealHighlights awards={current.awards} fieldTheme={theme} nextLabel={nextLabel(steps, step)} onNext={() => goToStep(step + 1)} />
+        <RevealHighlights
+          awards={current.awards}
+          fieldTheme={theme}
+          // Primeiro passo: o palco começa por baixo da cortina; as cartas esperam o vão abrir.
+          delay={step === 0 ? HIGHLIGHTS_UNDER_CURTAIN_S : 0} nextLabel={nextLabel(steps, step)} onNext={() => goToStep(step + 1)} />
       )}
 
       {step !== null && current?.type === "team" && (
