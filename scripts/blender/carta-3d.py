@@ -430,6 +430,24 @@ if FOG:
     v = nt.nodes.new('ShaderNodeVolumePrincipled'); v.inputs['Density'].default_value = 0.005; v.inputs['Color'].default_value = (0.7, 0.95, 0.8, 1); v.inputs['Anisotropy'].default_value = 0.4
     o = nt.nodes.new('ShaderNodeOutputMaterial'); nt.links.new(v.outputs[0], o.inputs['Volume']); fog.data.materials.append(m)
 
+# ---------- camadas: `camada=carta|circulo|runas|cacos|poeira` renderiza só uma parte, no mesmo enquadramento,
+# para o app animar cada camada por cima da outra (o círculo gira, as runas flutuam) sem vídeo
+CAMADA = ARGS.get('camada')
+if CAMADA:
+    def group(ob):
+        n = ob.name; top = ob
+        while top.parent and top.parent is not rig: top = top.parent
+        tn = top.name
+        if tn.startswith('circulo') or tn.startswith('Torus'): return 'circulo'
+        if tn.startswith('runa'): return 'runas'
+        if tn.startswith('caco'): return 'cacos'
+        if tn.startswith('Icosphere'): return 'poeira'
+        if tn.startswith('Cube') : return 'nevoa'
+        return 'carta'
+    for ob in scene.objects:
+        if ob.type in ('MESH',):
+            g = group(ob)
+            ob.hide_render = g != CAMADA
 # ---------- render ----------
 r = scene.render; r.engine = 'CYCLES'; r.resolution_x = RX; r.resolution_y = RY; r.film_transparent = True
 r.image_settings.file_format = 'PNG'; r.image_settings.color_mode = 'RGBA'
@@ -439,6 +457,6 @@ setup_device(scene, ARGS)
 scene.view_settings.view_transform = 'AgX'
 try: scene.view_settings.look = 'AgX - Medium High Contrast'
 except TypeError: pass
-r.filepath = os.path.join(OUT, f'destino-{VIEW}.png')
+r.filepath = os.path.join(OUT, f'destino-{VIEW}' + (f'-{CAMADA}' if CAMADA else '') + '.png')
 bpy.ops.render.render(write_still=True)
 print('ok', r.filepath, flush=True)
