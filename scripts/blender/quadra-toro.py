@@ -112,12 +112,12 @@ for k in range(380):
     sx = random.choice((-1, 1)); u = random.uniform(0.1, 5.8); y = random.uniform(-3.5, Ln + 3.0); z = 1.2 + (u / 6.0) * 5.6 + 0.1
     bpy.ops.mesh.primitive_uv_sphere_add(radius=random.uniform(0.04, 0.09), segments=6, ring_count=4, location=(sx * (W / 2 + 1.0 + u), y, z)); bpy.context.active_object.data.materials.append(dm)
 # relâmpago distante (luz fria) atrás do gol
-lg = bpy.data.lights.new('Relampago', 'AREA'); lg.energy = 9000; lg.size = 14; lg.color = (0.62, 0.76, 1.0); lo = bpy.data.objects.new('Relampago', lg); lo.location = (-9, -14, 9); lo.rotation_euler = (math.radians(70), 0, math.radians(-30)); scene.collection.objects.link(lo); lo.visible_camera = False
+lg = bpy.data.lights.new('Relampago', 'AREA'); lg.energy = 9000; lg.size = 14; lg.color = (0.62, 0.76, 1.0); lo = bpy.data.objects.new('Relampago', lg); lo.location = (-9, -14, 9); lo.rotation_euler = (math.radians(70), 0, math.radians(-30)); scene.collection.objects.link(lo); lo.visible_camera = False; lo.visible_glossy = False
 # ---- refletores nos cantos + feixes
 for (x, y) in ((-W / 2 - 3, 2), (W / 2 + 3, 2), (-W / 2 - 3, Ln - 2), (W / 2 + 3, Ln - 2), (-W / 2 - 3, Ln / 2), (W / 2 + 3, Ln / 2)):
-    a = bpy.data.lights.new('Ref', 'SPOT'); a.energy = 38000; a.spot_size = math.radians(48); a.spot_blend = 0.7; a.color = (0.72, 0.84, 1.0)
+    a = bpy.data.lights.new('Ref', 'SPOT'); a.energy = 38000; a.spot_size = math.radians(48); a.spot_blend = 0.7; a.color = (0.72, 0.84, 1.0); a.volume_factor = 0.25
     o = bpy.data.objects.new('Ref', a); o.location = (x, y, 11); tgt = Vector((0, Ln / 2, 0)); o.rotation_euler = (tgt - o.location).to_track_quat('-Z', 'Y').to_euler(); scene.collection.objects.link(o)
-fl = bpy.data.lights.new('Fill', 'AREA'); fl.energy = 500; fl.size = 18; fl.color = (0.5, 0.45, 0.9); fo = bpy.data.objects.new('Fill', fl); fo.location = (0, Ln / 2, 14); fo.rotation_euler = (0, 0, 0); scene.collection.objects.link(fo); fo.visible_camera = False
+fl = bpy.data.lights.new('Fill', 'AREA'); fl.energy = 500; fl.size = 18; fl.color = (0.5, 0.45, 0.9); fo = bpy.data.objects.new('Fill', fl); fo.location = (0, Ln / 2, 14); fo.rotation_euler = (0, 0, 0); scene.collection.objects.link(fo); fo.visible_camera = False; fo.visible_glossy = False
 
 # névoa
 bpy.ops.mesh.primitive_cube_add(size=1, location=(0, Ln / 2, 6)); vb = bpy.context.active_object; vb.scale = (70, 90, 14); vb.display_type = 'WIRE'
@@ -132,7 +132,7 @@ for k in range(260):
 gl = mat('Onda'); gb = gl.node_tree.nodes['Principled BSDF']; gb.inputs['Base Color'].default_value = (0.8, 0.9, 1.0, 1); gb.inputs['Roughness'].default_value = 0.05; gb.inputs['Alpha'].default_value = 0.2
 # ---- câmera: alta, olhando a meia quadra de trás do gol
 FLIP = ARGS.get('flip') == '1'
-cam = bpy.data.cameras.new('Cam'); cam.lens = 38; co = bpy.data.objects.new('Cam', cam); scene.collection.objects.link(co); scene.camera = co
+cam = bpy.data.cameras.new('Cam'); cam.lens = 40; co = bpy.data.objects.new('Cam', cam); scene.collection.objects.link(co); scene.camera = co
 if not FLIP: co.location = (0, -8.0, 19.0); tg = Vector((0, 12.0, 0))
 else: co.location = (0, Ln + 8.0, 19.0); tg = Vector((0, Ln - 12.0, 0))
 co.rotation_euler = (tg - co.location).to_track_quat('-Z', 'Y').to_euler(); cam.dof.use_dof = False
