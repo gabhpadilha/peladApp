@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useState, type CSSProperties } from "react";
 import { TrophyIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { AlphaVideo } from "./alpha-video";
 
 /** Duração do vídeo da cortina (renderizado no Blender, `scripts/blender/cortina.py`): o pai segue para o primeiro passo depois dele. */
 export const CURTAIN_OPEN_MS = 3200;
 /** Quanto a cortina fica por cima do primeiro passo enquanto abre um vão no meio e some vindo para a tela (`curtain-leaving`). */
-export const CURTAIN_LEAVE_MS = 2900;
+export const CURTAIN_LEAVE_MS = 3300;
 
 type RevealCurtainProps = {
   round: number;
@@ -28,36 +29,32 @@ const BEAMS: readonly { left: string; r0: string; r1: string }[] = [
  * A abertura da "noite de premiação" (pedido do dono do app em 2026-11-10): uma cortina de veludo com o nome da rodada; ao
  * tocar, ela se abre e revela o palco. A cortina é um **vídeo renderizado no Blender** (simulação de tecido de verdade;
  * aprovado pelo dono do app em 2026-11-11); se o vídeo não carregar, vale a versão de reserva em CSS (`curtain-*` no `globals.css`).
- * Com movimento reduzido, o vídeo não toca (fica a imagem da cortina fechada).
+ * Com movimento reduzido, o vídeo não toca (fica a imagem da cortina fechada). Desde 2026-11-11 o vídeo tem
+ * transparência (`AlphaVideo`): só o tecido, e o primeiro passo, que já toca por baixo, aparece pelo vão de verdade.
  */
 export function RevealCurtain({ round, contents, isOpening, onOpen }: RevealCurtainProps) {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
   const [hasVideo, setHasVideo] = useState(true);
-
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!isOpening || !video) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    // Falhar ao tocar não atrapalha: o pai segue pelo tempo.
-    video.play().catch(() => setHasVideo(false));
-  }, [isOpening]);
+  const handleFail = useCallback(() => setHasVideo(false), []);
 
   return (
-    <div className={cn("absolute inset-0 overflow-hidden bg-black", isOpening && "curtain-opening")}>
+    // Fechada, a cortina fica sobre o preto; abrindo, o fundo some e o que estiver por baixo aparece pelo vão.
+    <div className={cn("absolute inset-0 overflow-hidden", isOpening ? "curtain-opening" : "bg-black")}>
       {hasVideo ? (
-        <video
-          ref={videoRef}
-          aria-hidden
-          muted
-          playsInline
-          preload="auto"
-          poster="/revelacao/cortina-poster.jpg"
-          onError={() => setHasVideo(false)}
-          className="absolute inset-0 size-full object-cover"
-        >
-          <source src="/revelacao/cortina.mp4" type="video/mp4" />
-          <source src="/revelacao/cortina.webm" type="video/webm" />
-        </video>
+        <>
+          {!isOpening && (
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: "url(/revelacao/cortina-poster.jpg)" }}
+            />
+          )}
+          <AlphaVideo
+            src="/revelacao/cortina-alfa.mp4"
+            isPlaying={isOpening}
+            onFail={handleFail}
+            className="absolute top-1/2 left-1/2 aspect-9/16 w-[max(100%,calc(100dvh*9/16))] -translate-1/2"
+          />
+        </>
       ) : (
         <>
           {/* Reserva em CSS: o palco que aparece quando a cortina abre e as duas folhas. */}
@@ -77,7 +74,7 @@ export function RevealCurtain({ round, contents, isOpening, onOpen }: RevealCurt
         </>
       )}
       {/* Escurece a parte de baixo da cortina fechada para o texto e o botão lerem bem. */}
-      <span aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(0,0,0,0.55),transparent_70%)]" />
+      <span aria-hidden className="curtain-text pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_50%_50%,rgba(0,0,0,0.55),transparent_70%)]" />
 
       <div className="curtain-text absolute inset-0 z-20 flex flex-col items-center justify-center gap-7 px-6 text-center">
         <span className="flex size-20 items-center justify-center rounded-full border-2 border-amber-300/80 bg-black/35 text-amber-300 shadow-[0_0_40px_rgba(252,211,77,0.35)]">

@@ -590,15 +590,8 @@ body:has([data-rate-bar]):has([data-bottom-nav]) {
 .tunnel-cam { opacity: 0; animation: tunnel-cam 1.1s linear var(--d) infinite; }
 
 /*
- * A cortina sai por cima do primeiro passo (2026-11-11): um vão abre no meio, no ritmo do vídeo da cortina, mostrando
- * o palco que já toca por baixo, e o que sobra dela vem para a tela e some. Máscara só de degradê (nada de url()).
+ * A cortina sai por cima do primeiro passo (2026-11-11): o vídeo tem transparência, então o palco que já toca por baixo
+ * aparece pelo vão do próprio tecido; no fim, o que sobra nas laterais esmaece.
  */
-@property --curtain-gap { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
-@keyframes curtain-gap { from { --curtain-gap: 0%; } to { --curtain-gap: 62%; } }
-@keyframes curtain-away { from { opacity: 1; transform: none; } to { opacity: 0; transform: scale(1.4); } }
-.curtain-leaving {
-  --curtain-mask: linear-gradient(to right, #000 calc(50% - var(--curtain-gap)), transparent calc(50% - var(--curtain-gap) * 0.6), transparent calc(50% + var(--curtain-gap) * 0.6), #000 calc(50% + var(--curtain-gap)));
-  -webkit-mask-image: var(--curtain-mask);
-  mask-image: var(--curtain-mask);
-  animation: curtain-gap 1.5s cubic-bezier(0.45, 0, 0.25, 1) 0.7s both, curtain-away 0.9s cubic-bezier(0.5, 0, 0.75, 0) 1.9s both;
-}
+@keyframes curtain-away { from { opacity: 1; } to { opacity: 0; } }
+.curtain-leaving { animation: curtain-away 0.8s ease-in 2.5s both; }

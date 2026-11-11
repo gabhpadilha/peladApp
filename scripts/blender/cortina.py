@@ -8,6 +8,8 @@ RES_X = int(ARGS.get('rx', 270)); RES_Y = int(ARGS.get('ry', 480)); SAMPLES = in
 OUT = ARGS.get('out', '/tmp/bl_out'); _fr = ARGS.get('frames')
 FRAMES = (list(range(int(_fr.split('-')[0]), int(_fr.split('-')[1]) + 1)) if _fr and '-' in _fr else ([int(f) for f in _fr.split(',')] if _fr else None))
 BAKE_ONLY = ARGS.get('bake') == '1'
+# alpha=1: só a cortina, o varal e o bandô, com fundo transparente (o palco do app aparece pelo vão de verdade).
+ALPHA = ARGS.get('alpha') == '1'
 
 bpy.ops.wm.read_factory_settings(use_empty=True)
 scene = bpy.context.scene
@@ -174,7 +176,10 @@ for fr_ in range(1, 151, 3): cam_at(fr_)
 scene.render.engine = 'CYCLES'; cy = scene.cycles; cy.device = 'CPU'; setup_device(scene, ARGS); cy.samples = SAMPLES; cy.use_denoising = True; cy.denoiser = 'OPENIMAGEDENOISE'
 cy.use_adaptive_sampling = True; cy.adaptive_threshold = 0.03; cy.max_bounces = 6; cy.volume_bounces = 1; cy.volume_step_rate = 2.0
 scene.render.resolution_x = RES_X; scene.render.resolution_y = RES_Y; scene.render.resolution_percentage = 100
-scene.render.image_settings.file_format = 'PNG'; scene.render.film_transparent = False
+scene.render.image_settings.file_format = 'PNG'; scene.render.film_transparent = ALPHA
+if ALPHA:
+    scene.render.image_settings.color_mode = 'RGBA'
+    for o_ in (fl, bk, vb): o_.hide_render = True
 scene.view_settings.view_transform = 'AgX'; scene.view_settings.look = 'None'
 w = bpy.data.worlds.new('W'); scene.world = w; w.use_nodes = True; bg = w.node_tree.nodes['Background']; bg.inputs['Color'].default_value = (0.004, 0.005, 0.012, 1); bg.inputs['Strength'].default_value = 1.0
 
