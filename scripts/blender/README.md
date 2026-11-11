@@ -20,6 +20,9 @@ Argumentos: `frames` (lista `1,5,9` ou faixa `a-b`), `rx`/`ry` (resolução), `s
   A carta (foto + skin de cada jogador) entra por cima do vídeo, ao vivo, no clarão do quadro ~62.
 - `quadra-toro.py`: quadra de futsal molhada (tema Toró) para o fundo do quadro tático, imagem única 800x1480 (`public/mesa/temporal.webp`); as cartas entram por cima pela grade do app.
 - `tunel-rascunho.py`: rascunho do túnel do estádio, descartado pelo dono do app.
+- `fusao.py`: fusão das cartas em "Sua rodada" (2026-11-11): duas plataformas sob feixes de luz, fios de energia que convergem para a
+  plataforma do meio, clarão no quadro 125 e um aro de luz em volta da carta nova. Vídeo 4:5 (640x800), 5 s; as três cartas entram por cima,
+  ao vivo, sobre as plataformas (`slots.json`, usado em `reveal-fusion.tsx`).
 
 ## Custos de renderização (4 núcleos, sem GPU)
 Cortina 540x960: ~55 s/quadro (99 quadros). Revelação: ~45 s/quadro (90 quadros). Rodar uma de cada vez.
@@ -72,4 +75,5 @@ Na GPU dá para subir as amostras (`samples=64` a `128`) e a resolução (`rx=10
 | `destaques.py` | 1-150 (e `slots.json`, posição de cada pedestal na tela) | `d_` |
 | `spot2.py` (Melhor Jogador, final suave) | 1-150 | `s_` |
 | `pacote.py` (`tier=A..D`, `mode=anim` ou `mode=still`) | 1-120 | `p_` |
+| `fusao.py` (vídeo 4:5, `rx=640 ry=800`) | 1-150 (e `slots.json`, base de cada plataforma na tela) | `f_` |
 | `quadra-toro.py` (`flip=1` = lado do time Preto) | imagem única | `out=arquivo.png` |
