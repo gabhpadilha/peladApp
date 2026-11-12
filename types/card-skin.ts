@@ -46,6 +46,16 @@ export const CARD_SKINS = [
   { key: "tormenta", name: "Tormenta", level: 5, price: 600, event: { theme: "destino", year: 2026 }, packOnly: true },
   // Terceira de prestígio de dezembro (2026-11-09): o trapaceiro nórdico (chifres dourados, fumaça verde e runas), só alusões à mitologia.
   { key: "embuste", name: "Embuste", level: 5, price: 600, event: { theme: "destino", year: 2026 }, packOnly: true },
+  // Épicas do conjunto de dezembro de 2026 (evento Destino, só de pacote; 2026-11-12): borda com 1 enfeite no topo e fundo do poder do herói,
+  // só alusões (sem nome, emblema ou traje de personagem). Peças do dono no Gemini em `docs/cartas/<chave>/pecas/`, camadas por `scripts/cartas/montar-epica.py`.
+  { key: "rajada", name: "Rajada", level: 0, price: 0, event: { theme: "destino", year: 2026 }, packOnly: true },
+  { key: "pedreira", name: "Pedreira", level: 0, price: 0, event: { theme: "destino", year: 2026 }, packOnly: true },
+  { key: "cartada", name: "Cartada", level: 0, price: 0, event: { theme: "destino", year: 2026 }, packOnly: true },
+  { key: "ima", name: "Ímã", level: 0, price: 0, event: { theme: "destino", year: 2026 }, packOnly: true },
+  { key: "miragem", name: "Miragem", level: 0, price: 0, event: { theme: "destino", year: 2026 }, packOnly: true },
+  { key: "elastico", name: "Elástico", level: 0, price: 0, event: { theme: "destino", year: 2026 }, packOnly: true },
+  { key: "labareda", name: "Labareda", level: 0, price: 0, event: { theme: "destino", year: 2026 }, packOnly: true },
+  { key: "garra", name: "Garra", level: 0, price: 0, event: { theme: "destino", year: 2026 }, packOnly: true },
 ] as const;
 
 export type CardSkin = (typeof CARD_SKINS)[number];
