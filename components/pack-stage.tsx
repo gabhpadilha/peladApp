@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CardBack } from "@/components/card-back";
-import { CanchaCard } from "@/components/cancha-card";
+import { CanchaCard, isTrimmedCard } from "@/components/cancha-card";
 import { SAMPLE_PLAYER } from "@/lib/sample-player";
 import { PACK_RARITY_NAMES, type PackRarity, type PackTier } from "@/lib/packs";
 import { getCardSkin, isCardSkinKey } from "@/types/card-skin";
@@ -248,8 +248,11 @@ export function PackStage({ rarity, tier, skin, oddsPercent, isDuplicate, reduce
                       className="absolute inset-0"
                       style={{ animation: anim(`pk-front-half ${ms(HALF_TURN_MS + 140)} cubic-bezier(.2,.8,.3,1.2) both ${ms(flipIn)}`) }}
                     >
-                      {skinKey === "destino" && <HoodPlug />}
-                      <CanchaCard player={mystery} pure photoSizes="260px" className="w-full" />
+                      {/* Cartas de neon ocupam 84% da própria caixa: amplia para a frente ter o tamanho do verso. */}
+                      <div className="relative" style={isTrimmedCard(mystery) ? { scale: String(1 / 0.84) } : undefined}>
+                        {skinKey === "destino" && <HoodPlug />}
+                        <CanchaCard player={mystery} pure photoSizes="320px" className="w-full" />
+                      </div>
                     </div>
                   </div>
                 </div>
