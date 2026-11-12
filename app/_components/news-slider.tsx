@@ -17,6 +17,7 @@ import { getSalePrice, type ShopSale } from "@/lib/shop-sale";
 import type { Player } from "@/types/player";
 import { cn } from "@/lib/utils";
 import { NewsCarousel } from "./news-carousel";
+import { getPackDrop, PackDropSlide } from "./pack-drop-slide";
 
 type NewsSliderProps = {
   event: CurrentCardEvent;
@@ -189,7 +190,10 @@ export function NewsSlider({ event, today, shopSale, player }: NewsSliderProps) 
 
 
   const patch = LATEST_PATCH_NOTES;
+  // Lançamento de skins nos pacotes (estilo evento do FIFA): primeiro slide enquanto vale.
+  const packDrop = getPackDrop(today);
   const slides = [
+    ...(packDrop ? [{ key: "lancamento", title: `${packDrop.title[0]} ${packDrop.title[1]}`, content: <PackDropSlide drop={packDrop} /> }] : []),
     {
       key: "patch",
       title: patch.title,
