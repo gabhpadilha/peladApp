@@ -1071,7 +1071,8 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
         <div
           className={cn(
             "absolute inset-x-0 top-0 z-[3] flex h-[16%] flex-col justify-center border-b-[0.6cqw] border-(--cc-accent) pt-[2.6cqw] pr-[26cqw] pl-[8cqw] leading-none whitespace-nowrap",
-            roupa.bareName ? "" : roupa.matte ? "bg-(--cc-bar)" : "bg-linear-to-b from-black/80 to-black/40",
+            // Com o nome descido (`nameDrop`), a caixa fica mais alta e o degradê clareava a linha de baixo: a caixa fica na cor da barra, quase opaca, por igual (o mar claro do fundo aparecia através dela; pedido do dono do app, 2026-11-12).
+            roupa.bareName ? "" : roupa.matte ? "bg-(--cc-bar)" : roupa.nameDrop ? "bg-(--cc-bar)/90" : "bg-linear-to-b from-black/80 to-black/40",
           )}
           style={roupa.contentPad ? { height: `calc(16% + ${roupa.contentPad + (roupa.nameDrop ?? 0)}cqw)`, paddingLeft: `${8 + roupa.contentPad + (roupa.namePadX ?? 0)}cqw`, paddingTop: `${2.6 + roupa.contentPad + (roupa.nameDrop ?? 0)}cqw` } : undefined}
         >
@@ -1110,7 +1111,8 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
         {!roupa.clean && !pure && (
         <div
           aria-hidden
-          style={roupa.contentPad ? { top: `calc(16% + ${roupa.contentPad}cqw)` } : undefined}
+          // Começa onde a caixa do nome termina (com `nameDrop` ela desce; antes a luz cobria a linha "ALA · NÍVEL").
+          style={roupa.contentPad ? { top: `calc(16% + ${roupa.contentPad + (roupa.nameDrop ?? 0)}cqw)` } : undefined}
           className={cn(
             "absolute inset-x-0 top-[16%] bottom-0 z-[6]",
             roupa.matte
