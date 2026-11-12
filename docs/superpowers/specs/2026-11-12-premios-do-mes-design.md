@@ -15,7 +15,7 @@ Conversa com o dono do app em 2026-11-12. **Ainda sem código.** Falta confirmar
 - **Premiar também o resto do ranking**, com prêmios menores, no jeito das rodadas.
 - **A carta do Campeão do Mês continua**, junto com o pacote de 4: a carta é o troféu da Coleção e conta nas estatísticas. Em dezembro todos os prêmios individuais usam a mesma carta-base (vermelha de Natal com medalhão de ícone), decisão de 2026-11-09.
 
-## Proposta (a confirmar os números)
+## Tabela (aprovada pelo dono do app em 2026-11-12)
 
 | Posição no ranking de pontos do mês | Prêmio |
 | --- | --- |
@@ -25,7 +25,7 @@ Conversa com o dono do app em 2026-11-12. **Ainda sem código.** Falta confirmar
 | Meio | 1 pacote da faixa B (Destaque) |
 | 30% de baixo | 1 pacote da faixa C (Pelada) |
 
-- Só entra quem jogou no mês, com **mínimo de 2 rodadas** (sugestão).
+- Só entra quem jogou no mês, **sem mínimo de rodadas** (decisão do dono do app: "a soma de pontos já elimina quem joga poucas vezes").
 - Skins dos pacotes de 3 e 4 sorteadas pelas chances da **faixa Craque**, do conjunto do mês (`pack_sets`).
 - **Entrega:** ao fechar a rodada da **última quinta** do mês, junto com o Time do Mês e a carta do Campeão (`compute_match_awards` / `close_match`). Em Loja → Meus pacotes aparecem como "Prêmio do mês".
 - **Economia:** cada jogador já ganha pacote por rodada, pelos objetivos e pode comprar na Loja; mais pacotes = mais repetidas e mais CanchaCoins pela venda rápida. A tabela acima é contida de propósito; se ficar mais generosa, revisar `QUICK_SELL_COINS`.
@@ -38,6 +38,7 @@ Conversa com o dono do app em 2026-11-12. **Ainda sem código.** Falta confirmar
 
 ## Em aberto
 
-1. Mínimo de rodadas no mês para entrar no prêmio (sugestão: 2).
-2. Quais migrations pendentes o dono já aplicou no SQL Editor (Loja de pacotes, Objetivos do mês, Venda rápida, Cópia extra, Pacotes sempre ligados, Faixa pela classificação). O pacote novo depende da cópia extra.
-3. Os cortes da tabela (2º e 3º, 30% / meio / 30%) e a faixa das chances.
+1. Quais migrations pendentes o dono já aplicou no SQL Editor (Loja de pacotes, Objetivos do mês, Venda rápida, Cópia extra, Pacotes sempre ligados, Faixa pela classificação). O pacote novo depende da cópia extra.
+2. A faixa das chances dos pacotes de 3 e 4 (proposta: Craque).
+
+Resolvidos em 2026-11-12: sem mínimo de rodadas; cortes da tabela aprovados.
