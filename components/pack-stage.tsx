@@ -52,13 +52,15 @@ function pickVideoExtension(): "mp4" | "webm" {
   return probe.canPlayType('video/mp4; codecs="avc1.640028"') ? "mp4" : "webm";
 }
 
-/** Baixa o arquivo inteiro e devolve um endereço local (blob): o vídeo começa já carregado, sem travar no meio. */
-async function preload(path: string, urls: string[]): Promise<string> {
+/**
+ * Baixa o arquivo inteiro para o cache do navegador e devolve o próprio endereço: o vídeo começa já carregado. Não usa endereço
+ * local (blob): o Safari do iPhone, sobretudo no app instalado, às vezes não toca vídeo por blob (o rasgo pulava direto ao palco).
+ */
+async function preload(path: string): Promise<string> {
   const response = await fetch(path);
   if (!response.ok) throw new Error(`preload ${path}: ${response.status}`);
-  const url = URL.createObjectURL(await response.blob());
-  urls.push(url);
-  return url;
+  await response.blob();
+  return path;
 }
 
 const ms = (value: number): string => `${Math.round(value)}ms`;
@@ -131,12 +133,11 @@ export function PackStage({ rarity, tier, month, round, skin, oddsPercent, isDup
   useEffect(() => {
     if (reduced) return;
     let isCancelled = false;
-    const urls: string[] = [];
     const ext = pickVideoExtension();
     const loads = Promise.all([
-      preload(`/revelacao/pacote-rasgo-${tier}.${ext}?v=${MEDIA_VERSION}`, urls),
-      preload(`/revelacao/pacote-${rarity}.${ext}?v=${MEDIA_VERSION}`, urls),
-      preload(`/revelacao/pacote-${rarity}-poster.jpg?v=${MEDIA_VERSION}`, urls),
+      preload(`/revelacao/pacote-rasgo-${tier}.${ext}?v=${MEDIA_VERSION}`),
+      preload(`/revelacao/pacote-${rarity}.${ext}?v=${MEDIA_VERSION}`),
+      preload(`/revelacao/pacote-${rarity}-poster.jpg?v=${MEDIA_VERSION}`),
     ]);
     const timeout = new Promise<null>((resolve) => window.setTimeout(() => resolve(null), PRELOAD_TIMEOUT_MS));
     Promise.race([loads, timeout])
@@ -153,7 +154,6 @@ export function PackStage({ rarity, tier, month, round, skin, oddsPercent, isDup
       });
     return () => {
       isCancelled = true;
-      urls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [reduced, tier, rarity]);
 
@@ -266,7 +266,10 @@ export function PackStage({ rarity, tier, month, round, skin, oddsPercent, isDup
           preload="auto"
           src={media.tear}
           onEnded={goToStage}
-          onError={goToStage}
+          onError={(event) => {
+            console.error("pack tear video", event.currentTarget.error);
+            goToStage();
+          }}
           className="pointer-events-none absolute inset-0 size-full object-cover"
           style={{ opacity: phase === "tear" ? 1 : 0 }}
         />

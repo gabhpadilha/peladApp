@@ -51,7 +51,7 @@ const nextConfig: NextConfig = {
     const staticCache = [{ key: "Cache-Control", value: "public, max-age=86400, stale-while-revalidate=604800" }];
     return [
       { source: "/:path*", headers: securityHeaders },
-      ...["/cartas", "/mesa", "/rarity", "/icons", "/patch-notes", "/mediapipe"].map((base) => ({ source: `${base}/:path*`, headers: staticCache })),
+      ...["/cartas", "/mesa", "/rarity", "/icons", "/patch-notes", "/mediapipe", "/revelacao"].map((base) => ({ source: `${base}/:path*`, headers: staticCache })),
       {
         source: "/sw.js",
         headers: [
