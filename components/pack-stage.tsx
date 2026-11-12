@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { CardBack } from "@/components/card-back";
 import { CanchaCard, isTrimmedCard } from "@/components/cancha-card";
+import { PackCover } from "@/components/pack-cover";
 import { SAMPLE_PLAYER } from "@/lib/sample-player";
 import { PACK_RARITY_NAMES, type PackRarity, type PackTier } from "@/lib/packs";
 import { getCardSkin, isCardSkinKey } from "@/types/card-skin";
@@ -42,6 +43,24 @@ const VIDEO_WAIT_MS = 1500;
 /** Versão dos vídeos e capas na URL: os estáticos ficam 1 dia em cache, então mudou o arquivo, suba o número. */
 const MEDIA_VERSION = 2;
 
+/** Quanto esperar o download dos vídeos antes de seguir sem eles (só a carta, sem o palco). */
+const PRELOAD_TIMEOUT_MS = 12000;
+
+/** O iPhone toca o H.264 (mp4) sempre; o webm só onde o mp4 não toca (o Chromium sem codecs proprietários). */
+function pickVideoExtension(): "mp4" | "webm" {
+  const probe = document.createElement("video");
+  return probe.canPlayType('video/mp4; codecs="avc1.640028"') ? "mp4" : "webm";
+}
+
+/** Baixa o arquivo inteiro e devolve um endereço local (blob): o vídeo começa já carregado, sem travar no meio. */
+async function preload(path: string, urls: string[]): Promise<string> {
+  const response = await fetch(path);
+  if (!response.ok) throw new Error(`preload ${path}: ${response.status}`);
+  const url = URL.createObjectURL(await response.blob());
+  urls.push(url);
+  return url;
+}
+
 const ms = (value: number): string => `${Math.round(value)}ms`;
 
 /**
@@ -76,7 +95,9 @@ export type PackStageProps = {
   onReady: () => void;
 };
 
-type Phase = "tear" | "stage";
+/** loading: baixando os vídeos (o pacote parado); tap: o iPhone bloqueou tocar sozinho, espera um toque; tear: rasgo; stage: palco. */
+type Phase = "loading" | "tap" | "tear" | "stage";
+type Media = { tear: string; stage: string } | null;
 
 /**
  * A abertura do pacote (2026-11-11): o pacote rasga (vídeo do Blender, um por faixa), corta para o palco escuro onde o
@@ -84,7 +105,7 @@ type Phase = "tear" | "stage";
  * gira mostrando a skin. A carta é sempre do app (verso `CardBack` e frente `CanchaCard` em modo `pure`), presa ao círculo
  * pelo quadro 9:16 do vídeo; o giro é em duas metades, só `transform`.
  */
-export function PackStage({ rarity, tier, skin, oddsPercent, isDuplicate, reduced, onReady }: PackStageProps) {
+export function PackStage({ rarity, tier, month, round, skin, oddsPercent, isDuplicate, reduced, onReady }: PackStageProps) {
   const look = RARITY_LOOKS[rarity];
   const skinKey = isCardSkinKey(skin) ? skin : "esmeralda";
   const skinName = getCardSkin(skinKey).name;
@@ -94,7 +115,8 @@ export function PackStage({ rarity, tier, skin, oddsPercent, isDuplicate, reduce
   const color = `rgb(${look.rgb})`;
   const mystery = { ...SAMPLE_PLAYER, photo: null, nickname: "", fullName: "", cardSkin: skinKey };
 
-  const [phase, setPhase] = useState<Phase>("tear");
+  const [phase, setPhase] = useState<Phase>("loading");
+  const [media, setMedia] = useState<Media>(null);
   const [isStageRunning, setIsStageRunning] = useState(false);
   const tearRef = useRef<HTMLVideoElement>(null);
   const stageRef = useRef<HTMLVideoElement>(null);
@@ -105,33 +127,83 @@ export function PackStage({ rarity, tier, skin, oddsPercent, isDuplicate, reduce
 
   const goToStage = useCallback(() => setPhase("stage"), []);
 
-  // Rasgo: toca o vídeo da faixa; se não tocar, vai direto ao palco.
+  // Baixa o rasgo, o palco e a capa do palco inteiros antes de começar (mostrando o pacote parado). Sem rede, segue só com a carta.
   useEffect(() => {
     if (reduced) return;
+    let isCancelled = false;
+    const urls: string[] = [];
+    const ext = pickVideoExtension();
+    const loads = Promise.all([
+      preload(`/revelacao/pacote-rasgo-${tier}.${ext}?v=${MEDIA_VERSION}`, urls),
+      preload(`/revelacao/pacote-${rarity}.${ext}?v=${MEDIA_VERSION}`, urls),
+      preload(`/revelacao/pacote-${rarity}-poster.jpg?v=${MEDIA_VERSION}`, urls),
+    ]);
+    const timeout = new Promise<null>((resolve) => window.setTimeout(() => resolve(null), PRELOAD_TIMEOUT_MS));
+    Promise.race([loads, timeout])
+      .then((result) => {
+        if (isCancelled) return;
+        if (!result) throw new Error("preload timeout");
+        setMedia({ tear: result[0], stage: result[1] });
+        setPhase("tear");
+      })
+      .catch((error: unknown) => {
+        if (isCancelled) return;
+        console.error(error);
+        setPhase("stage");
+      });
+    return () => {
+      isCancelled = true;
+      urls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [reduced, tier, rarity]);
+
+  // Rasgo: toca o vídeo já baixado; se o aparelho não deixar tocar sozinho (economia de bateria no iPhone), espera um toque.
+  useEffect(() => {
+    if (reduced || phase !== "tear") return;
     const video = tearRef.current;
     if (!video) return;
-    const timer = window.setTimeout(() => {
-      if (video.currentTime === 0) goToStage();
-    }, VIDEO_WAIT_MS * 2);
-    video.play().catch(goToStage);
-    return () => window.clearTimeout(timer);
-  }, [reduced, goToStage]);
+    video.muted = true;
+    video.play().catch(() => setPhase("tap"));
+  }, [reduced, phase]);
+
+  function handleTapToOpen() {
+    const tear = tearRef.current;
+    const stage = stageRef.current;
+    // No toque, libera os dois vídeos de uma vez (o do palco toca e pausa logo) e começa o rasgo.
+    if (stage) {
+      stage.muted = true;
+      void stage.play().then(() => {
+        stage.pause();
+        stage.currentTime = 0;
+      }, () => undefined);
+    }
+    if (!tear) {
+      goToStage();
+      return;
+    }
+    tear.muted = true;
+    setPhase("tear");
+    tear.play().catch(goToStage);
+  }
 
   // Palco: toca o vídeo da raridade; a carta começa quando o vídeo começa (ou depois de um tempo, sem ele).
   useEffect(() => {
     if (reduced || phase !== "stage") return;
     const video = stageRef.current;
     const start = () => setIsStageRunning(true);
-    const timer = window.setTimeout(start, VIDEO_WAIT_MS);
-    if (video) {
-      video.addEventListener("playing", start, { once: true });
-      video.play().catch(start);
+    if (!video || !media) {
+      start();
+      return;
     }
+    const timer = window.setTimeout(start, VIDEO_WAIT_MS);
+    video.addEventListener("playing", start, { once: true });
+    video.muted = true;
+    video.play().catch(start);
     return () => {
       window.clearTimeout(timer);
-      video?.removeEventListener("playing", start);
+      video.removeEventListener("playing", start);
     };
-  }, [reduced, phase]);
+  }, [reduced, phase, media]);
 
   // Os botões aparecem quando a skin e os textos já estão na tela.
   useEffect(() => {
@@ -153,6 +225,7 @@ export function PackStage({ rarity, tier, skin, oddsPercent, isDuplicate, reduce
   return (
     <div className="absolute inset-0 overflow-hidden bg-black text-white">
       <style>{`
+        @keyframes pk-float { 0%, 100% { transform: translateY(0) rotate(-1deg); } 50% { transform: translateY(-8px) rotate(1deg); } }
         @keyframes pk-flash { 0% { opacity: 1; } 100% { opacity: 0; } }
         @keyframes pk-in { from { opacity: 0; } to { opacity: 1; } }
         @keyframes pk-rise { 0% { opacity: 0; transform: translateY(46%) scale(.82); } 35% { opacity: 1; } 100% { opacity: 1; transform: translateY(0) scale(1); } }
@@ -167,28 +240,42 @@ export function PackStage({ rarity, tier, skin, oddsPercent, isDuplicate, reduce
         @keyframes pk-shake { 0%, 100% { transform: translate(0, 0); } 25% { transform: translate(-4px, 3px); } 50% { transform: translate(4px, -2px); } 75% { transform: translate(-3px, -2px); } }
       `}</style>
 
-      {/* Rasgo do pacote (vídeo da faixa). Corta seco para o palco quando termina. */}
-      {!reduced && phase === "tear" && (
+      {/* Enquanto os vídeos baixam (e no "toque para abrir"): o pacote parado, flutuando. */}
+      {!reduced && (phase === "loading" || phase === "tap") && (
+        <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-6 px-6">
+          <div className="w-[52%] max-w-[240px]" style={{ animation: "pk-float 3.2s ease-in-out infinite" }}>
+            <PackCover tier={tier} month={month} round={round} className="w-full" />
+          </div>
+          {phase === "loading" ? (
+            <p className="text-sm text-white/70">Preparando o pacote…</p>
+          ) : (
+            <button type="button" onClick={handleTapToOpen} className="h-12 rounded-xl bg-white px-6 text-base font-semibold text-black">
+              Toque para abrir o pacote
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Rasgo do pacote (vídeo da faixa, já baixado). Corta seco para o palco quando termina. */}
+      {!reduced && media && phase !== "stage" && (
         <video
           ref={tearRef}
           aria-hidden
           muted
           playsInline
           preload="auto"
-          poster={`/revelacao/pacote-rasgo-${tier}-poster.jpg?v=${MEDIA_VERSION}`}
+          src={media.tear}
           onEnded={goToStage}
           onError={goToStage}
           className="pointer-events-none absolute inset-0 size-full object-cover"
-        >
-          <source src={`/revelacao/pacote-rasgo-${tier}.webm?v=${MEDIA_VERSION}`} type="video/webm" />
-          <source src={`/revelacao/pacote-rasgo-${tier}.mp4?v=${MEDIA_VERSION}`} type="video/mp4" />
-        </video>
+          style={{ opacity: phase === "tear" ? 1 : 0 }}
+        />
       )}
 
       {/* O palco num quadro 9:16 com a altura da tela: no celular as laterais sobram (cortadas); na tela larga, fundo escuro dos lados. */}
       <div
         className="absolute top-0 left-1/2 h-full aspect-9/16 -translate-x-1/2"
-        style={{ opacity: reduced || phase === "stage" ? 1 : 0 }}
+        style={reduced || phase === "stage" ? undefined : { opacity: 0, pointerEvents: "none" }}
       >
         <div className="absolute inset-0" style={look.shake && run ? { animation: anim(`pk-shake .1s linear 6 both ${ms(FLASH_MS)}`) } : undefined}>
           {reduced ? (
@@ -201,11 +288,9 @@ export function PackStage({ rarity, tier, skin, oddsPercent, isDuplicate, reduce
               playsInline
               preload="auto"
               poster={`/revelacao/pacote-${rarity}-poster.jpg?v=${MEDIA_VERSION}`}
+              src={media?.stage}
               className="pointer-events-none absolute inset-0 size-full object-cover"
-            >
-              <source src={`/revelacao/pacote-${rarity}.webm?v=${MEDIA_VERSION}`} type="video/webm" />
-              <source src={`/revelacao/pacote-${rarity}.mp4?v=${MEDIA_VERSION}`} type="video/mp4" />
-            </video>
+            />
           )}
 
           {run && (
