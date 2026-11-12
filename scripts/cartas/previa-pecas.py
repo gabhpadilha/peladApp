@@ -122,14 +122,24 @@ def montar(chave):
     camada = np.dstack([cor, alfa * 255]).astype(np.uint8)
     out.alpha_composite(Image.fromarray(camada, "RGBA"))
 
-    m = round(w * 0.06)
-    out = out.crop((max(bx0 - m, 0), max(by0 - m, 0), min(bx1 + m, w), min(by1 + m, h)))
-    fundo_preto = Image.new("RGBA", out.size, (11, 19, 15, 255))
-    fundo_preto.alpha_composite(out)
+    # Padrão das cartas (igual a gerar-catalogo.py e TRIMMED_CARD): tela 714 x 1000 transparente e a carta
+    # 5:7 nos 84% do meio (8% de sobra por lado). A caixa medida da borda é levada exatamente a essa caixa,
+    # então todas saem do mesmo tamanho, mesmo quando o Gemini entrega a carta maior, menor ou fora de 5:7.
+    CW, CH = 714, 1000
+    cx0, cy0, cx1, cy1 = round(CW * 0.08), round(CH * 0.08), round(CW * 0.92), round(CH * 0.92)
+    sx, sy = (cx1 - cx0) / bw, (cy1 - cy0) / bh
+    # a beira das imagens do Gemini às vezes tem um fio claro: some nos 6 px de fora
+    beira = Image.new("L", (w, h), 0)
+    ImageDraw.Draw(beira).rectangle((6, 6, w - 7, h - 7), fill=255)
+    out.putalpha(Image.fromarray(np.minimum(np.asarray(out.getchannel("A")), np.asarray(beira))))
+    escalada = out.resize((round(w * sx), round(h * sy)), Image.LANCZOS)
+    final = Image.new("RGBA", (CW, CH), (0, 0, 0, 0))
+    dx, dy = cx0 - round(bx0 * sx), cy0 - round(by0 * sy)
+    recorte = escalada.crop((-dx, -dy, CW - dx, CH - dy))  # fora da imagem vira transparente
+    final.alpha_composite(recorte)
     dest = os.path.join(DOCS, chave, "montada")
     os.makedirs(dest, exist_ok=True)
-    final = fundo_preto.convert("RGB")
-    final.thumbnail((560, 760))
+    final.thumbnail((500, 700))
     final.save(os.path.join(dest, f"{chave}-2d.webp"), quality=88, method=6)
     print(f"{chave}: caixa {bx0},{by0}-{bx1},{by1} ({larg:.0%}, {prop:.2f}), piso {pb:.0f}/{pf:.0f}")
     for a in avisos:

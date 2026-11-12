@@ -35,6 +35,7 @@
 
 - **2026-11-12**: peças recebidas do Gemini
 - **2026-11-12**: borda refeita no Gemini sem o emblema do topo, com enfeite próprio; fundo refeito sem a silhueta de pessoa
+- **2026-11-12**: aprovada pelo dono como épica; prévia no tamanho padrão (5:7 nos 84% do meio)
 
 ## Notas
 
