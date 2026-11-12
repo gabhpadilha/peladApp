@@ -204,10 +204,12 @@ const DILUVIO_FLOATERS: readonly Floater[] = [
 
 /** Runas, rochas e raios que flutuam em volta da Tormenta (`prototipos/tormenta-pecas.cjs`); os raios estalam como trovão (só `opacity`). */
 const TORMENTA_FLOATERS: readonly Floater[] = [
+  // anel de faíscas girando atrás (2026-11-12, pedido do dono do app: como o círculo da Destino e a fumaça do Embuste)
+  { src: "tormenta-faiscas", x: 50, y: 50, w: 112, layer: "back", anim: "spin", dur: 100 },
   { src: "tormenta-pedra-a", x: 8, y: 27, w: 15, layer: "front", anim: "float", dur: 8, rot: -10 },
   { src: "tormenta-runa", x: 92, y: 60, w: 14, layer: "front", anim: "orbit", dur: 9, delay: 1, rot: 8 },
   { src: "tormenta-pedra-b", x: 91, y: 12, w: 10, layer: "front", anim: "orbit", dur: 10, delay: 0.5, rot: 14 },
-  { src: "tormenta-runa", x: 8, y: 80, w: 11, layer: "front", anim: "float", dur: 7, delay: 2.2, rot: -6 },
+  { src: "tormenta-martelo", x: 6, y: 74, w: 20, layer: "front", anim: "float", dur: 7, delay: 2.2, rot: -14 },
   { src: "tormenta-pedra-b", x: 93, y: 86, w: 9, layer: "front", anim: "float", dur: 6, delay: 1.4, rot: -12 },
   { src: "tormenta-raio-b", x: 5.5, y: 52, w: 8, layer: "front", anim: "thunder-strike", dur: 3.4 },
   { src: "tormenta-raio-c", x: 95, y: 36, w: 9, layer: "front", anim: "thunder-strike", dur: 4.1, delay: 1.3 },
