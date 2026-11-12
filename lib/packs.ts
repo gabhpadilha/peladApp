@@ -94,10 +94,38 @@ export type MyPack = {
   rarity: PackRarity | null;
   wasDuplicate: boolean;
   coinsAwarded: number;
-  /** `round` = ganhou ao fechar uma rodada · `goal` = ganhou cumprindo um objetivo do mês · `shop` = comprou na Loja · `gift` = presente (boas-vindas). */
-  source: "round" | "goal" | "shop" | "gift";
+  /**
+   * `round` = ganhou ao fechar uma rodada · `goal` = ganhou cumprindo um objetivo do mês · `shop` = comprou na Loja · `gift` = presente
+   * (boas-vindas) · `monthly` = prêmio do ranking de pontos do mês.
+   */
+  source: PackSource;
   /** CanchaCoins pagas (só no pacote da Loja). */
   price: number | null;
+  /** Quantas skins o pacote traz (prêmio do mês: 4 para o 1º, 3 para o 2º e o 3º; o resto: 1). */
+  size: number;
+  /** Posição no ranking de pontos do mês (só nos pacotes de prêmio do mês). */
+  place: number | null;
+  /** Skins de um pacote de várias, da mais rara para a mais comum (só depois de aberto). */
+  items: PackItem[] | null;
 };
 
-export type OpenedPack = { skin: string; rarity: PackRarity; wasDuplicate: boolean; coinsAwarded: number };
+export type PackSource = "round" | "goal" | "shop" | "gift" | "monthly";
+
+export function isPackSource(value: string): value is PackSource {
+  return value === "round" || value === "goal" || value === "shop" || value === "gift" || value === "monthly";
+}
+
+/** Uma skin de dentro de um pacote aberto. */
+export type PackItem = { skin: string; rarity: PackRarity; wasDuplicate: boolean };
+
+/** A skin que a animação mostra (a mais rara) e, nos pacotes de várias, todas as skins (da mais rara para a mais comum). */
+export type OpenedPack = { skin: string; rarity: PackRarity; wasDuplicate: boolean; coinsAwarded: number; items: PackItem[] | null };
+
+const MONTH_FULL_NAMES = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+
+/** Prêmio do mês: `1, "2026-11"` → "Campeão de novembro"; `2` → "2º lugar de novembro". */
+export function monthlyPrizeLabel(place: number | null, month: string): string {
+  const monthName = MONTH_FULL_NAMES[Number(month.slice(5, 7)) - 1] ?? month;
+  if (place === 1) return `Campeão de ${monthName}`;
+  return place ? `${place}º lugar de ${monthName}` : `Ranking de ${monthName}`;
+}

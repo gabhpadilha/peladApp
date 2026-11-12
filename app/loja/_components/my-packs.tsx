@@ -5,7 +5,7 @@ import { GiftIcon } from "lucide-react";
 import { PackCover } from "@/components/pack-cover";
 import { PackOpener } from "@/components/pack-opener";
 import { Button } from "@/components/ui/button";
-import { PACK_TIER_NAMES, type MyPack } from "@/lib/packs";
+import { monthlyPrizeLabel, PACK_TIER_NAMES, type MyPack } from "@/lib/packs";
 
 const MONTH_NAMES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
 /** Quantos pacotes aparecem antes do "Mostrar todos": a lista não toma a tela com muitos guardados. */
@@ -43,8 +43,8 @@ export function MyPacks({ packs }: { packs: readonly MyPack[] }) {
             <div className="flex items-center gap-3">
               <PackCover tier={pack.tier} month={pack.month} className="h-11 shrink-0" />
               <div className="flex min-w-0 flex-1 flex-col">
-                <span className="truncate font-display text-base leading-tight font-bold tracking-wide uppercase">{PACK_TIER_NAMES[pack.tier]}</span>
-                <span className="text-xs text-muted-foreground">{pack.source === "goal" ? `Objetivo cumprido · ${monthName(pack.month)}` : pack.source === "shop" ? `Comprado na Loja · ${monthName(pack.month)}` : pack.source === "gift" ? "Presente de boas-vindas" : `Rodada ${pack.round} · ${monthName(pack.month)}`}</span>
+                <span className="truncate font-display text-base leading-tight font-bold tracking-wide uppercase">{pack.size > 1 ? `Prêmio do mês · ${pack.size} skins` : PACK_TIER_NAMES[pack.tier]}</span>
+                <span className="text-xs text-muted-foreground">{pack.source === "monthly" ? `Prêmio do mês · ${monthlyPrizeLabel(pack.place, pack.month)}` : pack.source === "goal" ? `Objetivo cumprido · ${monthName(pack.month)}` : pack.source === "shop" ? `Comprado na Loja · ${monthName(pack.month)}` : pack.source === "gift" ? "Presente de boas-vindas" : `Rodada ${pack.round} · ${monthName(pack.month)}`}</span>
               </div>
               <Button size="sm" onClick={() => setOpening([pack])}>
                 Abrir

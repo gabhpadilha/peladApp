@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { PackContents } from "@/components/pack-contents";
 import { PackStage } from "@/components/pack-stage";
 import { Button } from "@/components/ui/button";
 import { openPack, refreshAfterPack } from "@/app/loja/_actions/open-pack";
-import type { MyPack, OpenedPack } from "@/lib/packs";
+import { monthlyPrizeLabel, type MyPack, type OpenedPack } from "@/lib/packs";
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
@@ -19,13 +20,17 @@ function subscribeReducedMotion(callback: () => void) {
 type Step =
   | { status: "opening" }
   | { status: "error"; message: string }
-  | { status: "revealed"; pack: OpenedPack };
+  | { status: "revealed"; pack: OpenedPack }
+  /** Pacote de várias skins (prêmio do mês): depois da animação da mais rara, a tela "O que veio no pacote". */
+  | { status: "contents"; pack: OpenedPack };
+
+type OpenerPack = Pick<MyPack, "id" | "round" | "odds" | "tier" | "month"> & Partial<Pick<MyPack, "source" | "place">>;
 
 /**
  * Abre os pacotes em sequência em tela cheia: cada abertura chama o banco (que revela a skin sorteada no fechamento) e toca a animação.
  * Com movimento reduzido, mostra só o resultado. Fechar atualiza a página (saldo, ponto da Loja e coleção).
  */
-export function PackOpener({ packs, onClose }: { packs: readonly Pick<MyPack, "id" | "round" | "odds" | "tier" | "month">[]; onClose: () => void }) {
+export function PackOpener({ packs, onClose }: { packs: readonly OpenerPack[]; onClose: () => void }) {
   const router = useRouter();
   const reduced = useSyncExternalStore(
     subscribeReducedMotion,
@@ -71,6 +76,9 @@ export function PackOpener({ packs, onClose }: { packs: readonly Pick<MyPack, "i
   }
 
   const remaining = packs.length - index - 1;
+  const items = step.status === "revealed" || step.status === "contents" ? step.pack.items : null;
+  const continueLabel = remaining > 0 ? `Abrir o próximo (${remaining})` : "Fechar";
+  const handleContinue = remaining > 0 ? handleNext : handleClose;
   const oddsPercent = step.status === "revealed" && current ? (current.odds[step.pack.rarity] ?? null) : null;
 
   return (
@@ -82,7 +90,7 @@ export function PackOpener({ packs, onClose }: { packs: readonly Pick<MyPack, "i
           tier={current.tier}
           month={current.month}
           skin={step.pack.skin}
-          round={current.round}
+          round={current.source === "monthly" ? null : current.round}
           oddsPercent={oddsPercent}
           isDuplicate={step.pack.wasDuplicate}
           reduced={reduced}
@@ -98,15 +106,26 @@ export function PackOpener({ packs, onClose }: { packs: readonly Pick<MyPack, "i
           <Button variant="outline" size="lg" onClick={handleClose}>Voltar</Button>
         </div>
       )}
+      {step.status === "contents" && current && items && (
+        <div className="absolute inset-0 overflow-y-auto">
+          <PackContents
+            items={items}
+            subtitle={monthlyPrizeLabel(current.place ?? null, current.month)}
+            continueLabel={continueLabel}
+            onContinue={handleContinue}
+            onLeave={handleClose}
+          />
+        </div>
+      )}
       {step.status === "revealed" && isFooterReady && (
         <div className="absolute inset-x-0 bottom-0 z-10 flex flex-col items-center gap-2 bg-gradient-to-t from-black/80 to-transparent px-4 pt-8 pb-[max(1.25rem,env(safe-area-inset-bottom))] animate-in fade-in">
-          {remaining > 0 ? (
-            <Button size="lg" className="h-12 w-full max-w-xs text-base" onClick={handleNext}>
-              Abrir o próximo ({remaining})
+          {items ? (
+            <Button size="lg" className="h-12 w-full max-w-xs text-base" onClick={() => setStep({ status: "contents", pack: step.pack })}>
+              Ver o que veio no pacote ({items.length})
             </Button>
           ) : (
-            <Button size="lg" className="h-12 w-full max-w-xs text-base" onClick={handleClose}>
-              Fechar
+            <Button size="lg" className="h-12 w-full max-w-xs text-base" onClick={handleContinue}>
+              {continueLabel}
             </Button>
           )}
           <Link href="/eu#minhas-cartas" onClick={handleClose} className="flex h-11 items-center text-sm text-white/70 underline-offset-4 hover:underline">

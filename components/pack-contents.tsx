@@ -4,21 +4,23 @@ import Link from "next/link";
 import { RarityLabel } from "@/components/rarity-label";
 import { ShowcaseCard } from "@/components/showcase-card";
 import { Button } from "@/components/ui/button";
-import { PACK_RARITY_ORDER, type PackRarity } from "@/lib/packs";
+import { PACK_RARITY_ORDER, type PackItem } from "@/lib/packs";
 import { cn } from "@/lib/utils";
-import { getCardSkin, type CardSkinKey } from "@/types/card-skin";
-
-export type PackContentItem = { skin: CardSkinKey; rarity: PackRarity; wasDuplicate: boolean };
+import { getCardSkin, isCardSkinKey } from "@/types/card-skin";
 
 type PackContentsProps = {
-  items: readonly PackContentItem[];
+  items: readonly PackItem[];
   /** Ex.: "Campeão de novembro" ou "2º lugar de novembro". */
   subtitle: string;
-  onClose: () => void;
+  /** Texto do botão principal ("Fechar" ou "Abrir o próximo (N)"). */
+  continueLabel: string;
+  onContinue: () => void;
+  /** Ao tocar em "Ver em Minhas cartas" (fecha a abertura). */
+  onLeave: () => void;
 };
 
 /** Da mais rara para a mais comum (lendária primeiro). */
-function byRarity(a: PackContentItem, b: PackContentItem) {
+function byRarity(a: PackItem, b: PackItem) {
   return PACK_RARITY_ORDER.indexOf(b.rarity) - PACK_RARITY_ORDER.indexOf(a.rarity);
 }
 
@@ -27,7 +29,7 @@ function byRarity(a: PackContentItem, b: PackContentItem) {
  * a skin mais rara, aparecem todas as skins do pacote lado a lado, da mais rara para a mais comum. Skin que o jogador já tinha
  * vira cópia extra (vender no Mercado ou na venda rápida). Pacote de 4: grade 2 × 2; de 3: uma linha.
  */
-export function PackContents({ items, subtitle, onClose }: PackContentsProps) {
+export function PackContents({ items, subtitle, continueLabel, onContinue, onLeave }: PackContentsProps) {
   const sorted = items.toSorted(byRarity);
   const isGrid = sorted.length === 4;
 
@@ -40,7 +42,7 @@ export function PackContents({ items, subtitle, onClose }: PackContentsProps) {
       </header>
 
       <ol className={cn("grid w-full max-w-sm gap-x-3 gap-y-4", isGrid ? "max-w-[17rem] grid-cols-2" : "grid-cols-3")}>
-        {sorted.map((item) => (
+        {sorted.map((item) => isCardSkinKey(item.skin) && (
           <li key={item.skin} className="flex flex-col items-center gap-1.5 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <ShowcaseCard skin={item.skin} />
             <span className="mt-1 text-center font-display text-base leading-tight font-bold">{getCardSkin(item.skin).name}</span>
@@ -61,10 +63,10 @@ export function PackContents({ items, subtitle, onClose }: PackContentsProps) {
       )}
 
       <div className="mt-auto flex w-full max-w-xs flex-col items-center gap-2">
-        <Button size="lg" className="h-12 w-full text-base" onClick={onClose}>
-          Fechar
+        <Button size="lg" className="h-12 w-full text-base" onClick={onContinue}>
+          {continueLabel}
         </Button>
-        <Link href="/eu#minhas-cartas" onClick={onClose} className="flex h-11 items-center text-sm text-white/70 underline-offset-4 hover:underline">
+        <Link href="/eu#minhas-cartas" onClick={onLeave} className="flex h-11 items-center text-sm text-white/70 underline-offset-4 hover:underline">
           Ver em Minhas cartas
         </Link>
       </div>

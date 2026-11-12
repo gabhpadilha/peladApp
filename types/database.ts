@@ -1243,12 +1243,15 @@ export type Database = {
           group_id: string
           match_id: string | null
           month: string
+          items: Json | null
           odds: Json
           opened_at: string
           pack_id: string
+          place: number | null
           price: number | null
           rarity: string
           round: number | null
+          size: number
           skin: string
           source: string
           tier: string
