@@ -28,8 +28,6 @@ export const groupDetailsSchema = z.object({
   ),
   /** Rodadas por semana do plano. Vazio = sem limite. */
   weeklyRoundLimit: z.string().trim().regex(/^(|[1-7])$/, "Entre 1 e 7, ou deixe vazio para sem limite."),
-  /** Pacotes de skins ao fechar a rodada (desligado por padrão; só o admin liga). */
-  packsEnabled: z.boolean(),
   /** Mínimo de presentes na rodada para ela gerar pacotes. */
   packMinPlayers: z.string().trim().regex(/^\d{1,2}$/, "Informe um número.").refine(
     (value) => Number(value) >= 4 && Number(value) <= 30,

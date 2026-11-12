@@ -32,7 +32,6 @@ function toFormValues(group: AdminGroup): GroupDetailsInput {
     venue: group.venue ?? "",
     usualPlayers: group.usualPlayers === null ? "" : String(group.usualPlayers),
     weeklyRoundLimit: group.weeklyRoundLimit === null ? "" : String(group.weeklyRoundLimit),
-    packsEnabled: group.packsEnabled,
     packMinPlayers: String(group.packMinPlayers),
     ownerContact: group.ownerContact,
     adminNotes: group.adminNotes,
@@ -112,7 +111,7 @@ export function GroupCard({ group }: { group: AdminGroup }) {
       <p className="text-sm text-muted-foreground">
         Última rodada: {formatDate(group.lastRoundOn)} · código:{" "}
         <span className="font-mono">{group.slug ?? "sem código"}</span> · pacotes:{" "}
-        <span className={group.packsEnabled ? "text-primary" : ""}>{group.packsEnabled ? `ligados (mín. ${group.packMinPlayers})` : "desligados"}</span>
+        <span>mín. {group.packMinPlayers} na rodada</span>
       </p>
       {(group.ownerContact || group.adminNotes) && (
         <p className="text-sm text-muted-foreground">
