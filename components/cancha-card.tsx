@@ -122,6 +122,8 @@ export type Roupa = {
   namePadX?: number;
   /** Desce o nome e a posição (em cqw) quando o enfeite do topo da moldura cobre o nome (Cartada e Ímã, 2026-11-12); o selo do OVR fica onde está. */
   nameDrop?: number;
+  /** Desce a foto inteira (em cqw), para a cabeça não passar por cima da caixa do nome (épicas de dezembro, 2026-11-12); o peito some atrás das estatísticas. */
+  photoDrop?: number;
   /** Peças que flutuam em volta da carta (animação lenta, só nas cartas grandes). */
   floaters?: readonly Floater[];
   /** Sobe e afasta das laterais os números das estatísticas (em cqw), para a moldura da arte não passar por cima deles. */
@@ -273,21 +275,21 @@ const ROUPAS = {
   // Épicas de dezembro de 2026 (evento Destino, só de pacote; aprovadas pelo dono do app em 2026-11-12): fundo e borda do dono no Gemini, montados por
   // `scripts/cartas/montar-epica.py` (borda opaca POR CIMA do conteúdo, mesmo cobrindo uma coisa ou outra; o brilho do neon entra só como luz).
   // Rajada (feixe vermelho; gema de rubi no topo)
-  rajada: { background: "premium-rajada", overflow: "premium-rajada-vaza", statsLift: 6, statsPadX: 4, nameDrop: 4, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#5a6470", "#5a6470", "#ffd0cc"], accent: "#ff6b5e", light: "255 120 110", bar: "#14060a", muted: "#ffc9c4", sparkles: false, neon: "#ff3b30" },
+  rajada: { background: "premium-rajada", overflow: "premium-rajada-vaza", statsLift: 8, photoDrop: 6, statsPadX: 4, nameDrop: 4, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#5a6470", "#5a6470", "#ffd0cc"], accent: "#ff6b5e", light: "255 120 110", bar: "#14060a", muted: "#ffc9c4", sparkles: false, neon: "#ff3b30" },
   // Pedreira (rochas; bloco de pedra no topo)
-  pedreira: { background: "premium-pedreira", overflow: "premium-pedreira-vaza", statsLift: 6, nameDrop: 4, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#8a5a32", "#8a5a32", "#ffe0bf"], accent: "#f0a35e", light: "255 190 130", bar: "#140b05", muted: "#f5d2b0", sparkles: false, neon: "#ff9a3c" },
+  pedreira: { background: "premium-pedreira", overflow: "premium-pedreira-vaza", statsLift: 8, photoDrop: 6, nameDrop: 4, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#8a5a32", "#8a5a32", "#ffe0bf"], accent: "#f0a35e", light: "255 190 130", bar: "#140b05", muted: "#f5d2b0", sparkles: false, neon: "#ff9a3c" },
   // Cartada (cartas em energia rosa; losango com gema no topo)
-  cartada: { background: "premium-cartada", overflow: "premium-cartada-vaza", statsLift: 7, statsPadX: 5, nameDrop: 8, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#5a4a5c", "#5a4a5c", "#ffd6f4"], accent: "#ff7ad9", light: "255 140 230", bar: "#12060f", muted: "#ffc9ee", sparkles: false, neon: "#ff4fd2" },
+  cartada: { background: "premium-cartada", overflow: "premium-cartada-vaza", statsLift: 9, photoDrop: 10, statsPadX: 5, nameDrop: 8, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#5a4a5c", "#5a4a5c", "#ffd6f4"], accent: "#ff7ad9", light: "255 140 230", bar: "#12060f", muted: "#ffc9ee", sparkles: false, neon: "#ff4fd2" },
   // Ímã (redemoinho magnético; ímã de ferradura no topo)
-  ima: { background: "premium-ima", overflow: "premium-ima-vaza", statsLift: 7, statsPadX: 5, nameDrop: 8, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#6a3a4a", "#6a3a4a", "#f0d0ff"], accent: "#c78bff", light: "200 140 255", bar: "#10060f", muted: "#e3c8ff", sparkles: false, neon: "#b05cff" },
+  ima: { background: "premium-ima", overflow: "premium-ima-vaza", statsLift: 9, photoDrop: 10, statsPadX: 5, nameDrop: 8, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#6a3a4a", "#6a3a4a", "#f0d0ff"], accent: "#c78bff", light: "200 140 255", bar: "#10060f", muted: "#e3c8ff", sparkles: false, neon: "#b05cff" },
   // Miragem (campo de força de gelo; cristal hexagonal no topo)
-  miragem: { background: "premium-miragem", overflow: "premium-miragem-vaza", statsLift: 4, nameDrop: 4, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#6f8fae", "#6f8fae", "#eaf6ff"], accent: "#9fd8ff", light: "170 225 255", bar: "#06121e", muted: "#cfeaff", sparkles: false, neon: "#7fd0ff" },
+  miragem: { background: "premium-miragem", overflow: "premium-miragem-vaza", statsLift: 6, photoDrop: 6, nameDrop: 4, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#6f8fae", "#6f8fae", "#eaf6ff"], accent: "#9fd8ff", light: "170 225 255", bar: "#06121e", muted: "#cfeaff", sparkles: false, neon: "#7fd0ff" },
   // Elástico (fios azuis esticados; nó de fios no topo)
-  elastico: { background: "premium-elastico", overflow: "premium-elastico-vaza", statsLift: 4, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#3f5a80", "#3f5a80", "#d8e8ff"], accent: "#7fb6ff", light: "140 190 255", bar: "#050b18", muted: "#c4dcff", sparkles: false, neon: "#4a9dff" },
+  elastico: { background: "premium-elastico", overflow: "premium-elastico-vaza", statsLift: 6, photoDrop: 4, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#3f5a80", "#3f5a80", "#d8e8ff"], accent: "#7fb6ff", light: "140 190 255", bar: "#050b18", muted: "#c4dcff", sparkles: false, neon: "#4a9dff" },
   // Labareda (fogo; chama dourada no topo)
-  labareda: { background: "premium-labareda", overflow: "premium-labareda-vaza", statsLift: 4, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#4a5466", "#4a5466", "#ffe2b8"], accent: "#ffb04a", light: "255 180 90", bar: "#140904", muted: "#ffd9ad", sparkles: false, neon: "#ff8a1f" },
+  labareda: { background: "premium-labareda", overflow: "premium-labareda-vaza", statsLift: 6, photoDrop: 4, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#4a5466", "#4a5466", "#ffe2b8"], accent: "#ffb04a", light: "255 180 90", bar: "#140904", muted: "#ffd9ad", sparkles: false, neon: "#ff8a1f" },
   // Garra (cortes de garra em metal escuro; presilha de aço no topo)
-  garra: { background: "premium-garra", overflow: "premium-garra-vaza", statsLift: 4, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#8a8f96", "#8a8f96", "#f5f2e6"], accent: "#f2c94c", light: "255 225 140", bar: "#0a0b0d", muted: "#e6e3d6", sparkles: false, neon: "#f2c94c" },
+  garra: { background: "premium-garra", overflow: "premium-garra-vaza", statsLift: 6, photoDrop: 4, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#8a8f96", "#8a8f96", "#f5f2e6"], accent: "#f2c94c", light: "255 225 140", bar: "#0a0b0d", muted: "#e6e3d6", sparkles: false, neon: "#f2c94c" },
   // GUARDADAS, fora da Loja (sem entrada em `CARD_SKINS`; para usar: entrada lá, `case` em `skinRoupa` e `SKIN_CLASSES`): Voltagem e Maré.
   // Voltagem (2026-11-05, pedido do dono do app: o estilo da borda da referência dele no nosso retângulo): fio duplo de ouro pálido por dentro e
   // linhas de neon por fora, com o degrau onde se dividem (`prototipos/voltagem.cjs`). Janela `ring` recuada até o fio de dentro.
@@ -1056,7 +1058,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
 
         {/* Foto grande, presa embaixo: o peito some no degradê antes do rodapé. */}
         {!pure && (
-        <div className={cn("absolute z-[5]", frame.box)} style={roupa.contentPad && roupa.windowInset ? { bottom: `${22.6 - roupa.windowInset.y * 1.4 + lift}cqw`, height: `${99 - lift}cqw` } : undefined}>
+        <div className={cn("absolute z-[5]", frame.box)} style={roupa.contentPad && roupa.windowInset ? { bottom: `${22.6 - roupa.windowInset.y * 1.4 + lift - (roupa.photoDrop ?? 0)}cqw`, height: `${99 - lift}cqw` } : undefined}>
           {player.photo ? (
             <Image
               src={player.photo.url}
