@@ -53,14 +53,14 @@ As cartas anteriores a 2026-11-11 têm as peças na pasta de protótipos (`docs/
 | <img width="60" src="./voltagem/montada/voltagem-2d.webp"> | [Voltagem](./voltagem/README.md) | — | nenhum | — | guardada |
 | <img width="60" src="./mare/montada/mare-2d.webp"> | [Maré](./mare/README.md) | — | nenhum | — | guardada |
 | <img width="60" src="./aurora/montada/aurora-2d.webp"> | [Aurora](./aurora/README.md) | — | nenhum | — | guardada |
-| <img width="60" src="./rajada/montada/rajada-2d.webp"> | [Rajada](./rajada/README.md) | Épica | Pacote | Destino (dezembro de 2026) | guardada |
-| <img width="60" src="./pedreira/montada/pedreira-2d.webp"> | [Pedreira](./pedreira/README.md) | Épica | Pacote | Destino (dezembro de 2026) | guardada |
-| <img width="60" src="./cartada/montada/cartada-2d.webp"> | [Cartada](./cartada/README.md) | Épica | Pacote | Destino (dezembro de 2026) | guardada |
-| <img width="60" src="./ima/montada/ima-2d.webp"> | [Ímã](./ima/README.md) | Épica | Pacote | Destino (dezembro de 2026) | guardada |
-| <img width="60" src="./miragem/montada/miragem-2d.webp"> | [Miragem](./miragem/README.md) | Épica | Pacote | Destino (dezembro de 2026) | guardada |
-| <img width="60" src="./elastico/montada/elastico-2d.webp"> | [Elástico](./elastico/README.md) | Épica | Pacote | Destino (dezembro de 2026) | guardada |
-| <img width="60" src="./labareda/montada/labareda-2d.webp"> | [Labareda](./labareda/README.md) | Épica | Pacote | Destino (dezembro de 2026) | guardada |
-| <img width="60" src="./garra/montada/garra-2d.webp"> | [Garra](./garra/README.md) | Épica | Pacote | Destino (dezembro de 2026) | guardada |
+| <img width="60" src="./rajada/montada/rajada-2d.webp"> | [Rajada](./rajada/README.md) | Épica | Pacote | Destino (dezembro de 2026) | no app |
+| <img width="60" src="./pedreira/montada/pedreira-2d.webp"> | [Pedreira](./pedreira/README.md) | Épica | Pacote | Destino (dezembro de 2026) | no app |
+| <img width="60" src="./cartada/montada/cartada-2d.webp"> | [Cartada](./cartada/README.md) | Épica | Pacote | Destino (dezembro de 2026) | no app |
+| <img width="60" src="./ima/montada/ima-2d.webp"> | [Ímã](./ima/README.md) | Épica | Pacote | Destino (dezembro de 2026) | no app |
+| <img width="60" src="./miragem/montada/miragem-2d.webp"> | [Miragem](./miragem/README.md) | Épica | Pacote | Destino (dezembro de 2026) | no app |
+| <img width="60" src="./elastico/montada/elastico-2d.webp"> | [Elástico](./elastico/README.md) | Épica | Pacote | Destino (dezembro de 2026) | no app |
+| <img width="60" src="./labareda/montada/labareda-2d.webp"> | [Labareda](./labareda/README.md) | Épica | Pacote | Destino (dezembro de 2026) | no app |
+| <img width="60" src="./garra/montada/garra-2d.webp"> | [Garra](./garra/README.md) | Épica | Pacote | Destino (dezembro de 2026) | no app |
 
 ## Visuais de prêmio (10)
 

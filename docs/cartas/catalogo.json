@@ -1188,13 +1188,15 @@
    "raridade": "epica",
    "onde": "Pacote",
    "evento": "Destino (dezembro de 2026)",
-   "estado": "guardada",
+   "estado": "no-app",
    "pecas": [
     "docs/cartas/rajada/pecas/fundo.webp",
     "docs/cartas/rajada/pecas/borda.webp",
     "docs/cartas/rajada/pecas/borda-com-emblema.webp"
    ],
-   "scripts": [],
+   "scripts": [
+    "scripts/cartas/montar-epica.py"
+   ],
    "historico": [
     [
      "2026-11-12",
@@ -1207,9 +1209,18 @@
     [
      "2026-11-12",
      "aprovada pelo dono como épica; prévia no tamanho padrão (5:7 nos 84% do meio)"
+    ],
+    [
+     "2026-11-12",
+     "ligada no código (só de pacote, evento Destino, épica), montada com jogador e estatísticas; aprovada com a foto do dono"
     ]
    ],
-   "notas": "feixe de energia vermelho atravessando fumaça; moldura de metal azul-aço com neon vermelho. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py."
+   "notas": "feixe de energia vermelho atravessando fumaça; moldura de metal azul-aço com neon vermelho. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py.",
+   "roupa": "rajada",
+   "app": {
+    "fundo": "premium-rajada",
+    "vaza": "premium-rajada-vaza"
+   }
   },
   {
    "chave": "pedreira",
@@ -1218,13 +1229,15 @@
    "raridade": "epica",
    "onde": "Pacote",
    "evento": "Destino (dezembro de 2026)",
-   "estado": "guardada",
+   "estado": "no-app",
    "pecas": [
     "docs/cartas/pedreira/pecas/fundo.webp",
     "docs/cartas/pedreira/pecas/borda.webp",
     "docs/cartas/pedreira/pecas/borda-com-emblema.webp"
    ],
-   "scripts": [],
+   "scripts": [
+    "scripts/cartas/montar-epica.py"
+   ],
    "historico": [
     [
      "2026-11-12",
@@ -1237,9 +1250,18 @@
     [
      "2026-11-12",
      "aprovada pelo dono como épica; prévia no tamanho padrão (5:7 nos 84% do meio)"
+    ],
+    [
+     "2026-11-12",
+     "ligada no código (só de pacote, evento Destino, épica), montada com jogador e estatísticas; aprovada com a foto do dono"
     ]
    ],
-   "notas": "rochas laranja rachadas; moldura de pedra laranja com fio azul. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py."
+   "notas": "rochas laranja rachadas; moldura de pedra laranja com fio azul. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py.",
+   "roupa": "pedreira",
+   "app": {
+    "fundo": "premium-pedreira",
+    "vaza": "premium-pedreira-vaza"
+   }
   },
   {
    "chave": "cartada",
@@ -1248,13 +1270,15 @@
    "raridade": "epica",
    "onde": "Pacote",
    "evento": "Destino (dezembro de 2026)",
-   "estado": "guardada",
+   "estado": "no-app",
    "pecas": [
     "docs/cartas/cartada/pecas/fundo.webp",
     "docs/cartas/cartada/pecas/borda.webp",
     "docs/cartas/cartada/pecas/borda-com-emblema.webp"
    ],
-   "scripts": [],
+   "scripts": [
+    "scripts/cartas/montar-epica.py"
+   ],
    "historico": [
     [
      "2026-11-12",
@@ -1267,9 +1291,18 @@
     [
      "2026-11-12",
      "aprovada pelo dono como épica; prévia no tamanho padrão (5:7 nos 84% do meio)"
+    ],
+    [
+     "2026-11-12",
+     "ligada no código (só de pacote, evento Destino, épica), montada com jogador e estatísticas; aprovada com a foto do dono"
     ]
    ],
-   "notas": "cartas de baralho explodindo em energia rosa; moldura de metal escuro com neon rosa e raios. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py."
+   "notas": "cartas de baralho explodindo em energia rosa; moldura de metal escuro com neon rosa e raios. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py.",
+   "roupa": "cartada",
+   "app": {
+    "fundo": "premium-cartada",
+    "vaza": "premium-cartada-vaza"
+   }
   },
   {
    "chave": "ima",
@@ -1278,13 +1311,15 @@
    "raridade": "epica",
    "onde": "Pacote",
    "evento": "Destino (dezembro de 2026)",
-   "estado": "guardada",
+   "estado": "no-app",
    "pecas": [
     "docs/cartas/ima/pecas/fundo.webp",
     "docs/cartas/ima/pecas/borda.webp",
     "docs/cartas/ima/pecas/borda-com-emblema.webp"
    ],
-   "scripts": [],
+   "scripts": [
+    "scripts/cartas/montar-epica.py"
+   ],
    "historico": [
     [
      "2026-11-12",
@@ -1297,9 +1332,18 @@
     [
      "2026-11-12",
      "aprovada pelo dono como épica; prévia no tamanho padrão (5:7 nos 84% do meio)"
+    ],
+    [
+     "2026-11-12",
+     "ligada no código (só de pacote, evento Destino, épica), montada com jogador e estatísticas; aprovada com a foto do dono"
     ]
    ],
-   "notas": "redemoinho magnético roxo e vermelho com destroços; moldura bordô com raios roxos. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py."
+   "notas": "redemoinho magnético roxo e vermelho com destroços; moldura bordô com raios roxos. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py.",
+   "roupa": "ima",
+   "app": {
+    "fundo": "premium-ima",
+    "vaza": "premium-ima-vaza"
+   }
   },
   {
    "chave": "miragem",
@@ -1308,14 +1352,16 @@
    "raridade": "epica",
    "onde": "Pacote",
    "evento": "Destino (dezembro de 2026)",
-   "estado": "guardada",
+   "estado": "no-app",
    "pecas": [
     "docs/cartas/miragem/pecas/fundo.webp",
     "docs/cartas/miragem/pecas/borda.webp",
     "docs/cartas/miragem/pecas/borda-com-emblema.webp",
     "docs/cartas/miragem/pecas/fundo-antigo.webp"
    ],
-   "scripts": [],
+   "scripts": [
+    "scripts/cartas/montar-epica.py"
+   ],
    "historico": [
     [
      "2026-11-12",
@@ -1328,9 +1374,18 @@
     [
      "2026-11-12",
      "aprovada pelo dono como épica; prévia no tamanho padrão (5:7 nos 84% do meio)"
+    ],
+    [
+     "2026-11-12",
+     "ligada no código (só de pacote, evento Destino, épica), montada com jogador e estatísticas; aprovada com a foto do dono"
     ]
    ],
-   "notas": "campo de força azul-gelo translúcido; moldura de vidro azul. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py."
+   "notas": "campo de força azul-gelo translúcido; moldura de vidro azul. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py.",
+   "roupa": "miragem",
+   "app": {
+    "fundo": "premium-miragem",
+    "vaza": "premium-miragem-vaza"
+   }
   },
   {
    "chave": "elastico",
@@ -1339,13 +1394,15 @@
    "raridade": "epica",
    "onde": "Pacote",
    "evento": "Destino (dezembro de 2026)",
-   "estado": "guardada",
+   "estado": "no-app",
    "pecas": [
     "docs/cartas/elastico/pecas/fundo.webp",
     "docs/cartas/elastico/pecas/borda.webp",
     "docs/cartas/elastico/pecas/borda-com-emblema.webp"
    ],
-   "scripts": [],
+   "scripts": [
+    "scripts/cartas/montar-epica.py"
+   ],
    "historico": [
     [
      "2026-11-12",
@@ -1358,9 +1415,18 @@
     [
      "2026-11-12",
      "aprovada pelo dono como épica; prévia no tamanho padrão (5:7 nos 84% do meio)"
+    ],
+    [
+     "2026-11-12",
+     "ligada no código (só de pacote, evento Destino, épica), montada com jogador e estatísticas; aprovada com a foto do dono"
     ]
    ],
-   "notas": "fios azuis esticados e entrelaçados com raios; moldura de metal azul. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py."
+   "notas": "fios azuis esticados e entrelaçados com raios; moldura de metal azul. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py.",
+   "roupa": "elastico",
+   "app": {
+    "fundo": "premium-elastico",
+    "vaza": "premium-elastico-vaza"
+   }
   },
   {
    "chave": "labareda",
@@ -1369,13 +1435,15 @@
    "raridade": "epica",
    "onde": "Pacote",
    "evento": "Destino (dezembro de 2026)",
-   "estado": "guardada",
+   "estado": "no-app",
    "pecas": [
     "docs/cartas/labareda/pecas/fundo.webp",
     "docs/cartas/labareda/pecas/borda.webp",
     "docs/cartas/labareda/pecas/borda-com-emblema.webp"
    ],
-   "scripts": [],
+   "scripts": [
+    "scripts/cartas/montar-epica.py"
+   ],
    "historico": [
     [
      "2026-11-12",
@@ -1388,9 +1456,18 @@
     [
      "2026-11-12",
      "aprovada pelo dono como épica; prévia no tamanho padrão (5:7 nos 84% do meio)"
+    ],
+    [
+     "2026-11-12",
+     "ligada no código (só de pacote, evento Destino, épica), montada com jogador e estatísticas; aprovada com a foto do dono"
     ]
    ],
-   "notas": "fogo e fumaça; moldura de metal azul com chamas no topo e na base. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py."
+   "notas": "fogo e fumaça; moldura de metal azul com chamas no topo e na base. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py.",
+   "roupa": "labareda",
+   "app": {
+    "fundo": "premium-labareda",
+    "vaza": "premium-labareda-vaza"
+   }
   },
   {
    "chave": "garra",
@@ -1399,14 +1476,16 @@
    "raridade": "epica",
    "onde": "Pacote",
    "evento": "Destino (dezembro de 2026)",
-   "estado": "guardada",
+   "estado": "no-app",
    "pecas": [
     "docs/cartas/garra/pecas/fundo.webp",
     "docs/cartas/garra/pecas/borda.webp",
     "docs/cartas/garra/pecas/borda-com-emblema.webp",
     "docs/cartas/garra/pecas/fundo-antigo.webp"
    ],
-   "scripts": [],
+   "scripts": [
+    "scripts/cartas/montar-epica.py"
+   ],
    "historico": [
     [
      "2026-11-12",
@@ -1419,9 +1498,18 @@
     [
      "2026-11-12",
      "aprovada pelo dono como épica; prévia no tamanho padrão (5:7 nos 84% do meio)"
+    ],
+    [
+     "2026-11-12",
+     "ligada no código (só de pacote, evento Destino, épica), montada com jogador e estatísticas; aprovada com a foto do dono"
     ]
    ],
-   "notas": "painel escuro com três cortes de garra e circuitos dourados; moldura de metal prateado com detalhes amarelos. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py."
+   "notas": "painel escuro com três cortes de garra e circuitos dourados; moldura de metal prateado com detalhes amarelos. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py.",
+   "roupa": "garra",
+   "app": {
+    "fundo": "premium-garra",
+    "vaza": "premium-garra-vaza"
+   }
   }
  ],
  "em_andamento": [

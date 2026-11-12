@@ -7,27 +7,35 @@
 - [Rajada](./rajada/README.md): peças recebidas do Gemini
 - [Rajada](./rajada/README.md): borda refeita no Gemini sem o emblema do topo, com enfeite próprio
 - [Rajada](./rajada/README.md): aprovada pelo dono como épica; prévia no tamanho padrão (5:7 nos 84% do meio)
+- [Rajada](./rajada/README.md): ligada no código (só de pacote, evento Destino, épica), montada com jogador e estatísticas; aprovada com a foto do dono
 - [Pedreira](./pedreira/README.md): peças recebidas do Gemini
 - [Pedreira](./pedreira/README.md): borda refeita no Gemini sem o emblema do topo, com enfeite próprio
 - [Pedreira](./pedreira/README.md): aprovada pelo dono como épica; prévia no tamanho padrão (5:7 nos 84% do meio)
+- [Pedreira](./pedreira/README.md): ligada no código (só de pacote, evento Destino, épica), montada com jogador e estatísticas; aprovada com a foto do dono
 - [Cartada](./cartada/README.md): peças recebidas do Gemini
 - [Cartada](./cartada/README.md): borda refeita no Gemini sem o emblema do topo, com enfeite próprio
 - [Cartada](./cartada/README.md): aprovada pelo dono como épica; prévia no tamanho padrão (5:7 nos 84% do meio)
+- [Cartada](./cartada/README.md): ligada no código (só de pacote, evento Destino, épica), montada com jogador e estatísticas; aprovada com a foto do dono
 - [Ímã](./ima/README.md): peças recebidas do Gemini
 - [Ímã](./ima/README.md): borda refeita no Gemini sem o emblema do topo, com enfeite próprio
 - [Ímã](./ima/README.md): aprovada pelo dono como épica; prévia no tamanho padrão (5:7 nos 84% do meio)
+- [Ímã](./ima/README.md): ligada no código (só de pacote, evento Destino, épica), montada com jogador e estatísticas; aprovada com a foto do dono
 - [Miragem](./miragem/README.md): peças recebidas do Gemini
 - [Miragem](./miragem/README.md): borda refeita no Gemini sem o emblema do topo, com enfeite próprio; fundo refeito sem a silhueta de pessoa
 - [Miragem](./miragem/README.md): aprovada pelo dono como épica; prévia no tamanho padrão (5:7 nos 84% do meio)
+- [Miragem](./miragem/README.md): ligada no código (só de pacote, evento Destino, épica), montada com jogador e estatísticas; aprovada com a foto do dono
 - [Elástico](./elastico/README.md): peças recebidas do Gemini
 - [Elástico](./elastico/README.md): borda refeita no Gemini sem o emblema do topo, com enfeite próprio
 - [Elástico](./elastico/README.md): aprovada pelo dono como épica; prévia no tamanho padrão (5:7 nos 84% do meio)
+- [Elástico](./elastico/README.md): ligada no código (só de pacote, evento Destino, épica), montada com jogador e estatísticas; aprovada com a foto do dono
 - [Labareda](./labareda/README.md): peças recebidas do Gemini
 - [Labareda](./labareda/README.md): borda refeita no Gemini sem o emblema do topo, com enfeite próprio
 - [Labareda](./labareda/README.md): aprovada pelo dono como épica; prévia no tamanho padrão (5:7 nos 84% do meio)
+- [Labareda](./labareda/README.md): ligada no código (só de pacote, evento Destino, épica), montada com jogador e estatísticas; aprovada com a foto do dono
 - [Garra](./garra/README.md): peças recebidas do Gemini
 - [Garra](./garra/README.md): borda refeita no Gemini sem o emblema do topo, com enfeite próprio; fundo refeito sem a moldura de dentro (sobra um contorno leve, coberto pela borda)
 - [Garra](./garra/README.md): aprovada pelo dono como épica; prévia no tamanho padrão (5:7 nos 84% do meio)
+- [Garra](./garra/README.md): ligada no código (só de pacote, evento Destino, épica), montada com jogador e estatísticas; aprovada com a foto do dono
 
 ## 2026-11-11
 
