@@ -58,6 +58,8 @@ export const CARD_SKINS = [
   { key: "garra", name: "Garra", level: 0, price: 0, event: { theme: "destino", year: 2026 }, packOnly: true },
   // Épicas novas de novembro de 2026 (evento Toró, só de pacote; 2026-11-12): fundo e borda do dono no Gemini, montados por `scripts/cartas/montar-epica.py`.
   { key: "granizo", name: "Granizo", level: 0, price: 0, event: { theme: "temporal", year: 2026 }, packOnly: true },
+  // Lendária nova de novembro de 2026 (evento Toró, só de pacote; 2026-11-12): o rei dos mares na tempestade, só alusões (sem nome nem traje de personagem).
+  { key: "marerei", name: "Maré-Rei", level: 0, price: 0, event: { theme: "temporal", year: 2026 }, packOnly: true },
   { key: "ciclone", name: "Ciclone", level: 0, price: 0, event: { theme: "temporal", year: 2026 }, packOnly: true },
   { key: "enxurrada", name: "Enxurrada", level: 0, price: 0, event: { theme: "temporal", year: 2026 }, packOnly: true },
 ] as const;

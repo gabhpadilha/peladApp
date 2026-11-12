@@ -553,6 +553,7 @@ const SKIN_CLASSES: Record<CardSkinKey, string> = {
   granizo: "card-skin-icone",
   enxurrada: "card-skin-icone",
   ciclone: "card-skin-icone",
+  marerei: "card-skin-icone",
   pedreira: "card-skin-icone",
   cartada: "card-skin-icone",
   ima: "card-skin-icone",

@@ -216,6 +216,18 @@ const TORMENTA_FLOATERS: readonly Floater[] = [
   { src: "tormenta-raio-a", x: 7, y: 92, w: 6, layer: "front", anim: "thunder-strike", dur: 3.8, delay: 2.1 },
 ];
 
+/** Anel de água girando atrás da Maré-Rei e pérolas, conchas, coral e gotas boiando em volta (`scripts/cartas/recortar-flutuantes.py`). */
+const MAREREI_FLOATERS: readonly Floater[] = [
+  { src: "marerei-anel-1", x: 50, y: 50, w: 116, layer: "back", anim: "spin", dur: 90 },
+  { src: "marerei-peca-1", x: 8, y: 27, w: 13, layer: "front", anim: "float", dur: 8, rot: -6 },
+  { src: "marerei-peca-4", x: 92, y: 60, w: 15, layer: "front", anim: "orbit", dur: 9, delay: 1, rot: 12 },
+  { src: "marerei-gota-2", x: 91, y: 12, w: 8, layer: "front", anim: "orbit", dur: 10, delay: 0.5, rot: 10 },
+  { src: "marerei-peca-5", x: 6, y: 76, w: 15, layer: "front", anim: "float", dur: 7, delay: 2.2, rot: -12 },
+  { src: "marerei-peca-2", x: 93, y: 87, w: 12, layer: "front", anim: "float", dur: 6, delay: 1.4, rot: 8 },
+  { src: "marerei-gota-4", x: 5.5, y: 52, w: 7, layer: "front", anim: "float", dur: 5.5, delay: 0.8, rot: -8 },
+  { src: "marerei-peca-3", x: 95, y: 36, w: 8, layer: "front", anim: "float", dur: 6.5, delay: 1.9 },
+];
+
 /** Fumaça, runas, rochas e adaga que flutuam em volta do Embuste (`prototipos/embuste-pecas.cjs`); a fumaça gira devagar atrás da carta. */
 const EMBUSTE_FLOATERS: readonly Floater[] = [
   { src: "embuste-fumaca", x: 50, y: 50, w: 108, layer: "back", anim: "spin", dur: 140 },
@@ -295,6 +307,9 @@ const ROUPAS = {
   // Épicas novas de novembro de 2026 (evento Toró, só de pacote; 2026-11-12), mesma montagem das de dezembro.
   // Granizo (pedras de gelo; moldura de prata com geada, três pedras de gelo no topo)
   granizo: { background: "premium-granizo", overflow: "premium-granizo-vaza", statsLift: 6, photoDrop: 6, nameDrop: 4, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#8d98a6", "#8d98a6", "#eef6ff"], accent: "#b8e2ff", light: "190 228 255", bar: "#06101c", muted: "#d4ecff", sparkles: false, neon: "#9fd6ff" },
+  // Maré-Rei (2026-11-12, lendária de novembro, evento Toró, só de pacote): mar em tempestade, moldura de ouro velho com coral e pérolas, tridente no topo,
+  // conchas nos cantos e ondas nas laterais; anel de água girando atrás e pérolas, conchas, coral e gotas boiando (peças do dono no Gemini em `docs/cartas/marerei/pecas/`).
+  marerei: { background: "premium-marerei", overflow: "premium-marerei-vaza", floaters: MAREREI_FLOATERS, statsLift: 6, photoDrop: 6, nameDrop: 6, statsPadX: 4, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#8a6a2a", "#8a6a2a", "#fff1c2"], accent: "#f2cf6b", light: "120 230 200", bar: "#04110f", muted: "#cdeee2", sparkles: false, neon: "#3fe0b0" },
   // Ciclone (olho do furacão; bronze com azinhavre, cata-vento no topo e espirais nos cantos)
   ciclone: { background: "premium-ciclone", overflow: "premium-ciclone-vaza", statsLift: 6, photoDrop: 6, nameDrop: 4, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#8a6a45", "#8a6a45", "#e6fff6"], accent: "#6fe8c8", light: "120 240 205", bar: "#05100e", muted: "#c6efe2", sparkles: false, neon: "#4fe0b8" },
   // Enxurrada (rua alagada com neon; aço cromado, guarda-chuva no topo e grades nos cantos)
@@ -579,6 +594,7 @@ function skinRoupa(skin: CardSkinKey): RoupaKey {
     case "granizo": return "granizo";
     case "enxurrada": return "enxurrada";
     case "ciclone": return "ciclone";
+    case "marerei": return "marerei";
     case "lobisomem": return "lobisomem";
     case "nuvem": return "nuvem";
     case "relampago": return "relampago";
