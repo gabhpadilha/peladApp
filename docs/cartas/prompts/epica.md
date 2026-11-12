@@ -79,6 +79,7 @@ em que ele aparece na peça 2. Sem a moldura, sem sombra no chão, bem iluminado
 - **Contorno branco ou fundo xadrez:** "Sem contorno branco e sem fundo xadrez: o fundo em volta da carta é preto puro."
 - **Ficou exagerado:** "Deixe os enfeites mais simples e menores; é uma carta épica, não lendária."
 - **Texto ou letras na arte:** "Remova qualquer texto, letra ou número da imagem."
+- **Emblema de personagem, time ou marca** (aconteceu nas épicas de dezembro: "X", "4", "M"): "Remova o emblema e ponha no lugar [ENFEITE], no mesmo material da moldura; nada de logos ou símbolos de personagens." Melhor ainda: anexe a imagem e peça só a troca, como em `epicas-dezembro-sem-emblema.md`. Ao pedir um tema inspirado num personagem, descreva o poder (feixe vermelho, fogo, garras), nunca o nome dele.
 
 ## Exemplo preenchido
 
