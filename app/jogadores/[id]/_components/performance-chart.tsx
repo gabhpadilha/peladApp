@@ -13,10 +13,10 @@ const GRID_POSITION: Record<(typeof GRID_LINES)[number], string> = {
 };
 
 /**
- * Quantas rodadas jogadas entram no gráfico: as 5 que formam o OVR e mais 3 antes delas, para a moldura mostrar o que
- * ficou de fora (mais que isso espreme as barras no celular); a tabela de histórico tem todas.
+ * Limite de rodadas no gráfico (pedido do dono do app em 2026-11-12: "as últimas 10, e circulado as últimas cinco"): as 5 que
+ * formam o OVR e mais 5 antes delas, para o gráfico não apertar com o acúmulo de rodadas; a tabela de histórico tem todas.
  */
-const CHART_ROUNDS = CAREER_WINDOW_ROUNDS + 3;
+const CHART_ROUNDS = 10;
 
 type PerformanceChartProps = {
   performances: MatchPerformance[];
@@ -88,7 +88,10 @@ export function PerformanceChart({ performances: allPerformances, bestScore }: P
             </>
           )}
         </div>
-        <span className={cn("text-xs", counts ? "text-foreground" : "text-muted-foreground")}>R{performance.match.round}</span>
+        {/* Da rodada 100 em diante sai o "R": com 10 colunas no celular, "R120" alargava a coluna e empurrava a moldura para fora. */}
+        <span className={cn("text-xs tracking-tight tabular-nums", counts ? "text-foreground" : "text-muted-foreground")}>
+          {performance.match.round >= 100 ? performance.match.round : `R${performance.match.round}`}
+        </span>
       </li>
     );
   };
@@ -116,13 +119,13 @@ export function PerformanceChart({ performances: allPerformances, bestScore }: P
 
           <div className="relative flex items-stretch gap-1.5 sm:gap-3">
             {before.length > 0 && (
-              <ol className="flex basis-0 gap-1.5 pt-2 pb-1.5 sm:gap-3" style={{ flexGrow: before.length }}>
+              <ol className="flex min-w-0 basis-0 gap-1.5 pt-2 pb-1.5 sm:gap-3" style={{ flexGrow: before.length }}>
                 {before.map(renderColumn)}
               </ol>
             )}
             {framed.length > 0 && (
               <div
-                className="flex basis-0 flex-col rounded-xl border-2 border-primary/70 bg-primary/[0.06]"
+                className="flex min-w-0 basis-0 flex-col rounded-xl border-2 border-primary/70 bg-primary/[0.06]"
                 // Largura proporcional ao número de rodadas de cada grupo, para todas as barras terem a mesma largura.
                 style={{ flexGrow: framed.length }}
               >
