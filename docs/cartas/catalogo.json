@@ -1529,7 +1529,7 @@
  "proximos": [
   [
    "2026-12",
-   "Conjunto de pacotes de dezembro (tema Destino): skins e raridades a definir com o dono; lendárias já prontas: Destino, Tormenta, Embuste."
+   "Conjunto de pacotes de dezembro (tema Destino), o maior evento até agora: já no banco as 8 épicas (Rajada, Pedreira, Cartada, Ímã, Miragem, Elástico, Labareda, Garra) e as 3 lendárias (Destino, Tormenta, Embuste); faltam mais épicas e lendárias e muitas raras e comuns."
   ],
   [
    "2026-12",
@@ -1552,7 +1552,7 @@
   "Toda carta nova chega do Gemini em peças separadas (luz sobre preto puro): fundo, borda, enfeite-*, render-*, flutuante-*. Guardar em docs/cartas/<chave>/pecas/ como vieram.",
   "Nunca trabalhar só com a carta achatada: tirar uma peça de cima da borda deixa defeito (testes 3D de novembro, 2026-11-11).",
   "Nada de render vazando para fora da carta (decisão de 2026-11-11): gerava retrabalho e não ficava bom; o premium vem da borda e dos flutuantes.",
-  "Raridade pela borda (desde 2026-11-11, cartas de dezembro em diante; nada vaza para fora da carta): comum = fio ou tubo simples e fundo padrão; rara = borda trabalhada de leve e fundo com pattern; épica = borda com 1 ou 2 enfeites simples, fundo sofisticado, animação opcional só dentro da carta; lendária = borda cheia de enfeites, fundo sofisticado, flutuantes atrás e em volta e animação (só 1 por conjunto). Peças do Gemini sempre separadas. Cartas antigas com algo vazando ficam como estão (novembro de 2026 é o último mês assim).",
+  "Raridade pela borda (desde 2026-11-11, cartas de dezembro em diante; nada vaza para fora da carta): comum = fio ou tubo simples e fundo padrão; rara = borda trabalhada de leve e fundo com pattern; épica = borda com 1 ou 2 enfeites simples, fundo sofisticado, animação opcional só dentro da carta; lendária = borda cheia de enfeites, fundo sofisticado, flutuantes atrás e em volta e animação (em geral 1 por conjunto; dezembro de 2026, o maior evento, tem 3). Peças do Gemini sempre separadas. Cartas antigas com algo vazando ficam como estão (novembro de 2026 é o último mês assim).",
   "Na carta: sem filter, mix-blend-mode e backdrop-filter (iPhone); animações só de transform e opacity.",
   "Cartas já ganhas não mudam de desenho: o tema fica gravado na carta.",
   "Prompts do Gemini prontos por raridade em docs/cartas/prompts/ (épica: epica.md, 2 imagens por carta: fundo e borda com enfeites)."

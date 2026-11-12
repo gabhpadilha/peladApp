@@ -147,7 +147,7 @@
 
 ## Próximos
 
-- **2026-12**: Conjunto de pacotes de dezembro (tema Destino): skins e raridades a definir com o dono; lendárias já prontas: Destino, Tormenta, Embuste.
+- **2026-12**: Conjunto de pacotes de dezembro (tema Destino), o maior evento até agora: já no banco as 8 épicas (Rajada, Pedreira, Cartada, Ímã, Miragem, Elástico, Labareda, Garra) e as 3 lendárias (Destino, Tormenta, Embuste); faltam mais épicas e lendárias e muitas raras e comuns.
 - **2026-12**: Ligar o tema de Natal dos prêmios (carta-base vermelha com medalhão; Bola Murcha cinza-carvão).
 - **2026-12**: Cartas novas já nascem peça por peça (fundo, borda, enfeites, renders, flutuantes) e em 3D no Blender.
 - **futuro**: Refazer a Dilúvio em 3D (tem todas as peças separadas).
