@@ -5,13 +5,21 @@
 ## 2026-11-12
 
 - [Rajada](./rajada/README.md): peças recebidas do Gemini
+- [Rajada](./rajada/README.md): borda refeita no Gemini sem o emblema do topo, com enfeite próprio
 - [Pedreira](./pedreira/README.md): peças recebidas do Gemini
+- [Pedreira](./pedreira/README.md): borda refeita no Gemini sem o emblema do topo, com enfeite próprio
 - [Cartada](./cartada/README.md): peças recebidas do Gemini
+- [Cartada](./cartada/README.md): borda refeita no Gemini sem o emblema do topo, com enfeite próprio
 - [Ímã](./ima/README.md): peças recebidas do Gemini
+- [Ímã](./ima/README.md): borda refeita no Gemini sem o emblema do topo, com enfeite próprio
 - [Miragem](./miragem/README.md): peças recebidas do Gemini
+- [Miragem](./miragem/README.md): borda refeita no Gemini sem o emblema do topo, com enfeite próprio; fundo refeito sem a silhueta de pessoa
 - [Elástico](./elastico/README.md): peças recebidas do Gemini
+- [Elástico](./elastico/README.md): borda refeita no Gemini sem o emblema do topo, com enfeite próprio
 - [Labareda](./labareda/README.md): peças recebidas do Gemini
+- [Labareda](./labareda/README.md): borda refeita no Gemini sem o emblema do topo, com enfeite próprio
 - [Garra](./garra/README.md): peças recebidas do Gemini
+- [Garra](./garra/README.md): borda refeita no Gemini sem o emblema do topo, com enfeite próprio; fundo refeito sem a moldura de dentro (sobra um contorno leve, coberto pela borda)
 
 ## 2026-11-11
 

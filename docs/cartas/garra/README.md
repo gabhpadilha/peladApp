@@ -24,6 +24,8 @@
 
 - `docs/cartas/garra/pecas/fundo.webp`
 - `docs/cartas/garra/pecas/borda.webp`
+- `docs/cartas/garra/pecas/borda-com-emblema.webp`
+- `docs/cartas/garra/pecas/fundo-antigo.webp`
 
 ## Scripts
 
@@ -32,7 +34,8 @@
 ## Histórico
 
 - **2026-11-12**: peças recebidas do Gemini
+- **2026-11-12**: borda refeita no Gemini sem o emblema do topo, com enfeite próprio; fundo refeito sem a moldura de dentro (sobra um contorno leve, coberto pela borda)
 
 ## Notas
 
-painel escuro com três cortes de garra e circuitos dourados; moldura de metal prateado com detalhes amarelos. Nome e evento confirmados pelo dono em 2026-11-12. A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py.
+painel escuro com três cortes de garra e circuitos dourados; moldura de metal prateado com detalhes amarelos. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py.

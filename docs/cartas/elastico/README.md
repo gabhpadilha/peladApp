@@ -24,6 +24,7 @@
 
 - `docs/cartas/elastico/pecas/fundo.webp`
 - `docs/cartas/elastico/pecas/borda.webp`
+- `docs/cartas/elastico/pecas/borda-com-emblema.webp`
 
 ## Scripts
 
@@ -32,7 +33,8 @@
 ## Histórico
 
 - **2026-11-12**: peças recebidas do Gemini
+- **2026-11-12**: borda refeita no Gemini sem o emblema do topo, com enfeite próprio
 
 ## Notas
 
-fios azuis esticados e entrelaçados com raios; moldura de metal azul. Nome e evento confirmados pelo dono em 2026-11-12. A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py.
+fios azuis esticados e entrelaçados com raios; moldura de metal azul. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py.

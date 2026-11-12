@@ -1191,16 +1191,21 @@
    "estado": "guardada",
    "pecas": [
     "docs/cartas/rajada/pecas/fundo.webp",
-    "docs/cartas/rajada/pecas/borda.webp"
+    "docs/cartas/rajada/pecas/borda.webp",
+    "docs/cartas/rajada/pecas/borda-com-emblema.webp"
    ],
    "scripts": [],
    "historico": [
     [
      "2026-11-12",
      "peças recebidas do Gemini"
+    ],
+    [
+     "2026-11-12",
+     "borda refeita no Gemini sem o emblema do topo, com enfeite próprio"
     ]
    ],
-   "notas": "feixe de energia vermelho atravessando fumaça; moldura de metal azul-aço com neon vermelho. Nome e evento confirmados pelo dono em 2026-11-12. A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py."
+   "notas": "feixe de energia vermelho atravessando fumaça; moldura de metal azul-aço com neon vermelho. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py."
   },
   {
    "chave": "pedreira",
@@ -1212,16 +1217,21 @@
    "estado": "guardada",
    "pecas": [
     "docs/cartas/pedreira/pecas/fundo.webp",
-    "docs/cartas/pedreira/pecas/borda.webp"
+    "docs/cartas/pedreira/pecas/borda.webp",
+    "docs/cartas/pedreira/pecas/borda-com-emblema.webp"
    ],
    "scripts": [],
    "historico": [
     [
      "2026-11-12",
      "peças recebidas do Gemini"
+    ],
+    [
+     "2026-11-12",
+     "borda refeita no Gemini sem o emblema do topo, com enfeite próprio"
     ]
    ],
-   "notas": "rochas laranja rachadas; moldura de pedra laranja com fio azul. Nome e evento confirmados pelo dono em 2026-11-12. A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py."
+   "notas": "rochas laranja rachadas; moldura de pedra laranja com fio azul. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py."
   },
   {
    "chave": "cartada",
@@ -1233,16 +1243,21 @@
    "estado": "guardada",
    "pecas": [
     "docs/cartas/cartada/pecas/fundo.webp",
-    "docs/cartas/cartada/pecas/borda.webp"
+    "docs/cartas/cartada/pecas/borda.webp",
+    "docs/cartas/cartada/pecas/borda-com-emblema.webp"
    ],
    "scripts": [],
    "historico": [
     [
      "2026-11-12",
      "peças recebidas do Gemini"
+    ],
+    [
+     "2026-11-12",
+     "borda refeita no Gemini sem o emblema do topo, com enfeite próprio"
     ]
    ],
-   "notas": "cartas de baralho explodindo em energia rosa; moldura de metal escuro com neon rosa e raios. Nome e evento confirmados pelo dono em 2026-11-12. A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py."
+   "notas": "cartas de baralho explodindo em energia rosa; moldura de metal escuro com neon rosa e raios. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py."
   },
   {
    "chave": "ima",
@@ -1254,16 +1269,21 @@
    "estado": "guardada",
    "pecas": [
     "docs/cartas/ima/pecas/fundo.webp",
-    "docs/cartas/ima/pecas/borda.webp"
+    "docs/cartas/ima/pecas/borda.webp",
+    "docs/cartas/ima/pecas/borda-com-emblema.webp"
    ],
    "scripts": [],
    "historico": [
     [
      "2026-11-12",
      "peças recebidas do Gemini"
+    ],
+    [
+     "2026-11-12",
+     "borda refeita no Gemini sem o emblema do topo, com enfeite próprio"
     ]
    ],
-   "notas": "redemoinho magnético roxo e vermelho com destroços; moldura bordô com raios roxos. Nome e evento confirmados pelo dono em 2026-11-12. A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py."
+   "notas": "redemoinho magnético roxo e vermelho com destroços; moldura bordô com raios roxos. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py."
   },
   {
    "chave": "miragem",
@@ -1275,16 +1295,22 @@
    "estado": "guardada",
    "pecas": [
     "docs/cartas/miragem/pecas/fundo.webp",
-    "docs/cartas/miragem/pecas/borda.webp"
+    "docs/cartas/miragem/pecas/borda.webp",
+    "docs/cartas/miragem/pecas/borda-com-emblema.webp",
+    "docs/cartas/miragem/pecas/fundo-antigo.webp"
    ],
    "scripts": [],
    "historico": [
     [
      "2026-11-12",
      "peças recebidas do Gemini"
+    ],
+    [
+     "2026-11-12",
+     "borda refeita no Gemini sem o emblema do topo, com enfeite próprio; fundo refeito sem a silhueta de pessoa"
     ]
    ],
-   "notas": "campo de força azul-gelo translúcido; moldura de vidro azul. Nome e evento confirmados pelo dono em 2026-11-12. A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py."
+   "notas": "campo de força azul-gelo translúcido; moldura de vidro azul. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py."
   },
   {
    "chave": "elastico",
@@ -1296,16 +1322,21 @@
    "estado": "guardada",
    "pecas": [
     "docs/cartas/elastico/pecas/fundo.webp",
-    "docs/cartas/elastico/pecas/borda.webp"
+    "docs/cartas/elastico/pecas/borda.webp",
+    "docs/cartas/elastico/pecas/borda-com-emblema.webp"
    ],
    "scripts": [],
    "historico": [
     [
      "2026-11-12",
      "peças recebidas do Gemini"
+    ],
+    [
+     "2026-11-12",
+     "borda refeita no Gemini sem o emblema do topo, com enfeite próprio"
     ]
    ],
-   "notas": "fios azuis esticados e entrelaçados com raios; moldura de metal azul. Nome e evento confirmados pelo dono em 2026-11-12. A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py."
+   "notas": "fios azuis esticados e entrelaçados com raios; moldura de metal azul. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py."
   },
   {
    "chave": "labareda",
@@ -1317,16 +1348,21 @@
    "estado": "guardada",
    "pecas": [
     "docs/cartas/labareda/pecas/fundo.webp",
-    "docs/cartas/labareda/pecas/borda.webp"
+    "docs/cartas/labareda/pecas/borda.webp",
+    "docs/cartas/labareda/pecas/borda-com-emblema.webp"
    ],
    "scripts": [],
    "historico": [
     [
      "2026-11-12",
      "peças recebidas do Gemini"
+    ],
+    [
+     "2026-11-12",
+     "borda refeita no Gemini sem o emblema do topo, com enfeite próprio"
     ]
    ],
-   "notas": "fogo e fumaça; moldura de metal azul com chamas no topo e na base. Nome e evento confirmados pelo dono em 2026-11-12. A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py."
+   "notas": "fogo e fumaça; moldura de metal azul com chamas no topo e na base. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py."
   },
   {
    "chave": "garra",
@@ -1338,16 +1374,22 @@
    "estado": "guardada",
    "pecas": [
     "docs/cartas/garra/pecas/fundo.webp",
-    "docs/cartas/garra/pecas/borda.webp"
+    "docs/cartas/garra/pecas/borda.webp",
+    "docs/cartas/garra/pecas/borda-com-emblema.webp",
+    "docs/cartas/garra/pecas/fundo-antigo.webp"
    ],
    "scripts": [],
    "historico": [
     [
      "2026-11-12",
      "peças recebidas do Gemini"
+    ],
+    [
+     "2026-11-12",
+     "borda refeita no Gemini sem o emblema do topo, com enfeite próprio; fundo refeito sem a moldura de dentro (sobra um contorno leve, coberto pela borda)"
     ]
    ],
-   "notas": "painel escuro com três cortes de garra e circuitos dourados; moldura de metal prateado com detalhes amarelos. Nome e evento confirmados pelo dono em 2026-11-12. A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py."
+   "notas": "painel escuro com três cortes de garra e circuitos dourados; moldura de metal prateado com detalhes amarelos. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py."
   }
  ],
  "em_andamento": [

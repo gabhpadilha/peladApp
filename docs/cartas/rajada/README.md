@@ -24,6 +24,7 @@
 
 - `docs/cartas/rajada/pecas/fundo.webp`
 - `docs/cartas/rajada/pecas/borda.webp`
+- `docs/cartas/rajada/pecas/borda-com-emblema.webp`
 
 ## Scripts
 
@@ -32,7 +33,8 @@
 ## Histórico
 
 - **2026-11-12**: peças recebidas do Gemini
+- **2026-11-12**: borda refeita no Gemini sem o emblema do topo, com enfeite próprio
 
 ## Notas
 
-feixe de energia vermelho atravessando fumaça; moldura de metal azul-aço com neon vermelho. Nome e evento confirmados pelo dono em 2026-11-12. A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py.
+feixe de energia vermelho atravessando fumaça; moldura de metal azul-aço com neon vermelho. Nome e evento confirmados pelo dono em 2026-11-12. Peças antigas guardadas com sufixo (-com-emblema, -antigo), não usar. Prévia: scripts/cartas/previa-pecas.py.
