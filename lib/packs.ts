@@ -72,6 +72,8 @@ export const SKIN_RARITIES: Readonly<Record<string, PackRarity>> = {
   elastico: "epica",
   labareda: "epica",
   garra: "epica",
+  granizo: "epica",
+  enxurrada: "epica",
 };
 
 export function getSkinRarity(skin: string | null | undefined): PackRarity | null {

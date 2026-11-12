@@ -292,6 +292,11 @@ const ROUPAS = {
   labareda: { background: "premium-labareda", overflow: "premium-labareda-vaza", statsLift: 6, photoDrop: 4, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#4a5466", "#4a5466", "#ffe2b8"], accent: "#ffb04a", light: "255 180 90", bar: "#140904", muted: "#ffd9ad", sparkles: false, neon: "#ff8a1f" },
   // Garra (cortes de garra em metal escuro; presilha de aço no topo)
   garra: { background: "premium-garra", overflow: "premium-garra-vaza", statsLift: 6, photoDrop: 4, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#8a8f96", "#8a8f96", "#f5f2e6"], accent: "#f2c94c", light: "255 225 140", bar: "#0a0b0d", muted: "#e6e3d6", sparkles: false, neon: "#f2c94c" },
+  // Épicas novas de novembro de 2026 (evento Toró, só de pacote; 2026-11-12), mesma montagem das de dezembro.
+  // Granizo (pedras de gelo; moldura de prata com geada, três pedras de gelo no topo)
+  granizo: { background: "premium-granizo", overflow: "premium-granizo-vaza", statsLift: 6, photoDrop: 6, nameDrop: 4, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#8d98a6", "#8d98a6", "#eef6ff"], accent: "#b8e2ff", light: "190 228 255", bar: "#06101c", muted: "#d4ecff", sparkles: false, neon: "#9fd6ff" },
+  // Enxurrada (rua alagada com neon; aço cromado, guarda-chuva no topo e grades nos cantos)
+  enxurrada: { background: "premium-enxurrada", overflow: "premium-enxurrada-vaza", statsLift: 6, photoDrop: 6, nameDrop: 4, artInset: { x: 1.43, y: 1.02, radius: 7.5 }, window: "ring", windowInset: { x: 1.43, y: 1.02 }, windowRadius: 7.5, contentPad: 6.25, artFrame: true, trim: null, metal: ["#7a7f8a", "#7a7f8a", "#f4e8ff"], accent: "#ff6fd8", light: "255 120 220", bar: "#0c0612", muted: "#f2c8ec", sparkles: false, neon: "#3ee6ff" },
   // GUARDADAS, fora da Loja (sem entrada em `CARD_SKINS`; para usar: entrada lá, `case` em `skinRoupa` e `SKIN_CLASSES`): Voltagem e Maré.
   // Voltagem (2026-11-05, pedido do dono do app: o estilo da borda da referência dele no nosso retângulo): fio duplo de ouro pálido por dentro e
   // linhas de neon por fora, com o degrau onde se dividem (`prototipos/voltagem.cjs`). Janela `ring` recuada até o fio de dentro.
@@ -569,6 +574,8 @@ function skinRoupa(skin: CardSkinKey): RoupaKey {
     case "elastico": return "elastico";
     case "labareda": return "labareda";
     case "garra": return "garra";
+    case "granizo": return "granizo";
+    case "enxurrada": return "enxurrada";
     case "lobisomem": return "lobisomem";
     case "nuvem": return "nuvem";
     case "relampago": return "relampago";

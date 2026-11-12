@@ -56,6 +56,9 @@ export const CARD_SKINS = [
   { key: "elastico", name: "Elástico", level: 0, price: 0, event: { theme: "destino", year: 2026 }, packOnly: true },
   { key: "labareda", name: "Labareda", level: 0, price: 0, event: { theme: "destino", year: 2026 }, packOnly: true },
   { key: "garra", name: "Garra", level: 0, price: 0, event: { theme: "destino", year: 2026 }, packOnly: true },
+  // Épicas novas de novembro de 2026 (evento Toró, só de pacote; 2026-11-12): fundo e borda do dono no Gemini, montados por `scripts/cartas/montar-epica.py`.
+  { key: "granizo", name: "Granizo", level: 0, price: 0, event: { theme: "temporal", year: 2026 }, packOnly: true },
+  { key: "enxurrada", name: "Enxurrada", level: 0, price: 0, event: { theme: "temporal", year: 2026 }, packOnly: true },
 ] as const;
 
 export type CardSkin = (typeof CARD_SKINS)[number];
