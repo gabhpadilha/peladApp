@@ -36,6 +36,12 @@ Argumentos: `frames` (lista `1,5,9` ou faixa `a-b`), `rx`/`ry` (resolução), `s
   plataforma do meio, clarão no quadro 125 e um aro de luz em volta da carta nova. Vídeo 4:5 (640x800), 5 s; as três cartas entram por cima,
   ao vivo, sobre as plataformas (`slots.json`, usado em `reveal-fusion.tsx`).
 
+## Codificar para o iPhone
+Sempre `-pix_fmt yuv420p` no mp4 **e no webm**: os quadros em PNG RGB viram VP9 "perfil 1" (4:4:4) sem isso, o Safari do iPhone
+escolhe o webm, não decodifica e a tela fica preta, sem cair no mp4 (aconteceu na abertura do pacote em 2026-11-12). Confira com
+`ffprobe -show_entries stream=profile,pix_fmt` (tem que dar `Profile 0` e `yuv420p`). Trocou um vídeo com o mesmo nome: suba a
+versão na URL (os estáticos ficam 1 dia em cache), como o `MEDIA_VERSION` de `components/pack-stage.tsx`.
+
 ## Custos de renderização (4 núcleos, sem GPU)
 Cortina 540x960: ~55 s/quadro (99 quadros). Revelação: ~45 s/quadro (90 quadros). Rodar uma de cada vez.
 
@@ -75,7 +81,7 @@ para virar vídeo, com o ffmpeg:
 
 ```powershell
 ffmpeg -framerate 30 -i C:\renders\destaques\d_%04d.png -c:v libx264 -pix_fmt yuv420p -crf 20 -movflags +faststart destaques.mp4
-ffmpeg -framerate 30 -i C:\renders\destaques\d_%04d.png -c:v libvpx-vp9 -b:v 0 -crf 34 destaques.webm
+ffmpeg -framerate 30 -i C:\renders\destaques\d_%04d.png -c:v libvpx-vp9 -pix_fmt yuv420p -b:v 0 -crf 34 destaques.webm
 ```
 
 Na GPU dá para subir as amostras (`samples=64` a `128`) e a resolução (`rx=1080 ry=1920`) sem esperar horas.

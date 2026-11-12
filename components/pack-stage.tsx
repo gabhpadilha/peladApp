@@ -39,6 +39,9 @@ const HALF_TURN_MS = 260;
 /** Se um vídeo não começar nesse tempo, a cena segue sem ele (fica a capa do palco). */
 const VIDEO_WAIT_MS = 1500;
 
+/** Versão dos vídeos e capas na URL: os estáticos ficam 1 dia em cache, então mudou o arquivo, suba o número. */
+const MEDIA_VERSION = 2;
+
 const ms = (value: number): string => `${Math.round(value)}ms`;
 
 /**
@@ -172,13 +175,13 @@ export function PackStage({ rarity, tier, skin, oddsPercent, isDuplicate, reduce
           muted
           playsInline
           preload="auto"
-          poster={`/revelacao/pacote-rasgo-${tier}-poster.jpg`}
+          poster={`/revelacao/pacote-rasgo-${tier}-poster.jpg?v=${MEDIA_VERSION}`}
           onEnded={goToStage}
           onError={goToStage}
           className="pointer-events-none absolute inset-0 size-full object-cover"
         >
-          <source src={`/revelacao/pacote-rasgo-${tier}.webm`} type="video/webm" />
-          <source src={`/revelacao/pacote-rasgo-${tier}.mp4`} type="video/mp4" />
+          <source src={`/revelacao/pacote-rasgo-${tier}.webm?v=${MEDIA_VERSION}`} type="video/webm" />
+          <source src={`/revelacao/pacote-rasgo-${tier}.mp4?v=${MEDIA_VERSION}`} type="video/mp4" />
         </video>
       )}
 
@@ -189,7 +192,7 @@ export function PackStage({ rarity, tier, skin, oddsPercent, isDuplicate, reduce
       >
         <div className="absolute inset-0" style={look.shake && run ? { animation: anim(`pk-shake .1s linear 6 both ${ms(FLASH_MS)}`) } : undefined}>
           {reduced ? (
-            <div aria-hidden className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(/revelacao/pacote-${rarity}-poster.jpg)` }} />
+            <div aria-hidden className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(/revelacao/pacote-${rarity}-poster.jpg?v=${MEDIA_VERSION})` }} />
           ) : (
             <video
               ref={stageRef}
@@ -197,11 +200,11 @@ export function PackStage({ rarity, tier, skin, oddsPercent, isDuplicate, reduce
               muted
               playsInline
               preload="auto"
-              poster={`/revelacao/pacote-${rarity}-poster.jpg`}
+              poster={`/revelacao/pacote-${rarity}-poster.jpg?v=${MEDIA_VERSION}`}
               className="pointer-events-none absolute inset-0 size-full object-cover"
             >
-              <source src={`/revelacao/pacote-${rarity}.webm`} type="video/webm" />
-              <source src={`/revelacao/pacote-${rarity}.mp4`} type="video/mp4" />
+              <source src={`/revelacao/pacote-${rarity}.webm?v=${MEDIA_VERSION}`} type="video/webm" />
+              <source src={`/revelacao/pacote-${rarity}.mp4?v=${MEDIA_VERSION}`} type="video/mp4" />
             </video>
           )}
 
