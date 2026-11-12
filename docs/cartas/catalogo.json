@@ -1180,6 +1180,174 @@
     ]
    ],
    "notas": ""
+  },
+  {
+   "chave": "rajada",
+   "nome": "Rajada",
+   "tipo": "skin",
+   "raridade": "epica",
+   "onde": "Pacote",
+   "evento": "Destino (dezembro de 2026)",
+   "estado": "guardada",
+   "pecas": [
+    "docs/cartas/rajada/pecas/fundo.webp",
+    "docs/cartas/rajada/pecas/borda.webp"
+   ],
+   "scripts": [],
+   "historico": [
+    [
+     "2026-11-12",
+     "peças recebidas do Gemini"
+    ]
+   ],
+   "notas": "feixe de energia vermelho atravessando fumaça; moldura de metal azul-aço com neon vermelho. Nome provisório (a confirmar com o dono). A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py."
+  },
+  {
+   "chave": "pedreira",
+   "nome": "Pedreira",
+   "tipo": "skin",
+   "raridade": "epica",
+   "onde": "Pacote",
+   "evento": "Destino (dezembro de 2026)",
+   "estado": "guardada",
+   "pecas": [
+    "docs/cartas/pedreira/pecas/fundo.webp",
+    "docs/cartas/pedreira/pecas/borda.webp"
+   ],
+   "scripts": [],
+   "historico": [
+    [
+     "2026-11-12",
+     "peças recebidas do Gemini"
+    ]
+   ],
+   "notas": "rochas laranja rachadas; moldura de pedra laranja com fio azul. Nome provisório (a confirmar com o dono). A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py."
+  },
+  {
+   "chave": "cartada",
+   "nome": "Cartada",
+   "tipo": "skin",
+   "raridade": "epica",
+   "onde": "Pacote",
+   "evento": "Destino (dezembro de 2026)",
+   "estado": "guardada",
+   "pecas": [
+    "docs/cartas/cartada/pecas/fundo.webp",
+    "docs/cartas/cartada/pecas/borda.webp"
+   ],
+   "scripts": [],
+   "historico": [
+    [
+     "2026-11-12",
+     "peças recebidas do Gemini"
+    ]
+   ],
+   "notas": "cartas de baralho explodindo em energia rosa; moldura de metal escuro com neon rosa e raios. Nome provisório (a confirmar com o dono). A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py."
+  },
+  {
+   "chave": "ima",
+   "nome": "Ímã",
+   "tipo": "skin",
+   "raridade": "epica",
+   "onde": "Pacote",
+   "evento": "Destino (dezembro de 2026)",
+   "estado": "guardada",
+   "pecas": [
+    "docs/cartas/ima/pecas/fundo.webp",
+    "docs/cartas/ima/pecas/borda.webp"
+   ],
+   "scripts": [],
+   "historico": [
+    [
+     "2026-11-12",
+     "peças recebidas do Gemini"
+    ]
+   ],
+   "notas": "redemoinho magnético roxo e vermelho com destroços; moldura bordô com raios roxos. Nome provisório (a confirmar com o dono). A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py."
+  },
+  {
+   "chave": "miragem",
+   "nome": "Miragem",
+   "tipo": "skin",
+   "raridade": "epica",
+   "onde": "Pacote",
+   "evento": "Destino (dezembro de 2026)",
+   "estado": "guardada",
+   "pecas": [
+    "docs/cartas/miragem/pecas/fundo.webp",
+    "docs/cartas/miragem/pecas/borda.webp"
+   ],
+   "scripts": [],
+   "historico": [
+    [
+     "2026-11-12",
+     "peças recebidas do Gemini"
+    ]
+   ],
+   "notas": "campo de força azul-gelo translúcido; moldura de vidro azul. Nome provisório (a confirmar com o dono). A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py."
+  },
+  {
+   "chave": "elastico",
+   "nome": "Elástico",
+   "tipo": "skin",
+   "raridade": "epica",
+   "onde": "Pacote",
+   "evento": "Destino (dezembro de 2026)",
+   "estado": "guardada",
+   "pecas": [
+    "docs/cartas/elastico/pecas/fundo.webp",
+    "docs/cartas/elastico/pecas/borda.webp"
+   ],
+   "scripts": [],
+   "historico": [
+    [
+     "2026-11-12",
+     "peças recebidas do Gemini"
+    ]
+   ],
+   "notas": "fios azuis esticados e entrelaçados com raios; moldura de metal azul. Nome provisório (a confirmar com o dono). A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py."
+  },
+  {
+   "chave": "labareda",
+   "nome": "Labareda",
+   "tipo": "skin",
+   "raridade": "epica",
+   "onde": "Pacote",
+   "evento": "Destino (dezembro de 2026)",
+   "estado": "guardada",
+   "pecas": [
+    "docs/cartas/labareda/pecas/fundo.webp",
+    "docs/cartas/labareda/pecas/borda.webp"
+   ],
+   "scripts": [],
+   "historico": [
+    [
+     "2026-11-12",
+     "peças recebidas do Gemini"
+    ]
+   ],
+   "notas": "fogo e fumaça; moldura de metal azul com chamas no topo e na base. Nome provisório (a confirmar com o dono). A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py."
+  },
+  {
+   "chave": "garra",
+   "nome": "Garra",
+   "tipo": "skin",
+   "raridade": "epica",
+   "onde": "Pacote",
+   "evento": "Destino (dezembro de 2026)",
+   "estado": "guardada",
+   "pecas": [
+    "docs/cartas/garra/pecas/fundo.webp",
+    "docs/cartas/garra/pecas/borda.webp"
+   ],
+   "scripts": [],
+   "historico": [
+    [
+     "2026-11-12",
+     "peças recebidas do Gemini"
+    ]
+   ],
+   "notas": "painel escuro com três cortes de garra e circuitos dourados; moldura de metal prateado com detalhes amarelos. Nome provisório (a confirmar com o dono). A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py."
   }
  ],
  "em_andamento": [

@@ -105,7 +105,9 @@ def main():
             img.thumbnail((500, 700))
             img.save(os.path.join(pasta, "montada", f"{c['chave']}-2d.webp"), quality=86, method=6)
         with open(os.path.join(pasta, "README.md"), "w", encoding="utf-8") as f:
-            f.write(ficha(c, img is not None))
+            # cartas ainda fora do app têm a prévia feita por previa-pecas.py
+            existe = os.path.exists(os.path.join(pasta, "montada", f"{c['chave']}-2d.webp"))
+            f.write(ficha(c, img is not None or existe))
 
     idx = ["# Cartas do Cancha Club", "",
            "> Gerado de `docs/cartas/catalogo.json` por `python3 scripts/cartas/gerar-catalogo.py`. Para consultar rápido, leia o JSON ou a ficha da carta; não precisa varrer o app.", "",

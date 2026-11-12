@@ -2,6 +2,17 @@
 
 > Gerada do histórico de cada carta em `docs/cartas/catalogo.json`.
 
+## 2026-11-12
+
+- [Rajada](./rajada/README.md): peças recebidas do Gemini
+- [Pedreira](./pedreira/README.md): peças recebidas do Gemini
+- [Cartada](./cartada/README.md): peças recebidas do Gemini
+- [Ímã](./ima/README.md): peças recebidas do Gemini
+- [Miragem](./miragem/README.md): peças recebidas do Gemini
+- [Elástico](./elastico/README.md): peças recebidas do Gemini
+- [Labareda](./labareda/README.md): peças recebidas do Gemini
+- [Garra](./garra/README.md): peças recebidas do Gemini
+
 ## 2026-11-11
 
 - [Esmeralda](./esmeralda/README.md): mantida com o que vaza; pela nova regra, as cartas novas não terão peça saindo da carta
