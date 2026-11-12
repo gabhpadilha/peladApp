@@ -35,4 +35,4 @@
 
 ## Notas
 
-painel escuro com três cortes de garra e circuitos dourados; moldura de metal prateado com detalhes amarelos. Nome provisório (a confirmar com o dono). A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py.
+painel escuro com três cortes de garra e circuitos dourados; moldura de metal prateado com detalhes amarelos. Nome e evento confirmados pelo dono em 2026-11-12. A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py.

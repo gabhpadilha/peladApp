@@ -35,4 +35,4 @@
 
 ## Notas
 
-cartas de baralho explodindo em energia rosa; moldura de metal escuro com neon rosa e raios. Nome provisório (a confirmar com o dono). A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py.
+cartas de baralho explodindo em energia rosa; moldura de metal escuro com neon rosa e raios. Nome e evento confirmados pelo dono em 2026-11-12. A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py.

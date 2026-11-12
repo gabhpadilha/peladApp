@@ -35,4 +35,4 @@
 
 ## Notas
 
-feixe de energia vermelho atravessando fumaça; moldura de metal azul-aço com neon vermelho. Nome provisório (a confirmar com o dono). A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py.
+feixe de energia vermelho atravessando fumaça; moldura de metal azul-aço com neon vermelho. Nome e evento confirmados pelo dono em 2026-11-12. A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py.

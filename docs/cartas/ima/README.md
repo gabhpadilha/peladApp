@@ -35,4 +35,4 @@
 
 ## Notas
 
-redemoinho magnético roxo e vermelho com destroços; moldura bordô com raios roxos. Nome provisório (a confirmar com o dono). A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py.
+redemoinho magnético roxo e vermelho com destroços; moldura bordô com raios roxos. Nome e evento confirmados pelo dono em 2026-11-12. A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py.

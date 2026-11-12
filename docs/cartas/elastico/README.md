@@ -35,4 +35,4 @@
 
 ## Notas
 
-fios azuis esticados e entrelaçados com raios; moldura de metal azul. Nome provisório (a confirmar com o dono). A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py.
+fios azuis esticados e entrelaçados com raios; moldura de metal azul. Nome e evento confirmados pelo dono em 2026-11-12. A borda tem um emblema de super-herói no topo: trocar antes de ligar (só alusões, sem marca). Prévia: scripts/cartas/previa-pecas.py.
