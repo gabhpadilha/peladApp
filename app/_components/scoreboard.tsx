@@ -2,17 +2,20 @@
 
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-import type { RankedPlayer, TopScorer } from "../_data-access/get-home-data";
+import type { OvrRankedPlayer, RankedPlayer, TopScorer } from "../_data-access/get-home-data";
 import { ExpandableRanking } from "./expandable-ranking";
+import { OvrRanking } from "./ovr-ranking";
 import { ScorersRanking } from "./scorers-ranking";
 
-type ScoreboardView = "points" | "goals";
+type ScoreboardView = "points" | "goals" | "ovr";
 
 type ScoreboardProps = {
   pointsMonth: RankedPlayer[];
   pointsAllTime: RankedPlayer[];
   goalsMonth: TopScorer[];
   goalsAllTime: TopScorer[];
+  ovrOutfield: OvrRankedPlayer[];
+  ovrGoalkeepers: OvrRankedPlayer[];
   /** Mês por extenso, na aba do período ("Novembro"). */
   monthLabel: string;
   currentPlayerId: string;
@@ -21,14 +24,15 @@ type ScoreboardProps = {
 const VIEWS: { key: ScoreboardView; label: string; caption: string }[] = [
   { key: "points", label: "Pontos", caption: "ranking por pontos" },
   { key: "goals", label: "Gols", caption: "artilharia, gols confirmados" },
+  { key: "ovr", label: "OVR", caption: "ranking pelo OVR da carta" },
 ];
 
 /**
  * Placar da Início (revisão de 2026-11-04): o ranking por pontos e a artilharia eram dois cartões idênticos, com as
- * mesmas abas de período. Agora um cartão só, com a troca Pontos | Gols no topo. As duas listas ficam montadas
+ * mesmas abas de período. Agora um cartão só, com a troca Pontos | Gols | OVR no topo (OVR desde 2026-11-12). As duas listas ficam montadas
  * (só uma visível), para o período e a lista aberta de cada uma não se perderem ao trocar.
  */
-export function Scoreboard({ pointsMonth, pointsAllTime, goalsMonth, goalsAllTime, monthLabel, currentPlayerId }: ScoreboardProps) {
+export function Scoreboard({ pointsMonth, pointsAllTime, goalsMonth, goalsAllTime, ovrOutfield, ovrGoalkeepers, monthLabel, currentPlayerId }: ScoreboardProps) {
   const [view, setView] = useState<ScoreboardView>("points");
   const current = VIEWS.find((item) => item.key === view) ?? VIEWS[0];
 
@@ -49,7 +53,7 @@ export function Scoreboard({ pointsMonth, pointsAllTime, goalsMonth, goalsAllTim
               aria-controls={`scoreboard-panel-${item.key}`}
               onClick={() => setView(item.key)}
               className={cn(
-                "h-11 min-w-20 rounded-full px-4 text-sm font-medium transition-colors",
+                "h-11 min-w-14 rounded-full px-3 text-sm font-medium transition-colors",
                 view === item.key ? "bg-primary text-primary-foreground" : "text-muted-foreground",
               )}
             >
@@ -65,6 +69,9 @@ export function Scoreboard({ pointsMonth, pointsAllTime, goalsMonth, goalsAllTim
       </div>
       <div id="scoreboard-panel-goals" role="tabpanel" aria-labelledby="scoreboard-tab-goals" hidden={view !== "goals"} className="flex flex-col gap-3">
         <ScorersRanking month={goalsMonth} allTime={goalsAllTime} monthLabel={monthLabel} currentPlayerId={currentPlayerId} />
+      </div>
+      <div id="scoreboard-panel-ovr" role="tabpanel" aria-labelledby="scoreboard-tab-ovr" hidden={view !== "ovr"} className="flex flex-col gap-3">
+        <OvrRanking outfield={ovrOutfield} goalkeepers={ovrGoalkeepers} currentPlayerId={currentPlayerId} />
       </div>
     </section>
   );

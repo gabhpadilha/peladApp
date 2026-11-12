@@ -122,6 +122,8 @@ async function HomeContent() {
               pointsAllTime={data.allTimeRanking}
               goalsMonth={data.monthScorers}
               goalsAllTime={data.allTimeScorers}
+              ovrOutfield={data.ovrOutfield}
+              ovrGoalkeepers={data.ovrGoalkeepers}
               monthLabel={data.monthLabel}
               currentPlayerId={data.currentPlayer.id}
             />

@@ -19,6 +19,8 @@ const todayFormatter = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao
 
 export type RankedPlayer = RankedByPoints<Player>;
 export type TopScorer = Scorer<Player>;
+/** Uma linha do ranking por OVR: empate no OVR divide a posição. */
+export type OvrRankedPlayer = { player: Player; position: number; rounds: number };
 /** Rodada fechada com cartas que o jogador ainda não abriu ("Confira os vencedores"). */
 export type WinnersAlert = { matchId: string; round: number; cardCount: number; hasTeam: boolean; theme: CardThemeKey };
 
@@ -41,6 +43,9 @@ export type HomeData = {
   /** Artilharia (gols confirmados) do mês e de todos os tempos, só quem marcou. */
   monthScorers: TopScorer[];
   allTimeScorers: TopScorer[];
+  /** Ranking pelo OVR da carta (pedido do dono do app em 2026-11-12), separado entre linha e goleiros: os OVRs não se comparam. */
+  ovrOutfield: OvrRankedPlayer[];
+  ovrGoalkeepers: OvrRankedPlayer[];
   /** Mês do ranking, por extenso ("novembro"). */
   monthLabel: string;
   /** Evento do mês das cartas especiais (tema sazonal ou clássico). */
@@ -111,6 +116,9 @@ export async function getHomeData(): Promise<HomeData> {
   const allTimeRanking = rankByPoints(league.activePlayers, league.getRankingPoints());
   const monthScorers = rankScorers(league.activePlayers, league.getGoalTotals(today.slice(0, 7)));
   const allTimeScorers = rankScorers(league.activePlayers, league.getGoalTotals());
+  const roundsById = new Map(allTimeRanking.map((entry) => [entry.player.id, entry.rounds]));
+  const ovrOutfield = rankByOvr(league.activePlayers.filter((player) => player.role === "outfield"), roundsById);
+  const ovrGoalkeepers = rankByOvr(league.activePlayers.filter((player) => player.role === "goalkeeper"), roundsById);
   const myAllTime = allTimeRanking.find((entry) => entry.player.id === currentPlayer.id);
   const performances = getMatchPerformances(currentPlayer.id, league.matches, league.evaluations, league.confirmedGoals);
 
@@ -153,6 +161,8 @@ export async function getHomeData(): Promise<HomeData> {
     allTimeRanking,
     monthScorers,
     allTimeScorers,
+    ovrOutfield,
+    ovrGoalkeepers,
     monthLabel: monthFormatter.format(new Date()),
     cardEvent: getCurrentCardEvent(today),
     today,
@@ -161,4 +171,19 @@ export async function getHomeData(): Promise<HomeData> {
     showWelcomeBonus,
     goals,
   };
+}
+
+/**
+ * Ranking pelo OVR da carta: só quem já tem OVR, do maior para o menor; empate no OVR divide a posição (o desempate da
+ * ordem é por mais rodadas jogadas e depois pelo apelido, só para a lista não pular de lugar).
+ */
+function rankByOvr(players: readonly Player[], roundsById: ReadonlyMap<string, number>): OvrRankedPlayer[] {
+  const sorted = players
+    .filter((player): player is Player & { ovr: number } => player.ovr !== null)
+    .map((player) => ({ player, rounds: roundsById.get(player.id) ?? 0 }))
+    .toSorted((a, b) => b.player.ovr - a.player.ovr || b.rounds - a.rounds || a.player.nickname.localeCompare(b.player.nickname, "pt-BR"));
+  return sorted.map((entry) => ({
+    ...entry,
+    position: sorted.findIndex((other) => other.player.ovr === entry.player.ovr) + 1,
+  }));
 }
