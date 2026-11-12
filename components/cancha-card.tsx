@@ -120,7 +120,7 @@ export type Roupa = {
   statsPadX?: number;
   /** Afasta o nome e o selo do OVR das laterais (em cqw), quando enfeites da moldura entram na carta pelo alto. */
   namePadX?: number;
-  /** Desce o nome e a posição (em cqw) quando o enfeite do topo da moldura cobre o nome (Cartada e Ímã, 2026-11-12); o selo do OVR fica onde está. */
+  /** Desce o nome e a posição (em cqw) quando o enfeite do topo da moldura cobre o nome (Cartada e Ímã, 2026-11-12); o selo do OVR desce junto, para continuar passando da linha da caixa até a metade, como nas outras cartas. */
   nameDrop?: number;
   /** Desce a foto inteira (em cqw), para a cabeça não passar por cima da caixa do nome (épicas de dezembro, 2026-11-12); o peito some atrás das estatísticas. */
   photoDrop?: number;
@@ -1146,7 +1146,7 @@ export function CanchaCard({ player, award, className, photoSizes, photoFrame = 
             "absolute top-[5cqw] right-[5.5cqw] z-[8] flex h-[24cqw] w-[19cqw] flex-col items-center pt-[2.3cqw] leading-none text-[#0b130f] [clip-path:polygon(0_0,100%_0,100%_76%,50%_100%,0_76%)]",
             roupa.matte ? RANK_FLAT_CLASSES[rank] : RANK_CREST[rank],
           )}
-          style={roupa.contentPad ? { top: `${5 + roupa.contentPad}cqw`, right: `${5.5 + roupa.contentPad + (roupa.namePadX ?? 0) / 2}cqw` } : undefined}
+          style={roupa.contentPad ? { top: `${5 + roupa.contentPad + (roupa.nameDrop ?? 0)}cqw`, right: `${5.5 + roupa.contentPad + (roupa.namePadX ?? 0) / 2}cqw` } : undefined}
         >
           <span className="text-[9cqw] font-extrabold tabular-nums">{player.ovr ?? EMPTY_VALUE}</span>
           <RankInsignia rank={rank} />
