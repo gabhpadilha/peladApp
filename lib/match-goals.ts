@@ -13,7 +13,8 @@ export const getGroupGoals = cache(async (groupId: string): Promise<MatchGoal[]>
     supabase.rpc("get_group_goals", { target_group: groupId }).order("match_id").order("member_id").range(from, to),
   );
   return data.map((row) => {
-    const goal = { goals: row.goals, yes: row.yes_count };
+    // `organizer_confirmed` só existe depois da migration 20261119120000 (antes dela, vem indefinido = falso).
+    const goal = { goals: row.goals, yes: row.yes_count, organizerConfirmed: row.organizer_confirmed === true };
     return {
       matchId: row.match_id,
       memberId: row.member_id,
@@ -21,6 +22,7 @@ export const getGroupGoals = cache(async (groupId: string): Promise<MatchGoal[]>
       reportedBy: row.reported_by,
       yes: row.yes_count,
       no: row.no_count,
+      organizerConfirmed: goal.organizerConfirmed,
       isConfirmed: isGoalConfirmed(goal),
     };
   });

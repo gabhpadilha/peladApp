@@ -1133,6 +1133,7 @@ export type Database = {
           match_id: string
           member_id: string
           no_count: number
+          organizer_confirmed: boolean
           reported_by: string
           yes_count: number
         }[]
@@ -1314,6 +1315,10 @@ export type Database = {
       }
       market_release_expired: {
         Args: { target_purchase: string }
+        Returns: undefined
+      }
+      organizer_confirm_goals: {
+        Args: { is_confirmed?: boolean; target_match: string; target_member: string }
         Returns: undefined
       }
       open_pack: {

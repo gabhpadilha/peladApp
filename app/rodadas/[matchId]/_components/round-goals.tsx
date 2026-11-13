@@ -3,8 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ClipboardCheckIcon, HourglassIcon, UserRoundXIcon } from "lucide-react";
-import { reportGoals, unlockRatings } from "@/app/_actions/match-goals";
+import { BadgeCheckIcon, ClipboardCheckIcon, HourglassIcon, UserRoundXIcon } from "lucide-react";
+import { organizerConfirmGoals, reportGoals, unlockRatings } from "@/app/_actions/match-goals";
 import { GoalBall, formatGoals } from "@/components/goal-ball";
 import { GoalStepper } from "@/components/goal-stepper";
 import { GoalsVoteList } from "@/components/goals-vote-list";
@@ -71,7 +71,7 @@ function MyGoals({ board }: { board: MatchBoard }) {
           Seus gols: <strong>{mine.goals}</strong>
           {mine.goals > 0 &&
             (mine.isConfirmed ? (
-              <span className="text-primary"> · confirmados</span>
+              <span className="text-primary"> · confirmados{mine.organizerConfirmed && mine.yes < GOALS_MIN_CONFIRMATIONS ? " pelo organizador" : ""}</span>
             ) : (
               <span className="text-primary">
                 {" "}
@@ -170,6 +170,76 @@ function OrganizerGoals({ board }: { board: MatchBoard }) {
 }
 
 /**
+ * Organizador: confirma sozinho os gols de quem não juntou os 3 "sim" dos colegas (2026-11-13, pedido do dono do app: quase todos
+ * já votaram e faltam confirmações). Vale como os 3 "sim"; nunca os próprios gols; corrigir o número apaga a confirmação.
+ */
+function OrganizerConfirmGoals({ board, nameById }: { board: MatchBoard; nameById: Map<string, string> }) {
+  const router = useRouter();
+  const [error, setError] = useState<string | null>(null);
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const [, startTransition] = useTransition();
+  const items = Object.values(board.goals.byMember)
+    .filter((goal) => goal.goals > 0 && goal.memberId !== board.memberId && goal.yes < GOALS_MIN_CONFIRMATIONS)
+    .sort((a, b) => Number(a.organizerConfirmed) - Number(b.organizerConfirmed));
+  if (items.length === 0) return null;
+  const waiting = items.filter((goal) => !goal.organizerConfirmed).length;
+
+  function handleConfirm(memberId: string, confirmed: boolean) {
+    setError(null);
+    setPendingId(memberId);
+    startTransition(async () => {
+      const result = await organizerConfirmGoals({ matchId: board.match.id, memberId, confirmed });
+      setPendingId(null);
+      if (!result.success) setError(result.message);
+      else router.refresh();
+    });
+  }
+
+  return (
+    <details className="group rounded-xl border bg-card" open={waiting > 0}>
+      <summary className="flex cursor-pointer list-none items-center gap-3 p-3">
+        <span className="flex size-9 items-center justify-center rounded-full bg-primary/15 text-primary">
+          <BadgeCheckIcon className="size-5" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-sm font-medium">Gols sem as {GOALS_MIN_CONFIRMATIONS} confirmações</span>
+          <span className="block text-xs text-muted-foreground">
+            {waiting > 0 ? `${waiting === 1 ? "1 jogador" : `${waiting} jogadores`} · você pode confirmar sozinho` : "Todos confirmados por você"}
+          </span>
+        </span>
+        <span className="text-sm font-medium text-primary group-open:hidden">Abrir</span>
+      </summary>
+      <ul className="flex flex-col divide-y border-t">
+        {items.map((goal) => (
+          <li key={goal.memberId} className="flex items-center gap-3 px-3 py-2">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium">{nameById.get(goal.memberId) ?? "Jogador"}</p>
+              <p className="text-xs text-muted-foreground">
+                {formatGoals(goal.goals)} ·{" "}
+                {goal.organizerConfirmed ? <span className="text-primary">confirmados pelo organizador</span> : `${goal.yes} de ${GOALS_MIN_CONFIRMATIONS} confirmações`}
+              </p>
+            </div>
+            {goal.organizerConfirmed ? (
+              <Button size="sm" variant="ghost" disabled={pendingId !== null} onClick={() => handleConfirm(goal.memberId, false)}>
+                Desfazer
+              </Button>
+            ) : (
+              <Button size="sm" disabled={pendingId !== null} onClick={() => handleConfirm(goal.memberId, true)}>
+                {pendingId === goal.memberId ? "Confirmando…" : "Confirmar"}
+              </Button>
+            )}
+          </li>
+        ))}
+      </ul>
+      <p className="border-t px-3 py-2 text-xs text-muted-foreground">
+        Sua confirmação vale como as {GOALS_MIN_CONFIRMATIONS} dos colegas. Se o número de gols for corrigido, ela sai.
+      </p>
+      {error && <p role="alert" className="px-3 pb-3 text-sm text-destructive">{error}</p>}
+    </details>
+  );
+}
+
+/**
  * Etapa dos gols na mesa tática: os seus gols, a espera pelos dos outros (as notas abrem
  * quando todos informam) e, para o organizador, os gols de quem ainda não informou.
  */
@@ -232,6 +302,7 @@ export function RoundGoals({ board }: { board: MatchBoard }) {
         </details>
       )}
       {board.isOrganizer && <OrganizerGoals board={board} />}
+      {board.isOrganizer && <OrganizerConfirmGoals board={board} nameById={nameById} />}
     </div>
   );
 }

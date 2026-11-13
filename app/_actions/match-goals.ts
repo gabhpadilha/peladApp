@@ -21,6 +21,7 @@ const confirmSchema = z.object({
   expectedGoals: z.number().int().min(0).max(GOALS_MAX).optional(),
 });
 const finishSchema = z.object({ matchId: z.uuid() });
+const organizerConfirmSchema = z.object({ matchId: z.uuid(), memberId: z.uuid(), confirmed: z.boolean() });
 const unlockSchema = z.object({ matchId: z.uuid() });
 
 /** Mensagens das recusas do banco (as regras moram nas funções). */
@@ -31,6 +32,7 @@ function friendlyMessage(message: string): string {
   if (message.includes("everyone reports")) return "Espere todo mundo informar os gols para conferir.";
   if (message.includes("only organizers")) return "Só o organizador pode fazer isso.";
   if (message.includes("cannot confirm your own")) return "Você não confirma os próprios gols.";
+  if (message.includes("confirm goals alone")) return "Só o organizador pode confirmar sozinho.";
   if (message.includes("who reported")) return "Quem marcou esses gols não pode confirmá-los.";
   if (message.includes("no goals to confirm")) return "Esse jogador não informou gols para confirmar.";
   if (message.includes("between 0 and 15")) return `Informe de 0 a ${GOALS_MAX} gols.`;
@@ -76,6 +78,25 @@ export async function confirmGoals(input: z.infer<typeof confirmSchema>): Promis
   });
   if (error) {
     console.error("confirmGoals", error);
+    return { success: false, message: friendlyMessage(error.message) };
+  }
+  refresh(parsed.data.matchId);
+  return { success: true };
+}
+
+/** O organizador confirma sozinho (ou desfaz) os gols de um presente, quando faltam os 3 "sim" dos colegas. */
+export async function organizerConfirmGoals(input: z.infer<typeof organizerConfirmSchema>): Promise<GoalsActionResult> {
+  const parsed = organizerConfirmSchema.safeParse(input);
+  if (!parsed.success) return { success: false, message: "Não salvou. Confira a conexão e toque de novo." };
+  await requireActiveMembership(`/rodadas/${parsed.data.matchId}`);
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("organizer_confirm_goals", {
+    target_match: parsed.data.matchId,
+    target_member: parsed.data.memberId,
+    is_confirmed: parsed.data.confirmed,
+  });
+  if (error) {
+    console.error("organizerConfirmGoals", error);
     return { success: false, message: friendlyMessage(error.message) };
   }
   refresh(parsed.data.matchId);

@@ -18,12 +18,14 @@ export type MatchGoal = {
   reportedBy: string;
   yes: number;
   no: number;
-  /** 3 "sim" ou mais: entra na estatística, na bolinha da carta e no Goleador. */
+  /** Um organizador confirmou sozinho (vale como os 3 "sim"; 2026-11-13, pedido do dono do app). */
+  organizerConfirmed: boolean;
+  /** 3 "sim" ou mais, ou a confirmação de um organizador: entra na estatística, na bolinha da carta e no Goleador. */
   isConfirmed: boolean;
 };
 
-export function isGoalConfirmed(goal: Pick<MatchGoal, "goals" | "yes">): boolean {
-  return goal.goals > 0 && goal.yes >= GOALS_MIN_CONFIRMATIONS;
+export function isGoalConfirmed(goal: Pick<MatchGoal, "goals" | "yes" | "organizerConfirmed">): boolean {
+  return goal.goals > 0 && (goal.organizerConfirmed || goal.yes >= GOALS_MIN_CONFIRMATIONS);
 }
 
 /** Estado da etapa dos gols numa rodada aberta, do ponto de vista de quem está logado. */
